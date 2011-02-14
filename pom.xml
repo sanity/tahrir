@@ -3,4 +3,20 @@
   <groupId>tahrirproject</groupId>
   <artifactId>tahrir</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <dependencies>
+  	<dependency>
+  		<groupId>com.google.code.gson</groupId>
+  		<artifactId>gson</artifactId>
+  		<version>1.4</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>bouncycastle</groupId>
+  		<artifactId>bcprov-jdk16</artifactId>
+  		<version>140</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  	</dependency>
+  </dependencies>
 </project>

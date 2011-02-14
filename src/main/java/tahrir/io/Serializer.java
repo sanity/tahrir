@@ -1,4 +1,4 @@
-package tahrir.io.crypto;
+package tahrir.io;
 
 public interface Serializer {
 	public byte[] serialize(Object object);
