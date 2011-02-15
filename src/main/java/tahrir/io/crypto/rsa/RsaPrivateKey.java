@@ -16,9 +16,8 @@ public class RsaPrivateKey implements PrivateKey {
 		this.engine = engine;
 	}
 
-	public <T> T decrypt(final AsymmetricEncrypted<T> toEncrypt) {
-		// TODO Auto-generated method stub
-		return null;
+	public BigInteger decrypt(final BigInteger toDecrypt) {
+		return toDecrypt.modPow(d, n);
 	}
 
 	public <T> Signature sign(final T toSign) {
@@ -30,5 +29,4 @@ public class RsaPrivateKey implements PrivateKey {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }
