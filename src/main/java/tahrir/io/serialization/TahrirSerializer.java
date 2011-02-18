@@ -7,6 +7,7 @@ import java.util.*;
 import tahrir.io.serialization.serializers.*;
 
 import com.google.common.collect.Maps;
+import com.google.inject.internal.Sets;
 
 public abstract class TahrirSerializer {
 
@@ -65,6 +66,17 @@ public abstract class TahrirSerializer {
 
 	}
 
+	private static Set<Field> getAllFields(final Class<?> c) {
+		if (c.equals(Object.class))
+			return Collections.emptySet();
+		final HashSet<Field> ret = Sets.newHashSet();
+		for (final Field f : c.getDeclaredFields()) {
+			f.setAccessible(true);
+			ret.add(f);
+		}
+		ret.addAll(getAllFields(c.getSuperclass()));
+		return ret;
+	}
 
 	public static void serializeTo(final Object object, final ByteBuffer bb) throws TahrirSerializableException {
 		// See if we can serialize directly
@@ -74,10 +86,10 @@ public abstract class TahrirSerializer {
 		} else {
 
 			try {
-				final Field[] fields = object.getClass().getDeclaredFields();
-				if (fields.length > 127)
+				final Set<Field> fields = getAllFields(object.getClass());
+				if (fields.size() > 127)
 					throw new TahrirSerializableException("Cannot serialize objects with more than 127 fields");
-				bb.put((byte) fields.length);
+				bb.put((byte) fields.size());
 				for (final Field field : fields) {
 					field.setAccessible(true);
 					final Class<?> fieldType = field.getType();
@@ -123,7 +135,7 @@ public abstract class TahrirSerializer {
 				Map<Integer, Field> fMap = fieldMap.get(c);
 				if (fMap == null) {
 					fMap = Maps.newHashMap();
-					final Field[] fields = c.getDeclaredFields();
+					final Set<Field> fields = getAllFields(c);
 					for (final Field field : fields) {
 						field.setAccessible(true);
 						final Field old = fMap.put(field.getName().hashCode(), field);
