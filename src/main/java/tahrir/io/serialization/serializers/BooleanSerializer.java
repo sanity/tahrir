@@ -12,7 +12,7 @@ public class BooleanSerializer extends TahrirSerializer {
 	}
 
 	@Override
-	protected Object deserialize(final Type type, final ByteBuffer bb) {
+	protected Boolean deserialize(final Type type, final ByteBuffer bb) {
 		return new Boolean(bb.get() == (byte) 1);
 	}
 
@@ -20,5 +20,6 @@ public class BooleanSerializer extends TahrirSerializer {
 	protected void serialize(final Type type, final Object object, final ByteBuffer bb) {
 		bb.put(object.equals(Boolean.TRUE) ? (byte) 1 : (byte) 0);
 	}
+
 
 }

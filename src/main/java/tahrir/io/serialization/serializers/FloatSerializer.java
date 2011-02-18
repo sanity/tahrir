@@ -12,7 +12,7 @@ public class FloatSerializer extends TahrirSerializer {
 	}
 
 	@Override
-	protected Object deserialize(final Type type, final ByteBuffer bb) {
+	protected Float deserialize(final Type type, final ByteBuffer bb) {
 		return new Float(bb.getFloat());
 	}
 

@@ -12,7 +12,7 @@ public class ByteSerializer extends TahrirSerializer {
 	}
 
 	@Override
-	protected Object deserialize(final Type type, final ByteBuffer bb) {
+	protected Byte deserialize(final Type type, final ByteBuffer bb) {
 		return new Byte(bb.get());
 	}
 

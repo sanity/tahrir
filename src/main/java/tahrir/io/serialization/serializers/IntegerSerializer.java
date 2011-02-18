@@ -12,7 +12,7 @@ public class IntegerSerializer extends TahrirSerializer {
 	}
 
 	@Override
-	protected Object deserialize(final Type type, final ByteBuffer bb) {
+	protected Integer deserialize(final Type type, final ByteBuffer bb) {
 		return new Integer(bb.getInt());
 	}
 

@@ -12,7 +12,7 @@ public class StringSerializer extends TahrirSerializer {
 	}
 
 	@Override
-	protected Object deserialize(final Type type, final ByteBuffer bb) {
+	protected String deserialize(final Type type, final ByteBuffer bb) {
 		final int length = bb.getInt();
 		final byte[] asBytes = new byte[length];
 		bb.get(asBytes);

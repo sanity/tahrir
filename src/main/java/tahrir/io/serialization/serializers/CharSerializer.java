@@ -12,7 +12,7 @@ public class CharSerializer extends TahrirSerializer {
 	}
 
 	@Override
-	protected Object deserialize(final Type type, final ByteBuffer bb) {
+	protected Character deserialize(final Type type, final ByteBuffer bb) {
 		return new Character(bb.getChar());
 	}
 

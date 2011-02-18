@@ -12,7 +12,7 @@ public class DoubleSerializer extends TahrirSerializer {
 	}
 
 	@Override
-	protected Object deserialize(final Type type, final ByteBuffer bb) {
+	protected Double deserialize(final Type type, final ByteBuffer bb) {
 		return new Double(bb.getDouble());
 	}
 

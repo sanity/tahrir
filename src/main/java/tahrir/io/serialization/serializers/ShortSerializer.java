@@ -12,7 +12,7 @@ public class ShortSerializer extends TahrirSerializer {
 	}
 
 	@Override
-	protected Object deserialize(final Type type, final ByteBuffer bb) {
+	protected Short deserialize(final Type type, final ByteBuffer bb) {
 		return new Short(bb.getShort());
 	}
 

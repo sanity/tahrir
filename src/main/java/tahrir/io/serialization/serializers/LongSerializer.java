@@ -12,7 +12,7 @@ public class LongSerializer extends TahrirSerializer {
 	}
 
 	@Override
-	protected Object deserialize(final Type type, final ByteBuffer bb) {
+	protected Long deserialize(final Type type, final ByteBuffer bb) {
 		return new Long(bb.getLong());
 	}
 
