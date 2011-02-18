@@ -9,11 +9,14 @@ import tahrir.io.serialization.serializers.*;
 import com.google.common.collect.Maps;
 
 public abstract class TahrirSerializer {
-	public static void main(final String[] args) throws TahrirSerializableException {
+	public static void main(final String[] args) throws Exception {
+
 		final Object testObject = new TestObject();
 
+		System.out.println(((Class<?>) TestObject.class.getField("intArrayValue").getGenericType()).getComponentType());
 
-		final ByteBuffer bb = ByteBuffer.allocate(20);
+		final ByteBuffer bb = ByteBuffer.allocate(1024);
+
 
 		serializeTo(testObject, bb);
 
@@ -23,7 +26,7 @@ public abstract class TahrirSerializer {
 	}
 
 	public static class TestObject {
-		public int intValue = 1;
+		public int[] intArrayValue = new int[] { 1, 2, 4 };
 	}
 
 	protected final Type type;
@@ -66,11 +69,24 @@ public abstract class TahrirSerializer {
 			bb.put((byte) fields.length);
 			for (final Field field : fields) {
 				bb.putInt(field.getName().hashCode());
-				final TahrirSerializer fieldSerializer = serializers.get(field.getType());
-				if (fieldSerializer != null) {
-					fieldSerializer.serialize(field.getType(), field.get(object), bb);
+
+				final Class<?> fieldType = field.getType();
+				final Object fieldObject = field.get(object);
+
+				if (fieldType.isArray()) {
+					final int length = Array.getLength(fieldObject);
+					bb.putInt(length);
+					for (int x = 0; x < length; x++) {
+						serializeTo(Array.get(fieldObject, x), bb);
+					}
+
 				} else {
-					serializeTo(field.get(object), bb);
+					final TahrirSerializer fieldSerializer = serializers.get(field.getType());
+					if (fieldSerializer != null) {
+						fieldSerializer.serialize(fieldType, fieldObject, bb);
+					} else {
+						serializeTo(fieldObject, bb);
+					}
 				}
 			}
 		} catch (final Exception e) {
@@ -98,8 +114,17 @@ public abstract class TahrirSerializer {
 				final Field field = fMap.get(fieldHash);
 				if (field == null)
 					throw new TahrirSerializableException("Unrecognized fieldHash: " + fieldHash);
-				final TahrirSerializer serializer = serializers.get(field.getType());
-				field.set(returnObject, serializer.deserialize(field.getType(), bb));
+				if (field.getType().isArray()) {
+					final int arrayLen = bb.getInt();
+					final Object array = Array.newInstance(field.getType().getComponentType(), arrayLen);
+					for (int x = 0; x < arrayLen; x++) {
+						Array.set(array, x, deserializeFrom(field.getType().getComponentType(), bb));
+					}
+					field.set(returnObject, array);
+				} else {
+					final TahrirSerializer serializer = serializers.get(field.getType());
+					field.set(returnObject, serializer.deserialize(field.getType(), bb));
+				}
 			}
 			return returnObject;
 		} catch (final Exception e) {
@@ -107,6 +132,8 @@ public abstract class TahrirSerializer {
 		}
 	}
 
+	// This code is broken
+	// -------------------
 	// public static void writeLong(final ByteBuffer bb, long value) {
 	// while (value < 0 || value > 127) {
 	// bb.put((byte) (0x80 | (value & 0x7F)));
