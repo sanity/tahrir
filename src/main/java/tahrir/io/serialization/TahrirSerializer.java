@@ -6,31 +6,9 @@ import java.util.*;
 
 import tahrir.io.serialization.serializers.*;
 
-import com.google.common.collect.*;
+import com.google.common.collect.Maps;
 
 public abstract class TahrirSerializer {
-	public static void main(final String[] args) throws Exception {
-		final TestObject testObject = new TestObject();
-
-		testObject.intStringMap.put(5, "five");
-		testObject.intStringMap.put(6, "six");
-
-		testObject.testSet = Sets.newHashSet(1, 2, 3);
-
-		testObject.intArray = new int[] { 4, 5, 6 };
-
-		final ByteBuffer bb = ByteBuffer.allocate(1024);
-
-		serializeTo(testObject, bb);
-
-		System.out.println("Bytes: " + bb.position());
-
-		bb.flip();
-
-		final TestObject testObject2 = deserializeFrom(TestObject.class, bb);
-
-		System.out.println(testObject2);
-	}
 
 	public static class TestObject {
 		public HashMap<Integer, String> intStringMap = Maps.newHashMap();
@@ -96,11 +74,12 @@ public abstract class TahrirSerializer {
 		} else {
 
 			try {
-				final Field[] fields = object.getClass().getFields();
+				final Field[] fields = object.getClass().getDeclaredFields();
 				if (fields.length > 127)
 					throw new TahrirSerializableException("Cannot serialize objects with more than 127 fields");
 				bb.put((byte) fields.length);
 				for (final Field field : fields) {
+					field.setAccessible(true);
 					final Class<?> fieldType = field.getType();
 					final Object fieldObject = field.get(object);
 
@@ -144,8 +123,9 @@ public abstract class TahrirSerializer {
 				Map<Integer, Field> fMap = fieldMap.get(c);
 				if (fMap == null) {
 					fMap = Maps.newHashMap();
-					final Field[] fields = c.getFields();
+					final Field[] fields = c.getDeclaredFields();
 					for (final Field field : fields) {
+						field.setAccessible(true);
 						final Field old = fMap.put(field.getName().hashCode(), field);
 						if (old != null) // This is laughably unlikely
 							throw new RuntimeException("Field "+field.getName()+" of "+c.getName()+" has the same hashCode() as field "+old.getName()+", one of them MUST be renamed");

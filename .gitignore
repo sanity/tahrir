@@ -1,1 +1,3 @@
 target
+temp-testng-customsuite.xml
+test-output/
