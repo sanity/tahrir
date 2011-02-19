@@ -29,6 +29,30 @@ public class SerializationTest {
 	}
 
 	@Test
+	public void objectTypeTest() throws TahrirSerializableException {
+		final ObjectTypes ot = new ObjectTypes();
+		ot.subObj = new ObjectTypes.SubObjectType();
+		ot.subObj.i = 33;
+		final ByteBuffer bb = ByteBuffer.allocate(1024);
+		TahrirSerializer.serializeTo(ot, bb);
+		System.out.format("Object types serialized to %d bytes.%n", bb.position());
+		bb.flip();
+		final ObjectTypes ot2 = TahrirSerializer.deserializeFrom(ObjectTypes.class, bb);
+		Assert.assertNull(ot2.nullTest);
+		Assert.assertEquals(ot2.subObj.i, ot.subObj.i);
+	}
+
+	public static class ObjectTypes {
+		SubObjectType subObj;
+
+		Object nullTest = null;
+
+		public static class SubObjectType {
+			int i;
+		}
+	}
+
+	@Test
 	public void collectionsTypesTest() throws TahrirSerializableException {
 		final CollectionsTypes ct = new CollectionsTypes();
 		ct.hashMap = Maps.newHashMap();

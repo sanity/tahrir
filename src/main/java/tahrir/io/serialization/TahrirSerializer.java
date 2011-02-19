@@ -89,7 +89,13 @@ public abstract class TahrirSerializer {
 				final Set<Field> fields = getAllFields(object.getClass());
 				if (fields.size() > 127)
 					throw new TahrirSerializableException("Cannot serialize objects with more than 127 fields");
-				bb.put((byte) fields.size());
+				byte nonNullFieldCount = 0;
+				for (final Field field : fields) {
+					if (field.get(object) != null) {
+						nonNullFieldCount++;
+					}
+				}
+				bb.put(nonNullFieldCount);
 				for (final Field field : fields) {
 					field.setAccessible(true);
 					final Class<?> fieldType = field.getType();
@@ -113,6 +119,9 @@ public abstract class TahrirSerializer {
 						if (fieldSerializer != null) {
 							fieldSerializer.serialize(field.getGenericType(), fieldObject, bb);
 						} else {
+							if (field.getGenericType() instanceof ParameterizedType)
+								throw new TahrirSerializableException(
+										"If you want to serialize a generic type you must register a TahrirSerializer for it");
 							serializeTo(fieldObject, bb);
 						}
 
@@ -160,7 +169,11 @@ public abstract class TahrirSerializer {
 						field.set(returnObject, array);
 					} else {
 						final TahrirSerializer serializer = getSerializerForType(field.getType());
-						field.set(returnObject, serializer.deserialize(field.getGenericType(), bb));
+						if (serializer != null) {
+							field.set(returnObject, serializer.deserialize(field.getGenericType(), bb));
+						} else {
+							field.set(returnObject, deserializeFrom(field.getType(), bb));
+						}
 					}
 				}
 				return returnObject;
