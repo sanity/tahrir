@@ -53,7 +53,7 @@ public abstract class TahrirSerializer {
 	}
 
 	public static TahrirSerializer getSerializerForType(final Class<?> type) {
-		if (type.equals(Object.class))
+		if (type == null || type.equals(Object.class))
 			return null;
 		final TahrirSerializer fieldSerializer = serializers.get(type);
 		if (fieldSerializer != null) return fieldSerializer;
@@ -71,6 +71,10 @@ public abstract class TahrirSerializer {
 			return Collections.emptySet();
 		final HashSet<Field> ret = Sets.newHashSet();
 		for (final Field f : c.getDeclaredFields()) {
+			if (Modifier.isStatic(f.getModifiers())) {
+				// Don't serialize static fields
+				continue;
+			}
 			f.setAccessible(true);
 			ret.add(f);
 		}
@@ -121,7 +125,7 @@ public abstract class TahrirSerializer {
 						} else {
 							if (field.getGenericType() instanceof ParameterizedType)
 								throw new TahrirSerializableException(
-										"If you want to serialize a generic type you must register a TahrirSerializer for it");
+								"If you want to serialize a generic type you must register a TahrirSerializer for it");
 							serializeTo(fieldObject, bb);
 						}
 

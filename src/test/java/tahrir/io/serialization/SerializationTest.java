@@ -1,5 +1,6 @@
 package tahrir.io.serialization;
 
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -10,7 +11,7 @@ import com.google.inject.internal.*;
 
 public class SerializationTest {
 	@Test
-	public void primitiveTypesTest() throws TahrirSerializableException {
+	public void primitiveTypesTest() throws Exception {
 		final PrimitiveTypes pt = new PrimitiveTypes();
 		pt.b = 1;
 		pt.s = 2;
@@ -22,38 +23,55 @@ public class SerializationTest {
 		pt.bool = true;
 		final ByteBuffer bb = ByteBuffer.allocate(1024);
 		TahrirSerializer.serializeTo(pt, bb);
-		System.out.format("Primitive types serialized to %d bytes.%n", bb.position());
+		System.out.format("Primitive types serialized to %d bytes, compared to %d bytes for stock serialization.%n",
+				bb.position(), testNormalJavaSerialization(pt));
 		bb.flip();
 		final PrimitiveTypes pt2 = TahrirSerializer.deserializeFrom(PrimitiveTypes.class, bb);
 		Assert.assertEquals(pt, pt2);
 	}
 
+	public static int testNormalJavaSerialization(final Serializable object) throws IOException {
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+		final ObjectOutputStream oos = new ObjectOutputStream(baos);
+
+		oos.writeObject(object);
+
+		oos.flush();
+
+		return baos.toByteArray().length;
+	}
+
 	@Test
-	public void objectTypeTest() throws TahrirSerializableException {
+	public void objectTypeTest() throws Exception {
 		final ObjectTypes ot = new ObjectTypes();
 		ot.subObj = new ObjectTypes.SubObjectType();
 		ot.subObj.i = 33;
 		final ByteBuffer bb = ByteBuffer.allocate(1024);
 		TahrirSerializer.serializeTo(ot, bb);
-		System.out.format("Object types serialized to %d bytes.%n", bb.position());
+		System.out.format("Object types serialized to %d bytes, compared to %d bytes for stock serialization.%n",
+				bb.position(), testNormalJavaSerialization(ot));
 		bb.flip();
 		final ObjectTypes ot2 = TahrirSerializer.deserializeFrom(ObjectTypes.class, bb);
 		Assert.assertNull(ot2.nullTest);
 		Assert.assertEquals(ot2.subObj.i, ot.subObj.i);
 	}
 
-	public static class ObjectTypes {
+	public static class ObjectTypes implements Serializable {
+		private static final long serialVersionUID = -4822659189341304905L;
+
 		SubObjectType subObj;
 
 		Object nullTest = null;
 
-		public static class SubObjectType {
+		public static class SubObjectType implements Serializable {
+			private static final long serialVersionUID = -8224513766509229887L;
 			int i;
 		}
 	}
 
 	@Test
-	public void collectionsTypesTest() throws TahrirSerializableException {
+	public void collectionsTypesTest() throws Exception {
 		final CollectionsTypes ct = new CollectionsTypes();
 		ct.hashMap = Maps.newHashMap();
 		ct.hashMap.put("one", 1);
@@ -65,13 +83,15 @@ public class SerializationTest {
 
 		final ByteBuffer bb = ByteBuffer.allocate(1024);
 		TahrirSerializer.serializeTo(ct, bb);
-		System.out.format("Collections types serialized to %d bytes.%n", bb.position());
+		System.out.format("Collections types serialized to %d bytes, compared to %d bytes for stock serialization.%n",
+				bb.position(), testNormalJavaSerialization(ct));
 		bb.flip();
 		final CollectionsTypes ct2 = TahrirSerializer.deserializeFrom(CollectionsTypes.class, bb);
 		Assert.assertEquals(ct, ct2);
 	}
 
-	public static class CollectionsTypes {
+	@SuppressWarnings("serial")
+	public static class CollectionsTypes implements Serializable {
 		public HashMap<String, Integer> hashMap;
 		public HashSet<String> hashSet;
 
@@ -98,7 +118,8 @@ public class SerializationTest {
 		}
 	}
 
-	public static class PrimitiveTypes {
+	public static class PrimitiveTypes implements Serializable {
+		private static final long serialVersionUID = -5992856042046042767L;
 		public byte b;
 		public short s;
 		public char c;
