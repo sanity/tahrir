@@ -71,7 +71,7 @@ public abstract class TahrirSerializer {
 			return Collections.emptySet();
 		final HashSet<Field> ret = Sets.newHashSet();
 		for (final Field f : c.getDeclaredFields()) {
-			if (Modifier.isStatic(f.getModifiers())) {
+			if (Modifier.isStatic(f.getModifiers()) || Modifier.isTransient(f.getModifiers())) {
 				// Don't serialize static fields
 				continue;
 			}
