@@ -11,14 +11,6 @@ import com.google.inject.internal.Sets;
 
 public abstract class TahrirSerializer {
 
-	public static class TestObject {
-		public HashMap<Integer, String> intStringMap = Maps.newHashMap();
-
-		public HashSet<Integer> testSet;
-
-		public int[] intArray;
-	}
-
 	protected final Type type;
 
 	private static Map<Type, TahrirSerializer> serializers;
