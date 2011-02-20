@@ -3,6 +3,7 @@ package tahrir.io.serialization;
 import java.lang.reflect.*;
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import tahrir.io.serialization.serializers.*;
 
@@ -16,7 +17,7 @@ public abstract class TahrirSerializer {
 	private static Map<Type, TahrirSerializer> serializers;
 
 	static {
-		serializers = Maps.newHashMap();
+		serializers = new ConcurrentHashMap<Type, TahrirSerializer>();
 		registerSerializer(new IntegerSerializer(), Integer.class, Integer.TYPE);
 		registerSerializer(new BooleanSerializer(), Boolean.class, Boolean.TYPE);
 		registerSerializer(new ByteSerializer(), Byte.class, Byte.TYPE);
