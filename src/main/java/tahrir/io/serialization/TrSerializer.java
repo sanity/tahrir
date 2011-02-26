@@ -2,6 +2,7 @@ package tahrir.io.serialization;
 
 import java.lang.reflect.*;
 import java.nio.ByteBuffer;
+import java.security.interfaces.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,6 +29,8 @@ public abstract class TrSerializer {
 		registerSerializer(new StringSerializer(), String.class);
 		registerSerializer(new CollectionSerializer(), Collection.class);
 		registerSerializer(new MapSerializer(), Map.class);
+		registerSerializer(new RSAPublicKeySerializer(), RSAPublicKey.class);
+		registerSerializer(new RSAPrivateKeySerializer(), RSAPrivateKey.class);
 	}
 
 	private static final Map<Class<?>, Map<Integer, Field>> fieldMap = Maps.newHashMap();

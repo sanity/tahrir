@@ -1,10 +1,12 @@
 package tahrir.io.crypto;
 
+import java.nio.ByteBuffer;
 import java.security.interfaces.*;
 
 import org.testng.Assert;
 import org.testng.annotations.*;
 
+import tahrir.io.serialization.TrSerializer;
 import tahrir.tools.Tuple2;
 
 public class RsaAesTest {
@@ -29,6 +31,28 @@ public class RsaAesTest {
 				cipher.rsaEncryptedAesKey.length);
 
 		final TestObject decrypted = TrCrypto.decrypt(TestObject.class, cipher, keyPair1.b);
+
+		Assert.assertEquals(decrypted, plain);
+	}
+
+	@Test
+	public void testSerialization() throws Exception {
+		final ByteBuffer bb = ByteBuffer.allocate(10240);
+		TrSerializer.serializeTo(keyPair1.a, bb);
+		TrSerializer.serializeTo(keyPair1.b, bb);
+		bb.flip();
+		final RSAPublicKey pubKey = TrSerializer.deserializeFrom(RSAPublicKey.class, bb);
+		final RSAPrivateKey privKey = TrSerializer.deserializeFrom(RSAPrivateKey.class, bb);
+		final TestObject plain = new TestObject();
+		plain.i1 = 12;
+		plain.str = "hello";
+
+		final TrPPKEncrypted<TestObject> cipher = TrCrypto.encrypt(plain, pubKey);
+
+		System.out.format("AES Cypher size: %d, RSA cypher size: %d%n", cipher.aesCypherText.length,
+				cipher.rsaEncryptedAesKey.length);
+
+		final TestObject decrypted = TrCrypto.decrypt(TestObject.class, cipher, privKey);
 
 		Assert.assertEquals(decrypted, plain);
 	}
