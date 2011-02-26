@@ -1,17 +1,29 @@
 package tahrir.io.crypto;
 
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.security.*;
 import java.util.Arrays;
 
-public class SHA256Hash {
-	public final byte[] hash;
+import tahrir.io.serialization.*;
 
-	public SHA256Hash(final byte[] toHash) {
+public class SHA256Hash {
+	public byte[] hash;
+
+	protected SHA256Hash() {
+
+	}
+
+	public SHA256Hash(final Object toHash, final int maxSize) throws TahrirSerializableException {
+		final ByteBuffer bb = ByteBuffer.allocate(maxSize);
+		TahrirSerializer.serializeTo(toHash, bb);
+		bb.flip();
 		MessageDigest digest;
 		try {
 			digest = MessageDigest.getInstance("SHA-256");
 			digest.reset();
-			hash = digest.digest(toHash);
+			digest.update(bb);
+			hash = digest.digest();
 		} catch (final NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
@@ -29,6 +41,11 @@ public class SHA256Hash {
 		if (!Arrays.equals(hash, other.hash))
 			return false;
 		return true;
+	}
+
+	public BigInteger toBigInteger() {
+		// TODO Auto-generated method stub
+		return new BigInteger(hash);
 	}
 
 }

@@ -102,7 +102,7 @@ public abstract class TahrirSerializer {
 						continue;
 					}
 
-					bb.putInt(field.getName().hashCode());
+					bb.putInt(field.hashCode());
 
 					if (fieldType.isArray()) {
 						final int length = Array.getLength(fieldObject);
@@ -144,7 +144,7 @@ public abstract class TahrirSerializer {
 					final Set<Field> fields = getAllFields(c);
 					for (final Field field : fields) {
 						field.setAccessible(true);
-						final Field old = fMap.put(field.getName().hashCode(), field);
+						final Field old = fMap.put(field.hashCode(), field);
 						if (old != null) // This is laughably unlikely
 							throw new RuntimeException("Field "+field.getName()+" of "+c.getName()+" has the same hashCode() as field "+old.getName()+", one of them MUST be renamed");
 					}

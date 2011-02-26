@@ -11,6 +11,10 @@ public class AES256SymmetricKey {
 		skey = new SecretKeySpec(bytes, "AES");
 	}
 
+	public byte[] toBytes() {
+		return skey.getEncoded();
+	}
+
 	public byte[] encrypt(final byte[] toEncrypt) {
 		try {
 			final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding");

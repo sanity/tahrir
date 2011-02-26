@@ -21,4 +21,7 @@ public class RsaPrivateKey {
 		return toSign.modPow(d, n);
 	}
 
+	public RsaSignature sign(final SHA256Hash hash) {
+		return new RsaSignature(sign(new BigInteger(hash.hash)));
+	}
 }
