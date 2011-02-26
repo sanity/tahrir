@@ -6,14 +6,14 @@ import java.util.Map;
 
 import tahrir.io.serialization.*;
 
-public class MapSerializer extends TahrirSerializer {
+public class MapSerializer extends TrSerializer {
 
 	public MapSerializer() {
 		super(Map.class);
 	}
 
 	@Override
-	protected Object deserialize(final Type type_, final ByteBuffer bb) throws TahrirSerializableException {
+	protected Object deserialize(final Type type_, final ByteBuffer bb) throws TrSerializableException {
 		final ParameterizedType type = (ParameterizedType) type_;
 		final int size = bb.getInt();
 		try {
@@ -27,13 +27,13 @@ public class MapSerializer extends TahrirSerializer {
 			}
 			return map;
 		} catch (final Exception e) {
-			throw new TahrirSerializableException(e);
+			throw new TrSerializableException(e);
 		}
 	}
 
 	@Override
 	protected void serialize(final Type type, final Object object, final ByteBuffer bb)
-	throws TahrirSerializableException {
+	throws TrSerializableException {
 		final Map<?, ?> map = (Map<?, ?>) object;
 		bb.putInt(map.size());
 		for (final Map.Entry<?, ?> entry : map.entrySet()) {

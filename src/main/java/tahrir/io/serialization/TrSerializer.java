@@ -8,16 +8,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import tahrir.io.serialization.serializers.*;
 
 import com.google.common.collect.Maps;
-import com.google.inject.internal.Sets;
 
-public abstract class TahrirSerializer {
+public abstract class TrSerializer {
 
 	protected final Type type;
 
-	private static Map<Type, TahrirSerializer> serializers;
+	private static Map<Type, TrSerializer> serializers;
 
 	static {
-		serializers = new ConcurrentHashMap<Type, TahrirSerializer>();
+		serializers = new ConcurrentHashMap<Type, TrSerializer>();
 		registerSerializer(new IntegerSerializer(), Integer.class, Integer.TYPE);
 		registerSerializer(new BooleanSerializer(), Boolean.class, Boolean.TYPE);
 		registerSerializer(new ByteSerializer(), Byte.class, Byte.TYPE);
@@ -33,25 +32,25 @@ public abstract class TahrirSerializer {
 
 	private static final Map<Class<?>, Map<Integer, Field>> fieldMap = Maps.newHashMap();
 
-	public static <T> void registerSerializer(final TahrirSerializer serializer, final Type... types) {
+	public static <T> void registerSerializer(final TrSerializer serializer, final Type... types) {
 		for (final Type type : types) {
-			final TahrirSerializer put = serializers.put(type, serializer);
+			final TrSerializer put = serializers.put(type, serializer);
 			if (put != null)
 				throw new RuntimeException("Tried to register serializer for "+type+" twice");
 		}
 	}
 
-	protected TahrirSerializer(final Type type) {
+	protected TrSerializer(final Type type) {
 		this.type = type;
 	}
 
-	public static TahrirSerializer getSerializerForType(final Class<?> type) {
+	public static TrSerializer getSerializerForType(final Class<?> type) {
 		if (type == null || type.equals(Object.class))
 			return null;
-		final TahrirSerializer fieldSerializer = serializers.get(type);
+		final TrSerializer fieldSerializer = serializers.get(type);
 		if (fieldSerializer != null) return fieldSerializer;
 		for (final Class<?> iface : type.getInterfaces()) {
-			final TahrirSerializer ifaceFS = getSerializerForType(iface);
+			final TrSerializer ifaceFS = getSerializerForType(iface);
 			if (ifaceFS != null)
 				return ifaceFS;
 		}
@@ -62,7 +61,17 @@ public abstract class TahrirSerializer {
 	private static Set<Field> getAllFields(final Class<?> c) {
 		if (c.equals(Object.class))
 			return Collections.emptySet();
-		final HashSet<Field> ret = Sets.newHashSet();
+		// Ensure a consistent ordering on the fields we return to ensure that
+		// digital signatures match as they should
+		// FIXME: Is this dangerous? Could lead to weird failures to verify
+		// signatures if we aren't careful
+		final TreeSet<Field> ret = new TreeSet<Field>(new Comparator<Field>() {
+
+			public int compare(final Field o1, final Field o2) {
+				return o1.getName().compareTo(o2.getName());
+			}
+
+		});
 		for (final Field f : c.getDeclaredFields()) {
 			if (Modifier.isStatic(f.getModifiers()) || Modifier.isTransient(f.getModifiers())) {
 				// Don't serialize static fields
@@ -75,9 +84,9 @@ public abstract class TahrirSerializer {
 		return ret;
 	}
 
-	public static void serializeTo(final Object object, final ByteBuffer bb) throws TahrirSerializableException {
+	public static void serializeTo(final Object object, final ByteBuffer bb) throws TrSerializableException {
 		// See if we can serialize directly
-		final TahrirSerializer ts = getSerializerForType(object.getClass());
+		final TrSerializer ts = getSerializerForType(object.getClass());
 		if (ts != null) {
 			ts.serialize(object.getClass(), object, bb);
 		} else {
@@ -85,7 +94,7 @@ public abstract class TahrirSerializer {
 			try {
 				final Set<Field> fields = getAllFields(object.getClass());
 				if (fields.size() > 127)
-					throw new TahrirSerializableException("Cannot serialize objects with more than 127 fields");
+					throw new TrSerializableException("Cannot serialize objects with more than 127 fields");
 				byte nonNullFieldCount = 0;
 				for (final Field field : fields) {
 					if (field.get(object) != null) {
@@ -112,12 +121,12 @@ public abstract class TahrirSerializer {
 						}
 
 					} else {
-						final TahrirSerializer fieldSerializer = getSerializerForType(field.getType());
+						final TrSerializer fieldSerializer = getSerializerForType(field.getType());
 						if (fieldSerializer != null) {
 							fieldSerializer.serialize(field.getGenericType(), fieldObject, bb);
 						} else {
 							if (field.getGenericType() instanceof ParameterizedType)
-								throw new TahrirSerializableException(
+								throw new TrSerializableException(
 								"If you want to serialize a generic type you must register a TahrirSerializer for it");
 							serializeTo(fieldObject, bb);
 						}
@@ -126,14 +135,14 @@ public abstract class TahrirSerializer {
 					}
 				}
 			} catch (final Exception e) {
-				throw new TahrirSerializableException(e);
+				throw new TrSerializableException(e);
 			}
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> T deserializeFrom(final Class<T> c, final ByteBuffer bb) throws TahrirSerializableException {
-		final TahrirSerializer ts = getSerializerForType(c);
+	public static <T> T deserializeFrom(final Class<T> c, final ByteBuffer bb) throws TrSerializableException {
+		final TrSerializer ts = getSerializerForType(c);
 		if (ts != null)
 			return (T) ts.deserialize(c, bb);
 		else {
@@ -156,7 +165,7 @@ public abstract class TahrirSerializer {
 					final int fieldHash = bb.getInt();
 					final Field field = fMap.get(fieldHash);
 					if (field == null)
-						throw new TahrirSerializableException("Unrecognized fieldHash: " + fieldHash);
+						throw new TrSerializableException("Unrecognized fieldHash: " + fieldHash);
 					if (field.getType().isArray()) {
 						final int arrayLen = bb.getInt();
 						final Object array = Array.newInstance(field.getType().getComponentType(), arrayLen);
@@ -165,7 +174,7 @@ public abstract class TahrirSerializer {
 						}
 						field.set(returnObject, array);
 					} else {
-						final TahrirSerializer serializer = getSerializerForType(field.getType());
+						final TrSerializer serializer = getSerializerForType(field.getType());
 						if (serializer != null) {
 							field.set(returnObject, serializer.deserialize(field.getGenericType(), bb));
 						} else {
@@ -175,7 +184,7 @@ public abstract class TahrirSerializer {
 				}
 				return returnObject;
 			} catch (final Exception e) {
-				throw new TahrirSerializableException(e);
+				throw new TrSerializableException(e);
 			}
 		}
 	}
@@ -208,8 +217,8 @@ public abstract class TahrirSerializer {
 	// }
 
 	protected abstract Object deserialize(Type type, ByteBuffer bb)
-	throws TahrirSerializableException;
+	throws TrSerializableException;
 
 	protected abstract void serialize(Type type, Object object, ByteBuffer bb)
-	throws TahrirSerializableException;
+	throws TrSerializableException;
 }

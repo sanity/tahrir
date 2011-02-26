@@ -3,9 +3,9 @@ package tahrir.io.serialization.serializers;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 
-import tahrir.io.serialization.TahrirSerializer;
+import tahrir.io.serialization.TrSerializer;
 
-public class BooleanSerializer extends TahrirSerializer {
+public class BooleanSerializer extends TrSerializer {
 
 	public BooleanSerializer() {
 		super(Boolean.class);

@@ -6,7 +6,7 @@ import java.util.Collection;
 
 import tahrir.io.serialization.*;
 
-public class CollectionSerializer extends TahrirSerializer {
+public class CollectionSerializer extends TrSerializer {
 
 	public CollectionSerializer() {
 		super(Collection.class);
@@ -14,7 +14,7 @@ public class CollectionSerializer extends TahrirSerializer {
 
 	@Override
 	protected Object deserialize(final Type type_, final ByteBuffer bb)
-	throws TahrirSerializableException {
+	throws TrSerializableException {
 		final ParameterizedType type = (ParameterizedType) type_;
 		final int size = bb.getInt();
 		try {
@@ -27,14 +27,14 @@ public class CollectionSerializer extends TahrirSerializer {
 			}
 			return collection;
 		} catch (final Exception e) {
-			throw new TahrirSerializableException(e);
+			throw new TrSerializableException(e);
 		}
 	}
 
 	@Override
 	protected void serialize(final Type type, final Object object,
 			final ByteBuffer bb)
-	throws TahrirSerializableException {
+	throws TrSerializableException {
 		final Collection<?> collection = (Collection<?>) object;
 		bb.putInt(collection.size());
 		for (final Object element : collection) {

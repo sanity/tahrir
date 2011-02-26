@@ -4,9 +4,9 @@ import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-import tahrir.io.serialization.TahrirSerializer;
+import tahrir.io.serialization.TrSerializer;
 
-public class BigIntegerSerializer extends TahrirSerializer {
+public class BigIntegerSerializer extends TrSerializer {
 
 	public BigIntegerSerializer() {
 		super(BigInteger.class);

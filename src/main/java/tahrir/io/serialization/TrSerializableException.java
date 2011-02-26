@@ -1,23 +1,23 @@
 package tahrir.io.serialization;
 
-public class TahrirSerializableException extends Exception {
+public class TrSerializableException extends Exception {
 
-	public TahrirSerializableException() {
+	public TrSerializableException() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public TahrirSerializableException(final String arg0, final Throwable arg1) {
+	public TrSerializableException(final String arg0, final Throwable arg1) {
 		super(arg0, arg1);
 		// TODO Auto-generated constructor stub
 	}
 
-	public TahrirSerializableException(final String arg0) {
+	public TrSerializableException(final String arg0) {
 		super(arg0);
 		// TODO Auto-generated constructor stub
 	}
 
-	public TahrirSerializableException(final Throwable arg0) {
+	public TrSerializableException(final Throwable arg0) {
 		super(arg0);
 		// TODO Auto-generated constructor stub
 	}

@@ -7,16 +7,16 @@ import java.util.Arrays;
 
 import tahrir.io.serialization.*;
 
-public class SHA256Hash {
+public class TrHash {
 	public byte[] hash;
 
-	protected SHA256Hash() {
+	protected TrHash() {
 
 	}
 
-	public SHA256Hash(final Object toHash, final int maxSize) throws TahrirSerializableException {
+	public TrHash(final Object toHash, final int maxSize) throws TrSerializableException {
 		final ByteBuffer bb = ByteBuffer.allocate(maxSize);
-		TahrirSerializer.serializeTo(toHash, bb);
+		TrSerializer.serializeTo(toHash, bb);
 		bb.flip();
 		MessageDigest digest;
 		try {
@@ -35,9 +35,9 @@ public class SHA256Hash {
 			return true;
 		if (obj == null)
 			return false;
-		if (!(obj instanceof SHA256Hash))
+		if (!(obj instanceof TrHash))
 			return false;
-		final SHA256Hash other = (SHA256Hash) obj;
+		final TrHash other = (TrHash) obj;
 		if (!Arrays.equals(hash, other.hash))
 			return false;
 		return true;

@@ -3,9 +3,9 @@ package tahrir.io.serialization.serializers;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 
-import tahrir.io.serialization.TahrirSerializer;
+import tahrir.io.serialization.TrSerializer;
 
-public class ByteSerializer extends TahrirSerializer {
+public class ByteSerializer extends TrSerializer {
 
 	public ByteSerializer() {
 		super(Byte.class);

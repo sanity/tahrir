@@ -22,11 +22,11 @@ public class SerializationTest {
 		pt.d = 0.3;
 		pt.bool = true;
 		final ByteBuffer bb = ByteBuffer.allocate(1024);
-		TahrirSerializer.serializeTo(pt, bb);
+		TrSerializer.serializeTo(pt, bb);
 		System.out.format("Primitive types serialized to %d bytes, compared to %d bytes for stock serialization.%n",
 				bb.position(), testNormalJavaSerialization(pt));
 		bb.flip();
-		final PrimitiveTypes pt2 = TahrirSerializer.deserializeFrom(PrimitiveTypes.class, bb);
+		final PrimitiveTypes pt2 = TrSerializer.deserializeFrom(PrimitiveTypes.class, bb);
 		Assert.assertEquals(pt, pt2);
 	}
 
@@ -48,11 +48,11 @@ public class SerializationTest {
 		ot.subObj = new ObjectTypes.SubObjectType();
 		ot.subObj.i = 33;
 		final ByteBuffer bb = ByteBuffer.allocate(1024);
-		TahrirSerializer.serializeTo(ot, bb);
+		TrSerializer.serializeTo(ot, bb);
 		System.out.format("Object types serialized to %d bytes, compared to %d bytes for stock serialization.%n",
 				bb.position(), testNormalJavaSerialization(ot));
 		bb.flip();
-		final ObjectTypes ot2 = TahrirSerializer.deserializeFrom(ObjectTypes.class, bb);
+		final ObjectTypes ot2 = TrSerializer.deserializeFrom(ObjectTypes.class, bb);
 		Assert.assertNull(ot2.nullTest);
 		Assert.assertEquals(ot2.subObj.i, ot.subObj.i);
 	}
@@ -82,11 +82,11 @@ public class SerializationTest {
 		ct.hashSet.add("two");
 
 		final ByteBuffer bb = ByteBuffer.allocate(1024);
-		TahrirSerializer.serializeTo(ct, bb);
+		TrSerializer.serializeTo(ct, bb);
 		System.out.format("Collections types serialized to %d bytes, compared to %d bytes for stock serialization.%n",
 				bb.position(), testNormalJavaSerialization(ct));
 		bb.flip();
-		final CollectionsTypes ct2 = TahrirSerializer.deserializeFrom(CollectionsTypes.class, bb);
+		final CollectionsTypes ct2 = TrSerializer.deserializeFrom(CollectionsTypes.class, bb);
 		Assert.assertEquals(ct, ct2);
 	}
 
