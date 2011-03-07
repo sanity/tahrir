@@ -39,7 +39,9 @@ public class RsaAesTest {
 	public void testSerialization() throws Exception {
 		final ByteBuffer bb = ByteBuffer.allocate(10240);
 		TrSerializer.serializeTo(keyPair1.a, bb);
+		System.out.format("Public key serialized size: %d %n", bb.position());
 		TrSerializer.serializeTo(keyPair1.b, bb);
+		System.out.format("Both keys serialized size: %d %n", bb.position());
 		bb.flip();
 		final RSAPublicKey pubKey = TrSerializer.deserializeFrom(RSAPublicKey.class, bb);
 		final RSAPrivateKey privKey = TrSerializer.deserializeFrom(RSAPrivateKey.class, bb);
