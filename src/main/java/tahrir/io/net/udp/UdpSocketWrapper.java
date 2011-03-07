@@ -6,13 +6,13 @@ import java.util.Map;
 
 import com.google.inject.internal.Maps;
 
-public class UdpListener extends Thread {
+public class UdpSocketWrapper extends Thread {
 	private final UdpReceiver defaultReceiver;
 	private final DatagramSocket dsocket;
 	private boolean active = true;
 	private final Map<InetAddress, UdpReceiver> addressListeners = Maps.newHashMap();
 
-	public UdpListener(final int port, final UdpReceiver defaultReceiver) throws SocketException {
+	public UdpSocketWrapper(final int port, final UdpReceiver defaultReceiver) throws SocketException {
 		this.defaultReceiver = defaultReceiver;
 		dsocket = new DatagramSocket(port);
 		start();
@@ -20,6 +20,10 @@ public class UdpListener extends Thread {
 
 	public UdpReceiver registerListenerForAddress(final InetAddress address, final UdpReceiver receiver) {
 		return addressListeners.put(address, receiver);
+	}
+
+	public void send(final DatagramPacket toSend) throws IOException {
+		dsocket.send(toSend);
 	}
 
 	public void removeListenerForAddress(final InetAddress address) {
