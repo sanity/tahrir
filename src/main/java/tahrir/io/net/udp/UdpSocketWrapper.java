@@ -2,32 +2,28 @@ package tahrir.io.net.udp;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.Map;
-
-import com.google.inject.internal.Maps;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class UdpSocketWrapper extends Thread {
-	private final UdpReceiver defaultReceiver;
 	private final DatagramSocket dsocket;
 	private boolean active = true;
-	private final Map<InetAddress, UdpReceiver> addressListeners = Maps.newHashMap();
+	private final ConcurrentLinkedQueue<UdpReceiver> addressListeners = new ConcurrentLinkedQueue<UdpReceiver>();
 
-	public UdpSocketWrapper(final int port, final UdpReceiver defaultReceiver) throws SocketException {
-		this.defaultReceiver = defaultReceiver;
+	public UdpSocketWrapper(final int port) throws SocketException {
 		dsocket = new DatagramSocket(port);
 		start();
 	}
 
-	public UdpReceiver registerListenerForAddress(final InetAddress address, final UdpReceiver receiver) {
-		return addressListeners.put(address, receiver);
+	public void registerListener(final UdpReceiver receiver) {
+		addressListeners.add(receiver);
 	}
 
 	public void send(final DatagramPacket toSend) throws IOException {
 		dsocket.send(toSend);
 	}
 
-	public void removeListenerForAddress(final InetAddress address) {
-		addressListeners.remove(address);
+	public void removeListener(final UdpReceiver listener) {
+		addressListeners.remove(listener);
 	}
 
 	public void close() {
@@ -42,15 +38,11 @@ public class UdpSocketWrapper extends Thread {
 			final DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 			try {
 				dsocket.receive(packet);
-
-				final UdpReceiver udpReceiver = addressListeners.get(packet.getSocketAddress());
-
-				if (udpReceiver != null) {
-					udpReceiver.receive(packet);
-				} else {
-					defaultReceiver.receive(packet);
+				for (final UdpReceiver al : addressListeners) {
+					if (al.receive(packet)) {
+						break;
+					}
 				}
-
 			} catch (final IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -58,6 +50,11 @@ public class UdpSocketWrapper extends Thread {
 	}
 
 	public static interface UdpReceiver {
-		public void receive(DatagramPacket packet);
+		/**
+		 * 
+		 * @param packet
+		 * @return True if this receiver "consumes" the packet
+		 */
+		public boolean receive(DatagramPacket packet);
 	}
 }
