@@ -25,4 +25,6 @@ public class PrioritizedUdpPacket implements Comparable<PrioritizedUdpPacket> {
 	public static interface SentListener {
 		public void sent();
 	}
+
+	public static final double CONNECTION_MAINTAINANCE = 100;
 }

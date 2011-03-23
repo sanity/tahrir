@@ -21,6 +21,8 @@ public abstract class TrRemoteConnection {
 		stateChangeListeners.remove(toState);
 	}
 
+	public abstract void send(byte[] data) throws WrongStateException;
+
 	protected void changeState(final ConnState newState) {
 		final ConnState oldState = state;
 		state = newState;
@@ -36,5 +38,26 @@ public abstract class TrRemoteConnection {
 
 	public static interface StateChangeListener {
 		public void changed(ConnState fromState, ConnState toState);
+	}
+
+	public static class WrongStateException extends Exception {
+		private static final long serialVersionUID = 8173918760094188269L;
+
+		public WrongStateException() {
+			super();
+		}
+
+		public WrongStateException(final String arg0, final Throwable arg1) {
+			super(arg0, arg1);
+		}
+
+		public WrongStateException(final String arg0) {
+			super(arg0);
+		}
+
+		public WrongStateException(final Throwable arg0) {
+			super(arg0);
+		}
+
 	}
 }
