@@ -1,7 +1,7 @@
 package tahrir.io.net.udp;
 
+import java.io.*;
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.security.interfaces.RSAPublicKey;
 import java.util.concurrent.*;
 
@@ -18,11 +18,11 @@ public class UdpConnection extends TrRemoteConnection {
 	private final UdpConnectionManager manager;
 	private final TrSymKey receiveSymKey;
 	private final ScheduledFuture<?> connInitFuture;
-	private final ByteBuffer encryptedReceiveSymKeyBB;
+	private final byte[] encryptedReceiveSymKeyBA;
 	private final int port;
 
 	protected UdpConnection(final UdpConnectionManager manager, final RSAPublicKey connPubkey,
-			final InetAddress address, final int port) throws TrSerializableException {
+			final InetAddress address, final int port) throws TrSerializableException, IOException {
 		this.manager = manager;
 		this.connPubkey = connPubkey;
 		this.address = address;
@@ -32,17 +32,17 @@ public class UdpConnection extends TrRemoteConnection {
 
 		final TrPPKEncrypted<TrSymKey> encryptedReceiveSymKey = TrCrypto.encrypt(receiveSymKey, connPubkey);
 
-		encryptedReceiveSymKeyBB = ByteBuffer.allocate(TrConstants.MAX_BYTEBUFFER_SIZE_BYTES);
-
-		TrSerializer.serializeTo(encryptedReceiveSymKey, encryptedReceiveSymKeyBB);
-
-		encryptedReceiveSymKeyBB.flip();
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream(TrConstants.DEFAULT_BAOS_SIZE);
+		final DataOutputStream dos = new DataOutputStream(baos);
+		TrSerializer.serializeTo(encryptedReceiveSymKey, dos);
+		dos.flush();
+		encryptedReceiveSymKeyBA = baos.toByteArray();
 
 		connInitFuture = TrUtils.executor.scheduleAtFixedRate(new Runnable() {
 
 			public void run() {
-				final DatagramPacket packet = new DatagramPacket(encryptedReceiveSymKeyBB.array(),
-						encryptedReceiveSymKeyBB.position(), encryptedReceiveSymKeyBB.remaining(), address, port);
+				final DatagramPacket packet = new DatagramPacket(encryptedReceiveSymKeyBA,
+						encryptedReceiveSymKeyBA.length, address, port);
 				manager.sendQueue.add(new PrioritizedUdpPacket(packet, PrioritizedUdpPacket.CONNECTION_MAINTAINANCE));
 			}
 		}, TrConstants.UDP_CONN_INIT_INTERVAL_SECONDS, TrConstants.UDP_CONN_INIT_INTERVAL_SECONDS, TimeUnit.SECONDS);

@@ -54,18 +54,6 @@ public class TrSymKey {
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
-
-	}
-
-	protected void encrypt(final ByteBuffer plainText, final ByteBuffer cipherText) {
-		try {
-			final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
-
-			cipher.init(Cipher.ENCRYPT_MODE, skey, ivSpec);
-			cipher.doFinal(plainText, cipherText);
-		} catch (final Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	protected byte[] decrypt(final byte[] toDecrypt) {

@@ -1,7 +1,7 @@
 package tahrir.io.serialization.serializers;
 
+import java.io.*;
 import java.lang.reflect.Type;
-import java.nio.ByteBuffer;
 
 import tahrir.io.serialization.TrSerializer;
 
@@ -12,13 +12,13 @@ public class BooleanSerializer extends TrSerializer {
 	}
 
 	@Override
-	protected Boolean deserialize(final Type type, final ByteBuffer bb) {
-		return new Boolean(bb.get() == (byte) 1);
+	protected Boolean deserialize(final Type type, final DataInputStream dis) throws IOException {
+		return dis.readBoolean();
 	}
 
 	@Override
-	protected void serialize(final Type type, final Object object, final ByteBuffer bb) {
-		bb.put(object.equals(Boolean.TRUE) ? (byte) 1 : (byte) 0);
+	protected void serialize(final Type type, final Object object, final DataOutputStream dos) throws IOException {
+		dos.writeBoolean((Boolean) object);
 	}
 
 

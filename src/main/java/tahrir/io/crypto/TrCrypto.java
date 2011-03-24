@@ -1,14 +1,14 @@
 package tahrir.io.crypto;
 
-import java.nio.ByteBuffer;
+import java.io.*;
 import java.security.*;
 import java.security.interfaces.*;
 
 import javax.crypto.*;
 
+import tahrir.TrConstants;
 import tahrir.io.serialization.*;
 import tahrir.tools.Tuple2;
-import static tahrir.TrConstants.MAX_BYTEBUFFER_SIZE_BYTES;
 
 /**
  * A simple implementation of the RSA algorithm
@@ -54,13 +54,14 @@ public class TrCrypto {
 	}
 
 	public static TrSignature sign(final Object toSign, final RSAPrivateKey privKey) throws TrSerializableException {
-		final ByteBuffer toSignSerialized = ByteBuffer.allocate(MAX_BYTEBUFFER_SIZE_BYTES);
-		TrSerializer.serializeTo(toSign, toSignSerialized);
-		toSignSerialized.flip();
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream(TrConstants.DEFAULT_BAOS_SIZE);
+		final DataOutputStream dos = new DataOutputStream(baos);
 		try {
+			TrSerializer.serializeTo(toSign, dos);
+			dos.flush();
 			final Signature signature = Signature.getInstance("SHA256withRSA", "BC");
 			signature.initSign(privKey);
-			signature.update(toSignSerialized);
+			signature.update(baos.toByteArray());
 			return new TrSignature(signature.sign());
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
@@ -68,14 +69,17 @@ public class TrCrypto {
 	}
 
 	public static boolean verify(final TrSignature signature, final Object toVerify, final RSAPublicKey pubKey)
-			throws TrSerializableException {
-		final ByteBuffer toVerifySerialized = ByteBuffer.allocate(MAX_BYTEBUFFER_SIZE_BYTES);
-		TrSerializer.serializeTo(toVerify, toVerifySerialized);
-		toVerifySerialized.flip();
+	throws TrSerializableException {
+		// TODO: We serialize this object and then throw the result away, which
+		// is probably wasteful as frequently the object will be serialized
+		// elsewhere
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream(TrConstants.DEFAULT_BAOS_SIZE);
+		final DataOutputStream dos = new DataOutputStream(baos);
 		try {
+			TrSerializer.serializeTo(toVerify, dos);
 			final Signature sig = Signature.getInstance("SHA256withRSA", "BC");
 			sig.initVerify(pubKey);
-			sig.update(toVerifySerialized);
+			sig.update(baos.toByteArray());
 			return sig.verify(signature.signature);
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
@@ -85,23 +89,23 @@ public class TrCrypto {
 
 	public static <T> TrPPKEncrypted<T> encrypt(final T plainText, final RSAPublicKey pubKey)
 	throws TrSerializableException {
-		final ByteBuffer serializedPlaintext = ByteBuffer.allocate(MAX_BYTEBUFFER_SIZE_BYTES);
-		TrSerializer.serializeTo(plainText, serializedPlaintext);
-		serializedPlaintext.flip();
-		final TrSymKey aesKey = createAesKey();
-		final ByteBuffer aesEncrypted = ByteBuffer.allocate(MAX_BYTEBUFFER_SIZE_BYTES);
-		aesKey.encrypt(serializedPlaintext, aesEncrypted);
-		aesEncrypted.flip();
-		final Cipher cipher = getRSACipher();
+		// TODO: Lots of reading from and writing to byte arrays, inefficient
+		final ByteArrayOutputStream serializedPlaintext = new ByteArrayOutputStream(TrConstants.DEFAULT_BAOS_SIZE);
+		final DataOutputStream dos = new DataOutputStream(serializedPlaintext);
 		try {
+			TrSerializer.serializeTo(plainText, dos);
+			dos.flush();
+			final TrSymKey aesKey = createAesKey();
+			final byte[] aesEncrypted = aesKey.encrypt(serializedPlaintext.toByteArray());
+			final Cipher cipher = getRSACipher();
+
 			cipher.init(Cipher.ENCRYPT_MODE, pubKey);
 			final byte[] rsaEncryptedAesKey = cipher.doFinal(aesKey.toBytes());
-			final byte[] aesEncryptedByteArray = new byte[aesEncrypted.remaining()];
-			aesEncrypted.get(aesEncryptedByteArray);
-			return new TrPPKEncrypted<T>(rsaEncryptedAesKey, aesEncryptedByteArray);
+			return new TrPPKEncrypted<T>(rsaEncryptedAesKey, aesEncrypted);
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
+
 	}
 
 	public static <T> T decrypt(final Class<T> c, final TrPPKEncrypted<T> cipherText, final RSAPrivateKey privKey) {
@@ -110,10 +114,8 @@ public class TrCrypto {
 			cipher.init(Cipher.DECRYPT_MODE, privKey);
 			final TrSymKey aesKey = new TrSymKey(cipher.doFinal(cipherText.rsaEncryptedAesKey));
 			final byte[] serializedPlainTextByteArray = aesKey.decrypt(cipherText.aesCypherText);
-			final ByteBuffer bb = ByteBuffer.allocate(serializedPlainTextByteArray.length);
-			bb.put(serializedPlainTextByteArray);
-			bb.flip();
-			return TrSerializer.deserializeFrom(c, bb);
+			final ByteArrayInputStream bais = new ByteArrayInputStream(serializedPlainTextByteArray);
+			return TrSerializer.deserializeFrom(c, new DataInputStream(bais));
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}

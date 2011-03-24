@@ -1,11 +1,13 @@
 package tahrir.io.crypto;
 
+import java.io.*;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.security.*;
 import java.util.Arrays;
 
 import tahrir.io.serialization.*;
+
+import com.google.common.io.NullOutputStream;
 
 public class TrHash {
 	public byte[] hash;
@@ -15,16 +17,16 @@ public class TrHash {
 	}
 
 	public TrHash(final Object toHash, final int maxSize) throws TrSerializableException {
-		final ByteBuffer bb = ByteBuffer.allocate(maxSize);
-		TrSerializer.serializeTo(toHash, bb);
-		bb.flip();
 		MessageDigest digest;
 		try {
 			digest = MessageDigest.getInstance("SHA-256");
 			digest.reset();
-			digest.update(bb);
+			final DataOutputStream digOS = new DataOutputStream(new DigestOutputStream(new NullOutputStream(), digest));
+			TrSerializer.serializeTo(toHash, digOS);
 			hash = digest.digest();
 		} catch (final NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 	}

@@ -1,7 +1,7 @@
 package tahrir.io.serialization.serializers;
 
+import java.io.*;
 import java.lang.reflect.Type;
-import java.nio.ByteBuffer;
 
 import tahrir.io.serialization.TrSerializer;
 
@@ -12,13 +12,13 @@ public class DoubleSerializer extends TrSerializer {
 	}
 
 	@Override
-	protected Double deserialize(final Type type, final ByteBuffer bb) {
-		return new Double(bb.getDouble());
+	protected Double deserialize(final Type type, final DataInputStream dis) throws IOException {
+		return dis.readDouble();
 	}
 
 	@Override
-	protected void serialize(final Type type, final Object object, final ByteBuffer bb) {
-		bb.putDouble((Double) object);
+	protected void serialize(final Type type, final Object object, final DataOutputStream dos) throws IOException {
+		dos.writeDouble((Double) object);
 	}
 
 }

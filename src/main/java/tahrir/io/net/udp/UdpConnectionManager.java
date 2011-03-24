@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.concurrent.*;
 
 import tahrir.io.net.TrRemoteConnection;
+import tahrir.io.serialization.TrSerializableException;
 
 public class UdpConnectionManager extends Thread {
 
@@ -53,9 +54,9 @@ public class UdpConnectionManager extends Thread {
 		return null;
 	}
 
-	public UdpConnection establishConnection(final RSAPublicKey connPubkey, final InetAddress address,
-			final TrRemoteConnection.StateChangeListener connectedListener) {
-		final UdpConnection connection = new UdpConnection(this, connPubkey, address);
+	public UdpConnection establishConnection(final RSAPublicKey connPubkey, final InetAddress address, final int port,
+			final TrRemoteConnection.StateChangeListener connectedListener) throws TrSerializableException, IOException {
+		final UdpConnection connection = new UdpConnection(this, connPubkey, address, port);
 		connection.registerStateChangeListener(TrRemoteConnection.ConnState.ACTIVE, connectedListener);
 
 		return connection;

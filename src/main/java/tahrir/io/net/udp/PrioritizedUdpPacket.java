@@ -19,7 +19,9 @@ public class PrioritizedUdpPacket implements Comparable<PrioritizedUdpPacket> {
 	}
 
 	public int compareTo(final PrioritizedUdpPacket o) {
-		return Double.compare(priority, o.priority);
+		// We reverse this because the *lowest* comes out first in a
+		// PriorityQueue
+		return 1 - Double.compare(priority, o.priority);
 	}
 
 	public static interface SentListener {

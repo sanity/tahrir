@@ -1,7 +1,6 @@
 package tahrir.io.serialization;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.util.*;
 
 import org.testng.Assert;
@@ -21,12 +20,13 @@ public class SerializationTest {
 		pt.f = 0.33f;
 		pt.d = 0.3;
 		pt.bool = true;
-		final ByteBuffer bb = ByteBuffer.allocate(1024);
-		TrSerializer.serializeTo(pt, bb);
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+		final DataOutputStream dos = new DataOutputStream(baos);
+		TrSerializer.serializeTo(pt, dos);
 		System.out.format("Primitive types serialized to %d bytes, compared to %d bytes for stock serialization.%n",
-				bb.position(), testNormalJavaSerialization(pt));
-		bb.flip();
-		final PrimitiveTypes pt2 = TrSerializer.deserializeFrom(PrimitiveTypes.class, bb);
+				baos.size(), testNormalJavaSerialization(pt));
+		final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
+		final PrimitiveTypes pt2 = TrSerializer.deserializeFrom(PrimitiveTypes.class, dis);
 		Assert.assertEquals(pt, pt2);
 	}
 
@@ -47,12 +47,13 @@ public class SerializationTest {
 		final ObjectTypes ot = new ObjectTypes();
 		ot.subObj = new ObjectTypes.SubObjectType();
 		ot.subObj.i = 33;
-		final ByteBuffer bb = ByteBuffer.allocate(1024);
-		TrSerializer.serializeTo(ot, bb);
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+		final DataOutputStream dos = new DataOutputStream(baos);
+		TrSerializer.serializeTo(ot, dos);
 		System.out.format("Object types serialized to %d bytes, compared to %d bytes for stock serialization.%n",
-				bb.position(), testNormalJavaSerialization(ot));
-		bb.flip();
-		final ObjectTypes ot2 = TrSerializer.deserializeFrom(ObjectTypes.class, bb);
+				baos.size(), testNormalJavaSerialization(ot));
+		final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
+		final ObjectTypes ot2 = TrSerializer.deserializeFrom(ObjectTypes.class, dis);
 		Assert.assertNull(ot2.nullTest);
 		Assert.assertEquals(ot2.subObj.i, ot.subObj.i);
 	}
@@ -80,13 +81,13 @@ public class SerializationTest {
 		ct.hashSet = Sets.newHashSet();
 		ct.hashSet.add("one");
 		ct.hashSet.add("two");
-
-		final ByteBuffer bb = ByteBuffer.allocate(1024);
-		TrSerializer.serializeTo(ct, bb);
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+		final DataOutputStream dos = new DataOutputStream(baos);
+		TrSerializer.serializeTo(ct, dos);
 		System.out.format("Collections types serialized to %d bytes, compared to %d bytes for stock serialization.%n",
-				bb.position(), testNormalJavaSerialization(ct));
-		bb.flip();
-		final CollectionsTypes ct2 = TrSerializer.deserializeFrom(CollectionsTypes.class, bb);
+				baos.size(), testNormalJavaSerialization(ct));
+		final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
+		final CollectionsTypes ct2 = TrSerializer.deserializeFrom(CollectionsTypes.class, dis);
 		Assert.assertEquals(ct, ct2);
 	}
 

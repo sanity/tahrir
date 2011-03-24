@@ -1,7 +1,7 @@
 package tahrir.io.serialization.serializers;
 
+import java.io.*;
 import java.lang.reflect.*;
-import java.nio.ByteBuffer;
 import java.util.Map;
 
 import tahrir.io.serialization.*;
@@ -13,16 +13,17 @@ public class MapSerializer extends TrSerializer {
 	}
 
 	@Override
-	protected Object deserialize(final Type type_, final ByteBuffer bb) throws TrSerializableException {
+	protected Object deserialize(final Type type_, final DataInputStream dis) throws TrSerializableException,
+			IOException {
 		final ParameterizedType type = (ParameterizedType) type_;
-		final int size = bb.getInt();
+		final int size = dis.readInt();
 		try {
 			final Map<Object, Object> map = ((Class<Map<Object, Object>>) type.getRawType()).newInstance();
 			final Class<?> keyType = (Class<?>) type.getActualTypeArguments()[0];
 			final Class<?> valueType = (Class<?>) type.getActualTypeArguments()[1];
 			for (int x = 0; x < size; x++) {
-				final Object key = deserializeFrom(keyType, bb);
-				final Object value = deserializeFrom(valueType, bb);
+				final Object key = deserializeFrom(keyType, dis);
+				final Object value = deserializeFrom(valueType, dis);
 				map.put(key, value);
 			}
 			return map;
@@ -32,13 +33,13 @@ public class MapSerializer extends TrSerializer {
 	}
 
 	@Override
-	protected void serialize(final Type type, final Object object, final ByteBuffer bb)
-	throws TrSerializableException {
+	protected void serialize(final Type type, final Object object, final DataOutputStream dos)
+			throws TrSerializableException, IOException {
 		final Map<?, ?> map = (Map<?, ?>) object;
-		bb.putInt(map.size());
+		dos.writeInt(map.size());
 		for (final Map.Entry<?, ?> entry : map.entrySet()) {
-			serializeTo(entry.getKey(), bb);
-			serializeTo(entry.getValue(), bb);
+			serializeTo(entry.getKey(), dos);
+			serializeTo(entry.getValue(), dos);
 		}
 	}
 

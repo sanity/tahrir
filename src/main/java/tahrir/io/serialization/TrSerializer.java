@@ -1,7 +1,7 @@
 package tahrir.io.serialization;
 
+import java.io.*;
 import java.lang.reflect.*;
-import java.nio.ByteBuffer;
 import java.security.interfaces.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -87,11 +87,12 @@ public abstract class TrSerializer {
 		return ret;
 	}
 
-	public static void serializeTo(final Object object, final ByteBuffer bb) throws TrSerializableException {
+	public static void serializeTo(final Object object, final DataOutputStream dos) throws TrSerializableException,
+			IOException {
 		// See if we can serialize directly
 		final TrSerializer ts = getSerializerForType(object.getClass());
 		if (ts != null) {
-			ts.serialize(object.getClass(), object, bb);
+			ts.serialize(object.getClass(), object, dos);
 		} else {
 
 			try {
@@ -104,7 +105,7 @@ public abstract class TrSerializer {
 						nonNullFieldCount++;
 					}
 				}
-				bb.put(nonNullFieldCount);
+				dos.writeByte(nonNullFieldCount);
 				for (final Field field : fields) {
 					field.setAccessible(true);
 					final Class<?> fieldType = field.getType();
@@ -114,24 +115,24 @@ public abstract class TrSerializer {
 						continue;
 					}
 
-					bb.putInt(field.hashCode());
+					dos.writeInt(field.hashCode());
 
 					if (fieldType.isArray()) {
 						final int length = Array.getLength(fieldObject);
-						bb.putInt(length);
+						dos.writeInt(length);
 						for (int x = 0; x < length; x++) {
-							serializeTo(Array.get(fieldObject, x), bb);
+							serializeTo(Array.get(fieldObject, x), dos);
 						}
 
 					} else {
 						final TrSerializer fieldSerializer = getSerializerForType(field.getType());
 						if (fieldSerializer != null) {
-							fieldSerializer.serialize(field.getGenericType(), fieldObject, bb);
+							fieldSerializer.serialize(field.getGenericType(), fieldObject, dos);
 						} else {
 							if (field.getGenericType() instanceof ParameterizedType)
 								throw new TrSerializableException(
 								"If you want to serialize a generic type you must register a TahrirSerializer for it");
-							serializeTo(fieldObject, bb);
+							serializeTo(fieldObject, dos);
 						}
 
 
@@ -144,10 +145,11 @@ public abstract class TrSerializer {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> T deserializeFrom(final Class<T> c, final ByteBuffer bb) throws TrSerializableException {
+	public static <T> T deserializeFrom(final Class<T> c, final DataInputStream dis) throws TrSerializableException,
+			IOException {
 		final TrSerializer ts = getSerializerForType(c);
 		if (ts != null)
-			return (T) ts.deserialize(c, bb);
+			return (T) ts.deserialize(c, dis);
 		else {
 			try {
 				Map<Integer, Field> fMap = fieldMap.get(c);
@@ -163,25 +165,25 @@ public abstract class TrSerializer {
 					fieldMap.put(c, fMap);
 				}
 				final T returnObject = c.newInstance();
-				final int fieldCount = bb.get();
+				final int fieldCount = dis.readByte();
 				for (int fix = 0; fix < fieldCount; fix++) {
-					final int fieldHash = bb.getInt();
+					final int fieldHash = dis.readInt();
 					final Field field = fMap.get(fieldHash);
 					if (field == null)
 						throw new TrSerializableException("Unrecognized fieldHash: " + fieldHash);
 					if (field.getType().isArray()) {
-						final int arrayLen = bb.getInt();
+						final int arrayLen = dis.readInt();
 						final Object array = Array.newInstance(field.getType().getComponentType(), arrayLen);
 						for (int x = 0; x < arrayLen; x++) {
-							Array.set(array, x, deserializeFrom(field.getType().getComponentType(), bb));
+							Array.set(array, x, deserializeFrom(field.getType().getComponentType(), dis));
 						}
 						field.set(returnObject, array);
 					} else {
 						final TrSerializer serializer = getSerializerForType(field.getType());
 						if (serializer != null) {
-							field.set(returnObject, serializer.deserialize(field.getGenericType(), bb));
+							field.set(returnObject, serializer.deserialize(field.getGenericType(), dis));
 						} else {
-							field.set(returnObject, deserializeFrom(field.getType(), bb));
+							field.set(returnObject, deserializeFrom(field.getType(), dis));
 						}
 					}
 				}
@@ -219,9 +221,10 @@ public abstract class TrSerializer {
 	// throw new TahrirSerializableException("Malformed stop-bit encoding");
 	// }
 
-	protected abstract Object deserialize(Type type, ByteBuffer bb)
-	throws TrSerializableException;
+	protected abstract Object deserialize(Type type, DataInputStream dis)
+	throws TrSerializableException, IOException;
 
-	protected abstract void serialize(Type type, Object object, ByteBuffer bb)
-	throws TrSerializableException;
+	protected abstract void serialize(Type type, Object object, DataOutputStream dos)
+	throws TrSerializableException,
+	IOException;
 }

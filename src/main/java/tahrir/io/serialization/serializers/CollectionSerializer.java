@@ -1,7 +1,7 @@
 package tahrir.io.serialization.serializers;
 
+import java.io.*;
 import java.lang.reflect.*;
-import java.nio.ByteBuffer;
 import java.util.Collection;
 
 import tahrir.io.serialization.*;
@@ -13,16 +13,16 @@ public class CollectionSerializer extends TrSerializer {
 	}
 
 	@Override
-	protected Object deserialize(final Type type_, final ByteBuffer bb)
-	throws TrSerializableException {
+	protected Object deserialize(final Type type_, final DataInputStream dis) throws TrSerializableException,
+	IOException {
 		final ParameterizedType type = (ParameterizedType) type_;
-		final int size = bb.getInt();
+		final int size = dis.readInt();
 		try {
 			final Collection<Object> collection = ((Class<Collection<Object>>) type.getRawType())
 			.newInstance();
 			final Class<?> elementType = (Class<?>) type.getActualTypeArguments()[0];
 			for (int x = 0; x < size; x++) {
-				final Object element = deserializeFrom(elementType, bb);
+				final Object element = deserializeFrom(elementType, dis);
 				collection.add(element);
 			}
 			return collection;
@@ -33,12 +33,12 @@ public class CollectionSerializer extends TrSerializer {
 
 	@Override
 	protected void serialize(final Type type, final Object object,
-			final ByteBuffer bb)
-	throws TrSerializableException {
+ final DataOutputStream dos)
+			throws TrSerializableException, IOException {
 		final Collection<?> collection = (Collection<?>) object;
-		bb.putInt(collection.size());
+		dos.writeInt(collection.size());
 		for (final Object element : collection) {
-			serializeTo(element, bb);
+			serializeTo(element, dos);
 		}
 	}
 

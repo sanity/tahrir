@@ -1,8 +1,8 @@
 package tahrir.io.serialization.serializers;
 
+import java.io.*;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 
 import tahrir.io.serialization.TrSerializer;
 
@@ -13,16 +13,16 @@ public class BigIntegerSerializer extends TrSerializer {
 	}
 
 	@Override
-	protected BigInteger deserialize(final Type type, final ByteBuffer bb) {
-		final int length = bb.getInt();
+	protected BigInteger deserialize(final Type type, final DataInputStream dis) throws IOException {
+		final int length = dis.readInt();
 		final byte[] bytes = new byte[length];
-		bb.get(bytes);
+		dis.read(bytes);
 		return new BigInteger(bytes);
 	}
 
 	@Override
-	protected void serialize(final Type type, final Object object, final ByteBuffer bb) {
-		bb.put(((BigInteger) object).toByteArray());
+	protected void serialize(final Type type, final Object object, final DataOutputStream dos) throws IOException {
+		dos.write(((BigInteger) object).toByteArray());
 	}
 
 
