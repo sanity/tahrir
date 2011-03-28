@@ -41,4 +41,15 @@ public class UdpRemoteAddress implements TrRemoteAddress {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		final StringBuilder builder = new StringBuilder();
+		builder.append("UdpRemoteAddress [inetAddress=");
+		builder.append(inetAddress);
+		builder.append(", port=");
+		builder.append(port);
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

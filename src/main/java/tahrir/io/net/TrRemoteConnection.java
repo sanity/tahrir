@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
-public abstract class TrRemoteConnection {
+public abstract class TrRemoteConnection<RA extends TrRemoteAddress> {
 
 	State state = State.CONNECTING;
 

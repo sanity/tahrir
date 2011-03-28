@@ -56,11 +56,11 @@ public class TrSymKey {
 		}
 	}
 
-	public byte[] decrypt(final byte[] toDecrypt) {
+	public byte[] decrypt(final byte[] toDecrypt, final int length) {
 		try {
 			final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
 			cipher.init(Cipher.DECRYPT_MODE, skey, ivSpec);
-			return cipher.doFinal(toDecrypt);
+			return cipher.doFinal(toDecrypt, 0, length);
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}

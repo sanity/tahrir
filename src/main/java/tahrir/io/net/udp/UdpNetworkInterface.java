@@ -2,12 +2,12 @@ package tahrir.io.net.udp;
 
 import java.io.IOException;
 import java.net.*;
-import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.*;
 import java.util.concurrent.*;
 
 import org.slf4j.*;
 
-import tahrir.io.net.*;
+import tahrir.io.net.TrNetworkInterface;
 
 import com.google.common.collect.Maps;
 
@@ -40,8 +40,8 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 		receiver.start();
 	}
 
-	public UdpRemoteConnection connectTo(final UdpRemoteAddress address) {
-		return null;
+	public UdpRemoteConnection connectTo(final UdpRemoteAddress address, final RSAPublicKey remotePubkey) {
+		return new UdpRemoteConnection(this, address, remotePubkey);
 	}
 
 	public ConcurrentLinkedQueue<TrMessageListener<UdpRemoteAddress>> listeners = new ConcurrentLinkedQueue<TrMessageListener<UdpRemoteAddress>>();
@@ -61,9 +61,9 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 	}
 
 	@Override
-	public void registerListenerForSender(final TrRemoteAddress sender,
+	public void registerListenerForSender(final UdpRemoteAddress sender,
 			final TrMessageListener<UdpRemoteAddress> listener) {
-		if (listenersByAddress.put((UdpRemoteAddress) sender, listener) != null) {
+		if (listenersByAddress.put(sender, listener) != null) {
 			logger.warn("Overwriting listener for sender {}", sender);
 		}
 	}
@@ -106,7 +106,11 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 					final tahrir.io.net.TrNetworkInterface.TrMessageListener<UdpRemoteAddress> ml = parent.listenersByAddress.get(ura);
 
 					if (ml != null) {
-						ml.received(parent, ura, dp.getData(), dp.getLength());
+						try {
+							ml.received(parent, ura, dp.getData(), dp.getLength());
+						} catch (final Exception e) {
+							parent.logger.error("Error handling received UDP packet", e);
+						}
 					} else {
 						for (final tahrir.io.net.TrNetworkInterface.TrMessageListener<UdpRemoteAddress> li : parent.listeners) {
 							li.received(parent, ura, dp.getData(), dp.getLength());
@@ -148,8 +152,7 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 							}
 							parent.logger.error("Failed to send UDP packet", e);
 						}
-						Thread.sleep((1000l * packet.data.length / parent.config.maxUpstreamBytesPerSecond)
-								- (System.currentTimeMillis() - startTime));
+						Thread.sleep((1000l * packet.data.length / parent.config.maxUpstreamBytesPerSecond));
 					}
 				} catch (final InterruptedException e) {
 
@@ -182,7 +185,14 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 	}
 
 	@Override
-	public void unregisterListenerForSender(final TrRemoteAddress sender) {
+	public void unregisterListenerForSender(final UdpRemoteAddress sender) {
 		listenersByAddress.remove(sender);
+	}
+
+	@Override
+	public void shutdown() {
+		sender.active = false;
+		receiver.active = false;
+		datagramSocket.close();
 	}
 }

@@ -6,11 +6,13 @@ public abstract class TrNetworkInterface<RA extends TrRemoteAddress> {
 
 	public abstract void registerListener(TrMessageListener<RA> listener);
 
-	public abstract void unregisterListenerForSender(TrRemoteAddress sender);
+	public abstract void unregisterListenerForSender(RA sender);
 
-	public abstract void registerListenerForSender(TrRemoteAddress sender, TrMessageListener<RA> listener);
+	public abstract void registerListenerForSender(RA sender, TrMessageListener<RA> listener);
 
 	public abstract void unregisterListener(TrMessageListener<RA> listener);
+
+	public abstract void shutdown();
 
 	protected abstract void sendTo(RA recepient, byte[] message, TrSentListener sentListener, double priority);
 
