@@ -28,4 +28,6 @@ public abstract class TrNetworkInterface<RA extends TrRemoteAddress> {
 
 		public void failure();
 	}
+
+	public static final double CONNECTION_MAINTAINANCE_PRIORITY = 1.0;
 }

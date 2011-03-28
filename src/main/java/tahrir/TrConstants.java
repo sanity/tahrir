@@ -5,4 +5,5 @@ public class TrConstants {
 
 	public static final int UDP_CONN_INIT_INTERVAL_SECONDS = 2;
 
+	public static final String version = "0.1";
 }

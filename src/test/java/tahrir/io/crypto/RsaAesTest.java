@@ -20,6 +20,14 @@ public class RsaAesTest {
 	}
 
 	@Test
+	public void testRaw() throws Exception {
+		final byte[] pt = "plaintext".getBytes();
+		final byte[] ct = TrCrypto.encryptRaw(pt, keyPair1.a);
+		final byte[] dpt = TrCrypto.decryptRaw(ct, keyPair1.b);
+		Assert.assertEquals(dpt, pt);
+	}
+
+	@Test
 	public void testObjectEncryptDecrypt() throws Exception {
 		final TestObject plain = new TestObject();
 		plain.i1 = 12;

@@ -37,15 +37,15 @@ public class TrSymKey {
 
 	private final SecretKeySpec skey;
 
-	protected TrSymKey(final byte[] bytes) {
+	public TrSymKey(final byte[] bytes) {
 		skey = new SecretKeySpec(bytes, "AES");
 	}
 
-	protected byte[] toBytes() {
+	public byte[] toBytes() {
 		return skey.getEncoded();
 	}
 
-	protected byte[] encrypt(final byte[] toEncrypt) {
+	public byte[] encrypt(final byte[] toEncrypt) {
 		try {
 			final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
 
@@ -56,7 +56,7 @@ public class TrSymKey {
 		}
 	}
 
-	protected byte[] decrypt(final byte[] toDecrypt) {
+	public byte[] decrypt(final byte[] toDecrypt) {
 		try {
 			final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
 			cipher.init(Cipher.DECRYPT_MODE, skey, ivSpec);

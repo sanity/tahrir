@@ -98,14 +98,36 @@ public class TrCrypto {
 			final TrSymKey aesKey = createAesKey();
 			final byte[] aesEncrypted = aesKey.encrypt(serializedPlaintext.toByteArray());
 			final Cipher cipher = getRSACipher();
-
 			cipher.init(Cipher.ENCRYPT_MODE, pubKey);
 			final byte[] rsaEncryptedAesKey = cipher.doFinal(aesKey.toBytes());
 			return new TrPPKEncrypted<T>(rsaEncryptedAesKey, aesEncrypted);
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
 
+	public static byte[] encryptRaw(final byte[] plainText, final RSAPublicKey pubKey) {
+		final Cipher cipher = getRSACipher();
+		try {
+			cipher.init(Cipher.ENCRYPT_MODE, pubKey);
+			return cipher.doFinal(plainText);
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static byte[] decryptRaw(final byte[] cipherText, final RSAPrivateKey privKey) {
+		return decryptRaw(cipherText, cipherText.length, privKey);
+	}
+
+	public static byte[] decryptRaw(final byte[] cipherText, final int length, final RSAPrivateKey privKey) {
+		final Cipher cipher = getRSACipher();
+		try {
+			cipher.init(Cipher.DECRYPT_MODE, privKey);
+			return cipher.doFinal(cipherText, 0, length);
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static <T> T decrypt(final Class<T> c, final TrPPKEncrypted<T> cipherText, final RSAPrivateKey privKey) {

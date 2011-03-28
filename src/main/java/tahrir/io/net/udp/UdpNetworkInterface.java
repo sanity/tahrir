@@ -2,6 +2,7 @@ package tahrir.io.net.udp;
 
 import java.io.IOException;
 import java.net.*;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.concurrent.*;
 
 import org.slf4j.*;
@@ -21,14 +22,17 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 
 	private final Receiver receiver;
 
+	public final RSAPrivateKey myPrivateKey;
+
 	public static class Config {
 		public int listenPort;
 
 		public volatile int maxUpstreamBytesPerSecond;
 	}
 
-	public UdpNetworkInterface(final Config config) throws SocketException {
+	public UdpNetworkInterface(final Config config, final RSAPrivateKey myPrivateKey) throws SocketException {
 		this.config = config;
+		this.myPrivateKey = myPrivateKey;
 		datagramSocket = new DatagramSocket(config.listenPort);
 		sender = new Sender(this);
 		sender.start();
