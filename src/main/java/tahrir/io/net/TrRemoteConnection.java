@@ -1,63 +1,41 @@
 package tahrir.io.net;
 
-import java.util.EnumMap;
+import java.util.Map;
 
 import com.google.common.collect.Maps;
 
 public abstract class TrRemoteConnection {
-	private ConnState state = ConnState.INIT;
 
-	private final EnumMap<ConnState, StateChangeListener> stateChangeListeners = Maps.newEnumMap(ConnState.class);
+	State state = State.CONNECTING;
 
-	public ConnState getState() {
+	Map<State, StateChangeListener> scl = Maps.newConcurrentMap();
+
+	public State getState() {
 		return state;
 	}
 
-	public void registerStateChangeListener(final ConnState toState, final StateChangeListener listener) {
-		stateChangeListeners.put(toState, listener);
-	}
-
-	public void removeStateChangeListener(final ConnState toState) {
-		stateChangeListeners.remove(toState);
-	}
-
-	public abstract void send(byte[] data) throws WrongStateException;
-
-	protected void changeState(final ConnState newState) {
-		final ConnState oldState = state;
-		state = newState;
-		final StateChangeListener listener = stateChangeListeners.get(newState);
-		if (listener != null) {
-			listener.changed(oldState, newState);
+	protected void changeStateTo(final State toState) {
+		final State oldState = state;
+		state = toState;
+		final StateChangeListener s = scl.get(toState);
+		if (s != null) {
+			s.stateChanged(oldState, toState);
 		}
 	}
 
-	public enum ConnState {
-		INIT, CONNECTING, ACTIVE, CLOSED
+	public void setStateChangeListener(final State toState, final StateChangeListener listener) {
+		scl.put(toState, listener);
+	}
+
+	public void unsetStateChangeListener(final State toState) {
+		scl.remove(toState);
 	}
 
 	public static interface StateChangeListener {
-		public void changed(ConnState fromState, ConnState toState);
+		public void stateChanged(State fromState, State toState);
 	}
 
-	public static class WrongStateException extends Exception {
-		private static final long serialVersionUID = 8173918760094188269L;
-
-		public WrongStateException() {
-			super();
-		}
-
-		public WrongStateException(final String arg0, final Throwable arg1) {
-			super(arg0, arg1);
-		}
-
-		public WrongStateException(final String arg0) {
-			super(arg0);
-		}
-
-		public WrongStateException(final Throwable arg0) {
-			super(arg0);
-		}
-
+	public enum State {
+		CONNECTING, CONNECTED, DISCONNECTED;
 	}
 }
