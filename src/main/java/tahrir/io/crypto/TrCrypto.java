@@ -135,7 +135,7 @@ public class TrCrypto {
 		try {
 			cipher.init(Cipher.DECRYPT_MODE, privKey);
 			final TrSymKey aesKey = new TrSymKey(cipher.doFinal(cipherText.rsaEncryptedAesKey));
-			final byte[] serializedPlainTextByteArray = aesKey.decrypt(cipherText.aesCypherText);
+			final byte[] serializedPlainTextByteArray = aesKey.decrypt(cipherText.aesCypherText, 0);
 			final ByteArrayInputStream bais = new ByteArrayInputStream(serializedPlainTextByteArray);
 			return TrSerializer.deserializeFrom(c, new DataInputStream(bais));
 		} catch (final Exception e) {

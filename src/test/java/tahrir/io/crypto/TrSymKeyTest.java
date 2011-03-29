@@ -15,7 +15,7 @@ public class TrSymKeyTest {
 		System.out.format("PlainText size: %s bytes%n", plainText.length);
 		final byte[] cypherText = key.encrypt(plainText);
 		System.out.format("CypherText size: %s bytes%n", cypherText.length);
-		final byte[] decryptedCypherText = key.decrypt(cypherText);
+		final byte[] decryptedCypherText = key.decrypt(cypherText, 0);
 		Assert.assertEquals(decryptedCypherText, plainText);
 	}
 }
