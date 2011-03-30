@@ -9,7 +9,7 @@ public class Tuple2<A, B> {
 		return new Tuple2<A, B>(a, b);
 	}
 
-	protected Tuple2(final A a, final B b) {
+	public Tuple2(final A a, final B b) {
 		this.a = a;
 		this.b = b;
 	}

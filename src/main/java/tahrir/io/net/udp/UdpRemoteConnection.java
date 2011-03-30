@@ -13,7 +13,7 @@ import tahrir.io.net.*;
 import tahrir.io.net.TrNetworkInterface.TrMessageListener;
 import tahrir.io.net.TrNetworkInterface.TrSentListener;
 import tahrir.io.serialization.*;
-import tahrir.tools.TrUtils;
+import tahrir.tools.*;
 
 import com.google.common.collect.MapMaker;
 
@@ -37,7 +37,7 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 
 	private static final int MAX_INTRODUCE_LENGTH_BYTES = 100;
 
-	protected ConcurrentHashMap<Integer, ScheduledFuture<?>> awaitingAcks = new ConcurrentHashMap<Integer, ScheduledFuture<?>>();
+	protected ConcurrentHashMap<Integer, Tuple2<ScheduledFuture<?>, TrSentListener>> awaitingAcks = new ConcurrentHashMap<Integer, Tuple2<ScheduledFuture<?>, TrSentListener>>();
 
 	protected ConcurrentMap<Integer, RecentlyReceivedMessage> recentlyReceivedUids = new MapMaker().expiration(20,
 			TimeUnit.MINUTES).makeMap();
@@ -92,7 +92,7 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 						public void run() {
 							resendCount++;
 							if (resendCount > TrConstants.UDP_SHORT_MESSAGE_RETRY_ATTEMPTS) {
-								awaitingAcks.remove(msgUid).cancel(false);
+								awaitingAcks.remove(msgUid).a.cancel(false);
 								sentListener.failure();
 							} else {
 								iface.sendTo(address, encryptedMessage, TrNetworkInterface.PACKET_RESEND_PRIORITY);
@@ -100,7 +100,8 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 						}
 					}, TrConstants.DEFAULT_UDP_ACK_TIMEOUT_MS, TrConstants.DEFAULT_UDP_ACK_TIMEOUT_MS,
 					TimeUnit.MILLISECONDS);
-					awaitingAcks.put(msgUid, ackResendFuture);
+					awaitingAcks.put(msgUid, new Tuple2<ScheduledFuture<?>, TrSentListener>(ackResendFuture,
+							sentListener));
 				}
 
 				public void failure() {
@@ -181,9 +182,10 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 
 				if (messageType == MESSAGE_ACK) {
 					final int msgUid = dis.readInt();
-					final ScheduledFuture<?> resendFuture = awaitingAcks.get(msgUid);
-					if (resendFuture != null) {
-						resendFuture.cancel(false);
+					final Tuple2<ScheduledFuture<?>, TrSentListener> resendDat = awaitingAcks.remove(msgUid);
+					if (resendDat != null) {
+						resendDat.a.cancel(false);
+						resendDat.b.success();
 					}
 				}
 
