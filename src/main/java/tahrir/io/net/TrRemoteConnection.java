@@ -2,6 +2,8 @@ package tahrir.io.net;
 
 import java.util.Map;
 
+import tahrir.io.net.udp.UdpRemoteAddress;
+
 import com.google.common.collect.Maps;
 
 public abstract class TrRemoteConnection<RA extends TrRemoteAddress> {
@@ -38,4 +40,6 @@ public abstract class TrRemoteConnection<RA extends TrRemoteAddress> {
 	public enum State {
 		CONNECTING, CONNECTED, DISCONNECTED;
 	}
+
+	public abstract void received(TrNetworkInterface<RA> iFace, UdpRemoteAddress sender, byte[] message, int length);
 }

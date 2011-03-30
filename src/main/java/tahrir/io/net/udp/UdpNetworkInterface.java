@@ -3,6 +3,7 @@ package tahrir.io.net.udp;
 import java.io.IOException;
 import java.net.*;
 import java.security.interfaces.*;
+import java.util.Arrays;
 import java.util.concurrent.*;
 
 import org.slf4j.*;
@@ -17,7 +18,7 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 	private final PriorityBlockingQueue<QueuedPacket> outbox = new PriorityBlockingQueue<UdpNetworkInterface.QueuedPacket>();
 	public static final int MAX_PACKET_SIZE_BYTES = 1450;
 	private final DatagramSocket datagramSocket;
-	private final Config config;
+	final Config config;
 	private final Sender sender;
 
 	private final Receiver receiver;
@@ -34,14 +35,16 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 		this.config = config;
 		this.myPrivateKey = myPrivateKey;
 		datagramSocket = new DatagramSocket(config.listenPort);
+		datagramSocket.setSoTimeout(500);
 		sender = new Sender(this);
 		sender.start();
 		receiver = new Receiver(this);
 		receiver.start();
 	}
 
-	public UdpRemoteConnection connectTo(final UdpRemoteAddress address, final RSAPublicKey remotePubkey) {
-		return new UdpRemoteConnection(this, address, remotePubkey);
+	public UdpRemoteConnection connectTo(final UdpRemoteAddress address, final RSAPublicKey remotePubkey,
+			final TrMessageListener<UdpRemoteAddress> listener) {
+		return new UdpRemoteConnection(this, address, remotePubkey, listener);
 	}
 
 	public ConcurrentLinkedQueue<TrMessageListener<UdpRemoteAddress>> listeners = new ConcurrentLinkedQueue<TrMessageListener<UdpRemoteAddress>>();
@@ -103,24 +106,32 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 
 					final UdpRemoteAddress ura = new UdpRemoteAddress(dp.getAddress(), dp.getPort());
 
+					System.out.println("Received: " + dp.getPort() + " -> " + parent.config.listenPort + " len: "
+							+ dp.getLength() + " msg: " + Arrays.toString(dp.getData()));
+
 					final tahrir.io.net.TrNetworkInterface.TrMessageListener<UdpRemoteAddress> ml = parent.listenersByAddress.get(ura);
 
 					if (ml != null) {
 						try {
 							ml.received(parent, ura, dp.getData(), dp.getLength());
 						} catch (final Exception e) {
-							parent.logger.error("Error handling received UDP packet", e);
+							parent.logger.error(
+									"Error handling received UDP packet on port "
+									+ parent.datagramSocket.getLocalPort() + " from port " + dp.getPort(), e);
 						}
 					} else {
 						for (final tahrir.io.net.TrNetworkInterface.TrMessageListener<UdpRemoteAddress> li : parent.listeners) {
 							li.received(parent, ura, dp.getData(), dp.getLength());
 						}
 					}
-
+				} catch (final SocketTimeoutException e) {
+					// NOOP
 				} catch (final IOException e) {
-					parent.logger.error("Error receiving udp packet", e);
+					parent.logger.error("Error receiving udp packet on port " + parent.datagramSocket.getLocalPort()
+							+ ", receiveractive=" + active, e);
 				}
 			}
+			parent.datagramSocket.close();
 		}
 	}
 
@@ -152,6 +163,8 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 							}
 							parent.logger.error("Failed to send UDP packet", e);
 						}
+						System.out.println("Sent: " + parent.config.listenPort + " -> " + packet.addr.port + " len: "
+								+ packet.data.length + " data: " + Arrays.toString(packet.data));
 						Thread.sleep((1000l * packet.data.length / parent.config.maxUpstreamBytesPerSecond));
 					}
 				} catch (final InterruptedException e) {
@@ -192,7 +205,7 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 	@Override
 	public void shutdown() {
 		sender.active = false;
+		sender.interrupt();
 		receiver.active = false;
-		datagramSocket.close();
 	}
 }

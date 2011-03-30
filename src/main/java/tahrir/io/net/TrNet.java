@@ -2,7 +2,7 @@ package tahrir.io.net;
 
 import java.lang.reflect.*;
 
-import tahrir.tools.TrMath;
+import tahrir.tools.TrUtils;
 
 
 public class TrNet {
@@ -20,7 +20,7 @@ public class TrNet {
 	}
 
 	public <T extends TrSession> T getRemoteSession(final Class<T> c, final TrRemoteConnection connection) {
-		return getRemoteSession(c, connection, TrMath.rand.nextInt());
+		return getRemoteSession(c, connection, TrUtils.rand.nextInt());
 	}
 
 	@SuppressWarnings("unchecked")

@@ -32,4 +32,5 @@ public abstract class TrNetworkInterface<RA extends TrRemoteAddress> {
 	}
 
 	public static final double CONNECTION_MAINTAINANCE_PRIORITY = 1.0;
+	public static final double PACKET_RESEND_PRIORITY = 2.0;
 }
