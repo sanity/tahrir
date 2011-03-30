@@ -114,10 +114,8 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 		System.err.println(Arrays.toString(array1));
 		System.err.println(Arrays.toString(array2));
 		for (int x = 0; x < length; x++) {
-			if (array1[x] != array2[x]) {
-				System.out.println("Differ at " + x);
+			if (array1[x] != array2[x])
 				return false;
-			}
 		}
 		System.err.println("Same!");
 		return true;
@@ -128,8 +126,6 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 			final byte[] message, final int length) {
 		if (getState().equals(State.CONNECTING)) {
 			if (length > MAX_INTRODUCE_LENGTH_BYTES) {
-				System.out.println("Received remoteSymKey from " + sender.port + ": first time: "
-						+ (remoteSymKeyMsg == null));
 				// We don't know the remote connection's symkey yet so assume this
 				// is it
 				if (!inboundConnectivityEstablished) {
@@ -156,7 +152,6 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 					throw new RuntimeException(e);
 				}
 			} else {
-				System.out.println("Received message length: " + length);
 				final byte[] plainText = inboundSymKey.decrypt(message, length);
 				final ByteArrayInputStream bais = new ByteArrayInputStream(plainText);
 				final DataInputStream dis = new DataInputStream(bais);

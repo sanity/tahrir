@@ -3,7 +3,6 @@ package tahrir.io.net.udp;
 import java.io.IOException;
 import java.net.*;
 import java.security.interfaces.*;
-import java.util.Arrays;
 import java.util.concurrent.*;
 
 import org.slf4j.*;
@@ -106,8 +105,10 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 
 					final UdpRemoteAddress ura = new UdpRemoteAddress(dp.getAddress(), dp.getPort());
 
-					System.out.println("Received: " + dp.getPort() + " -> " + parent.config.listenPort + " len: "
-							+ dp.getLength() + " msg: " + Arrays.toString(dp.getData()));
+					// System.out.println("Received: " + dp.getPort() + " -> " +
+					// parent.config.listenPort + " len: "
+					// + dp.getLength() + " msg: " +
+					// Arrays.toString(dp.getData()));
 
 					final tahrir.io.net.TrNetworkInterface.TrMessageListener<UdpRemoteAddress> ml = parent.listenersByAddress.get(ura);
 
@@ -163,8 +164,11 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 							}
 							parent.logger.error("Failed to send UDP packet", e);
 						}
-						System.out.println("Sent: " + parent.config.listenPort + " -> " + packet.addr.port + " len: "
-								+ packet.data.length + " data: " + Arrays.toString(packet.data));
+						// System.out.println("Sent: " +
+						// parent.config.listenPort + " -> " + packet.addr.port
+						// + " len: "
+						// + packet.data.length + " data: " +
+						// Arrays.toString(packet.data));
 						Thread.sleep((1000l * packet.data.length / parent.config.maxUpstreamBytesPerSecond));
 					}
 				} catch (final InterruptedException e) {
