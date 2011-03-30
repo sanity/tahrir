@@ -10,9 +10,11 @@ import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.*;
 import tahrir.io.net.TrNetworkInterface.TrMessageListener;
 import tahrir.io.net.TrNetworkInterface.TrSentListener;
+import tahrir.io.net.TrNetworkInterface.TrSentReceivedListener;
 import tahrir.io.net.TrRemoteConnection.State;
 import tahrir.io.net.udp.UdpNetworkInterface.Config;
-import tahrir.tools.Tuple2;
+import tahrir.tools.*;
+import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
 public class UdpNetworkInterfaceTest {
 
@@ -46,28 +48,28 @@ public class UdpNetworkInterfaceTest {
 		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2.b);
 		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort);
 
-		final byte[] msg = new byte[900];
-		for (int x = 0; x < msg.length; x++) {
-			msg[x] = (byte) (x % 256);
+		final byte[] msg_ = new byte[900];
+		for (int x = 0; x < msg_.length; x++) {
+			msg_[x] = (byte) (x % 256);
 		}
+
+		final ByteArraySegment msg = new ByteArraySegment(msg_);
 
 		final boolean[] receivedFlag = new boolean[2];
 
 		i2.registerListener(new TrMessageListener<UdpRemoteAddress>() {
 
 			public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
-					final byte[] message, final int length) {
+					final ByteArraySegment message) {
 				receivedFlag[0] = true;
-				Assert.assertEquals(length, 900);
-				for (int x = 0; x < length; x++) {
-					Assert.assertEquals(message[x], msg[x]);
-				}
+				Assert.assertEquals(message, msg);
+
 			}
 		});
 
 		i1.sendTo(ra2, msg, new TrSentListener() {
 
-			public void success() {
+			public void sent() {
 				receivedFlag[1] = true;
 			}
 
@@ -107,7 +109,7 @@ public class UdpNetworkInterfaceTest {
 		final TrMessageListener<UdpRemoteAddress> listener = new TrMessageListener<UdpRemoteAddress>() {
 
 			public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
-					final byte[] message, final int length) {
+					final ByteArraySegment message) {
 
 			}
 		};
@@ -152,10 +154,9 @@ public class UdpNetworkInterfaceTest {
 		final TrMessageListener<UdpRemoteAddress> listener = new TrMessageListener<UdpRemoteAddress>() {
 
 			public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
-					final byte[] message, final int length) {
-				Assert.assertEquals(length, 100);
-				for (int x = 0; x < length; x++) {
-					Assert.assertEquals(message[x], 33);
+					final ByteArraySegment message) {
+				for (int x = 0; x < message.length; x++) {
+					Assert.assertEquals(message.array[message.offset + x], 33);
 				}
 				received[0] = true;
 			}
@@ -173,20 +174,24 @@ public class UdpNetworkInterfaceTest {
 
 		Assert.assertTrue(one2two.getState().equals(State.CONNECTED) && two2one.getState().equals(State.CONNECTED));
 
-		final byte[] msg = new byte[100];
+		final ByteArraySegmentBuilder msgBuilder = ByteArraySegment.builder();
 
-		for (int x = 0; x < msg.length; x++) {
-			msg[x] = 33;
+		for (int x = 0; x < 100; x++) {
+			msgBuilder.writeByte(33);
 		}
 
-		one2two.send(msg, 1, new TrSentListener() {
+		one2two.send(msgBuilder.build(), 1, new TrSentReceivedListener() {
 
-			public void success() {
+			public void sent() {
 				System.out.println("Sent successfully");
 			}
 
 			public void failure() {
 				Assert.fail();
+			}
+
+			public void received() {
+				System.out.println("Received successfully");
 			}
 		});
 

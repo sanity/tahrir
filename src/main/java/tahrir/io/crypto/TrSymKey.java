@@ -1,12 +1,13 @@
 package tahrir.io.crypto;
 
-import java.nio.ByteBuffer;
 import java.security.*;
 
 import javax.crypto.*;
 import javax.crypto.spec.*;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import tahrir.tools.ByteArraySegment;
 
 public class TrSymKey {
 
@@ -37,42 +38,35 @@ public class TrSymKey {
 
 	private final SecretKeySpec skey;
 
-	public TrSymKey(final byte[] bytes) {
-		skey = new SecretKeySpec(bytes, "AES");
+	public TrSymKey(final ByteArraySegment bas) {
+		skey = new SecretKeySpec(bas.array, bas.offset, bas.length, "AES");
 	}
 
 	public byte[] toBytes() {
 		return skey.getEncoded();
 	}
 
-	public byte[] encrypt(final byte[] toEncrypt) {
+	public ByteArraySegment decrypt(final ByteArraySegment toDecrypt) {
 		try {
 			final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
+			cipher.init(Cipher.DECRYPT_MODE, skey, ivSpec);
+			return new ByteArraySegment(cipher.doFinal(toDecrypt.array, toDecrypt.offset, toDecrypt.length));
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 
+	public ByteArraySegment encrypt(final ByteArraySegment toEncrypt) {
+		try {
+			final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
 			cipher.init(Cipher.ENCRYPT_MODE, skey, ivSpec);
-			return cipher.doFinal(toEncrypt);
+			return new ByteArraySegment(cipher.doFinal(toEncrypt.array, toEncrypt.offset, toEncrypt.length));
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public byte[] decrypt(final byte[] toDecrypt, final int length) {
-		try {
-			final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
-			cipher.init(Cipher.DECRYPT_MODE, skey, ivSpec);
-			return cipher.doFinal(toDecrypt, 0, length);
-		} catch (final Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	protected void decrypt(final ByteBuffer cipherText, final ByteBuffer plainText) {
-		try {
-			final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
-			cipher.init(Cipher.DECRYPT_MODE, skey, ivSpec);
-			cipher.doFinal(cipherText, plainText);
-		} catch (final Exception e) {
-			throw new RuntimeException(e);
-		}
+	public ByteArraySegment toByteArraySegment() {
+		return new ByteArraySegment(toBytes());
 	}
 }

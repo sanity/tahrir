@@ -7,7 +7,7 @@ import org.testng.Assert;
 import org.testng.annotations.*;
 
 import tahrir.io.serialization.TrSerializer;
-import tahrir.tools.Tuple2;
+import tahrir.tools.*;
 
 public class RsaAesTest {
 	private Tuple2<RSAPublicKey, RSAPrivateKey> keyPair1;
@@ -21,9 +21,9 @@ public class RsaAesTest {
 
 	@Test
 	public void testRaw() throws Exception {
-		final byte[] pt = "plaintext".getBytes();
-		final byte[] ct = TrCrypto.encryptRaw(pt, keyPair1.a);
-		final byte[] dpt = TrCrypto.decryptRaw(ct, keyPair1.b);
+		final ByteArraySegment pt = new ByteArraySegment("plaintext".getBytes());
+		final ByteArraySegment ct = TrCrypto.encryptRaw(pt, keyPair1.a);
+		final ByteArraySegment dpt = TrCrypto.decryptRaw(ct, keyPair1.b);
 		Assert.assertEquals(dpt, pt);
 	}
 

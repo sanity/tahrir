@@ -5,17 +5,20 @@ import java.util.Random;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import tahrir.tools.ByteArraySegment;
+
 public class TrSymKeyTest {
 	@Test
 	public void testEncryptDecrypt() {
 		final TrSymKey key = TrCrypto.createAesKey();
 		final Random r = new Random();
-		final byte[] plainText = new byte[512];
-		r.nextBytes(plainText);
-		System.out.format("PlainText size: %s bytes%n", plainText.length);
-		final byte[] cypherText = key.encrypt(plainText);
+		final byte[] plainText_ = new byte[512];
+		r.nextBytes(plainText_);
+		System.out.format("PlainText size: %s bytes%n", plainText_.length);
+		final ByteArraySegment plainText = new ByteArraySegment(plainText_);
+		final ByteArraySegment cypherText = key.encrypt(plainText);
 		System.out.format("CypherText size: %s bytes%n", cypherText.length);
-		final byte[] decryptedCypherText = key.decrypt(cypherText, 0);
+		final ByteArraySegment decryptedCypherText = key.decrypt(cypherText);
 		Assert.assertEquals(decryptedCypherText, plainText);
 	}
 }

@@ -2,7 +2,7 @@ package tahrir.io.net.udp;
 
 import java.io.*;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.*;
 
 import org.slf4j.*;
@@ -12,9 +12,12 @@ import tahrir.io.crypto.*;
 import tahrir.io.net.*;
 import tahrir.io.net.TrNetworkInterface.TrMessageListener;
 import tahrir.io.net.TrNetworkInterface.TrSentListener;
+import tahrir.io.net.TrNetworkInterface.TrSentReceivedListener;
 import tahrir.io.serialization.*;
 import tahrir.tools.*;
+import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
+import com.beust.jcommander.internal.Maps;
 import com.google.common.collect.MapMaker;
 
 public class UdpRemoteConnection extends TrRemoteConnection<UdpRemoteAddress> implements
@@ -26,18 +29,18 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 	private final RSAPublicKey pubKey;
 	private final TrSymKey inboundSymKey;
 	private TrSymKey outboundSymKey = null;
-	private byte[] remoteSymKeyMsg = null;
+	private ByteArraySegment remoteSymKeyMsg = null;
 	private final ScheduledFuture<?> connectionInitiationSender;
 	private boolean inboundConnectivityEstablished = false, outboundConnectivityEstablished = false;
 
 	public static final int INTRODUCE = 0;
 	public static final int SHORT_MESSAGE = 1;
-	public static final int LONG_MESSAGE = 2;
+	public static final int LONG_MESSAGE_HEADER = 2;
 	public static final int MESSAGE_ACK = 3;
 
 	private static final int MAX_INTRODUCE_LENGTH_BYTES = 100;
 
-	protected ConcurrentHashMap<Integer, Tuple2<ScheduledFuture<?>, TrSentListener>> awaitingAcks = new ConcurrentHashMap<Integer, Tuple2<ScheduledFuture<?>, TrSentListener>>();
+	protected ConcurrentHashMap<Integer, Tuple2<ScheduledFuture<?>, TrSentReceivedListener>> awaitingAcks = new ConcurrentHashMap<Integer, Tuple2<ScheduledFuture<?>, TrSentReceivedListener>>();
 
 	protected ConcurrentMap<Integer, RecentlyReceivedMessage> recentlyReceivedUids = new MapMaker().expiration(20,
 			TimeUnit.MINUTES).makeMap();
@@ -56,7 +59,7 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 		this.pubKey = pubKey;
 		this.listener = listener;
 		inboundSymKey = TrCrypto.createAesKey();
-		final byte[] encryptedSymKeys = TrCrypto.encryptRaw(inboundSymKey.toBytes(), pubKey);
+		final ByteArraySegment encryptedSymKeys = TrCrypto.encryptRaw(inboundSymKey.toByteArraySegment(), pubKey);
 
 		// We use the length of the message to indicate whether it is the
 		// connection initiation or an introduce message
@@ -72,20 +75,25 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 		}, 0, TrConstants.UDP_CONN_INIT_INTERVAL_SECONDS, TimeUnit.SECONDS);
 	}
 
-	public void send(final byte[] message, final double priority, final TrSentListener sentListener) throws IOException {
-		final int msgUid = TrUtils.rand.nextInt();
+	public void send(final ByteArraySegment message, final double priority, final TrSentReceivedListener sentListener)
+	throws IOException {
+		send(message, priority, sentListener, TrUtils.rand.nextInt());
+	}
+
+	public void send(final ByteArraySegment message, final double priority, final TrSentReceivedListener sentListener,
+			final int msgUid) throws IOException {
 		if (message.length < TrConstants.MAX_UDP_PACKET_SIZE - 10) {
-			final ByteArrayOutputStream baos = new ByteArrayOutputStream(message.length * 2);
-			final DataOutputStream dos = new DataOutputStream(baos);
+			final ByteArraySegmentBuilder dos = ByteArraySegment.builder();
 			dos.writeByte(SHORT_MESSAGE);
 			dos.writeInt(msgUid);
 			dos.writeInt(message.length);
-			dos.write(message);
+			message.writeTo(dos);
 			dos.flush();
-			final byte[] encryptedMessage = outboundSymKey.encrypt(baos.toByteArray());
+			final ByteArraySegment encryptedMessage = outboundSymKey.encrypt(dos.build());
 			iface.sendTo(address, encryptedMessage, new TrSentListener() {
 
-				public void success() {
+				public void sent() {
+					sentListener.sent();
 					final ScheduledFuture<?> ackResendFuture = TrUtils.executor.scheduleAtFixedRate(new Runnable() {
 						int resendCount = 0;
 
@@ -100,7 +108,7 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 						}
 					}, TrConstants.DEFAULT_UDP_ACK_TIMEOUT_MS, TrConstants.DEFAULT_UDP_ACK_TIMEOUT_MS,
 					TimeUnit.MILLISECONDS);
-					awaitingAcks.put(msgUid, new Tuple2<ScheduledFuture<?>, TrSentListener>(ackResendFuture,
+					awaitingAcks.put(msgUid, new Tuple2<ScheduledFuture<?>, TrSentReceivedListener>(ackResendFuture,
 							sentListener));
 				}
 
@@ -108,6 +116,16 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 					sentListener.failure();
 				}
 			}, priority);
+		} else {
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream(message.length * 2);
+			final DataOutputStream dos = new DataOutputStream(baos);
+			dos.writeByte(LONG_MESSAGE_HEADER);
+			dos.writeInt(msgUid);
+			final int maxBlockSize = TrConstants.MAX_UDP_PACKET_SIZE - 15;
+			final Map<Integer, byte[]> toSend = Maps.newHashMap();
+			// final ByteArrayInputStream bais = new
+			// ByteArrayInputStream(message);
+
 		}
 	}
 
@@ -125,26 +143,24 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 
 	@Override
 	public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
-			final byte[] message, final int length) {
+			final ByteArraySegment message) {
 		if (getState().equals(State.CONNECTING)) {
-			if (length > MAX_INTRODUCE_LENGTH_BYTES) {
+			if (message.length > MAX_INTRODUCE_LENGTH_BYTES) {
 				// We don't know the remote connection's symkey yet so assume this
 				// is it
 				if (!inboundConnectivityEstablished) {
 					inboundConnectivityEstablished = true;
 					remoteSymKeyMsg = message;
-					outboundSymKey = new TrSymKey(TrCrypto.decryptRaw(message, length, iface.myPrivateKey));
+					outboundSymKey = new TrSymKey(TrCrypto.decryptRaw(message, iface.myPrivateKey));
 				}
-				final ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-				final DataOutputStream dos = new DataOutputStream(baos);
+				final ByteArraySegmentBuilder dos = ByteArraySegment.builder();
 				try {
 					dos.writeByte(INTRODUCE);
 					final Introduce obj = new Introduce();
 					obj.version = TrConstants.version;
 					TrSerializer.serializeTo(obj, dos);
 					dos.flush();
-					final byte[] plaintext = baos.toByteArray();
-					final byte[] ciphertext = outboundSymKey.encrypt(plaintext);
+					final ByteArraySegment ciphertext = outboundSymKey.encrypt(dos.build());
 					assert ciphertext.length <= MAX_INTRODUCE_LENGTH_BYTES;
 					iface.sendTo(sender, ciphertext,
 							TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY);
@@ -154,9 +170,8 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 					throw new RuntimeException(e);
 				}
 			} else {
-				final byte[] plainText = inboundSymKey.decrypt(message, length);
-				final ByteArrayInputStream bais = new ByteArrayInputStream(plainText);
-				final DataInputStream dis = new DataInputStream(bais);
+				final ByteArraySegment plainText = inboundSymKey.decrypt(message);
+				final DataInputStream dis = plainText.toDataInputStream();
 
 				try {
 					final int messageType = dis.readByte();
@@ -173,19 +188,18 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 				changeStateTo(State.CONNECTED);
 			}
 		} else if (getState().equals(State.CONNECTED)) {
-			final byte[] plainText = inboundSymKey.decrypt(message, length);
-			final ByteArrayInputStream bais = new ByteArrayInputStream(plainText);
-			final DataInputStream dis = new DataInputStream(bais);
+			final ByteArraySegment plainText = inboundSymKey.decrypt(message);
+			final DataInputStream dis = plainText.toDataInputStream();
 
 			try {
 				final int messageType = dis.readByte();
 
 				if (messageType == MESSAGE_ACK) {
 					final int msgUid = dis.readInt();
-					final Tuple2<ScheduledFuture<?>, TrSentListener> resendDat = awaitingAcks.remove(msgUid);
+					final Tuple2<ScheduledFuture<?>, TrSentReceivedListener> resendDat = awaitingAcks.remove(msgUid);
 					if (resendDat != null) {
 						resendDat.a.cancel(false);
-						resendDat.b.success();
+						resendDat.b.received();
 					}
 				}
 
@@ -195,12 +209,11 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 					// before, so that the sender stops resending - this could
 					// happen if the ack was dropped)
 					{
-						final ByteArrayOutputStream baos = new ByteArrayOutputStream(TrConstants.DEFAULT_BAOS_SIZE);
-						final DataOutputStream dos = new DataOutputStream(baos);
-						dos.writeByte(MESSAGE_ACK);
-						dos.writeInt(msgUid);
-						dos.flush();
-						iface.sendTo(address, outboundSymKey.encrypt(baos.toByteArray()),
+						final ByteArraySegmentBuilder builder = ByteArraySegment.builder();
+						builder.writeByte(MESSAGE_ACK);
+						builder.writeInt(msgUid);
+						builder.flush();
+						iface.sendTo(address, outboundSymKey.encrypt(builder.build()),
 								TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY);
 					}
 					// Ignore if we've received it before
@@ -209,7 +222,7 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 						final int actuallyRead = dis.read(payload);
 						if (actuallyRead != payload.length)
 							throw new RuntimeException("Packet length "+actuallyRead+", but expected "+payload.length);
-						listener.received(iface, sender, payload, payload.length);
+						listener.received(iface, sender, new ByteArraySegment(payload));
 					}
 
 				}

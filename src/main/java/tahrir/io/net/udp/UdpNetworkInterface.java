@@ -8,6 +8,7 @@ import java.util.concurrent.*;
 import org.slf4j.*;
 
 import tahrir.io.net.TrNetworkInterface;
+import tahrir.tools.ByteArraySegment;
 
 import com.google.common.collect.Maps;
 
@@ -78,10 +79,10 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 	}
 
 	@Override
-	protected void sendTo(final UdpRemoteAddress recepient, final byte[] message,
+	protected void sendTo(final UdpRemoteAddress recepient, final ByteArraySegment encryptedMessage,
 			final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener, final double priority) {
-		assert message.length <= MAX_PACKET_SIZE_BYTES;
-		final QueuedPacket qp = new QueuedPacket(recepient, message, sentListener, priority);
+		assert encryptedMessage.length <= MAX_PACKET_SIZE_BYTES;
+		final QueuedPacket qp = new QueuedPacket(recepient, encryptedMessage, sentListener, priority);
 		outbox.add(qp);
 	}
 
@@ -114,7 +115,7 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 
 					if (ml != null) {
 						try {
-							ml.received(parent, ura, dp.getData(), dp.getLength());
+							ml.received(parent, ura, ByteArraySegment.from(dp));
 						} catch (final Exception e) {
 							parent.logger.error(
 									"Error handling received UDP packet on port "
@@ -122,7 +123,7 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 						}
 					} else {
 						for (final tahrir.io.net.TrNetworkInterface.TrMessageListener<UdpRemoteAddress> li : parent.listeners) {
-							li.received(parent, ura, dp.getData(), dp.getLength());
+							li.received(parent, ura, ByteArraySegment.from(dp));
 						}
 					}
 				} catch (final SocketTimeoutException e) {
@@ -151,12 +152,13 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 					final long startTime = System.currentTimeMillis();
 					final QueuedPacket packet = parent.outbox.poll(1, TimeUnit.SECONDS);
 					if (packet != null) {
-						final DatagramPacket dp = new DatagramPacket(packet.data, packet.data.length,
+						final DatagramPacket dp = new DatagramPacket(packet.data.array, packet.data.offset,
+								packet.data.length,
 								packet.addr.inetAddress, packet.addr.port);
 						try {
 							parent.datagramSocket.send(dp);
 							if (packet.sentListener != null) {
-								packet.sentListener.success();
+								packet.sentListener.sent();
 							}
 						} catch (final IOException e) {
 							if (packet.sentListener != null) {
@@ -182,14 +184,14 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 	private static class QueuedPacket implements Comparable<QueuedPacket> {
 
 		private final UdpRemoteAddress addr;
-		private final byte[] data;
+		private final ByteArraySegment data;
 		private final double priority;
 		private final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener;
 
-		public QueuedPacket(final UdpRemoteAddress addr, final byte[] data,
+		public QueuedPacket(final UdpRemoteAddress addr, final ByteArraySegment encryptedMessage,
 				final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener, final double priority) {
 			this.addr = addr;
-			this.data = data;
+			data = encryptedMessage;
 			this.sentListener = sentListener;
 			this.priority = priority;
 

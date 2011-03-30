@@ -8,7 +8,8 @@ import javax.crypto.*;
 
 import tahrir.TrConstants;
 import tahrir.io.serialization.*;
-import tahrir.tools.Tuple2;
+import tahrir.tools.*;
+import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
 /**
  * A simple implementation of the RSA algorithm
@@ -35,7 +36,7 @@ public class TrCrypto {
 			kgen = KeyGenerator.getInstance("AES");
 			kgen.init(256);
 			final SecretKey skey = kgen.generateKey();
-			return new TrSymKey(skey.getEncoded());
+			return new TrSymKey(new ByteArraySegment(skey.getEncoded()));
 		} catch (final NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
@@ -91,12 +92,12 @@ public class TrCrypto {
 	throws TrSerializableException {
 		// TODO: Lots of reading from and writing to byte arrays, inefficient
 		final ByteArrayOutputStream serializedPlaintext = new ByteArrayOutputStream(TrConstants.DEFAULT_BAOS_SIZE);
-		final DataOutputStream dos = new DataOutputStream(serializedPlaintext);
+		final ByteArraySegmentBuilder dos = ByteArraySegment.builder();
 		try {
 			TrSerializer.serializeTo(plainText, dos);
 			dos.flush();
 			final TrSymKey aesKey = createAesKey();
-			final byte[] aesEncrypted = aesKey.encrypt(serializedPlaintext.toByteArray());
+			final ByteArraySegment aesEncrypted = aesKey.encrypt(dos.build());
 			final Cipher cipher = getRSACipher();
 			cipher.init(Cipher.ENCRYPT_MODE, pubKey);
 			final byte[] rsaEncryptedAesKey = cipher.doFinal(aesKey.toBytes());
@@ -106,25 +107,22 @@ public class TrCrypto {
 		}
 	}
 
-	public static byte[] encryptRaw(final byte[] plainText, final RSAPublicKey pubKey) {
+	public static ByteArraySegment encryptRaw(final ByteArraySegment pt, final RSAPublicKey pubKey) {
 		final Cipher cipher = getRSACipher();
 		try {
 			cipher.init(Cipher.ENCRYPT_MODE, pubKey);
-			return cipher.doFinal(plainText);
+			return new ByteArraySegment(cipher.doFinal(pt.array, pt.offset, pt.length));
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public static byte[] decryptRaw(final byte[] cipherText, final RSAPrivateKey privKey) {
-		return decryptRaw(cipherText, cipherText.length, privKey);
-	}
 
-	public static byte[] decryptRaw(final byte[] cipherText, final int length, final RSAPrivateKey privKey) {
+	public static ByteArraySegment decryptRaw(final ByteArraySegment cipherText, final RSAPrivateKey privKey) {
 		final Cipher cipher = getRSACipher();
 		try {
 			cipher.init(Cipher.DECRYPT_MODE, privKey);
-			return cipher.doFinal(cipherText, 0, length);
+			return new ByteArraySegment(cipher.doFinal(cipherText.array, cipherText.offset, cipherText.length));
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -134,10 +132,10 @@ public class TrCrypto {
 		final Cipher cipher = getRSACipher();
 		try {
 			cipher.init(Cipher.DECRYPT_MODE, privKey);
-			final TrSymKey aesKey = new TrSymKey(cipher.doFinal(cipherText.rsaEncryptedAesKey));
-			final byte[] serializedPlainTextByteArray = aesKey.decrypt(cipherText.aesCypherText, 0);
-			final ByteArrayInputStream bais = new ByteArrayInputStream(serializedPlainTextByteArray);
-			return TrSerializer.deserializeFrom(c, new DataInputStream(bais));
+			final TrSymKey aesKey = new TrSymKey(new ByteArraySegment(cipher.doFinal(cipherText.rsaEncryptedAesKey)));
+			final ByteArraySegment serializedPlainTextByteArray = aesKey.decrypt(cipherText.aesCypherText);
+			final DataInputStream dis = serializedPlainTextByteArray.toDataInputStream();
+			return TrSerializer.deserializeFrom(c, dis);
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
