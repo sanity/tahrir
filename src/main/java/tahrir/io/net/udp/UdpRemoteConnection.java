@@ -80,6 +80,7 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 			dos.writeByte(SHORT_MESSAGE);
 			dos.writeInt(msgUid);
 			dos.writeInt(message.length);
+			dos.write(message);
 			dos.flush();
 			final byte[] encryptedMessage = outboundSymKey.encrypt(baos.toByteArray());
 			iface.sendTo(address, encryptedMessage, new TrSentListener() {
@@ -197,12 +198,15 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 						dos.writeByte(MESSAGE_ACK);
 						dos.writeInt(msgUid);
 						dos.flush();
-						iface.sendTo(address, baos.toByteArray(), TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY);
+						iface.sendTo(address, outboundSymKey.encrypt(baos.toByteArray()),
+								TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY);
 					}
 					// Ignore if we've received it before
 					if (!recentlyReceivedUids.containsKey(msgUid)) {
 						final byte[] payload = new byte[dis.readInt()];
-						dis.read(payload);
+						final int actuallyRead = dis.read(payload);
+						if (actuallyRead != payload.length)
+							throw new RuntimeException("Packet length "+actuallyRead+", but expected "+payload.length);
 						listener.received(iface, sender, payload, payload.length);
 					}
 
