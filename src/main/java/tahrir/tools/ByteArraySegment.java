@@ -43,7 +43,8 @@ public final class ByteArraySegment {
 	}
 
 	public ByteArraySegment subsegment(final int offset, final int length) {
-		return new ByteArraySegment(array, this.offset + offset, length);
+		return new ByteArraySegment(array, this.offset + offset,
+				Math.min(length, array.length - (this.offset + offset)));
 	}
 
 	public static ByteArraySegmentBuilder builder() {
@@ -52,6 +53,10 @@ public final class ByteArraySegment {
 
 
 	public static final class ByteArraySegmentBuilder extends DataOutputStream {
+
+		public void write(final ByteArraySegment seg) throws IOException {
+			this.write(seg.array, seg.offset, seg.length);
+		}
 
 		public ByteArraySegmentBuilder() {
 			super(new ByteArrayOutputStream(TrConstants.DEFAULT_BAOS_SIZE));
