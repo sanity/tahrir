@@ -1,10 +1,12 @@
 package tahrir.io.net.sessions;
 
+import tahrir.TrNode;
+
 public class PingImpl implements Ping {
 
 	private final int sessionId;
 
-	public PingImpl(final int sessionId) {
+	public PingImpl(final int sessionId, final TrNode node) {
 		this.sessionId = sessionId;
 	}
 

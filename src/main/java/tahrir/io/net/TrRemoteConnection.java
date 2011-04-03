@@ -1,7 +1,9 @@
 package tahrir.io.net;
 
+import java.io.IOException;
 import java.util.Map;
 
+import tahrir.io.net.TrNetworkInterface.TrSentReceivedListener;
 import tahrir.io.net.udp.UdpRemoteAddress;
 import tahrir.tools.ByteArraySegment;
 
@@ -29,6 +31,9 @@ public abstract class TrRemoteConnection<RA extends TrRemoteAddress> {
 	public void setStateChangeListener(final State toState, final StateChangeListener listener) {
 		scl.put(toState, listener);
 	}
+
+	public abstract void send(final ByteArraySegment message, final double priority,
+			final TrSentReceivedListener sentListener) throws IOException;
 
 	public void unsetStateChangeListener(final State toState) {
 		scl.remove(toState);

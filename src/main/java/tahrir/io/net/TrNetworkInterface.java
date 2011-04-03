@@ -26,6 +26,18 @@ public abstract class TrNetworkInterface<RA extends TrRemoteAddress> {
 
 	}
 
+	public static final TrSentReceivedListener nullSentListener = new TrSentReceivedListener() {
+
+		public void sent() {
+		}
+
+		public void failure() {
+		}
+
+		public void received() {
+		}
+	};
+
 	public static interface TrSentListener {
 		public void sent();
 

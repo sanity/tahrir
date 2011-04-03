@@ -12,4 +12,6 @@ public class TrConstants {
 	public static final int DEFAULT_UDP_ACK_TIMEOUT_MS = 1000;
 
 	public static final int UDP_SHORT_MESSAGE_RETRY_ATTEMPTS = 3;
+
+	public static final int UDP_KEEP_ALIVE_DURATION = 7;
 }

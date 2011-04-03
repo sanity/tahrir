@@ -27,14 +27,15 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 
 	private final UdpNetworkInterface iface;
 	private final UdpRemoteAddress address;
-	private final RSAPublicKey pubKey;
 	private final TrSymKey inboundSymKey;
 	private TrSymKey outboundSymKey = null;
-	private final ScheduledFuture<?> connectionInitiationSender;
+	private ScheduledFuture<?> connectionInitiationSender;
+
+	private ScheduledFuture<?> keepAliveSender;
 	private boolean inboundConnectivityEstablished = false, outboundConnectivityEstablished = false;
 
-	public enum MessageType {
-		INTRODUCE(0), SHORT(1), LONG_HEADER(2), ACK(3);
+	private enum MessageType {
+		INTRODUCE(0), SHORT(1), LONG_HEADER(2), ACK(3), KEEPALIVE(4), SHUTDOWN(5);
 
 		public static Map<Byte, MessageType> forBytes;
 		static {
@@ -73,7 +74,6 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 			final RSAPublicKey pubKey, final TrMessageListener<UdpRemoteAddress> listener) {
 		this.iface = iface;
 		this.address = address;
-		this.pubKey = pubKey;
 		this.listener = listener;
 		inboundSymKey = TrCrypto.createAesKey();
 		final ByteArraySegment encryptedSymKeys = TrCrypto.encryptRaw(inboundSymKey.toByteArraySegment(), pubKey);
@@ -90,6 +90,45 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 				iface.sendTo(address, encryptedSymKeys, TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY);
 			}
 		}, 0, TrConstants.UDP_CONN_INIT_INTERVAL_SECONDS, TimeUnit.SECONDS);
+	}
+
+	public void shutdown() {
+		shutdown(true);
+	}
+
+	public void shutdown(final boolean sendShutdownMessage) {
+		if (keepAliveSender != null) {
+			keepAliveSender.cancel(false);
+		}
+		if (connectionInitiationSender != null && !connectionInitiationSender.isCancelled()) {
+			connectionInitiationSender.cancel(false);
+		}
+
+		changeStateTo(State.DISCONNECTED);
+		if (sendShutdownMessage) {
+			sendShutdownMessage();
+		}
+		// Unregister the listener in 1 minute, to give us the opportunity to
+		// tell the other node that we have shut down
+		TrUtils.executor.schedule(new Runnable() {
+
+			public void run() {
+				iface.unregisterListenerForSender(address);
+			}
+		}, 1, TimeUnit.MINUTES);
+	}
+
+	private void sendShutdownMessage() {
+		final ByteArraySegmentBuilder dos = ByteArraySegment.builder();
+		try {
+			MessageType.SHUTDOWN.write(dos);
+			dos.flush();
+			final ByteArraySegment ciphertext = outboundSymKey.encrypt(dos.build());
+			assert ciphertext.length <= MAX_INTRODUCE_LENGTH_BYTES;
+			iface.sendTo(address, ciphertext, TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY);
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public void send(final ByteArraySegment message, final double priority, final TrSentReceivedListener sentListener)
@@ -200,7 +239,21 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 	@Override
 	public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
 			final ByteArraySegment message) {
-		if (getState().equals(State.CONNECTING)) {
+		if (getState().equals(State.DISCONNECTED)) {
+			final ByteArraySegment plainText = inboundSymKey.decrypt(message);
+			final DataInputStream dis = plainText.toDataInputStream();
+
+			try {
+				final MessageType messageType = MessageType.forBytes.get(dis.readByte());
+
+				if (!messageType.equals(MessageType.SHUTDOWN)) {
+					sendShutdownMessage();
+				}
+			} catch (final IOException e) {
+
+			}
+
+		} else if (getState().equals(State.CONNECTING)) {
 			if (message.length > MAX_INTRODUCE_LENGTH_BYTES) {
 				// We don't know the remote connection's symkey yet so assume this
 				// is it
@@ -213,6 +266,7 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 					MessageType.INTRODUCE.write(dos);
 					final Introduce obj = new Introduce();
 					obj.version = TrConstants.version;
+					obj.localTime = System.currentTimeMillis();
 					TrSerializer.serializeTo(obj, dos);
 					dos.flush();
 					final ByteArraySegment ciphertext = outboundSymKey.encrypt(dos.build());
@@ -234,6 +288,7 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 					if (messageType.equals(MessageType.INTRODUCE)) {
 						outboundConnectivityEstablished = true;
 						connectionInitiationSender.cancel(false);
+						connectionInitiationSender = null;
 					}
 				} catch (final IOException e) {
 					throw new RuntimeException(e);
@@ -241,6 +296,25 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 			}
 			if (inboundConnectivityEstablished && outboundConnectivityEstablished) {
 				changeStateTo(State.CONNECTED);
+				TrUtils.executor.scheduleWithFixedDelay(new Runnable() {
+
+					public void run() {
+						final ByteArraySegmentBuilder dos = ByteArraySegment.builder();
+						try {
+							MessageType.KEEPALIVE.write(dos);
+							final KeepAlive obj = new KeepAlive();
+							TrSerializer.serializeTo(obj, dos);
+							dos.flush();
+							final ByteArraySegment ciphertext = outboundSymKey.encrypt(dos.build());
+							assert ciphertext.length <= MAX_INTRODUCE_LENGTH_BYTES;
+							iface.sendTo(sender, ciphertext, TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY);
+						} catch (final IOException e) {
+							throw new RuntimeException(e);
+						} catch (final TrSerializableException e) {
+							throw new RuntimeException(e);
+						}
+					}
+				}, TrConstants.UDP_KEEP_ALIVE_DURATION, TrConstants.UDP_KEEP_ALIVE_DURATION, TimeUnit.SECONDS);
 			}
 		} else if (getState().equals(State.CONNECTED)) {
 			final ByteArraySegment plainText = inboundSymKey.decrypt(message);
@@ -249,16 +323,18 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 			try {
 				final MessageType messageType = MessageType.forBytes.get(dis.readByte());
 
-				if (messageType.equals(MessageType.ACK)) {
+				if (messageType.equals(MessageType.SHUTDOWN)) {
+					shutdown(false);
+				} else if (messageType.equals(MessageType.KEEPALIVE)) {
+					// noop
+				} else if (messageType.equals(MessageType.ACK)) {
 					final int msgUid = dis.readInt();
 					final Tuple2<ScheduledFuture<?>, TrSentReceivedListener> resendDat = awaitingAcks.remove(msgUid);
 					if (resendDat != null) {
 						resendDat.a.cancel(false);
 						resendDat.b.received();
 					}
-				}
-
-				if (messageType.equals(MessageType.SHORT) || messageType.equals(MessageType.LONG_HEADER)) {
+				} else if (messageType.equals(MessageType.SHORT) || messageType.equals(MessageType.LONG_HEADER)) {
 					final int msgUid = dis.readInt();
 					// Ack the message (even if we're already received it
 					// before, so that the sender stops resending - this could
@@ -326,7 +402,12 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 		Map<Integer, ByteArraySegment> receivedPackets;
 	}
 
+	public static class KeepAlive {
+
+	}
+
 	public static class Introduce {
+		public long localTime;
 		public String version;
 	}
 }

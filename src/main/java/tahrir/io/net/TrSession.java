@@ -8,4 +8,8 @@ public interface TrSession {
 	enum SessionType {
 		LOCAL, REMOTE
 	}
+
+	public @interface Priority {
+		double value();
+	}
 }
