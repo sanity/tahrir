@@ -25,6 +25,8 @@ Tahrir.main = function main() {
   // TODO: Set the content property on your primary controller
   // ex: Tahrir.contactsController.set('content',Tahrir.contacts);
 
+	var messages = Tahrir.store.find(Tahrir.Message);
+	Tahrir.messagesController.set('content', messages);
 } ;
 
 function main() { Tahrir.main(); }

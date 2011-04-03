@@ -15,5 +15,7 @@ Tahrir.Message = SC.Record.extend(
 /** @scope Tahrir.Message.prototype */ {
     author: SC.Record.toOne("Tahrir.Nym", {
         inverse: "messages", isMaster: YES
-    })
+    }),
+	text : SC.Record.attr(String),
+	created : SC.Record.attr(SC.DateTime)
 }) ;

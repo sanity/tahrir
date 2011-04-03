@@ -8,6 +8,19 @@ sc_require('models/message');
 
 Tahrir.Message.FIXTURES = [
 
+	{
+		guid: 1,
+		author: 1,
+		text: "This is a test message",
+		created: SC.DateTime.parse('08/05/2009 01:00:22', '%d/%m/%Y %H:%M:%S')
+	},
+	{
+		guid: 2,
+		author: 1,
+		text: "This is another test message",
+		created: SC.DateTime.parse('08/05/2009 00:30:22', '%d/%m/%Y %H:%M:%S')
+	}
+
   // TODO: Add your data fixtures here.
   // All fixture records must have a unique primary key (default 'guid').  See 
   // the example below.

@@ -7,6 +7,11 @@
 sc_require('models/nym');
 
 Tahrir.Nym.FIXTURES = [
+  {
+	guid : 1,
+	pubkey : "5g5g5g5g5g5g",
+   	nickname : "sanity"
+  }
 
   // TODO: Add your data fixtures here.
   // All fixture records must have a unique primary key (default 'guid').  See 
