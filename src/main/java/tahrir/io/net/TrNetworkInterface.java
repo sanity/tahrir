@@ -1,17 +1,17 @@
 package tahrir.io.net;
 
+import java.security.interfaces.RSAPublicKey;
+
 import tahrir.tools.ByteArraySegment;
 
 public abstract class TrNetworkInterface<RA extends TrRemoteAddress> {
-	public abstract boolean canSendTo(RA remoteAddress);
+	protected abstract void registerListener(TrMessageListener<RA> listener);
 
-	public abstract void registerListener(TrMessageListener<RA> listener);
+	protected abstract void unregisterListenerForSender(RA sender);
 
-	public abstract void unregisterListenerForSender(RA sender);
+	protected abstract void registerListenerForSender(RA sender, TrMessageListener<RA> listener);
 
-	public abstract void registerListenerForSender(RA sender, TrMessageListener<RA> listener);
-
-	public abstract void unregisterListener(TrMessageListener<RA> listener);
+	protected abstract void unregisterListener(TrMessageListener<RA> listener);
 
 	public abstract void shutdown();
 
@@ -25,6 +25,11 @@ public abstract class TrNetworkInterface<RA extends TrRemoteAddress> {
 		public void received(TrNetworkInterface<RA> iFace, RA sender, ByteArraySegment message);
 
 	}
+
+	public abstract TrRemoteConnection<RA> getConnectionForAddress(RA address);
+
+	public abstract TrRemoteConnection<RA> connectTo(final RA address, final RSAPublicKey remotePubkey,
+			final TrMessageListener<RA> listener);
 
 	public static final TrSentReceivedListener nullSentListener = new TrSentReceivedListener() {
 
@@ -51,4 +56,7 @@ public abstract class TrNetworkInterface<RA extends TrRemoteAddress> {
 	public static final double CONNECTION_MAINTAINANCE_PRIORITY = 1.0;
 	public static final double PACKET_RESEND_PRIORITY = 2.0;
 	public static final double LONG_MESSAGE_HEADER = 3.0;
+
+	@Override
+	public abstract String toString();
 }
