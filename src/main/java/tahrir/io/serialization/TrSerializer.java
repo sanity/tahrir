@@ -6,6 +6,7 @@ import java.security.interfaces.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import tahrir.io.net.TrRemoteAddress;
 import tahrir.io.serialization.serializers.*;
 
 import com.google.common.collect.Maps;
@@ -31,6 +32,7 @@ public abstract class TrSerializer {
 		registerSerializer(new MapSerializer(), Map.class);
 		registerSerializer(new RSAPublicKeySerializer(), RSAPublicKey.class);
 		registerSerializer(new RSAPrivateKeySerializer(), RSAPrivateKey.class);
+		registerSerializer(new TrRemoteAddressSerializer(), TrRemoteAddress.class);
 	}
 
 	private static final Map<Class<?>, Map<Integer, Field>> fieldMap = Maps.newHashMap();
@@ -88,7 +90,7 @@ public abstract class TrSerializer {
 	}
 
 	public static void serializeTo(final Object object, final DataOutputStream dos) throws TrSerializableException,
-			IOException {
+	IOException {
 		// See if we can serialize directly
 		final TrSerializer ts = getSerializerForType(object.getClass());
 		if (ts != null) {
@@ -146,7 +148,7 @@ public abstract class TrSerializer {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T deserializeFrom(final Class<T> c, final DataInputStream dis) throws TrSerializableException,
-			IOException {
+	IOException {
 		final TrSerializer ts = getSerializerForType(c);
 		if (ts != null)
 			return (T) ts.deserialize(c, dis);

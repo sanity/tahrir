@@ -6,8 +6,6 @@ public abstract class TrSessionImpl implements TrSession {
 
 	public static final ThreadLocal<TrRemoteConnection<?>> sender = new ThreadLocal<TrRemoteConnection<?>>();
 
-	public static final ThreadLocal<TrNet<?>> trNet = new ThreadLocal<TrNet<?>>();
-
 	protected final int sessionId;
 	protected final TrNode<?> node;
 
@@ -16,11 +14,12 @@ public abstract class TrSessionImpl implements TrSession {
 		this.node = node;
 	}
 
+	/**
+	 * Warning, this cannot be safely used in callbacks
+	 * 
+	 * @return
+	 */
 	public TrRemoteConnection<?> getSender() {
 		return sender.get();
-	}
-
-	public TrNet<?> getTrNet() {
-		return trNet.get();
 	}
 }

@@ -53,26 +53,31 @@ public class TrNetTest {
 
 		final TestSession remoteSession = trn1.getRemoteSession(TestSession.class, one2two, 1234, 1.0);
 
-		remoteSession.testMethod(0);
+		remoteSession.testMethod(null, 0);
 
 		Thread.sleep(1000);
 	}
 
 	public static interface TestSession extends TrSession {
-		public void testMethod(int param);
+
+		@Remote
+		public void testMethod(final TrRemoteConnection<?> sender, int param);
 	}
 
 	public static class TestSessionImpl extends TrSessionImpl implements TestSession {
 
-		public TestSessionImpl(final Integer sessionId, final TrNode<?> node) {
+		private final TrNet<?> trNet;
+
+		public TestSessionImpl(final Integer sessionId, final TrNode<?> node, final TrNet<?> trNet) {
 			super(sessionId, node);
+			this.trNet = trNet;
 		}
 
-		public void testMethod(final int param) {
+		public void testMethod(final TrRemoteConnection<?> sender, final int param) {
 			System.out.println(node.networkInterface + " testMethod(" + param + ")");
 			if (param < 10) {
-				final TestSession remote = getTrNet().getOrCreateRemoteSession(TestSession.class, getSender(), 1.0);
-				remote.testMethod(param + 1);
+				final TestSession remote = trNet.getOrCreateRemoteSession(TestSession.class, sender, 1.0);
+				remote.testMethod(null, param + 1);
 			}
 		}
 

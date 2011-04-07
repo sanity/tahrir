@@ -16,7 +16,7 @@ import com.beust.jcommander.internal.Maps;
 import com.google.common.collect.MapMaker;
 
 
-public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> {
+public class TrNet<RA extends TrRemoteAddress> {
 
 	private final TrNode<RA> trNode;
 
@@ -68,8 +68,18 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 			MessageType.METHOD_CALL.write(builder);
 			builder.writeInt(sessionId);
 			builder.writeInt(methodId);
-			for (final Object argument : arguments) {
-				TrSerializer.serializeTo(argument, builder);
+			for (int x = 0; x < method.getParameterTypes().length; x++) {
+				final Class<?> type = method.getParameterTypes()[x];
+				final Object argument = arguments[x];
+				if (!(TrRemoteConnection.class.isAssignableFrom(type))) {
+					if (argument == null)
+						throw new RuntimeException("Null argument with type " + type + " in method " + method
+								+ ", but null arguments are not supported at this time");
+					TrSerializer.serializeTo(argument, builder);
+				} else {
+					if (argument != null)
+						throw new RuntimeException("Sender placeholder TrRemoteConnection field must be called with 'null'");
+				}
 			}
 
 			connection.send(builder.build(), priority, TrNetworkInterface.nullSentListener);
@@ -90,6 +100,11 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 						final int sessionId = dis.readInt();
 						final int methodId = dis.readInt();
 						final MethodPair methodPair = methodsById.get(methodId);
+						if (methodPair == null)
+							throw new RuntimeException(
+									"Unrecognized methodId "
+									+ methodId
+									+ ", is the method you are calling public, non-static and annotated with @Remote?");
 						TrSessionImpl session = sessions.get(Tuple2.of(methodPair.cls.getDeclaringClass().getName(),
 								sessionId));
 						if (session == null) {
@@ -102,16 +117,16 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 						// reset cache expiry time
 						sessions.put(Tuple2.of(methodPair.cls.getDeclaringClass().getName(), sessionId), session);
 
-						final Object[] args = new Object[methodPair.cls.getParameterTypes().length];
-						for (int i = 0; i < args.length; i++) {
-							args[i] = TrSerializer.deserializeFrom(methodPair.cls.getParameterTypes()[i], dis);
+						final ArrayList<Object> args = new ArrayList<Object>(methodPair.cls.getParameterTypes().length);
+						for (final Class<?> t : methodPair.cls.getParameterTypes()) {
+							if (TrRemoteConnection.class.isAssignableFrom(t)) {
+								args.add(trNode.networkInterface.getConnectionForAddress(sender));
+							} else {
+								args.add(TrSerializer.deserializeFrom(t, dis));
+							}
 						}
-						final TrRemoteConnection<RA> connectionForAddress = trNode.networkInterface
-						.getConnectionForAddress(sender);
-						TrSessionImpl.sender.set(connectionForAddress);
-						TrSessionImpl.trNet.set(TrNet.this);
 
-						methodPair.cls.invoke(session, args);
+						methodPair.cls.invoke(session, args.toArray());
 						break;
 					}
 				} catch (final Exception e) {
@@ -134,7 +149,8 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 	.newHashMap();
 
 	public void registerSessionClass(final Class<? extends TrSession> iface,
-			final Class<? extends TrSessionImpl> cls) {
+ final Class<? extends TrSessionImpl> cls,
+			final Object... additionalConstructorParameters) {
 		if (!iface.isInterface())
 			throw new RuntimeException(iface + " is not an interface");
 		if (cls.isInterface())
@@ -144,7 +160,13 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 		if (!iface.isAssignableFrom(cls))
 			throw new RuntimeException(cls+" is not an implementation of "+iface);
 		try {
-			if (cls.getConstructor(Integer.class, TrNode.class) == null)
+			final ArrayList<Class<?>> constructorParamTypes = new ArrayList<Class<?>>();
+			constructorParamTypes.add(Integer.class);
+			for (final Object acp : additionalConstructorParameters) {
+				constructorParamTypes.add(acp.getClass());
+			}
+			final Class<?>[] cptA = new Class<?>[constructorParamTypes.size()];
+			if (cls.getConstructor(constructorParamTypes.toArray(cptA)) == null)
 				throw new RuntimeException(cls
 						+ " must have a constructor that takes parameters (java.lang.Integer, tahrir.TrNode)");
 		} catch (final Exception e1) {
@@ -156,7 +178,9 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 				final MethodPair methodPair = new MethodPair(ifaceMethod, cls.getMethod(ifaceMethod.getName(),
 						ifaceMethod.getParameterTypes()));
 				final int modifiers = methodPair.cls.getModifiers();
-				if (!Modifier.isPublic(modifiers) || Modifier.isStatic(modifiers)) {
+				if (!Modifier.isPublic(modifiers) || Modifier.isStatic(modifiers)
+						|| !(methodPair.iface.isAnnotationPresent(TrSession.Remote.class) || methodPair.cls
+								.isAnnotationPresent(TrSession.Remote.class))) {
 					continue;
 				}
 				if (!methodPair.cls.getReturnType().equals(Void.TYPE))
@@ -178,18 +202,23 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends TrSessionImpl> T getOrCreateLocalSession(final Class<T> c, final int sessionId) {
+	public <T extends TrSessionImpl> T getOrCreateLocalSession(final Class<T> c, final int sessionId,
+			final Object... additionalConstructorParams) {
 		try {
 			T session = (T) this.sessions.get(Tuple2.of(c.getName(), sessionId));
 			if (session == null) {
 				final Constructor<?> constructor = c.getConstructor(Integer.class, TrNode.class);
-				session = (T) constructor.newInstance(sessionId, trNode);
+				final ArrayList<Object> constructorParams = new ArrayList<Object>();
+				constructorParams.add(sessionId);
+				for (final Object ap : additionalConstructorParams) {
+					constructorParams.add(ap);
+				}
+				session = (T) constructor.newInstance(constructorParams.toArray());
 			}
 			// We put regardless of whether it is new or not to reset cache
 			// expiry time
 			this.sessions.put(Tuple2.of(c.getName(), sessionId), session);
 			TrSessionImpl.sender.set(null);
-			TrSessionImpl.trNet.set(this);
 			return session;
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
@@ -201,11 +230,6 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 			final int sessionId, final double priority) {
 		return (T) Proxy.newProxyInstance(c.getClassLoader(), new Class[] { c }, new IH(c, connection, sessionId,
 				priority));
-	}
-
-	public void received(final TrNetworkInterface<RA> iFace, final RA sender, final ByteArraySegment message) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public static final class MethodPair {

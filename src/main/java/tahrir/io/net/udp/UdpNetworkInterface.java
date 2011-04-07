@@ -114,10 +114,8 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 
 					final UdpRemoteAddress ura = new UdpRemoteAddress(dp.getAddress(), dp.getPort());
 
-					// System.out.println("Received: " + dp.getPort() + " -> " +
-					// parent.config.listenPort + " len: "
-					// + dp.getLength() + " msg: " +
-					// Arrays.toString(dp.getData()));
+					System.out.println("Received: " + dp.getPort() + " -> " + parent.config.listenPort + " len: "
+							+ dp.getLength());
 
 					final tahrir.io.net.TrNetworkInterface.TrMessageListener<UdpRemoteAddress> ml = parent.listenersByAddress.get(ura);
 
