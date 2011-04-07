@@ -5,22 +5,21 @@ import tahrir.TrNode;
 public abstract class TrSessionImpl implements TrSession {
 
 	public static final ThreadLocal<TrRemoteConnection<?>> sender = new ThreadLocal<TrRemoteConnection<?>>();
-
-	public static final ThreadLocal<TrNet<?>> trNet = new ThreadLocal<TrNet<?>>();
-
 	protected final int sessionId;
 	protected final TrNode<?> node;
+	protected final TrNet<?> trNet;
 
-	public TrSessionImpl(final Integer sessionId, final TrNode<?> node) {
+	public TrSessionImpl(final Integer sessionId, final TrNode<?> node, final TrNet<?> trNet) {
 		this.sessionId = sessionId;
 		this.node = node;
+		this.trNet = trNet;
 	}
 
 	public TrRemoteConnection<?> getSender() {
-		return sender.get();
-	}
-
-	public TrNet<?> getTrNet() {
-		return trNet.get();
+		final TrRemoteConnection<?> r = sender.get();
+		if (r == null)
+			throw new RuntimeException("No sender stored in this thread.  Is this a local Session?  Are you calling getSender() from within a callback?  In either case, don't!");
+		else
+			return r;
 	}
 }

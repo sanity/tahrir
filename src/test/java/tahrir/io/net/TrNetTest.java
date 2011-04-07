@@ -64,14 +64,14 @@ public class TrNetTest {
 
 	public static class TestSessionImpl extends TrSessionImpl implements TestSession {
 
-		public TestSessionImpl(final Integer sessionId, final TrNode<?> node) {
-			super(sessionId, node);
+		public TestSessionImpl(final Integer sessionId, final TrNode<?> node, final TrNet<?> trNet) {
+			super(sessionId, node, trNet);
 		}
 
 		public void testMethod(final int param) {
 			System.out.println(node.networkInterface + " testMethod(" + param + ")");
 			if (param < 10) {
-				final TestSession remote = getTrNet().getOrCreateRemoteSession(TestSession.class, getSender(), 1.0);
+				final TestSession remote = trNet.getOrCreateRemoteSession(TestSession.class, getSender(), 1.0);
 				remote.testMethod(param + 1);
 			}
 		}

@@ -94,9 +94,8 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 								sessionId));
 						if (session == null) {
 							final Constructor<?> constructor = methodPair.cls.getDeclaringClass().getConstructor(
-									Integer.class,
-									TrNode.class);
-							session = (TrSessionImpl) constructor.newInstance(sessionId, trNode);
+									Integer.class, TrNode.class, TrNet.class);
+							session = (TrSessionImpl) constructor.newInstance(sessionId, trNode, TrNet.this);
 						}
 						// We put regardless of whether it is new or not to
 						// reset cache expiry time
@@ -109,7 +108,6 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 						final TrRemoteConnection<RA> connectionForAddress = trNode.networkInterface
 						.getConnectionForAddress(sender);
 						TrSessionImpl.sender.set(connectionForAddress);
-						TrSessionImpl.trNet.set(TrNet.this);
 
 						methodPair.cls.invoke(session, args);
 						break;
@@ -144,9 +142,9 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 		if (!iface.isAssignableFrom(cls))
 			throw new RuntimeException(cls+" is not an implementation of "+iface);
 		try {
-			if (cls.getConstructor(Integer.class, TrNode.class) == null)
+			if (cls.getConstructor(Integer.class, TrNode.class, TrNet.class) == null)
 				throw new RuntimeException(cls
-						+ " must have a constructor that takes parameters (java.lang.Integer, tahrir.TrNode)");
+								+ " must have a constructor that takes parameters (java.lang.Integer, tahrir.TrNode, tahrir.io.net.TrNet)");
 		} catch (final Exception e1) {
 			throw new RuntimeException(e1);
 		}
@@ -182,14 +180,13 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 		try {
 			T session = (T) this.sessions.get(Tuple2.of(c.getName(), sessionId));
 			if (session == null) {
-				final Constructor<?> constructor = c.getConstructor(Integer.class, TrNode.class);
-				session = (T) constructor.newInstance(sessionId, trNode);
+				final Constructor<?> constructor = c.getConstructor(Integer.class, TrNode.class, TrNet.class);
+				session = (T) constructor.newInstance(sessionId, trNode, this);
 			}
 			// We put regardless of whether it is new or not to reset cache
 			// expiry time
 			this.sessions.put(Tuple2.of(c.getName(), sessionId), session);
 			TrSessionImpl.sender.set(null);
-			TrSessionImpl.trNet.set(this);
 			return session;
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
