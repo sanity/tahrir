@@ -56,6 +56,7 @@ public abstract class TrNetworkInterface<RA extends TrRemoteAddress> {
 	public static final double CONNECTION_MAINTAINANCE_PRIORITY = 1.0;
 	public static final double PACKET_RESEND_PRIORITY = 2.0;
 	public static final double LONG_MESSAGE_HEADER = 3.0;
+	public static final double ASSIMILATION_PRIORITY = 4.0;
 
 	@Override
 	public abstract String toString();
