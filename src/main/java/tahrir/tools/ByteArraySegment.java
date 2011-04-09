@@ -54,8 +54,12 @@ public final class ByteArraySegment {
 
 	public static final class ByteArraySegmentBuilder extends DataOutputStream {
 
-		public void write(final ByteArraySegment seg) throws IOException {
-			this.write(seg.array, seg.offset, seg.length);
+		public void write(final ByteArraySegment seg) {
+			try {
+				this.write(seg.array, seg.offset, seg.length);
+			} catch (final IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		public ByteArraySegmentBuilder() {

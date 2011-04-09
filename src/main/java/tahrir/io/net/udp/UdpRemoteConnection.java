@@ -15,6 +15,7 @@ import tahrir.io.net.TrNetworkInterface.TrMessageListener;
 import tahrir.io.net.TrNetworkInterface.TrSentListener;
 import tahrir.io.net.TrNetworkInterface.TrSentReceivedListener;
 import tahrir.io.serialization.*;
+import tahrir.io.serialization.serializers.RSAPublicKeySerializer;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
@@ -33,6 +34,8 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 
 	private ScheduledFuture<?> keepAliveSender;
 	private boolean inboundConnectivityEstablished = false, outboundConnectivityEstablished = false;
+
+	private static final int ENCRYPTED_SYM_KEY_LENGTH = 256;
 
 	private enum MessageType {
 		INTRODUCE(0), SHORT(1), LONG_HEADER(2), ACK(3), KEEPALIVE(4), SHUTDOWN(5);
@@ -58,6 +61,8 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 
 	private static final int MAX_INTRODUCE_LENGTH_BYTES = 100;
 
+	private static final int ENCRYPTED_SYM_KEY_WITH_PUB_KEY_LENGTH = 560;
+
 	protected ConcurrentHashMap<Integer, Tuple2<ScheduledFuture<?>, TrSentReceivedListener>> awaitingAcks = new ConcurrentHashMap<Integer, Tuple2<ScheduledFuture<?>, TrSentReceivedListener>>();
 
 	protected ConcurrentMap<Integer, RecentlyReceivedMessage> recentlyReceivedUids = new MapMaker().expiration(20,
@@ -65,18 +70,49 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 
 	private final TrMessageListener<UdpRemoteAddress> listener;
 
+	private final boolean otherPeerPublic;
+
+	private RSAPublicKey pubKey;
+
 	protected static class RecentlyReceivedMessage {
 		long time;
 		int uid;
 	}
 
 	protected UdpRemoteConnection(final UdpNetworkInterface iface, final UdpRemoteAddress address,
-			final RSAPublicKey pubKey, final TrMessageListener<UdpRemoteAddress> listener) {
+			final RSAPublicKey pubKey, final TrMessageListener<UdpRemoteAddress> listener, final boolean otherPeerPublic) {
 		this.iface = iface;
 		this.address = address;
 		this.listener = listener;
+		this.pubKey = pubKey;
+		this.otherPeerPublic = otherPeerPublic;
 		inboundSymKey = TrCrypto.createAesKey();
-		final ByteArraySegment encryptedSymKeys = TrCrypto.encryptRaw(inboundSymKey.toByteArraySegment(), pubKey);
+		if (pubKey != null) {
+			initiateConnection(pubKey);
+		}
+	}
+
+	protected void initiateConnection(final RSAPublicKey pubKey) {
+		ByteArraySegment encryptedSymKeys_;
+		if (otherPeerPublic) {
+			final ByteArraySegmentBuilder encryptedSymKeysBuilder = ByteArraySegment.builder();
+			encryptedSymKeysBuilder.write(TrCrypto.encryptRaw(inboundSymKey.toByteArraySegment(), pubKey));
+			final ByteArraySegmentBuilder pubKeyBuilder = ByteArraySegment.builder();
+			try {
+				TrSerializer.serializeTo(iface.myPublicKey, pubKeyBuilder);
+			} catch (final Exception e) {
+				throw new RuntimeException(e);
+			}
+			encryptedSymKeysBuilder.write(inboundSymKey.encrypt(pubKeyBuilder.build()));
+			encryptedSymKeys_ = encryptedSymKeysBuilder.build();
+			assert encryptedSymKeys_.length == ENCRYPTED_SYM_KEY_WITH_PUB_KEY_LENGTH : "Expected symKeyWithPubKeyLength to be "
+				+ ENCRYPTED_SYM_KEY_WITH_PUB_KEY_LENGTH + " but was " + encryptedSymKeys_.length;
+		} else {
+			encryptedSymKeys_ = TrCrypto.encryptRaw(inboundSymKey.toByteArraySegment(), pubKey);
+			assert encryptedSymKeys_.length == ENCRYPTED_SYM_KEY_LENGTH;
+		}
+
+		final ByteArraySegment encryptedSymKeys = encryptedSymKeys_;
 
 		// We use the length of the message to indicate whether it is the
 		// connection initiation or an introduce message
@@ -255,15 +291,28 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 			}
 
 		} else if (getState().equals(State.CONNECTING)) {
-			if (message.length > MAX_INTRODUCE_LENGTH_BYTES) {
+			if (message.length == ENCRYPTED_SYM_KEY_LENGTH || message.length == ENCRYPTED_SYM_KEY_WITH_PUB_KEY_LENGTH) {
 				// We don't know the remote connection's symkey yet so assume this
 				// is it
 				if (!inboundConnectivityEstablished) {
 					inboundConnectivityEstablished = true;
-					outboundSymKey = new TrSymKey(TrCrypto.decryptRaw(message, iface.myPrivateKey));
+					outboundSymKey = new TrSymKey(TrCrypto.decryptRaw(message.subsegment(0, ENCRYPTED_SYM_KEY_LENGTH),
+							iface.myPrivateKey));
+
+					if ((message.length == ENCRYPTED_SYM_KEY_WITH_PUB_KEY_LENGTH) && (pubKey == null)) {
+						final RSAPublicKeySerializer ser = new RSAPublicKeySerializer();
+						try {
+							pubKey = ser.deserialize(null,
+									outboundSymKey.decrypt(message.subsegment(ENCRYPTED_SYM_KEY_LENGTH, 256))
+									.toDataInputStream());
+						} catch (final IOException e) {
+							throw new RuntimeException(e);
+						}
+						initiateConnection(pubKey);
+					}
 				}
-				final ByteArraySegmentBuilder dos = ByteArraySegment.builder();
 				try {
+					final ByteArraySegmentBuilder dos = ByteArraySegment.builder();
 					MessageType.INTRODUCE.write(dos);
 					final Introduce obj = new Introduce();
 					obj.version = TrConstants.version;
@@ -279,7 +328,8 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 				} catch (final TrSerializableException e) {
 					throw new RuntimeException(e);
 				}
-			} else {
+			}
+			else {
 				final ByteArraySegment plainText = inboundSymKey.decrypt(message);
 				final DataInputStream dis = plainText.toDataInputStream();
 
@@ -393,6 +443,7 @@ TrNetworkInterface.TrMessageListener<UdpRemoteAddress> {
 			}
 		}
 	}
+
 
 	protected Map<Integer, PendingLongMessage> awaitingLongPackets = new MapMaker().expiration(20, TimeUnit.MINUTES)
 	.makeMap();

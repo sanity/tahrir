@@ -29,8 +29,7 @@ public abstract class TrNetworkInterface<RA extends TrRemoteAddress> {
 	public abstract TrRemoteConnection<RA> getConnectionForAddress(RA address);
 
 	public abstract TrRemoteConnection<RA> connectTo(final RA address, final RSAPublicKey remotePubkey,
-			final TrMessageListener<RA> listener);
-
+			final TrMessageListener<RA> listener, boolean otherPublicPeer);
 	public static final TrSentReceivedListener nullSentListener = new TrSentReceivedListener() {
 
 		public void sent() {

@@ -11,7 +11,7 @@ import org.slf4j.*;
 import tahrir.io.net.*;
 import tahrir.io.net.TrRemoteConnection.State;
 import tahrir.io.net.TrRemoteConnection.StateChangeListener;
-import tahrir.tools.ByteArraySegment;
+import tahrir.tools.*;
 
 import com.google.common.collect.Maps;
 
@@ -30,15 +30,19 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 
 	public Map<UdpRemoteAddress, UdpRemoteConnection> remoteConnections = Maps.newConcurrentMap();
 
+	public final RSAPublicKey myPublicKey;
+
 	public static class Config {
 		public int listenPort;
 
 		public volatile int maxUpstreamBytesPerSecond;
 	}
 
-	public UdpNetworkInterface(final Config config, final RSAPrivateKey myPrivateKey) throws SocketException {
+	public UdpNetworkInterface(final Config config, final Tuple2<RSAPublicKey, RSAPrivateKey> keyPair)
+	throws SocketException {
 		this.config = config;
-		this.myPrivateKey = myPrivateKey;
+		myPublicKey = keyPair.a;
+		myPrivateKey = keyPair.b;
 		datagramSocket = new DatagramSocket(config.listenPort);
 		datagramSocket.setSoTimeout(500);
 		sender = new Sender(this);
@@ -49,8 +53,8 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 
 	@Override
 	public UdpRemoteConnection connectTo(final UdpRemoteAddress address, final RSAPublicKey remotePubkey,
-			final TrMessageListener<UdpRemoteAddress> listener) {
-		final UdpRemoteConnection ret = new UdpRemoteConnection(this, address, remotePubkey, listener);
+			final TrMessageListener<UdpRemoteAddress> listener, final boolean otherPublicPeer) {
+		final UdpRemoteConnection ret = new UdpRemoteConnection(this, address, remotePubkey, listener, otherPublicPeer);
 		remoteConnections.put(address, ret);
 		ret.setStateChangeListener(State.DISCONNECTED, new StateChangeListener() {
 

@@ -13,12 +13,15 @@ import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
 import com.beust.jcommander.internal.Maps;
+import com.google.common.base.Function;
 import com.google.common.collect.MapMaker;
 
 
 public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> {
 
 	private final TrNode<RA> trNode;
+
+	private Function<TrRemoteConnection<RA>, Void> inboundConnectionHandler;
 
 	private enum MessageType {
 		METHOD_CALL(0);
@@ -78,7 +81,18 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 
 	}
 
-	public TrRemoteConnection<RA> connectTo(final RA address, final RSAPublicKey remotePubkey) {
+	public void enableUnexpectedInboundConnections() {
+		trNode.networkInterface.registerListener(new TrMessageListener<RA>() {
+
+			public void received(final TrNetworkInterface<RA> iFace, final RA sender, final ByteArraySegment message) {
+				final TrRemoteConnection<RA> newConn = connectTo(sender, null, false);
+				newConn.received(iFace, sender, message);
+			}
+		});
+	}
+
+	public TrRemoteConnection<RA> connectTo(final RA address, final RSAPublicKey remotePubkey,
+			final boolean otherPublicPeer) {
 		return trNode.networkInterface.connectTo(address, remotePubkey, new TrMessageListener<RA>() {
 
 			public void received(final TrNetworkInterface<RA> iFace, final RA sender, final ByteArraySegment message) {
@@ -116,7 +130,7 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 					throw new RuntimeException(e);
 				}
 			}
-		});
+		}, otherPublicPeer);
 	}
 
 	private static final int hashCode(final Method method) {
@@ -144,7 +158,7 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 		try {
 			if (cls.getConstructor(Integer.class, TrNode.class, TrNet.class) == null)
 				throw new RuntimeException(cls
-								+ " must have a constructor that takes parameters (java.lang.Integer, tahrir.TrNode, tahrir.io.net.TrNet)");
+						+ " must have a constructor that takes parameters (java.lang.Integer, tahrir.TrNode, tahrir.io.net.TrNet)");
 		} catch (final Exception e1) {
 			throw new RuntimeException(e1);
 		}

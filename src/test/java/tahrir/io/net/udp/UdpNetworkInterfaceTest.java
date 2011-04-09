@@ -40,12 +40,12 @@ public class UdpNetworkInterfaceTest {
 
 		final Tuple2<RSAPublicKey, RSAPrivateKey> kp2 = TrCrypto.createRsaKeyPair();
 
-		final UdpNetworkInterface i1 = new UdpNetworkInterface(conf1, kp1.b);
+		final UdpNetworkInterface i1 = new UdpNetworkInterface(conf1, kp1);
 
 		final Config conf2 = new Config();
 		conf2.listenPort = 3957;
 		conf2.maxUpstreamBytesPerSecond = 1024;
-		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2.b);
+		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2);
 		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort);
 
 		final byte[] msg_ = new byte[900];
@@ -96,12 +96,12 @@ public class UdpNetworkInterfaceTest {
 
 		final Tuple2<RSAPublicKey, RSAPrivateKey> kp2 = TrCrypto.createRsaKeyPair();
 
-		final UdpNetworkInterface i1 = new UdpNetworkInterface(conf1, kp1.b);
+		final UdpNetworkInterface i1 = new UdpNetworkInterface(conf1, kp1);
 
 		final Config conf2 = new Config();
 		conf2.listenPort = 3947;
 		conf2.maxUpstreamBytesPerSecond = 1024;
-		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2.b);
+		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2);
 
 		final UdpRemoteAddress ra1 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort);
 		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort);
@@ -113,9 +113,9 @@ public class UdpNetworkInterfaceTest {
 
 			}
 		};
-		final UdpRemoteConnection one2two = i1.connectTo(ra2, kp2.a, listener);
+		final UdpRemoteConnection one2two = i1.connectTo(ra2, kp2.a, listener, false);
 
-		final UdpRemoteConnection two2one = i2.connectTo(ra1, kp1.a, listener);
+		final UdpRemoteConnection two2one = i2.connectTo(ra1, kp1.a, listener, false);
 
 		for (int x = 0; x < 100; x++) {
 			if (one2two.getState().equals(State.CONNECTED)) {
@@ -139,12 +139,12 @@ public class UdpNetworkInterfaceTest {
 
 		final Tuple2<RSAPublicKey, RSAPrivateKey> kp2 = TrCrypto.createRsaKeyPair();
 
-		final UdpNetworkInterface i1 = new UdpNetworkInterface(conf1, kp1.b);
+		final UdpNetworkInterface i1 = new UdpNetworkInterface(conf1, kp1);
 
 		final Config conf2 = new Config();
 		conf2.listenPort = 3937;
 		conf2.maxUpstreamBytesPerSecond = 1024;
-		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2.b);
+		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2);
 
 		final UdpRemoteAddress ra1 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort);
 		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort);
@@ -162,9 +162,9 @@ public class UdpNetworkInterfaceTest {
 				received[0] = true;
 			}
 		};
-		final UdpRemoteConnection one2two = i1.connectTo(ra2, kp2.a, listener);
+		final UdpRemoteConnection one2two = i1.connectTo(ra2, kp2.a, listener, false);
 
-		final UdpRemoteConnection two2one = i2.connectTo(ra1, kp1.a, listener);
+		final UdpRemoteConnection two2one = i2.connectTo(ra1, kp1.a, listener, false);
 
 		for (int x = 0; x < 100; x++) {
 			if (one2two.getState().equals(State.CONNECTED) && two2one.getState().equals(State.CONNECTED)) {
@@ -216,12 +216,12 @@ public class UdpNetworkInterfaceTest {
 
 		final Tuple2<RSAPublicKey, RSAPrivateKey> kp2 = TrCrypto.createRsaKeyPair();
 
-		final UdpNetworkInterface i1 = new UdpNetworkInterface(conf1, kp1.b);
+		final UdpNetworkInterface i1 = new UdpNetworkInterface(conf1, kp1);
 
 		final Config conf2 = new Config();
 		conf2.listenPort = 3927;
 		conf2.maxUpstreamBytesPerSecond = 1024;
-		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2.b);
+		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2);
 
 		final UdpRemoteAddress ra1 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort);
 		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort);
@@ -239,9 +239,9 @@ public class UdpNetworkInterfaceTest {
 				received[0] = true;
 			}
 		};
-		final UdpRemoteConnection one2two = i1.connectTo(ra2, kp2.a, listener);
+		final UdpRemoteConnection one2two = i1.connectTo(ra2, kp2.a, listener, false);
 
-		final UdpRemoteConnection two2one = i2.connectTo(ra1, kp1.a, listener);
+		final UdpRemoteConnection two2one = i2.connectTo(ra1, kp1.a, listener, false);
 
 		for (int x = 0; x < 100; x++) {
 			if (one2two.getState().equals(State.CONNECTED) && two2one.getState().equals(State.CONNECTED)) {
