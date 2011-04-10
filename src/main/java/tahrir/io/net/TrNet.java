@@ -81,19 +81,12 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 
 	}
 
-	public void enableUnexpectedInboundConnections() {
-		trNode.networkInterface.registerListener(new TrMessageListener<RA>() {
-
-			public void received(final TrNetworkInterface<RA> iFace, final RA sender, final ByteArraySegment message) {
-				final TrRemoteConnection<RA> newConn = connectTo(sender, null, false);
-				newConn.received(iFace, sender, message);
-			}
-		});
-	}
+	private final Map<RA, TrRemoteConnection<RA>> connectionsByAddress = new MapMaker().weakValues().makeMap();
 
 	public TrRemoteConnection<RA> connectTo(final RA address, final RSAPublicKey remotePubkey,
-			final boolean otherPublicPeer) {
-		return trNode.networkInterface.connectTo(address, remotePubkey, new TrMessageListener<RA>() {
+			final Runnable connectedCallback, final Runnable disconnectedCallback, final boolean unilateral) {
+		final TrRemoteConnection<RA> connection = trNode.networkInterface.connect(address, remotePubkey,
+				new TrMessageListener<RA>() {
 
 			public void received(final TrNetworkInterface<RA> iFace, final RA sender, final ByteArraySegment message) {
 				final DataInputStream dis = message.toDataInputStream();
@@ -119,8 +112,7 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 						for (int i = 0; i < args.length; i++) {
 							args[i] = TrSerializer.deserializeFrom(methodPair.cls.getParameterTypes()[i], dis);
 						}
-						final TrRemoteConnection<RA> connectionForAddress = trNode.networkInterface
-						.getConnectionForAddress(sender);
+						final TrRemoteConnection<RA> connectionForAddress = connectionsByAddress.get(sender);
 						TrSessionImpl.sender.set(connectionForAddress);
 
 						methodPair.cls.invoke(session, args);
@@ -130,7 +122,9 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 					throw new RuntimeException(e);
 				}
 			}
-		}, otherPublicPeer);
+		}, connectedCallback, disconnectedCallback, unilateral);
+		this.connectionsByAddress.put(address, connection);
+		return connection;
 	}
 
 	private static final int hashCode(final Method method) {

@@ -1,4 +1,4 @@
-package tahrir.io.net.udp;
+package tahrir.io.net.udpV1;
 
 import java.net.InetAddress;
 

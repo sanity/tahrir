@@ -1,4 +1,4 @@
-package tahrir.io.net.udp;
+package tahrir.io.net.udpV1;
 
 import java.io.IOException;
 import java.net.*;
@@ -6,17 +6,15 @@ import java.security.interfaces.*;
 import java.util.Map;
 import java.util.concurrent.*;
 
-import org.slf4j.*;
+import org.slf4j.LoggerFactory;
 
 import tahrir.io.net.*;
-import tahrir.io.net.TrRemoteConnection.State;
-import tahrir.io.net.TrRemoteConnection.StateChangeListener;
 import tahrir.tools.*;
 
 import com.google.common.collect.Maps;
 
 public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
-	final Logger logger = LoggerFactory.getLogger(UdpNetworkInterface.class);
+	private static org.slf4j.Logger logger = LoggerFactory.getLogger(UdpNetworkInterface.class);
 
 	private final PriorityBlockingQueue<QueuedPacket> outbox = new PriorityBlockingQueue<UdpNetworkInterface.QueuedPacket>();
 	public static final int MAX_PACKET_SIZE_BYTES = 1450;
@@ -51,27 +49,13 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 		receiver.start();
 	}
 
-	@Override
-	public UdpRemoteConnection connectTo(final UdpRemoteAddress address, final RSAPublicKey remotePubkey,
-			final TrMessageListener<UdpRemoteAddress> listener, final boolean otherPublicPeer) {
-		final UdpRemoteConnection ret = new UdpRemoteConnection(this, address, remotePubkey, listener, otherPublicPeer);
-		remoteConnections.put(address, ret);
-		ret.setStateChangeListener(State.DISCONNECTED, new StateChangeListener() {
+	private final ConcurrentLinkedQueue<TrMessageListener<UdpRemoteAddress>> listeners = new ConcurrentLinkedQueue<TrMessageListener<UdpRemoteAddress>>();
 
-			public void stateChanged(final State fromState, final State toState) {
-				remoteConnections.remove(address);
-			}
-		});
-		return ret;
-	}
-
-	public ConcurrentLinkedQueue<TrMessageListener<UdpRemoteAddress>> listeners = new ConcurrentLinkedQueue<TrMessageListener<UdpRemoteAddress>>();
-
-	public ConcurrentMap<UdpRemoteAddress, TrMessageListener<UdpRemoteAddress>> listenersByAddress = Maps
+	private final ConcurrentMap<UdpRemoteAddress, TrMessageListener<UdpRemoteAddress>> listenersByAddress = Maps
 	.newConcurrentMap();
 
 	@Override
-	protected void registerListener(final TrMessageListener<UdpRemoteAddress> listener) {
+	public void registerListener(final TrMessageListener<UdpRemoteAddress> listener) {
 		listeners.add(listener);
 	}
 
@@ -91,9 +75,12 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 	}
 
 	@Override
-	protected void sendTo(final UdpRemoteAddress recepient, final ByteArraySegment encryptedMessage,
+	public void sendTo(final UdpRemoteAddress recepient, final ByteArraySegment encryptedMessage,
 			final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener, final double priority) {
-		assert encryptedMessage.length <= MAX_PACKET_SIZE_BYTES;
+		assert encryptedMessage.length <= MAX_PACKET_SIZE_BYTES : "Packet length " + encryptedMessage.length
+				+ " greater than " + MAX_PACKET_SIZE_BYTES;
+		if (recepient.port == config.listenPort)
+			throw new RuntimeException(); // REMOVEME
 		final QueuedPacket qp = new QueuedPacket(recepient, encryptedMessage, sentListener, priority);
 		outbox.add(qp);
 	}
@@ -117,12 +104,6 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 					parent.datagramSocket.receive(dp);
 
 					final UdpRemoteAddress ura = new UdpRemoteAddress(dp.getAddress(), dp.getPort());
-
-					// System.out.println("Received: " + dp.getPort() + " -> " +
-					// parent.config.listenPort + " len: "
-					// + dp.getLength() + " msg: " +
-					// Arrays.toString(dp.getData()));
-
 					final tahrir.io.net.TrNetworkInterface.TrMessageListener<UdpRemoteAddress> ml = parent.listenersByAddress.get(ura);
 
 					if (ml != null) {
@@ -163,6 +144,8 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 				try {
 					final long startTime = System.currentTimeMillis();
 					final QueuedPacket packet = parent.outbox.poll(1, TimeUnit.SECONDS);
+					if (packet != null) {
+					}
 					if (packet != null) {
 						final DatagramPacket dp = new DatagramPacket(packet.data.array, packet.data.offset,
 								packet.data.length,
@@ -227,12 +210,16 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 	}
 
 	@Override
-	public TrRemoteConnection<UdpRemoteAddress> getConnectionForAddress(final UdpRemoteAddress address) {
-		return remoteConnections.get(address);
+	public String toString() {
+		return "<" + config.listenPort + ">";
 	}
 
 	@Override
-	public String toString() {
-		return "<" + config.listenPort + ">";
+	public TrRemoteConnection<UdpRemoteAddress> connect(final UdpRemoteAddress remoteAddress,
+			final RSAPublicKey remotePubKey,
+			final tahrir.io.net.TrNetworkInterface.TrMessageListener<UdpRemoteAddress> listener,
+			final Runnable connectedCallback, final Runnable disconnectedCallback, final boolean unilateral) {
+		return new UdpRemoteConnection(this, remoteAddress, remotePubKey, listener, connectedCallback,
+				disconnectedCallback, unilateral);
 	}
 }

@@ -1,6 +1,6 @@
 package tahrir.io.net.udp;
 
-import java.net.*;
+import java.net.InetAddress;
 import java.security.interfaces.*;
 
 import org.testng.Assert;
@@ -11,25 +11,12 @@ import tahrir.io.net.*;
 import tahrir.io.net.TrNetworkInterface.TrMessageListener;
 import tahrir.io.net.TrNetworkInterface.TrSentListener;
 import tahrir.io.net.TrNetworkInterface.TrSentReceivedListener;
-import tahrir.io.net.TrRemoteConnection.State;
-import tahrir.io.net.udp.UdpNetworkInterface.Config;
+import tahrir.io.net.udpV1.*;
+import tahrir.io.net.udpV1.UdpNetworkInterface.Config;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
 public class UdpNetworkInterfaceTest {
-
-	@Test(enabled = false)
-	public void debugUdpWeirdnessTest() throws Exception {
-		final DatagramSocket ds1 = new DatagramSocket(1089);
-		final DatagramPacket dp1 = new DatagramPacket(new byte[1000], 1000);
-		// ds1.receive();
-		ds1.close();
-		final DatagramSocket ds2 = new DatagramSocket(1089);
-		final DatagramPacket dp2 = new DatagramPacket(new byte[1000], 1000);
-		// ds1.receive(dp2);
-		// ds2.close();
-	}
-
 	@Test
 	public void simpleSendReceiveTest() throws Exception {
 		final Config conf1 = new Config();
@@ -86,53 +73,10 @@ public class UdpNetworkInterfaceTest {
 		i2.shutdown();
 	}
 
-	@Test()
-	public void establishConnectionTest() throws Exception {
-		final Config conf1 = new Config();
-		conf1.listenPort = 3946;
-		conf1.maxUpstreamBytesPerSecond = 1024;
-
-		final Tuple2<RSAPublicKey, RSAPrivateKey> kp1 = TrCrypto.createRsaKeyPair();
-
-		final Tuple2<RSAPublicKey, RSAPrivateKey> kp2 = TrCrypto.createRsaKeyPair();
-
-		final UdpNetworkInterface i1 = new UdpNetworkInterface(conf1, kp1);
-
-		final Config conf2 = new Config();
-		conf2.listenPort = 3947;
-		conf2.maxUpstreamBytesPerSecond = 1024;
-		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2);
-
-		final UdpRemoteAddress ra1 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort);
-		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort);
-
-		final TrMessageListener<UdpRemoteAddress> listener = new TrMessageListener<UdpRemoteAddress>() {
-
-			public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
-					final ByteArraySegment message) {
-
-			}
-		};
-		final UdpRemoteConnection one2two = i1.connectTo(ra2, kp2.a, listener, false);
-
-		final UdpRemoteConnection two2one = i2.connectTo(ra1, kp1.a, listener, false);
-
-		for (int x = 0; x < 100; x++) {
-			if (one2two.getState().equals(State.CONNECTED)) {
-				break;
-			}
-			Thread.sleep(100);
-		}
-
-		Assert.assertEquals(one2two.getState(), State.CONNECTED);
-		i1.shutdown();
-		i2.shutdown();
-	}
-
-	@Test()
+	@Test
 	public void simpleReliableMessageSend() throws Exception {
 		final Config conf1 = new Config();
-		conf1.listenPort = 3936;
+		conf1.listenPort = 3956;
 		conf1.maxUpstreamBytesPerSecond = 1024;
 
 		final Tuple2<RSAPublicKey, RSAPrivateKey> kp1 = TrCrypto.createRsaKeyPair();
@@ -142,38 +86,22 @@ public class UdpNetworkInterfaceTest {
 		final UdpNetworkInterface i1 = new UdpNetworkInterface(conf1, kp1);
 
 		final Config conf2 = new Config();
-		conf2.listenPort = 3937;
+		conf2.listenPort = 3957;
 		conf2.maxUpstreamBytesPerSecond = 1024;
 		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2);
 
 		final UdpRemoteAddress ra1 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort);
 		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort);
 
-		final boolean[] received = new boolean[1];
-
-		final TrMessageListener<UdpRemoteAddress> listener = new TrMessageListener<UdpRemoteAddress>() {
+		final TrMessageListener<UdpRemoteAddress> noopListener = new TrMessageListener<UdpRemoteAddress>() {
 
 			public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
 					final ByteArraySegment message) {
-				Assert.assertEquals(message.length, 100);
-				for (int x = 0; x < message.length; x++) {
-					Assert.assertEquals(message.array[message.offset + x], 33);
-				}
-				received[0] = true;
 			}
+
 		};
-		final UdpRemoteConnection one2two = i1.connectTo(ra2, kp2.a, listener, false);
 
-		final UdpRemoteConnection two2one = i2.connectTo(ra1, kp1.a, listener, false);
-
-		for (int x = 0; x < 100; x++) {
-			if (one2two.getState().equals(State.CONNECTED) && two2one.getState().equals(State.CONNECTED)) {
-				break;
-			}
-			Thread.sleep(100);
-		}
-
-		Assert.assertTrue(one2two.getState().equals(State.CONNECTED) && two2one.getState().equals(State.CONNECTED));
+		final Called receivedSuccessfully = new Called();
 
 		final ByteArraySegmentBuilder msgBuilder = ByteArraySegment.builder();
 
@@ -181,7 +109,36 @@ public class UdpNetworkInterfaceTest {
 			msgBuilder.writeByte(33);
 		}
 
-		one2two.send(msgBuilder.build(), 1, new TrSentReceivedListener() {
+		final ByteArraySegment sentMessage = msgBuilder.build();
+
+		final TrMessageListener<UdpRemoteAddress> listener = new TrMessageListener<UdpRemoteAddress>() {
+
+			public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
+					final ByteArraySegment message) {
+				Assert.assertEquals(message, sentMessage);
+				receivedSuccessfully.called = true;
+			}
+		};
+		final Called connected1 = new Called();
+		final Called disconnected1 = new Called();
+		final TrRemoteConnection<UdpRemoteAddress> one2two = i1.connect(ra2, kp2.a, noopListener, connected1,
+				disconnected1, false);
+
+		final Called connected2 = new Called();
+		final Called disconnected2 = new Called();
+		final TrRemoteConnection<UdpRemoteAddress> two2one = i2.connect(ra1, kp1.a, listener, connected2,
+				disconnected2, false);
+
+		for (int x = 0; x < 100; x++) {
+			if (connected1.called && connected2.called) {
+				break;
+			}
+			Thread.sleep(100);
+		}
+
+		final Called ackReceived = new Called();
+
+		one2two.send(sentMessage, 1, new TrSentReceivedListener() {
 
 			public void sent() {
 				System.out.println("Sent successfully");
@@ -192,24 +149,26 @@ public class UdpNetworkInterfaceTest {
 			}
 
 			public void received() {
+				ackReceived.called = true;
 				System.out.println("Received successfully");
 			}
 		});
 
 		for (int x = 0; x < 10; x++) {
-			if (received[0]) {
+			if (ackReceived.called && receivedSuccessfully.called) {
 				break;
 			}
 			Thread.sleep(500);
 		}
 
-		Assert.assertTrue(received[0]);
+		Assert.assertTrue(ackReceived.called);
+		Assert.assertTrue(receivedSuccessfully.called);
 	}
 
-	@Test()
+	@Test
 	public void longReliableMessageSend() throws Exception {
 		final Config conf1 = new Config();
-		conf1.listenPort = 3926;
+		conf1.listenPort = 3986;
 		conf1.maxUpstreamBytesPerSecond = 1024;
 
 		final Tuple2<RSAPublicKey, RSAPrivateKey> kp1 = TrCrypto.createRsaKeyPair();
@@ -219,46 +178,59 @@ public class UdpNetworkInterfaceTest {
 		final UdpNetworkInterface i1 = new UdpNetworkInterface(conf1, kp1);
 
 		final Config conf2 = new Config();
-		conf2.listenPort = 3927;
+		conf2.listenPort = 3987;
 		conf2.maxUpstreamBytesPerSecond = 1024;
 		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2);
 
 		final UdpRemoteAddress ra1 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort);
 		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort);
 
-		final boolean[] received = new boolean[1];
+		final TrMessageListener<UdpRemoteAddress> noopListener = new TrMessageListener<UdpRemoteAddress>() {
+
+			public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
+					final ByteArraySegment message) {
+			}
+
+		};
+
+		final Called receivedSuccessfully = new Called();
+
+		final ByteArraySegmentBuilder msgBuilder = ByteArraySegment.builder();
+
+		for (int x = 0; x < 2000; x++) {
+			msgBuilder.writeByte(33);
+		}
+
+		final ByteArraySegment sentMessage = msgBuilder.build();
 
 		final TrMessageListener<UdpRemoteAddress> listener = new TrMessageListener<UdpRemoteAddress>() {
 
 			public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
 					final ByteArraySegment message) {
-				Assert.assertEquals(message.length, 5000);
-				for (int x = 0; x < message.length; x++) {
-					Assert.assertEquals(message.array[message.offset + x], 33);
-				}
-				received[0] = true;
+				Assert.assertEquals(message, sentMessage);
+				receivedSuccessfully.called = true;
 			}
 		};
-		final UdpRemoteConnection one2two = i1.connectTo(ra2, kp2.a, listener, false);
+		final Called connected1 = new Called();
+		final Called disconnected1 = new Called();
+		final TrRemoteConnection<UdpRemoteAddress> one2two = i1.connect(ra2, kp2.a, noopListener, connected1,
+				disconnected1, false);
 
-		final UdpRemoteConnection two2one = i2.connectTo(ra1, kp1.a, listener, false);
+		final Called connected2 = new Called();
+		final Called disconnected2 = new Called();
+		final TrRemoteConnection<UdpRemoteAddress> two2one = i2.connect(ra1, kp1.a, listener, connected2,
+				disconnected2, false);
 
 		for (int x = 0; x < 100; x++) {
-			if (one2two.getState().equals(State.CONNECTED) && two2one.getState().equals(State.CONNECTED)) {
+			if (connected1.called && connected2.called) {
 				break;
 			}
 			Thread.sleep(100);
 		}
 
-		Assert.assertTrue(one2two.getState().equals(State.CONNECTED) && two2one.getState().equals(State.CONNECTED));
+		final Called ackReceived = new Called();
 
-		final ByteArraySegmentBuilder msgBuilder = ByteArraySegment.builder();
-
-		for (int x = 0; x < 5000; x++) {
-			msgBuilder.writeByte(33);
-		}
-
-		one2two.send(msgBuilder.build(), 1, new TrSentReceivedListener() {
+		one2two.send(sentMessage, 1, new TrSentReceivedListener() {
 
 			public void sent() {
 				System.out.println("Sent successfully");
@@ -269,17 +241,28 @@ public class UdpNetworkInterfaceTest {
 			}
 
 			public void received() {
+				ackReceived.called = true;
 				System.out.println("Received successfully");
 			}
 		});
 
 		for (int x = 0; x < 10; x++) {
-			if (received[0]) {
+			if (ackReceived.called && receivedSuccessfully.called) {
 				break;
 			}
 			Thread.sleep(500);
 		}
 
-		Assert.assertTrue(received[0]);
+		Assert.assertTrue(ackReceived.called);
+		Assert.assertTrue(receivedSuccessfully.called);
+	}
+
+	public static class Called implements Runnable {
+		public volatile boolean called = false;
+
+		public void run() {
+			called = true;
+		}
+
 	}
 }

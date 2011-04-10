@@ -18,10 +18,27 @@ public final class ByteArraySegment {
 		return new ByteArraySegment(array);
 	}
 
+	public static ByteArraySegment from(final InputStream is, final int maxLength) throws IOException {
+		final byte[] ba = new byte[maxLength];
+		final int len = is.read(ba);
+		assert is.read() == -1;
+		return new ByteArraySegment(ba, 0, len);
+	}
+
 	private ByteArraySegment(final byte[] array, final int offset, final int length) {
 		this.array = array;
 		this.offset = offset;
 		this.length = length;
+	}
+
+	public boolean startsWith(final ByteArraySegment other) {
+		if (other.length > length)
+			return false;
+		for (int x = 0; x < other.length; x++) {
+			if (byteAt(x) != other.byteAt(x))
+				return false;
+		}
+		return true;
 	}
 
 	public ByteArraySegment(final byte[] array) {
@@ -40,6 +57,10 @@ public final class ByteArraySegment {
 
 	public void writeTo(final OutputStream os) throws IOException {
 		os.write(array, offset, length);
+	}
+
+	public ByteArraySegment subsegment(final int offset) {
+		return subsegment(offset, Integer.MAX_VALUE);
 	}
 
 	public ByteArraySegment subsegment(final int offset, final int length) {
@@ -87,6 +108,12 @@ public final class ByteArraySegment {
 		return result;
 	}
 
+	public final byte byteAt(final int pos) {
+		if (pos > length)
+			throw new ArrayIndexOutOfBoundsException("byteAt(" + pos + ") but length is " + length);
+		return array[offset + pos];
+	}
+
 	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj)
@@ -95,11 +122,12 @@ public final class ByteArraySegment {
 			return false;
 		if (!(obj instanceof ByteArraySegment))
 			return false;
+
 		final ByteArraySegment other = (ByteArraySegment) obj;
 		if (length != other.length)
 			return false;
 		for (int x = 0; x < length; x++) {
-			if (array[offset + x] != other.array[other.offset + x])
+			if (byteAt(x) != other.byteAt(x))
 				return false;
 		}
 		return true;

@@ -2,10 +2,9 @@ package tahrir.io.serialization.serializers;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.math.BigInteger;
 
 import tahrir.io.net.TrRemoteAddress;
-import tahrir.io.net.udp.UdpRemoteAddress;
+import tahrir.io.net.udpV1.UdpRemoteAddress;
 import tahrir.io.serialization.*;
 
 public class TrRemoteAddressSerializer extends TrSerializer {
@@ -13,7 +12,7 @@ public class TrRemoteAddressSerializer extends TrSerializer {
 	public static final byte UDP_REMOTE_ADDRESS = 0;
 
 	public TrRemoteAddressSerializer() {
-		super(BigInteger.class);
+		super(TrRemoteAddress.class);
 	}
 
 	@Override
@@ -28,7 +27,7 @@ public class TrRemoteAddressSerializer extends TrSerializer {
 
 	@Override
 	protected void serialize(final Type type, final Object object, final DataOutputStream dos) throws IOException,
-			TrSerializableException {
+	TrSerializableException {
 		if (!(object instanceof UdpRemoteAddress))
 			throw new TrSerializableException("Unrecognized TrRemoteAddress type: " + object.getClass());
 		else {

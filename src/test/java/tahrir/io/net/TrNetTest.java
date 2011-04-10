@@ -3,16 +3,18 @@ package tahrir.io.net;
 import java.net.InetAddress;
 import java.security.interfaces.*;
 
+import org.slf4j.*;
 import org.testng.annotations.Test;
 
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
-import tahrir.io.net.TrRemoteConnection.State;
-import tahrir.io.net.udp.*;
-import tahrir.io.net.udp.UdpNetworkInterface.Config;
-import tahrir.tools.Tuple2;
+import tahrir.io.net.udpV1.*;
+import tahrir.io.net.udpV1.UdpNetworkInterface.Config;
+import tahrir.tools.*;
 
 public class TrNetTest {
+	Logger logger = LoggerFactory.getLogger(TrNetTest.class);
+
 	@Test
 	public void simpleTest() throws Exception {
 		final Config conf1 = new Config();
@@ -23,9 +25,14 @@ public class TrNetTest {
 		conf2.listenPort = 3913;
 		conf2.maxUpstreamBytesPerSecond = 1024;
 
+		logger.info("Generating public-private keys");
+
 		final Tuple2<RSAPublicKey, RSAPrivateKey> kp1 = TrCrypto.createRsaKeyPair();
 
 		final Tuple2<RSAPublicKey, RSAPrivateKey> kp2 = TrCrypto.createRsaKeyPair();
+
+		logger.info("Done");
+
 		final UdpNetworkInterface iface1 = new UdpNetworkInterface(conf1, kp1);
 
 		final UdpNetworkInterface iface2 = new UdpNetworkInterface(conf2, kp2);
@@ -41,59 +48,19 @@ public class TrNetTest {
 
 		trn2.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
+		final Flag connectedFlag1 = new Flag();
+		final Flag disconnectedFlag1 = new Flag();
+
 		final TrRemoteConnection<UdpRemoteAddress> one2two = trn1.connectTo(
-				new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort), kp2.a, false);
+				new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort), kp2.a, connectedFlag1,
+				disconnectedFlag1, false);
+
+		final Flag connectedFlag2 = new Flag();
+		final Flag disconnectedFlag2 = new Flag();
 
 		final TrRemoteConnection<UdpRemoteAddress> two2one = trn2.connectTo(
-				new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort), kp1.a, false);
-
-		while (!one2two.getState().equals(State.CONNECTED) || !two2one.getState().equals(State.CONNECTED)) {
-			Thread.sleep(100);
-		}
-
-		final TestSession remoteSession = trn1.getRemoteSession(TestSession.class, one2two, 1234, 1.0);
-
-		remoteSession.testMethod(0);
-
-		Thread.sleep(1000);
-	}
-
-	@Test
-	public void testUnsolicited() throws Exception {
-		final Config conf1 = new Config();
-		conf1.listenPort = 3942;
-		conf1.maxUpstreamBytesPerSecond = 1024;
-
-		final Config conf2 = new Config();
-		conf2.listenPort = 3943;
-		conf2.maxUpstreamBytesPerSecond = 1024;
-
-		final Tuple2<RSAPublicKey, RSAPrivateKey> kp1 = TrCrypto.createRsaKeyPair();
-
-		final Tuple2<RSAPublicKey, RSAPrivateKey> kp2 = TrCrypto.createRsaKeyPair();
-		final UdpNetworkInterface iface1 = new UdpNetworkInterface(conf1, kp1);
-
-		final UdpNetworkInterface iface2 = new UdpNetworkInterface(conf2, kp2);
-
-		final TrNode<UdpRemoteAddress> node1 = new TrNode<UdpRemoteAddress>(iface1);
-		final TrNet<UdpRemoteAddress> trn1 = new TrNet<UdpRemoteAddress>(node1);
-
-		trn1.registerSessionClass(TestSession.class, TestSessionImpl.class);
-
-		final TrNode<UdpRemoteAddress> node2 = new TrNode<UdpRemoteAddress>(iface2);
-		final TrNet<UdpRemoteAddress> trn2 = new TrNet<UdpRemoteAddress>(node2);
-
-		trn2.enableUnexpectedInboundConnections();
-
-		trn2.registerSessionClass(TestSession.class, TestSessionImpl.class);
-
-		final TrRemoteConnection<UdpRemoteAddress> one2two = trn1.connectTo(
-				new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort), kp2.a, true);
-
-
-		while (!one2two.getState().equals(State.CONNECTED)) {
-			Thread.sleep(100);
-		}
+				new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort), kp1.a, connectedFlag2,
+				disconnectedFlag2, false);
 
 		final TestSession remoteSession = trn1.getRemoteSession(TestSession.class, one2two, 1234, 1.0);
 
