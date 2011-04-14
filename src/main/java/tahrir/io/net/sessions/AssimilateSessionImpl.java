@@ -1,9 +1,10 @@
 package tahrir.io.net.sessions;
 
+import java.security.interfaces.RSAPublicKey;
+
 import tahrir.TrNode;
 import tahrir.io.net.*;
-
-import com.google.common.base.Function;
+import tahrir.io.net.udpV1.UdpRemoteAddress;
 
 public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSession {
 
@@ -11,16 +12,14 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 		super(sessionId, node, trNet);
 	}
 
-	public void findNewConnection(final TrRemoteConnection<?> introductoryPeerConnection,
-			final Function<TrRemoteConnection<?>, Void> successCB) {
-		final AssimilateSession introPeer = trNet.getOrCreateRemoteSession(AssimilateSessionImpl.class,
-				introductoryPeerConnection, TrNetworkInterface.ASSIMILATION_PRIORITY);
+	public void requestNewConnection(final TrRemoteConnection<?> sender, final UdpRemoteAddress requestor,
+			final RSAPublicKey requestorPubkey) {
+		final AssimilateSession senderAS = trNet.getOrCreateRemoteSession(AssimilateSessionImpl.class, sender,
+				TrNetworkInterface.ASSIMILATION_PRIORITY);
+		if (node.peerManager.peers.size() < node.peerManager.config.maxPeers) {
 
+		}
 	}
 
-	public void requestAssimilation() {
-		// TODO Auto-generated method stub
-
-	}
 
 }

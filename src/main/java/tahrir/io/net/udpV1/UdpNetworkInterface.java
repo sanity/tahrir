@@ -36,6 +36,11 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 		public volatile int maxUpstreamBytesPerSecond;
 	}
 
+	@Override
+	public String toString() {
+		return "UDP<" + datagramSocket.getLocalPort() + ">";
+	}
+
 	public UdpNetworkInterface(final Config config, final Tuple2<RSAPublicKey, RSAPrivateKey> keyPair)
 	throws SocketException {
 		this.config = config;
@@ -78,7 +83,7 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 	public void sendTo(final UdpRemoteAddress recepient, final ByteArraySegment encryptedMessage,
 			final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener, final double priority) {
 		assert encryptedMessage.length <= MAX_PACKET_SIZE_BYTES : "Packet length " + encryptedMessage.length
-				+ " greater than " + MAX_PACKET_SIZE_BYTES;
+		+ " greater than " + MAX_PACKET_SIZE_BYTES;
 		if (recepient.port == config.listenPort)
 			throw new RuntimeException(); // REMOVEME
 		final QueuedPacket qp = new QueuedPacket(recepient, encryptedMessage, sentListener, priority);
@@ -207,11 +212,6 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 		sender.active = false;
 		sender.interrupt();
 		receiver.active = false;
-	}
-
-	@Override
-	public String toString() {
-		return "<" + config.listenPort + ">";
 	}
 
 	@Override

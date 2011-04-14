@@ -28,6 +28,23 @@ public class RsaAesTest {
 	}
 
 	@Test
+	public void rsaSpeedTest() {
+		final TrSymKey aesKey = TrCrypto.createAesKey();
+		final Tuple2<RSAPublicKey, RSAPrivateKey> kp = TrCrypto.createRsaKeyPair();
+		long startTime = System.currentTimeMillis();
+		ByteArraySegment encrypted = null;
+		for (int x = 0; x < 100; x++) {
+			encrypted = TrCrypto.encryptRaw(aesKey.toByteArraySegment(), kp.a);
+		}
+		System.out.println("RSA encryption time (ms): " + ((double) System.currentTimeMillis() - startTime) / 100.0);
+		startTime = System.currentTimeMillis();
+		for (int x = 0; x < 100; x++) {
+			encrypted = TrCrypto.decryptRaw(encrypted, kp.b);
+		}
+		System.out.println("RSA decryption time (ms): " + ((double) System.currentTimeMillis() - startTime) / 100.0);
+	}
+
+	@Test
 	public void testObjectEncryptDecrypt() throws Exception {
 		final TestObject plain = new TestObject();
 		plain.i1 = 12;

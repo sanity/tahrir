@@ -4,7 +4,9 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+
+import org.slf4j.*;
 
 import tahrir.TrNode;
 import tahrir.io.net.TrNetworkInterface.TrMessageListener;
@@ -17,11 +19,35 @@ import com.google.common.base.Function;
 import com.google.common.collect.MapMaker;
 
 
-public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> {
+public class TrNet<RA extends TrRemoteAddress> {
+
+	private final Logger logger;
 
 	private final TrNode<RA> trNode;
 
 	private Function<TrRemoteConnection<RA>, Void> inboundConnectionHandler;
+
+	private final boolean allowUnilateral;
+
+	private final ConcurrentLinkedQueue<Function<TrRemoteAddress, Void>> connectedListeners = new ConcurrentLinkedQueue<Function<TrRemoteAddress, Void>>();
+
+	public void addConnectedListener(final Function<TrRemoteAddress, Void> connectedListener) {
+		connectedListeners.add(connectedListener);
+	}
+
+	public boolean removeConnectedListener(final Function<TrRemoteAddress, Void> connectedListener) {
+		return connectedListeners.remove(connectedListener);
+	}
+
+	private final ConcurrentLinkedQueue<Function<TrRemoteAddress, Void>> disconnectedListeners = new ConcurrentLinkedQueue<Function<TrRemoteAddress, Void>>();
+
+	public void addDisconnectedListener(final Function<TrRemoteAddress, Void> disconnectedListener) {
+		disconnectedListeners.add(disconnectedListener);
+	}
+
+	public boolean removeDisconnectedListener(final Function<TrRemoteAddress, Void> disconnectedListener) {
+		return disconnectedListeners.remove(disconnectedListener);
+	}
 
 	private enum MessageType {
 		METHOD_CALL(0);
@@ -45,8 +71,18 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 		}
 	}
 
-	public TrNet(final TrNode<RA> trNode) {
+	public TrNet(final TrNode<RA> trNode, final boolean allowUnilateral) {
+		this.logger = LoggerFactory.getLogger(" TrNet(" + trNode.networkInterface + ")");
 		this.trNode = trNode;
+		this.allowUnilateral = allowUnilateral;
+		if (allowUnilateral) {
+			trNode.networkInterface.registerListener(new TrMessageListener<RA>() {
+
+				public void received(final TrNetworkInterface<RA> iFace, final RA sender, final ByteArraySegment message) {
+
+				}
+			});
+		}
 	}
 
 	public class IH implements InvocationHandler {
@@ -66,6 +102,11 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 		public Object invoke(final Object object, final Method method, final Object[] arguments) throws Throwable {
 			// We have to include the parameter types because for some dumb
 			// reason Method.hashCode() ignores these.
+			if (TrNet.this.logger.isDebugEnabled()) {
+				final String args = Arrays.toString(arguments);
+				TrNet.this.logger.debug("Sending " + method.getName() + "(" + args.substring(1, args.length() - 1)
+						+ ")");
+			}
 			final int methodId = TrNet.hashCode(method);
 			final ByteArraySegmentBuilder builder = ByteArraySegment.builder();
 			MessageType.METHOD_CALL.write(builder);
@@ -83,8 +124,7 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 
 	private final Map<RA, TrRemoteConnection<RA>> connectionsByAddress = new MapMaker().weakValues().makeMap();
 
-	public TrRemoteConnection<RA> connectTo(final RA address, final RSAPublicKey remotePubkey,
-			final Runnable connectedCallback, final Runnable disconnectedCallback, final boolean unilateral) {
+	public TrRemoteConnection<RA> connectTo(final RA address, final RSAPublicKey remotePubkey, final boolean unilateral) {
 		final TrRemoteConnection<RA> connection = trNode.networkInterface.connect(address, remotePubkey,
 				new TrMessageListener<RA>() {
 
@@ -115,6 +155,12 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 						final TrRemoteConnection<RA> connectionForAddress = connectionsByAddress.get(sender);
 						TrSessionImpl.sender.set(connectionForAddress);
 
+								if (TrNet.this.logger.isDebugEnabled()) {
+									final String argsStr = Arrays.toString(args);
+									TrNet.this.logger.debug("Received " + methodPair.cls.getName() + "("
+											+ argsStr.substring(1, argsStr.length() - 1) + ")");
+								}
+
 						methodPair.cls.invoke(session, args);
 						break;
 					}
@@ -122,7 +168,21 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 					throw new RuntimeException(e);
 				}
 			}
-		}, connectedCallback, disconnectedCallback, unilateral);
+		}, new Runnable() {
+
+			public void run() {
+				for (final Function<TrRemoteAddress, Void> r : connectedListeners) {
+					r.apply(address);
+				}
+			}}, new Runnable() {
+
+				public void run() {
+					for (final Function<TrRemoteAddress, Void> r : disconnectedListeners) {
+						r.apply(address);
+					}
+				}
+
+			}, unilateral);
 		this.connectionsByAddress.put(address, connection);
 		return connection;
 	}
@@ -206,11 +266,6 @@ public class TrNet<RA extends TrRemoteAddress> implements TrMessageListener<RA> 
 			final int sessionId, final double priority) {
 		return (T) Proxy.newProxyInstance(c.getClassLoader(), new Class[] { c }, new IH(c, connection, sessionId,
 				priority));
-	}
-
-	public void received(final TrNetworkInterface<RA> iFace, final RA sender, final ByteArraySegment message) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public static final class MethodPair {

@@ -10,7 +10,7 @@ import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.udpV1.*;
 import tahrir.io.net.udpV1.UdpNetworkInterface.Config;
-import tahrir.tools.*;
+import tahrir.tools.Tuple2;
 
 public class TrNetTest {
 	Logger logger = LoggerFactory.getLogger(TrNetTest.class);
@@ -39,28 +39,19 @@ public class TrNetTest {
 
 
 		final TrNode<UdpRemoteAddress> node1 = new TrNode<UdpRemoteAddress>(iface1);
-		final TrNet<UdpRemoteAddress> trn1 = new TrNet<UdpRemoteAddress>(node1);
+		final TrNet<UdpRemoteAddress> trn1 = new TrNet<UdpRemoteAddress>(node1, false);
 
 		trn1.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
 		final TrNode<UdpRemoteAddress> node2 = new TrNode<UdpRemoteAddress>(iface2);
-		final TrNet<UdpRemoteAddress> trn2 = new TrNet<UdpRemoteAddress>(node2);
+		final TrNet<UdpRemoteAddress> trn2 = new TrNet<UdpRemoteAddress>(node2, false);
 
 		trn2.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
-		final Flag connectedFlag1 = new Flag();
-		final Flag disconnectedFlag1 = new Flag();
-
 		final TrRemoteConnection<UdpRemoteAddress> one2two = trn1.connectTo(
-				new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort), kp2.a, connectedFlag1,
-				disconnectedFlag1, false);
-
-		final Flag connectedFlag2 = new Flag();
-		final Flag disconnectedFlag2 = new Flag();
-
+				new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort), kp2.a, false);
 		final TrRemoteConnection<UdpRemoteAddress> two2one = trn2.connectTo(
-				new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort), kp1.a, connectedFlag2,
-				disconnectedFlag2, false);
+				new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort), kp1.a, false);
 
 		final TestSession remoteSession = trn1.getRemoteSession(TestSession.class, one2two, 1234, 1.0);
 
@@ -80,7 +71,6 @@ public class TrNetTest {
 		}
 
 		public void testMethod(final int param) {
-			System.out.println(node.networkInterface + " testMethod(" + param + ")");
 			if (param < 10) {
 				final TestSession remote = trNet.getOrCreateRemoteSession(TestSession.class, getSender(), 1.0);
 				remote.testMethod(param + 1);
