@@ -16,6 +16,8 @@ import tahrir.io.net.udpV1.UdpNetworkInterface.Config;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
+import com.google.common.base.Function;
+
 public class UdpNetworkInterfaceTest {
 	@Test
 	public void simpleSendReceiveTest() throws Exception {
@@ -101,7 +103,7 @@ public class UdpNetworkInterfaceTest {
 
 		};
 
-		final Called receivedSuccessfully = new Called();
+		final Called<UdpRemoteAddress> receivedSuccessfully = new Called<UdpRemoteAddress>();
 
 		final ByteArraySegmentBuilder msgBuilder = ByteArraySegment.builder();
 
@@ -119,13 +121,13 @@ public class UdpNetworkInterfaceTest {
 				receivedSuccessfully.called = true;
 			}
 		};
-		final Called connected1 = new Called();
-		final Called disconnected1 = new Called();
+		final Called<UdpRemoteAddress> connected1 = new Called<UdpRemoteAddress>();
+		final Called<UdpRemoteAddress> disconnected1 = new Called<UdpRemoteAddress>();
 		final TrRemoteConnection<UdpRemoteAddress> one2two = i1.connect(ra2, kp2.a, noopListener, connected1,
 				disconnected1, false);
 
-		final Called connected2 = new Called();
-		final Called disconnected2 = new Called();
+		final Called<UdpRemoteAddress> connected2 = new Called<UdpRemoteAddress>();
+		final Called<UdpRemoteAddress> disconnected2 = new Called<UdpRemoteAddress>();
 		final TrRemoteConnection<UdpRemoteAddress> two2one = i2.connect(ra1, kp1.a, listener, connected2,
 				disconnected2, false);
 
@@ -136,7 +138,7 @@ public class UdpNetworkInterfaceTest {
 			Thread.sleep(100);
 		}
 
-		final Called ackReceived = new Called();
+		final Called<UdpRemoteAddress> ackReceived = new Called<UdpRemoteAddress>();
 
 		one2two.send(sentMessage, 1, new TrSentReceivedListener() {
 
@@ -193,7 +195,7 @@ public class UdpNetworkInterfaceTest {
 
 		};
 
-		final Called receivedSuccessfully = new Called();
+		final Called<UdpRemoteAddress> receivedSuccessfully = new Called<UdpRemoteAddress>();
 
 		final ByteArraySegmentBuilder msgBuilder = ByteArraySegment.builder();
 
@@ -211,13 +213,13 @@ public class UdpNetworkInterfaceTest {
 				receivedSuccessfully.called = true;
 			}
 		};
-		final Called connected1 = new Called();
-		final Called disconnected1 = new Called();
+		final Called<UdpRemoteAddress> connected1 = new Called<UdpRemoteAddress>();
+		final Called<UdpRemoteAddress> disconnected1 = new Called<UdpRemoteAddress>();
 		final TrRemoteConnection<UdpRemoteAddress> one2two = i1.connect(ra2, kp2.a, noopListener, connected1,
 				disconnected1, false);
 
-		final Called connected2 = new Called();
-		final Called disconnected2 = new Called();
+		final Called<UdpRemoteAddress> connected2 = new Called<UdpRemoteAddress>();
+		final Called<UdpRemoteAddress> disconnected2 = new Called<UdpRemoteAddress>();
 		final TrRemoteConnection<UdpRemoteAddress> two2one = i2.connect(ra1, kp1.a, listener, connected2,
 				disconnected2, false);
 
@@ -228,7 +230,7 @@ public class UdpNetworkInterfaceTest {
 			Thread.sleep(100);
 		}
 
-		final Called ackReceived = new Called();
+		final Called<UdpRemoteAddress> ackReceived = new Called<UdpRemoteAddress>();
 
 		one2two.send(sentMessage, 1, new TrSentReceivedListener() {
 
@@ -257,11 +259,16 @@ public class UdpNetworkInterfaceTest {
 		Assert.assertTrue(receivedSuccessfully.called);
 	}
 
-	public static class Called implements Runnable {
+	public static class Called<RA extends TrRemoteAddress> implements Runnable, Function<TrRemoteConnection<RA>, Void> {
 		public volatile boolean called = false;
 
 		public void run() {
 			called = true;
+		}
+
+		public Void apply(final TrRemoteConnection<RA> arg0) {
+			called = true;
+			return null;
 		}
 
 	}

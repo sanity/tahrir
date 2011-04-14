@@ -21,5 +21,10 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 		}
 	}
 
+	@Override
+	public void terminate() {
+		// TODO Auto-generated method stub
+
+	}
 
 }

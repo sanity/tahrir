@@ -15,14 +15,24 @@ public class TrPeerManager {
 		this.config = config;
 	}
 
+	public static class Capabilities {
+		public boolean allowsUnsolicitiedInbound;
+		public boolean allowsAssimilation;
+		public boolean receivesMessageBroadcasts;
+	}
+
 	public static class TrPeerInfo {
 		public PublicKey publicKey;
-		public boolean allowsUnsolicited;
+		public Capabilities capabilities;
 
 		public class assimilation {
 			public Stat successRate;
 			public Stat time;
 		}
+	}
+
+	public boolean shouldRetainConnectionTo(final TrRemoteAddress ra) {
+		return peers.containsKey(ra);
 	}
 
 	public static class Config {

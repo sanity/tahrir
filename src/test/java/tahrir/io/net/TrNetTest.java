@@ -38,13 +38,13 @@ public class TrNetTest {
 		final UdpNetworkInterface iface2 = new UdpNetworkInterface(conf2, kp2);
 
 
-		final TrNode<UdpRemoteAddress> node1 = new TrNode<UdpRemoteAddress>(iface1);
-		final TrNet<UdpRemoteAddress> trn1 = new TrNet<UdpRemoteAddress>(node1, false);
+		final TrNode<UdpRemoteAddress> node1 = new TrNode<UdpRemoteAddress>();
+		final TrNet<UdpRemoteAddress> trn1 = new TrNet<UdpRemoteAddress>(node1, iface1, false);
 
 		trn1.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
-		final TrNode<UdpRemoteAddress> node2 = new TrNode<UdpRemoteAddress>(iface2);
-		final TrNet<UdpRemoteAddress> trn2 = new TrNet<UdpRemoteAddress>(node2, false);
+		final TrNode<UdpRemoteAddress> node2 = new TrNode<UdpRemoteAddress>();
+		final TrNet<UdpRemoteAddress> trn2 = new TrNet<UdpRemoteAddress>(node2, iface2, false);
 
 		trn2.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
@@ -75,6 +75,12 @@ public class TrNetTest {
 				final TestSession remote = trNet.getOrCreateRemoteSession(TestSession.class, getSender(), 1.0);
 				remote.testMethod(param + 1);
 			}
+		}
+
+		@Override
+		public void terminate() {
+			// TODO Auto-generated method stub
+
 		}
 
 	}

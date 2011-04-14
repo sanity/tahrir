@@ -16,23 +16,24 @@ import tahrir.io.serialization.*;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
+import com.google.common.base.Function;
 import com.google.common.collect.*;
 import com.google.gwt.thirdparty.guava.common.collect.MapMaker;
 
 public class UdpRemoteConnection extends TrRemoteConnection<UdpRemoteAddress> implements
 TrMessageListener<UdpRemoteAddress> {
-	private final org.slf4j.Logger logger;
-
 	private static final int MAX_RETRIES = 5;
+
 	private volatile boolean disconnectedCallbackCalled = false;
 	private final UdpNetworkInterface iface;
-
 	private TrSymKey inboundSymKey;
 
 	private ByteArraySegment inboundSymKeyEncoded = null;
+
 	private final int KEEP_ALIVE_INTERVAL_SEC = 7;
 	private final ScheduledFuture<?> keepAliveSender;
-	private final TrSymKey outboundSymKey;
+	private final org.slf4j.Logger logger;
+	private TrSymKey outboundSymKey;
 
 	private final Map<Integer, PendingLongMessage> pendingReceivedLongMessages = new MapMaker()
 	.expiration(20, TimeUnit.MINUTES).makeMap();
@@ -50,15 +51,19 @@ TrMessageListener<UdpRemoteAddress> {
 
 	protected UdpRemoteConnection(final UdpNetworkInterface iface, final UdpRemoteAddress remoteAddr,
 			final RSAPublicKey remotePubKey, final TrMessageListener<UdpRemoteAddress> listener,
-			final Runnable connectedCallback,
+			final Function<TrRemoteConnection<UdpRemoteAddress>, Void> connectedCallback,
 			final Runnable disconnectedCallback, final boolean unilateral) {
 		super(remoteAddr, remotePubKey, listener, connectedCallback, disconnectedCallback, unilateral);
 		this.iface = iface;
 		logger = LoggerFactory.getLogger("UdpRemoteConnection(" + iface.config.listenPort + "-" + remoteAddress + ")");
 		iface.registerListenerForSender(remoteAddr, this);
-		outboundSymKey = TrCrypto.createAesKey();
-		// logger.info("Using outboundSymKey: " +
-		// Arrays.toString(outboundSymKey.toBytes()));
+		if (remotePubKey != null) {
+			// If we don't know the remote's public key this must be a
+			// unilateral
+			// connection, and we will be using the inboundSymKey (once we are
+			// told it) to encrypt outbound messages too
+			outboundSymKey = TrCrypto.createAesKey();
+		}
 		if (unilateral) {
 			inboundSymKey = outboundSymKey;
 			inboundSymKeyEncoded = inboundSymKey.toByteArraySegment();
@@ -81,7 +86,9 @@ TrMessageListener<UdpRemoteAddress> {
 	public void disconnect() {
 		if (!disconnectedCallbackCalled) {
 			disconnectedCallbackCalled = true;
-			disconnectedCallback.run();
+			if (disconnectedCallback != null) {
+				disconnectedCallback.run();
+			}
 		}
 		keepAliveSender.cancel(false);
 		shutdown = true;
@@ -110,21 +117,23 @@ TrMessageListener<UdpRemoteAddress> {
 
 	public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
 			ByteArraySegment message) {
-		// logger.info("Message received from " + sender.port);
 		if (inboundSymKey == null) {
 			// We don't have the inbound sym key, but it will be prepended
 			// to the message, 256 bytes
 			inboundSymKeyEncoded = message.subsegment(0, 256);
 			inboundSymKey = new TrSymKey(TrCrypto.decryptRaw(inboundSymKeyEncoded, iface.myPrivateKey));
-			// logger.info("Received inboundSymKey: " +
-			// Arrays.toString(inboundSymKey.toBytes()));
+			if (remotePubKey == null) {
+				// We don't know the remote's public key, indicating this was a
+				// unilateral connection,
+				// remote will expect that we use the inboundSymKey to encrypt
+				// outbound too
+				outboundSymKey = inboundSymKey;
+			}
 			message = message.subsegment(inboundSymKeyEncoded.length);
-			// logger.info("Read inboundSymKey");
 		} else if (message.startsWith(inboundSymKeyEncoded)) {
 			// Sender is still prepending the inboundSymKey even though we
 			// already have it, disregard it
 			message = message.subsegment(inboundSymKeyEncoded.length);
-			// logger.info("Message had inboundSymKey, but isn't needed");
 		}
 		// Decode the message
 		try {
@@ -139,7 +148,9 @@ TrMessageListener<UdpRemoteAddress> {
 					// Receiving our first ACK indicates by-directional
 					// communication is established
 					remoteHasCachedInboundKey = true;
-					connectedCallback.run();
+					if (connectedCallback != null) {
+						connectedCallback.apply(this);
+					}
 				}
 				if (shutdown) {
 					disconnect();
@@ -200,18 +211,9 @@ TrMessageListener<UdpRemoteAddress> {
 		}
 	}
 
-	public void setRemotePubKey(final RSAPublicKey remotePubKey) {
-		if (!remotePubKey.equals(this.remotePubKey))
-			throw new UnsupportedOperationException("remotePubKey is already set to something else");
-		this.remotePubKey = remotePubKey;
-	}
-
 	private ByteArraySegment encryptOutbound(final ByteArraySegment rawMessage) {
 		final ByteArraySegmentBuilder toSend = ByteArraySegment.builder();
 		if (!remoteHasCachedInboundKey) {
-			if (remotePubKey == null) {
-				System.out.println("Remote is null on " + iface.config.listenPort); // REMOVEME
-			}
 			toSend.write(TrCrypto.encryptRaw(outboundSymKey.toByteArraySegment(), remotePubKey));
 		}
 		toSend.write(outboundSymKey.encrypt(rawMessage));
@@ -393,13 +395,13 @@ TrMessageListener<UdpRemoteAddress> {
 	}
 
 	private static class Resender implements Runnable {
+		public volatile boolean receiptConfirmed = false;
 		private final TrSentReceivedListener callbacks;
 		private final double initialPriority;
 		private final int maxRetries;
 		private final ByteArraySegment message;
 		private final int messageId;
 		private final UdpRemoteConnection parent;
-		public volatile boolean receiptConfirmed = false;
 		private int retryCount = 0;
 		public Resender(final int messageId, final int maxRetries, final TrSentReceivedListener callbacks,
 				final ByteArraySegment message, final UdpRemoteConnection parent, final double initialPriority) {

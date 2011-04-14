@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import tahrir.io.net.*;
 import tahrir.tools.*;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 
 public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
@@ -218,7 +219,8 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 	public TrRemoteConnection<UdpRemoteAddress> connect(final UdpRemoteAddress remoteAddress,
 			final RSAPublicKey remotePubKey,
 			final tahrir.io.net.TrNetworkInterface.TrMessageListener<UdpRemoteAddress> listener,
-			final Runnable connectedCallback, final Runnable disconnectedCallback, final boolean unilateral) {
+			final Function<TrRemoteConnection<UdpRemoteAddress>, Void> connectedCallback,
+			final Runnable disconnectedCallback, final boolean unilateral) {
 		return new UdpRemoteConnection(this, remoteAddress, remotePubKey, listener, connectedCallback,
 				disconnectedCallback, unilateral);
 	}

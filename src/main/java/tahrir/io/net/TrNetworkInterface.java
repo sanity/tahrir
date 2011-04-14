@@ -4,6 +4,8 @@ import java.security.interfaces.RSAPublicKey;
 
 import tahrir.tools.ByteArraySegment;
 
+import com.google.common.base.Function;
+
 public abstract class TrNetworkInterface<RA extends TrRemoteAddress> {
 	protected abstract void registerListener(TrMessageListener<RA> listener);
 
@@ -39,7 +41,7 @@ public abstract class TrNetworkInterface<RA extends TrRemoteAddress> {
 	};
 
 	public abstract TrRemoteConnection<RA> connect(final RA remoteAddress, final RSAPublicKey remotePubKey,
-			final TrMessageListener<RA> listener, final Runnable connectedCallback,
+			final TrMessageListener<RA> listener, final Function<TrRemoteConnection<RA>, Void> connectedCallback,
 			final Runnable disconnectedCallback, boolean unilateral);
 
 	public static interface TrSentListener {
