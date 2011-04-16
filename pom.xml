@@ -3,6 +3,12 @@
   <groupId>tahrirproject</groupId>
   <artifactId>tahrir</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <repositories>
+       <repository>
+           <id>repo2_maven_org</id>
+           <url>http://repo2.maven.org/maven2</url>
+       </repository>
+  </repositories>
   <dependencies>
   	<dependency>
   		<groupId>com.google.code.gson</groupId>
@@ -17,7 +23,11 @@
 	  <version>5.14</version>
 	  <scope>test</scope>
 	</dependency>
-  	
+  	<dependency>
+           <groupId>org.eclipse.jetty</groupId>
+           <artifactId>jetty-server</artifactId>
+           <version>7.3.1.v20110307</version>
+    </dependency>
   	<dependency>
   		<groupId>bouncycastle</groupId>
   		<artifactId>bcprov-jdk16</artifactId>

@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
+import tahrir.io.net.sessions.Priority;
 import tahrir.io.net.udpV1.*;
 import tahrir.io.net.udpV1.UdpNetworkInterface.Config;
 import tahrir.tools.Tuple2;
@@ -48,12 +49,12 @@ public class TrNetTest {
 
 		trn2.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
-		final TrRemoteConnection<UdpRemoteAddress> one2two = trn1.connectTo(
-				new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort), kp2.a, false);
-		final TrRemoteConnection<UdpRemoteAddress> two2one = trn2.connectTo(
-				new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort), kp1.a, false);
+		final TrRemoteConnection<UdpRemoteAddress> one2two = trn1.connectionManager.getConnection(new UdpRemoteAddress(
+				InetAddress.getLocalHost(), conf2.listenPort), kp2.a, false, "trn1");
+		final TrRemoteConnection<UdpRemoteAddress> two2one = trn2.connectionManager.getConnection(new UdpRemoteAddress(
+				InetAddress.getLocalHost(), conf1.listenPort), kp1.a, false, "trn2");
 
-		final TestSession remoteSession = trn1.getRemoteSession(TestSession.class, one2two, 1234, 1.0);
+		final TestSession remoteSession = trn1.getOrCreateRemoteSession(TestSession.class, one2two, 1234);
 
 		remoteSession.testMethod(0);
 
@@ -61,6 +62,7 @@ public class TrNetTest {
 	}
 
 	public static interface TestSession extends TrSession {
+		@Priority(TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY)
 		public void testMethod(int param);
 	}
 
@@ -72,16 +74,9 @@ public class TrNetTest {
 
 		public void testMethod(final int param) {
 			if (param < 10) {
-				final TestSession remote = trNet.getOrCreateRemoteSession(TestSession.class, getSender(), 1.0);
+				final TestSession remote = remoteSession(TestSession.class, connection(sender()));
 				remote.testMethod(param + 1);
 			}
 		}
-
-		@Override
-		public void terminate() {
-			// TODO Auto-generated method stub
-
-		}
-
 	}
 }

@@ -10,6 +10,7 @@ import org.slf4j.*;
 
 import tahrir.TrNode;
 import tahrir.io.net.TrNetworkInterface.TrMessageListener;
+import tahrir.io.net.sessions.Priority;
 import tahrir.io.serialization.TrSerializer;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
@@ -23,8 +24,6 @@ public class TrNet<RA extends TrRemoteAddress> {
 	private static final int hashCode(final Method method) {
 		return method.hashCode() ^ Arrays.deepHashCode(method.getGenericParameterTypes());
 	}
-
-	public final Map<RA, TrRemoteConnection<RA>> activeConnections = new MapMaker().makeMap();
 
 	private final Map<Class<? extends TrSession>, Class<? extends TrSessionImpl>> classesByInterface = Maps
 	.newHashMap();
@@ -67,25 +66,6 @@ public class TrNet<RA extends TrRemoteAddress> {
 		disconnectedListeners.add(disconnectedListener);
 	}
 
-	public TrRemoteConnection<RA> connectTo(final RA address, final RSAPublicKey remotePubkey, final boolean unilateral) {
-		final TrRemoteConnection<RA> rc = activeConnections.get(address);
-		if (rc != null)
-			return rc;
-		final TrRemoteConnection<RA> connection = netIface.connect(address, remotePubkey,
-				new TrNetMessageListener(),
-				null, new Runnable() {
-
-			public void run() {
-				activeConnections.remove(address);
-				for (final Function<TrRemoteAddress, Void> r : disconnectedListeners) {
-					r.apply(address);
-				}
-			}
-
-		}, unilateral);
-		this.activeConnections.put(address, connection);
-		return connection;
-	}
 
 	@SuppressWarnings("unchecked")
 	public <T extends TrSessionImpl> T getOrCreateLocalSession(final Class<T> c, final int sessionId) {
@@ -105,16 +85,14 @@ public class TrNet<RA extends TrRemoteAddress> {
 		}
 	}
 
-	public <T extends TrSession> T getOrCreateRemoteSession(final Class<T> c, final TrRemoteConnection<?> connection,
-			final double priority) {
-		return getRemoteSession(c, connection, TrUtils.rand.nextInt(), priority);
+	public <T extends TrSession> T getOrCreateRemoteSession(final Class<T> c, final TrRemoteConnection<?> connection) {
+		return getOrCreateRemoteSession(c, connection, TrUtils.rand.nextInt());
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends TrSession> T getRemoteSession(final Class<T> c, final TrRemoteConnection<?> connection,
-			final int sessionId, final double priority) {
-		return (T) Proxy.newProxyInstance(c.getClassLoader(), new Class[] { c }, new IH(c, connection, sessionId,
-				priority));
+	public <T extends TrSession> T getOrCreateRemoteSession(final Class<T> c, final TrRemoteConnection<?> connection,
+			final int sessionId) {
+		return (T) Proxy.newProxyInstance(c.getClassLoader(), new Class[] { c }, new IH(c, connection, sessionId));
 	}
 
 	public void registerSessionClass(final Class<? extends TrSession> iface, final Class<? extends TrSessionImpl> cls) {
@@ -167,14 +145,12 @@ public class TrNet<RA extends TrRemoteAddress> {
 
 		private final Class<?> c;
 		private final TrRemoteConnection<?> connection;
-		private final double priority;
 		private final int sessionId;
 
-		public IH(final Class<?> c, final TrRemoteConnection<?> connection, final int sessionId, final double priority) {
+		public IH(final Class<?> c, final TrRemoteConnection<?> connection, final int sessionId) {
 			this.c = c;
 			this.connection = connection;
 			this.sessionId = sessionId;
-			this.priority = priority;
 		}
 
 		public Object invoke(final Object object, final Method method, final Object[] arguments) throws Throwable {
@@ -194,7 +170,14 @@ public class TrNet<RA extends TrRemoteAddress> {
 				TrSerializer.serializeTo(argument, builder);
 			}
 
-			connection.send(builder.build(), priority, TrNetworkInterface.nullSentListener);
+			final Priority priority = method.getAnnotation(Priority.class);
+
+			if (priority == null)
+				throw new RuntimeException("Required @Priority annotation missing on method " + method
+						+ " in interface "
+						+ method.getDeclaringClass());
+
+			connection.send(builder.build(), priority.value(), TrNetworkInterface.nullSentListener);
 			return null;
 		}
 
@@ -245,34 +228,12 @@ public class TrNet<RA extends TrRemoteAddress> {
 					TrSessionImpl session = sessions.get(Tuple2.of(methodPair.cls.getDeclaringClass().getName(),
 							sessionId));
 
-					// Do we have a connection to this sender?
-					TrRemoteConnection<RA> senderConnection = TrNet.this.activeConnections.get(sender);
-					final boolean newConnection = (senderConnection == null);
-					if (senderConnection == null) {
-						senderConnection = TrNet.this.connectTo(sender, null, false);
-					}
 
 					if (session == null) {
 						// New session, we need to create it
 						final Constructor<?> constructor = methodPair.cls.getDeclaringClass().getConstructor(
 								Integer.class, TrNode.class, TrNet.class);
 						session = (TrSessionImpl) constructor.newInstance(sessionId, trNode, TrNet.this);
-
-						if (newConnection) {
-							// If this connection was created for this session,
-							// then we probably want to delete it when the
-							// session is done
-							final TrRemoteConnection<RA> finalSenderConnection = senderConnection;
-							session.addTerminateCallback(new Runnable() {
-
-								public void run() {
-									if (!TrNet.this.trNode.peerManager.shouldRetainConnectionTo(sender)) {
-										finalSenderConnection.disconnect();
-									}
-								}
-
-							});
-						}
 					}
 					// We put regardless of whether it is new or not to
 					// reset cache expiry time
@@ -283,7 +244,7 @@ public class TrNet<RA extends TrRemoteAddress> {
 						args[i] = TrSerializer.deserializeFrom(methodPair.cls.getParameterTypes()[i], dis);
 					}
 
-					TrSessionImpl.sender.set(senderConnection);
+					TrSessionImpl.sender.set(sender);
 
 					if (TrNet.this.logger.isDebugEnabled()) {
 						final String argsStr = Arrays.toString(args);
@@ -298,5 +259,59 @@ public class TrNet<RA extends TrRemoteAddress> {
 				throw new RuntimeException(e);
 			}
 		}
+	}
+
+	public ConnectionManager connectionManager = new ConnectionManager();
+
+	public class ConnectionManager {
+
+		private final Map<TrRemoteAddress, ConnectionInfo<RA>> connections = new MapMaker().makeMap();
+
+		public TrRemoteConnection<RA> getConnection(final TrRemoteAddress address, final RSAPublicKey pubKey,
+				final boolean unilateral, final String userLabel) {
+			return getConnection(address, pubKey, unilateral, userLabel, TrUtils.noopRunnable);
+		}
+
+		public TrRemoteConnection<RA> getConnection(final TrRemoteAddress address, final RSAPublicKey pubKey,
+				final boolean unilateral, final String userLabel, final Runnable disconnectCallback) {
+			ConnectionInfo<RA> ci = connections.get(address);
+			if (ci == null) {
+				ci = new ConnectionInfo<RA>();
+				final ConnectionInfo<RA> finalCi = ci;
+				// TODO: I think the necessity of a cast here probably points to
+				// a deeper issue with using a parameterized type for
+				// TrRemoteAddress in TrNet. We'll probably run into this when
+				// we try supporting more than one protocol.
+				ci.remoteConnection = netIface.connect((RA) address, pubKey, new TrNetMessageListener(), null,
+						new Runnable() {
+
+					public void run() {
+						connections.remove(address);
+						for (final Runnable r : finalCi.interests.values()) {
+							r.run();
+						}
+					}
+
+				}, unilateral);
+				connections.put(address, ci);
+			}
+			ci.interests.put(userLabel, disconnectCallback);
+			return ci.remoteConnection;
+		}
+
+		public void noLongerNeeded(final TrRemoteAddress address, final String userLabel) {
+			final ConnectionInfo<RA> ci = connections.get(address);
+			ci.interests.remove(userLabel);
+			if (ci.interests.isEmpty()) {
+				connections.remove(address);
+				ci.remoteConnection.disconnect();
+			}
+		}
+
+	}
+
+	private static class ConnectionInfo<RA extends TrRemoteAddress> {
+		Map<String, Runnable> interests = new MapMaker().makeMap();
+		TrRemoteConnection<RA> remoteConnection;
 	}
 }

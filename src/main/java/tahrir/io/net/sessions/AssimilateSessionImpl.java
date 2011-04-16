@@ -12,19 +12,12 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 		super(sessionId, node, trNet);
 	}
 
-	public void requestNewConnection(final TrRemoteConnection<?> sender, final UdpRemoteAddress requestor,
+	public void requestNewConnection(final UdpRemoteAddress requestor,
 			final RSAPublicKey requestorPubkey) {
-		final AssimilateSession senderAS = trNet.getOrCreateRemoteSession(AssimilateSessionImpl.class, sender,
-				TrNetworkInterface.ASSIMILATION_PRIORITY);
+		final AssimilateSession senderAS = this.remoteSession(AssimilateSession.class, connection(sender()));
 		if (node.peerManager.peers.size() < node.peerManager.config.maxPeers) {
 
 		}
-	}
-
-	@Override
-	public void terminate() {
-		// TODO Auto-generated method stub
-
 	}
 
 }

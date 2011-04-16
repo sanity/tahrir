@@ -1,4 +1,6 @@
 package tahrir.io.net.sessions;
 
-public interface AssimilateSession {
+import tahrir.io.net.TrSession;
+
+public interface AssimilateSession extends TrSession {
 }
