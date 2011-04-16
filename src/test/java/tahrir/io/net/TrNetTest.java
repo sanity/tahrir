@@ -39,20 +39,22 @@ public class TrNetTest {
 		final UdpNetworkInterface iface2 = new UdpNetworkInterface(conf2, kp2);
 
 
-		final TrNode<UdpRemoteAddress> node1 = new TrNode<UdpRemoteAddress>();
-		final TrNet<UdpRemoteAddress> trn1 = new TrNet<UdpRemoteAddress>(node1, iface1, false);
+		final TrNode node1 = new TrNode();
+		final TrNet trn1 = new TrNet(node1, iface1, false);
 
 		trn1.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
-		final TrNode<UdpRemoteAddress> node2 = new TrNode<UdpRemoteAddress>();
-		final TrNet<UdpRemoteAddress> trn2 = new TrNet<UdpRemoteAddress>(node2, iface2, false);
+		final TrNode node2 = new TrNode();
+		final TrNet trn2 = new TrNet(node2, iface2, false);
 
 		trn2.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
-		final TrRemoteConnection<UdpRemoteAddress> one2two = trn1.connectionManager.getConnection(new UdpRemoteAddress(
-				InetAddress.getLocalHost(), conf2.listenPort), kp2.a, false, "trn1");
-		final TrRemoteConnection<UdpRemoteAddress> two2one = trn2.connectionManager.getConnection(new UdpRemoteAddress(
-				InetAddress.getLocalHost(), conf1.listenPort), kp1.a, false, "trn2");
+		final TrRemoteConnection one2two = trn1.connectionManager.getConnection(
+				new UdpRemoteAddress(
+						InetAddress.getLocalHost(), conf2.listenPort), kp2.a, false, "trn1");
+		final TrRemoteConnection two2one = trn2.connectionManager.getConnection(
+				new UdpRemoteAddress(
+						InetAddress.getLocalHost(), conf1.listenPort), kp1.a, false, "trn2");
 
 		final TestSession remoteSession = trn1.getOrCreateRemoteSession(TestSession.class, one2two, 1234);
 
@@ -68,7 +70,7 @@ public class TrNetTest {
 
 	public static class TestSessionImpl extends TrSessionImpl implements TestSession {
 
-		public TestSessionImpl(final Integer sessionId, final TrNode<?> node, final TrNet<?> trNet) {
+		public TestSessionImpl(final Integer sessionId, final TrNode node, final TrNet trNet) {
 			super(sessionId, node, trNet);
 		}
 

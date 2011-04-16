@@ -19,7 +19,7 @@ import com.beust.jcommander.internal.Maps;
 import com.google.common.base.Function;
 import com.google.common.collect.*;
 
-public class TrNet<RA extends TrRemoteAddress> {
+public class TrNet {
 
 	private static final int hashCode(final Method method) {
 		return method.hashCode() ^ Arrays.deepHashCode(method.getGenericParameterTypes());
@@ -36,8 +36,6 @@ public class TrNet<RA extends TrRemoteAddress> {
 
 	private final Map<Integer, MethodPair> methodsById = Maps.newHashMap();
 
-	private final TrNetworkInterface<RA> netIface;
-
 	final Map<Tuple2<String, Integer>, TrSessionImpl> sessions = new MapMaker()
 	.expiration(30, TimeUnit.MINUTES)
 	.evictionListener(new MapEvictionListener<Tuple2<String, Integer>, TrSessionImpl>() {
@@ -47,14 +45,26 @@ public class TrNet<RA extends TrRemoteAddress> {
 		}
 	}).makeMap();
 
-	private final TrNode<RA> trNode;
+	private final TrNode trNode;
 
-	public TrNet(final TrNode<RA> trNode, final TrNetworkInterface<RA> netIface, final boolean allowUnilateral) {
-		this.netIface = netIface;
-		this.logger = LoggerFactory.getLogger(" TrNet(" + netIface + ")");
+	private final Map<Class<? extends TrRemoteAddress>, TrNetworkInterface> interfacesByAddressType;
+
+	public TrNet(final TrNode trNode, final TrNetworkInterface i, final boolean allowUnilateral) {
+		this(trNode, Collections.singleton(i), allowUnilateral);
+	}
+
+	public TrNet(final TrNode trNode, final Iterable<TrNetworkInterface> interfaces,
+			final boolean allowUnilateral) {
+		interfacesByAddressType = Maps.newHashMap();
+		for (final TrNetworkInterface iface : interfaces) {
+			interfacesByAddressType.put(iface.getAddressClass(), iface);
+		}
+		logger = LoggerFactory.getLogger("TrNet");
 		this.trNode = trNode;
 		if (allowUnilateral) {
-			netIface.registerListener(new TrNetMessageListener());
+			for (final TrNetworkInterface netIface : interfacesByAddressType.values()) {
+				netIface.registerListener(new TrNetMessageListener());
+			}
 		}
 	}
 
@@ -70,14 +80,14 @@ public class TrNet<RA extends TrRemoteAddress> {
 	@SuppressWarnings("unchecked")
 	public <T extends TrSessionImpl> T getOrCreateLocalSession(final Class<T> c, final int sessionId) {
 		try {
-			T session = (T) this.sessions.get(Tuple2.of(c.getName(), sessionId));
+			T session = (T) sessions.get(Tuple2.of(c.getName(), sessionId));
 			if (session == null) {
 				final Constructor<?> constructor = c.getConstructor(Integer.class, TrNode.class, TrNet.class);
 				session = (T) constructor.newInstance(sessionId, trNode, this);
 			}
 			// We put regardless of whether it is new or not to reset cache
 			// expiry time
-			this.sessions.put(Tuple2.of(c.getName(), sessionId), session);
+			sessions.put(Tuple2.of(c.getName(), sessionId), session);
 			TrSessionImpl.sender.set(null);
 			return session;
 		} catch (final Exception e) {
@@ -85,12 +95,12 @@ public class TrNet<RA extends TrRemoteAddress> {
 		}
 	}
 
-	public <T extends TrSession> T getOrCreateRemoteSession(final Class<T> c, final TrRemoteConnection<?> connection) {
+	public <T extends TrSession> T getOrCreateRemoteSession(final Class<T> c, final TrRemoteConnection connection) {
 		return getOrCreateRemoteSession(c, connection, TrUtils.rand.nextInt());
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends TrSession> T getOrCreateRemoteSession(final Class<T> c, final TrRemoteConnection<?> connection,
+	public <T extends TrSession> T getOrCreateRemoteSession(final Class<T> c, final TrRemoteConnection connection,
 			final int sessionId) {
 		return (T) Proxy.newProxyInstance(c.getClassLoader(), new Class[] { c }, new IH(c, connection, sessionId));
 	}
@@ -144,10 +154,10 @@ public class TrNet<RA extends TrRemoteAddress> {
 	public class IH implements InvocationHandler {
 
 		private final Class<?> c;
-		private final TrRemoteConnection<?> connection;
+		private final TrRemoteConnection connection;
 		private final int sessionId;
 
-		public IH(final Class<?> c, final TrRemoteConnection<?> connection, final int sessionId) {
+		public IH(final Class<?> c, final TrRemoteConnection connection, final int sessionId) {
 			this.c = c;
 			this.connection = connection;
 			this.sessionId = sessionId;
@@ -156,9 +166,9 @@ public class TrNet<RA extends TrRemoteAddress> {
 		public Object invoke(final Object object, final Method method, final Object[] arguments) throws Throwable {
 			// We have to include the parameter types because for some dumb
 			// reason Method.hashCode() ignores these.
-			if (TrNet.this.logger.isDebugEnabled()) {
+			if (logger.isDebugEnabled()) {
 				final String args = Arrays.toString(arguments);
-				TrNet.this.logger.debug("Sending " + method.getName() + "(" + args.substring(1, args.length() - 1)
+				logger.debug("Sending " + method.getName() + "(" + args.substring(1, args.length() - 1)
 						+ ")");
 			}
 			final int methodId = TrNet.hashCode(method);
@@ -215,8 +225,9 @@ public class TrNet<RA extends TrRemoteAddress> {
 		}
 	}
 
-	private final class TrNetMessageListener implements TrMessageListener<RA> {
-		public void received(final TrNetworkInterface<RA> iFace, final RA sender, final ByteArraySegment message) {
+	private final class TrNetMessageListener implements TrMessageListener {
+		public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender,
+				final ByteArraySegment message) {
 			final DataInputStream dis = message.toDataInputStream();
 			try {
 				final MessageType messageType = MessageType.forBytes.get(dis.readByte());
@@ -246,9 +257,9 @@ public class TrNet<RA extends TrRemoteAddress> {
 
 					TrSessionImpl.sender.set(sender);
 
-					if (TrNet.this.logger.isDebugEnabled()) {
+					if (logger.isDebugEnabled()) {
 						final String argsStr = Arrays.toString(args);
-						TrNet.this.logger.debug("Received " + methodPair.cls.getName() + "("
+						logger.debug("Received " + methodPair.cls.getName() + "("
 								+ argsStr.substring(1, argsStr.length() - 1) + ")");
 					}
 
@@ -265,24 +276,23 @@ public class TrNet<RA extends TrRemoteAddress> {
 
 	public class ConnectionManager {
 
-		private final Map<TrRemoteAddress, ConnectionInfo<RA>> connections = new MapMaker().makeMap();
+		private final Map<TrRemoteAddress, ConnectionInfo> connections = new MapMaker().makeMap();
 
-		public TrRemoteConnection<RA> getConnection(final TrRemoteAddress address, final RSAPublicKey pubKey,
+		public TrRemoteConnection getConnection(final TrRemoteAddress address, final RSAPublicKey pubKey,
 				final boolean unilateral, final String userLabel) {
 			return getConnection(address, pubKey, unilateral, userLabel, TrUtils.noopRunnable);
 		}
 
-		public TrRemoteConnection<RA> getConnection(final TrRemoteAddress address, final RSAPublicKey pubKey,
+		public TrRemoteConnection getConnection(final TrRemoteAddress address, final RSAPublicKey pubKey,
 				final boolean unilateral, final String userLabel, final Runnable disconnectCallback) {
-			ConnectionInfo<RA> ci = connections.get(address);
+			ConnectionInfo ci = connections.get(address);
 			if (ci == null) {
-				ci = new ConnectionInfo<RA>();
-				final ConnectionInfo<RA> finalCi = ci;
-				// TODO: I think the necessity of a cast here probably points to
-				// a deeper issue with using a parameterized type for
-				// TrRemoteAddress in TrNet. We'll probably run into this when
-				// we try supporting more than one protocol.
-				ci.remoteConnection = netIface.connect((RA) address, pubKey, new TrNetMessageListener(), null,
+				ci = new ConnectionInfo();
+				final ConnectionInfo finalCi = ci;
+				final TrNetworkInterface netIface = interfacesByAddressType.get(address.getClass());
+				if (netIface == null)
+					throw new RuntimeException("Unknown TrRemoteAddress type: " + address.getClass());
+				ci.remoteConnection = netIface.connect(address, pubKey, new TrNetMessageListener(), null,
 						new Runnable() {
 
 					public void run() {
@@ -300,7 +310,7 @@ public class TrNet<RA extends TrRemoteAddress> {
 		}
 
 		public void noLongerNeeded(final TrRemoteAddress address, final String userLabel) {
-			final ConnectionInfo<RA> ci = connections.get(address);
+			final ConnectionInfo ci = connections.get(address);
 			ci.interests.remove(userLabel);
 			if (ci.interests.isEmpty()) {
 				connections.remove(address);
@@ -310,8 +320,8 @@ public class TrNet<RA extends TrRemoteAddress> {
 
 	}
 
-	private static class ConnectionInfo<RA extends TrRemoteAddress> {
+	private static class ConnectionInfo {
 		Map<String, Runnable> interests = new MapMaker().makeMap();
-		TrRemoteConnection<RA> remoteConnection;
+		TrRemoteConnection remoteConnection;
 	}
 }

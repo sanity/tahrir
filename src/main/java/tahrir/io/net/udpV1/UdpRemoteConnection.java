@@ -20,8 +20,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.*;
 import com.google.gwt.thirdparty.guava.common.collect.MapMaker;
 
-public class UdpRemoteConnection extends TrRemoteConnection<UdpRemoteAddress> implements
-TrMessageListener<UdpRemoteAddress> {
+public class UdpRemoteConnection extends TrRemoteConnection implements TrMessageListener {
 	private static final int MAX_RETRIES = 5;
 
 	private volatile boolean disconnectedCallbackCalled = false;
@@ -50,8 +49,8 @@ TrMessageListener<UdpRemoteAddress> {
 	private boolean unregisterScheduled = false;
 
 	protected UdpRemoteConnection(final UdpNetworkInterface iface, final UdpRemoteAddress remoteAddr,
-			final RSAPublicKey remotePubKey, final TrMessageListener<UdpRemoteAddress> listener,
-			final Function<TrRemoteConnection<UdpRemoteAddress>, Void> connectedCallback,
+			final RSAPublicKey remotePubKey, final TrMessageListener listener,
+			final Function<TrRemoteConnection, Void> connectedCallback,
 			final Runnable disconnectedCallback, final boolean unilateral) {
 		super(remoteAddr, remotePubKey, listener, connectedCallback, disconnectedCallback, unilateral);
 		this.iface = iface;
@@ -115,8 +114,9 @@ TrMessageListener<UdpRemoteAddress> {
 
 	}
 
-	public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
+	public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender_,
 			ByteArraySegment message) {
+		final UdpRemoteAddress sender = (UdpRemoteAddress) sender_;
 		if (inboundSymKey == null) {
 			// We don't have the inbound sym key, but it will be prepended
 			// to the message, 256 bytes

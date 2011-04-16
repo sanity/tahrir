@@ -9,17 +9,16 @@ import tahrir.tools.ByteArraySegment;
 
 import com.google.common.base.Function;
 
-public abstract class TrRemoteConnection<RA extends TrRemoteAddress> {
-	protected final TrMessageListener<RA> listener;
-	protected final Function<TrRemoteConnection<RA>, Void> connectedCallback;
-	protected final RA remoteAddress;
+public abstract class TrRemoteConnection {
+	protected final TrMessageListener listener;
+	protected final Function<TrRemoteConnection, Void> connectedCallback;
+	protected final TrRemoteAddress remoteAddress;
 	protected RSAPublicKey remotePubKey;
 	protected final Runnable disconnectedCallback;
 	protected final boolean unilateral;
 
-	protected TrRemoteConnection(final RA remoteAddress, final RSAPublicKey remotePubKey,
-			final TrMessageListener<RA> listener,
-			final Function<TrRemoteConnection<RA>, Void> connectedCallback,
+	protected TrRemoteConnection(final TrRemoteAddress remoteAddress, final RSAPublicKey remotePubKey,
+			final TrMessageListener listener, final Function<TrRemoteConnection, Void> connectedCallback,
 			final Runnable disconnectedCallback, final boolean unilateral) {
 		this.remoteAddress = remoteAddress;
 		this.remotePubKey = remotePubKey;

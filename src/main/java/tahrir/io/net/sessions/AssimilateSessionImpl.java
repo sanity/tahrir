@@ -8,7 +8,7 @@ import tahrir.io.net.udpV1.UdpRemoteAddress;
 
 public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSession {
 
-	public AssimilateSessionImpl(final Integer sessionId, final TrNode<?> node, final TrNet<?> trNet) {
+	public AssimilateSessionImpl(final Integer sessionId, final TrNode node, final TrNet trNet) {
 		super(sessionId, node, trNet);
 	}
 

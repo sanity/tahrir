@@ -46,9 +46,9 @@ public class UdpNetworkInterfaceTest {
 
 		final boolean[] receivedFlag = new boolean[2];
 
-		i2.registerListener(new TrMessageListener<UdpRemoteAddress>() {
+		i2.registerListener(new TrMessageListener() {
 
-			public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
+			public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender,
 					final ByteArraySegment message) {
 				receivedFlag[0] = true;
 				Assert.assertEquals(message, msg);
@@ -95,15 +95,15 @@ public class UdpNetworkInterfaceTest {
 		final UdpRemoteAddress ra1 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort);
 		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort);
 
-		final TrMessageListener<UdpRemoteAddress> noopListener = new TrMessageListener<UdpRemoteAddress>() {
+		final TrMessageListener noopListener = new TrMessageListener() {
 
-			public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
+			public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender,
 					final ByteArraySegment message) {
 			}
 
 		};
 
-		final Called<UdpRemoteAddress> receivedSuccessfully = new Called<UdpRemoteAddress>();
+		final Called receivedSuccessfully = new Called();
 
 		final ByteArraySegmentBuilder msgBuilder = ByteArraySegment.builder();
 
@@ -113,22 +113,22 @@ public class UdpNetworkInterfaceTest {
 
 		final ByteArraySegment sentMessage = msgBuilder.build();
 
-		final TrMessageListener<UdpRemoteAddress> listener = new TrMessageListener<UdpRemoteAddress>() {
+		final TrMessageListener listener = new TrMessageListener() {
 
-			public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
+			public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender,
 					final ByteArraySegment message) {
 				Assert.assertEquals(message, sentMessage);
 				receivedSuccessfully.called = true;
 			}
 		};
-		final Called<UdpRemoteAddress> connected1 = new Called<UdpRemoteAddress>();
-		final Called<UdpRemoteAddress> disconnected1 = new Called<UdpRemoteAddress>();
-		final TrRemoteConnection<UdpRemoteAddress> one2two = i1.connect(ra2, kp2.a, noopListener, connected1,
+		final Called connected1 = new Called();
+		final Called disconnected1 = new Called();
+		final TrRemoteConnection one2two = i1.connect(ra2, kp2.a, noopListener, connected1,
 				disconnected1, false);
 
-		final Called<UdpRemoteAddress> connected2 = new Called<UdpRemoteAddress>();
-		final Called<UdpRemoteAddress> disconnected2 = new Called<UdpRemoteAddress>();
-		final TrRemoteConnection<UdpRemoteAddress> two2one = i2.connect(ra1, kp1.a, listener, connected2,
+		final Called connected2 = new Called();
+		final Called disconnected2 = new Called();
+		final TrRemoteConnection two2one = i2.connect(ra1, kp1.a, listener, connected2,
 				disconnected2, false);
 
 		for (int x = 0; x < 100; x++) {
@@ -138,7 +138,7 @@ public class UdpNetworkInterfaceTest {
 			Thread.sleep(100);
 		}
 
-		final Called<UdpRemoteAddress> ackReceived = new Called<UdpRemoteAddress>();
+		final Called ackReceived = new Called();
 
 		one2two.send(sentMessage, 1, new TrSentReceivedListener() {
 
@@ -187,15 +187,15 @@ public class UdpNetworkInterfaceTest {
 		final UdpRemoteAddress ra1 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort);
 		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort);
 
-		final TrMessageListener<UdpRemoteAddress> noopListener = new TrMessageListener<UdpRemoteAddress>() {
+		final TrMessageListener noopListener = new TrMessageListener() {
 
-			public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
+			public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender,
 					final ByteArraySegment message) {
 			}
 
 		};
 
-		final Called<UdpRemoteAddress> receivedSuccessfully = new Called<UdpRemoteAddress>();
+		final Called receivedSuccessfully = new Called();
 
 		final ByteArraySegmentBuilder msgBuilder = ByteArraySegment.builder();
 
@@ -205,22 +205,22 @@ public class UdpNetworkInterfaceTest {
 
 		final ByteArraySegment sentMessage = msgBuilder.build();
 
-		final TrMessageListener<UdpRemoteAddress> listener = new TrMessageListener<UdpRemoteAddress>() {
+		final TrMessageListener listener = new TrMessageListener() {
 
-			public void received(final TrNetworkInterface<UdpRemoteAddress> iFace, final UdpRemoteAddress sender,
+			public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender,
 					final ByteArraySegment message) {
 				Assert.assertEquals(message, sentMessage);
 				receivedSuccessfully.called = true;
 			}
 		};
-		final Called<UdpRemoteAddress> connected1 = new Called<UdpRemoteAddress>();
-		final Called<UdpRemoteAddress> disconnected1 = new Called<UdpRemoteAddress>();
-		final TrRemoteConnection<UdpRemoteAddress> one2two = i1.connect(ra2, kp2.a, noopListener, connected1,
+		final Called connected1 = new Called();
+		final Called disconnected1 = new Called();
+		final TrRemoteConnection one2two = i1.connect(ra2, kp2.a, noopListener, connected1,
 				disconnected1, false);
 
-		final Called<UdpRemoteAddress> connected2 = new Called<UdpRemoteAddress>();
-		final Called<UdpRemoteAddress> disconnected2 = new Called<UdpRemoteAddress>();
-		final TrRemoteConnection<UdpRemoteAddress> two2one = i2.connect(ra1, kp1.a, listener, connected2,
+		final Called connected2 = new Called();
+		final Called disconnected2 = new Called();
+		final TrRemoteConnection two2one = i2.connect(ra1, kp1.a, listener, connected2,
 				disconnected2, false);
 
 		for (int x = 0; x < 100; x++) {
@@ -230,7 +230,7 @@ public class UdpNetworkInterfaceTest {
 			Thread.sleep(100);
 		}
 
-		final Called<UdpRemoteAddress> ackReceived = new Called<UdpRemoteAddress>();
+		final Called ackReceived = new Called();
 
 		one2two.send(sentMessage, 1, new TrSentReceivedListener() {
 
@@ -259,14 +259,14 @@ public class UdpNetworkInterfaceTest {
 		Assert.assertTrue(receivedSuccessfully.called);
 	}
 
-	public static class Called<RA extends TrRemoteAddress> implements Runnable, Function<TrRemoteConnection<RA>, Void> {
+	public static class Called implements Runnable, Function<TrRemoteConnection, Void> {
 		public volatile boolean called = false;
 
 		public void run() {
 			called = true;
 		}
 
-		public Void apply(final TrRemoteConnection<RA> arg0) {
+		public Void apply(final TrRemoteConnection arg0) {
 			called = true;
 			return null;
 		}

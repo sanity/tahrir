@@ -14,7 +14,7 @@ import tahrir.tools.*;
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 
-public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
+public class UdpNetworkInterface extends TrNetworkInterface {
 	private static org.slf4j.Logger logger = LoggerFactory.getLogger(UdpNetworkInterface.class);
 
 	private final PriorityBlockingQueue<QueuedPacket> outbox = new PriorityBlockingQueue<UdpNetworkInterface.QueuedPacket>();
@@ -55,20 +55,20 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 		receiver.start();
 	}
 
-	private final ConcurrentLinkedQueue<TrMessageListener<UdpRemoteAddress>> listeners = new ConcurrentLinkedQueue<TrMessageListener<UdpRemoteAddress>>();
+	private final ConcurrentLinkedQueue<TrMessageListener> listeners = new ConcurrentLinkedQueue<TrMessageListener>();
 
-	private final ConcurrentMap<UdpRemoteAddress, TrMessageListener<UdpRemoteAddress>> listenersByAddress = Maps
+	private final ConcurrentMap<UdpRemoteAddress, TrMessageListener> listenersByAddress = Maps
 	.newConcurrentMap();
 
 	@Override
-	public void registerListener(final TrMessageListener<UdpRemoteAddress> listener) {
+	public void registerListener(final TrMessageListener listener) {
 		listeners.add(listener);
 	}
 
 	@Override
-	protected void registerListenerForSender(final UdpRemoteAddress sender,
-			final TrMessageListener<UdpRemoteAddress> listener) {
-		if (listenersByAddress.put(sender, listener) != null) {
+	protected void registerListenerForSender(final TrRemoteAddress sender,
+			final TrMessageListener listener) {
+		if (listenersByAddress.put((UdpRemoteAddress) sender, listener) != null) {
 			logger.warn("Overwriting listener for sender {}", sender);
 		}
 	}
@@ -76,13 +76,14 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 
 	@Override
 	protected void unregisterListener(
-			final tahrir.io.net.TrNetworkInterface.TrMessageListener<UdpRemoteAddress> listener) {
+			final tahrir.io.net.TrNetworkInterface.TrMessageListener listener) {
 		listeners.remove(listener);
 	}
 
 	@Override
-	public void sendTo(final UdpRemoteAddress recepient, final ByteArraySegment encryptedMessage,
+	public void sendTo(final TrRemoteAddress recepient_, final ByteArraySegment encryptedMessage,
 			final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener, final double priority) {
+		final UdpRemoteAddress recepient = (UdpRemoteAddress) recepient_;
 		assert encryptedMessage.length <= MAX_PACKET_SIZE_BYTES : "Packet length " + encryptedMessage.length
 		+ " greater than " + MAX_PACKET_SIZE_BYTES;
 		if (recepient.port == config.listenPort)
@@ -110,7 +111,7 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 					parent.datagramSocket.receive(dp);
 
 					final UdpRemoteAddress ura = new UdpRemoteAddress(dp.getAddress(), dp.getPort());
-					final tahrir.io.net.TrNetworkInterface.TrMessageListener<UdpRemoteAddress> ml = parent.listenersByAddress.get(ura);
+					final tahrir.io.net.TrNetworkInterface.TrMessageListener ml = parent.listenersByAddress.get(ura);
 
 					if (ml != null) {
 						try {
@@ -121,7 +122,7 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 									+ parent.datagramSocket.getLocalPort() + " from port " + dp.getPort(), e);
 						}
 					} else {
-						for (final tahrir.io.net.TrNetworkInterface.TrMessageListener<UdpRemoteAddress> li : parent.listeners) {
+						for (final tahrir.io.net.TrNetworkInterface.TrMessageListener li : parent.listeners) {
 							li.received(parent, ura, ByteArraySegment.from(dp));
 						}
 					}
@@ -204,7 +205,7 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 	}
 
 	@Override
-	public void unregisterListenerForSender(final UdpRemoteAddress sender) {
+	public void unregisterListenerForSender(final TrRemoteAddress sender) {
 		listenersByAddress.remove(sender);
 	}
 
@@ -216,12 +217,18 @@ public class UdpNetworkInterface extends TrNetworkInterface<UdpRemoteAddress> {
 	}
 
 	@Override
-	public TrRemoteConnection<UdpRemoteAddress> connect(final UdpRemoteAddress remoteAddress,
+	public TrRemoteConnection connect(final TrRemoteAddress remoteAddress,
 			final RSAPublicKey remotePubKey,
-			final tahrir.io.net.TrNetworkInterface.TrMessageListener<UdpRemoteAddress> listener,
-			final Function<TrRemoteConnection<UdpRemoteAddress>, Void> connectedCallback,
+			final tahrir.io.net.TrNetworkInterface.TrMessageListener listener,
+			final Function<TrRemoteConnection, Void> connectedCallback,
 			final Runnable disconnectedCallback, final boolean unilateral) {
-		return new UdpRemoteConnection(this, remoteAddress, remotePubKey, listener, connectedCallback,
+		return new UdpRemoteConnection(this, (UdpRemoteAddress) remoteAddress, remotePubKey, listener,
+				connectedCallback,
 				disconnectedCallback, unilateral);
+	}
+
+	@Override
+	protected Class<? extends TrRemoteAddress> getAddressClass() {
+		return UdpRemoteAddress.class;
 	}
 }
