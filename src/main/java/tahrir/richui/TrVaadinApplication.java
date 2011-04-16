@@ -1,10 +1,6 @@
 package tahrir.richui;
 
-import java.util.concurrent.TimeUnit;
-
 import org.vaadin.artur.icepush.ICEPush;
-
-import tahrir.tools.TrUtils;
 
 import com.vaadin.Application;
 import com.vaadin.ui.*;
@@ -15,7 +11,7 @@ public class TrVaadinApplication extends Application {
 
 	@Override
 	public void init() {
-		final Window mainWindow = new Window("Jettytest Application");
+		final Window mainWindow = new Window("Tahrir");
 
 		// mainWindow.addComponent(pusher);
 
@@ -24,12 +20,6 @@ public class TrVaadinApplication extends Application {
 		layout.setSpacing(true);
 		final Label title = new Label("<h1>Tahrir</h1>");
 		title.setContentMode(Label.CONTENT_XHTML);
-		TrUtils.executor.scheduleAtFixedRate(new Runnable() {
-
-			public void run() {
-				title.setValue("Tahrir " + System.currentTimeMillis());
-				pusher.push();
-			}}, 10, 10, TimeUnit.SECONDS);
 		layout.addComponent(title);
 		addMessageComposeComponent(layout);
 		final HorizontalLayout hLayout = new HorizontalLayout();
