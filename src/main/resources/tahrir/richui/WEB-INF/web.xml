@@ -12,7 +12,7 @@
 	</context-param>
 	<servlet>
 		<servlet-name>Tahrir Rich UI</servlet-name>
-		<servlet-class>com.vaadin.terminal.gwt.server.ApplicationServlet</servlet-class>
+		<servlet-class>org.vaadin.artur.icepush.ICEPushServlet</servlet-class>
 		<init-param>
 			<description>Vaadin application class to start</description>
 			<param-name>application</param-name>

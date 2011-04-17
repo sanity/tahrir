@@ -7,13 +7,15 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.themes.BaseTheme;
 
 public class TrVaadinApplication extends Application {
+	private static final long serialVersionUID = -3838123348713939217L;
+
 	private final ICEPush pusher = new ICEPush();
 
 	@Override
 	public void init() {
 		final Window mainWindow = new Window("Tahrir");
 
-		// mainWindow.addComponent(pusher);
+		mainWindow.addComponent(pusher);
 
 		final VerticalLayout layout = new VerticalLayout();
 		layout.setSizeFull();
