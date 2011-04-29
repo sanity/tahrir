@@ -1,9 +1,10 @@
-package tahrir;
+package tahrir.peerManager;
 
 import java.security.PublicKey;
 import java.util.Map;
 
-import tahrir.io.net.TrRemoteAddress;
+import tahrir.io.net.*;
+import tahrir.tools.TrUtils;
 
 import com.google.common.collect.MapMaker;
 
@@ -11,8 +12,13 @@ public class TrPeerManager {
 	public Map<TrRemoteAddress, TrPeerInfo> peers = new MapMaker().makeMap();
 	public final Config config;
 
-	public TrPeerManager(final Config config) {
+	public final int uid;
+	private final TrNet trNet;
+
+	public TrPeerManager(final Config config, final TrNet trNet) {
 		this.config = config;
+		this.trNet = trNet;
+		uid = TrUtils.rand.nextInt();
 	}
 
 	public static class Capabilities {

@@ -18,7 +18,6 @@ import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
 import com.google.common.base.Function;
 import com.google.common.collect.*;
-import com.google.gwt.thirdparty.guava.common.collect.MapMaker;
 
 public class UdpRemoteConnection extends TrRemoteConnection implements TrMessageListener {
 	private static final int MAX_RETRIES = 5;

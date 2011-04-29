@@ -44,18 +44,22 @@ public abstract class TrSessionImpl implements TrSession {
 	}
 
 	public final <T extends TrSession> T remoteSession(final Class<T> cls,
- final TrRemoteConnection conn) {
+			final TrRemoteConnection conn) {
 		return remoteSession(cls, conn, sessionId);
 	}
 
 	public final <T extends TrSession> T remoteSession(final Class<T> cls,
- final TrRemoteConnection conn,
+			final TrRemoteConnection conn,
 			final int sessionId) {
 		return trNet.getOrCreateRemoteSession(cls, conn, sessionId);
 	}
 
 	public final void addTerminateCallback(final Runnable cb) {
 		terminatedCallbacks.add(cb);
+	}
+
+	public void registerFailureListener(final Runnable listener) {
+		throw new RuntimeException("registerFailureListner() can only be called on a remote session");
 	}
 
 	public final void terminate() {

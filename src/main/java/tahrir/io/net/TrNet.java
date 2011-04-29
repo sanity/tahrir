@@ -10,6 +10,7 @@ import org.slf4j.*;
 
 import tahrir.TrNode;
 import tahrir.io.net.TrNetworkInterface.TrMessageListener;
+import tahrir.io.net.TrNetworkInterface.TrSentReceivedListener;
 import tahrir.io.net.sessions.Priority;
 import tahrir.io.serialization.TrSerializer;
 import tahrir.tools.*;
@@ -156,6 +157,7 @@ public class TrNet {
 		private final Class<?> c;
 		private final TrRemoteConnection connection;
 		private final int sessionId;
+		private Runnable failureCallback = null;
 
 		public IH(final Class<?> c, final TrRemoteConnection connection, final int sessionId) {
 			this.c = c;
@@ -164,6 +166,15 @@ public class TrNet {
 		}
 
 		public Object invoke(final Object object, final Method method, final Object[] arguments) throws Throwable {
+			if (method.getName().equals("registerFailureListener")) {
+				if (arguments.length != 1)
+					throw new RuntimeException("registerFailureListener() must have only one parameter");
+				if (failureCallback != null)
+					throw new RuntimeException("Only one failureCallback may be registered per remote session");
+				failureCallback = (Runnable) arguments[0];
+				return null;
+			}
+
 			// We have to include the parameter types because for some dumb
 			// reason Method.hashCode() ignores these.
 			if (logger.isDebugEnabled()) {
@@ -187,7 +198,23 @@ public class TrNet {
 						+ " in interface "
 						+ method.getDeclaringClass());
 
-			connection.send(builder.build(), priority.value(), TrNetworkInterface.nullSentListener);
+			connection.send(builder.build(), priority.value(), new TrSentReceivedListener() {
+
+				public void sent() {
+
+				}
+
+				public void failure() {
+					connection.disconnect();
+					if (failureCallback != null) {
+						failureCallback.run();
+					}
+				}
+
+				public void received() {
+
+				}
+			});
 			return null;
 		}
 

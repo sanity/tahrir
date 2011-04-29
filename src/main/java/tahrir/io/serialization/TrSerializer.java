@@ -33,6 +33,7 @@ public abstract class TrSerializer {
 		registerSerializer(new RSAPublicKeySerializer(), RSAPublicKey.class);
 		registerSerializer(new RSAPrivateKeySerializer(), RSAPrivateKey.class);
 		registerSerializer(new ByteArraySegmentSerializer(), ByteArraySegment.class);
+		registerSerializer(new TrRemoteAddressSerializer(), TrRemoteAddressSerializer.class);
 	}
 
 	private static final Map<Class<?>, Map<Integer, Field>> fieldMap = Maps.newHashMap();
