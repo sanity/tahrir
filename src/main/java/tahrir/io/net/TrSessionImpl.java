@@ -4,10 +4,12 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.slf4j.*;
+
 import tahrir.TrNode;
 
 public abstract class TrSessionImpl implements TrSession {
-
+	protected Logger logger;
 	public static final ThreadLocal<TrRemoteAddress> sender = new ThreadLocal<TrRemoteAddress>();
 	protected final int sessionId;
 	protected final TrNode node;
@@ -15,10 +17,11 @@ public abstract class TrSessionImpl implements TrSession {
 	private final ConcurrentLinkedQueue<Runnable> terminatedCallbacks = new ConcurrentLinkedQueue<Runnable>();
 
 	public TrSessionImpl(final Integer sessionId, final TrNode node, final TrNet trNet) {
+		userLabel = this.getClass().getName() + "(" + sessionId + ")";
+		logger = LoggerFactory.getLogger(userLabel);
 		this.sessionId = sessionId;
 		this.node = node;
 		this.trNet = trNet;
-		userLabel = this.getClass().getName() + "(" + sessionId + ")";
 	}
 
 	public TrRemoteAddress sender() {

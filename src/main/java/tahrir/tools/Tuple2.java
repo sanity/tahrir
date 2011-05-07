@@ -1,5 +1,7 @@
 package tahrir.tools;
 
+import java.util.Map.Entry;
+
 public class Tuple2<A, B> {
 
 	public final A a;
@@ -43,5 +45,9 @@ public class Tuple2<A, B> {
 		} else if (!b.equals(other.b))
 			return false;
 		return true;
+	}
+
+	public static <A, B> Tuple2<A, B> fromEntry(final Entry<A, B> entry) {
+		return of(entry.getKey(), entry.getValue());
 	}
 }

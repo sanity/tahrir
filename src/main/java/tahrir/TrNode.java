@@ -3,13 +3,13 @@ package tahrir;
 import java.io.File;
 import java.net.*;
 import java.security.interfaces.*;
-import java.util.Collection;
+import java.util.ArrayList;
 
 import org.slf4j.*;
 
 import tahrir.io.crypto.TrCrypto;
-import tahrir.io.net.TrRemoteAddress;
-import tahrir.io.net.udpV1.UdpRemoteAddress;
+import tahrir.io.net.*;
+import tahrir.io.net.udpV1.*;
 import tahrir.peerManager.TrPeerManager;
 import tahrir.tools.*;
 import tahrir.tools.Persistence.Modified;
@@ -35,8 +35,8 @@ public class TrNode {
 
 	private File publicNodeIdsDir;
 
-	public TrNode(final TrPeerManager peerManager, final File rootDirectory, final TrConfig config) {
-		this.peerManager = peerManager;
+	public TrNode(final File rootDirectory, final TrConfig config)
+	throws SocketException {
 		this.rootDirectory = rootDirectory;
 		this.config = config;
 		privNodeIdFile = new File(rootDirectory, config.privateNodeId);
@@ -64,6 +64,15 @@ public class TrNode {
 		if (!publicNodeIdsDir.exists()) {
 			publicNodeIdsDir.mkdir();
 		}
+
+		logger.info("Set up UDP network interface");
+		final Tuple2<RSAPublicKey, RSAPrivateKey> keyPair = Tuple2.of(getPublicNodeId().publicKey,
+				getPrivateNodeId().privateKey);
+		final UdpNetworkInterface uni = new UdpNetworkInterface(config.udp, keyPair);
+		trNet = new TrNet(this, uni, config.capabilities.allowsUnsolicitiedInbound);
+
+		logger.info("Set up peer manager");
+		peerManager = new TrPeerManager(config.peers, this);
 	}
 
 	// For unit tests
@@ -74,8 +83,13 @@ public class TrNode {
 		rootDirectory = null;
 	}
 
-	public Collection<File> getPublicNodeIdFiles() {
+	public ArrayList<File> getPublicNodeIdFiles() {
 		return Lists.newArrayList(publicNodeIdsDir.listFiles());
+	}
+
+	public File getFileForPublicNode(final TrRemoteAddress addr) {
+		final int hc = Math.abs(addr.hashCode());
+		return new File(publicNodeIdsDir, "pn-" + hc + ".dat");
 	}
 
 	public PrivateNodeId getPrivateNodeId() {
@@ -98,6 +112,8 @@ public class TrNode {
 
 	public final File rootDirectory;
 
+	public TrNet trNet;
+
 	public static class PrivateNodeId {
 		public static Tuple2<PrivateNodeId, PublicNodeId> generate() {
 			final PrivateNodeId privateNodeId = new PrivateNodeId();
@@ -116,7 +132,7 @@ public class TrNode {
 		public RSAPrivateKey privateKey;
 	}
 
-	public static class PublicNodeIdStats {
+	public static class PublicNodeIdInfo {
 		public PublicNodeId id;
 		public int connectionAttempts = 0;
 		public int connectionFailures = 0;

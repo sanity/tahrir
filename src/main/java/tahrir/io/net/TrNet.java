@@ -351,4 +351,8 @@ public class TrNet {
 		Map<String, Runnable> interests = new MapMaker().makeMap();
 		TrRemoteConnection remoteConnection;
 	}
+
+	public <T extends TrSessionImpl> T getOrCreateLocalSession(final Class<T> cls) {
+		return this.getOrCreateLocalSession(cls, TrUtils.rand.nextInt());
+	}
 }
