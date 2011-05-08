@@ -113,6 +113,8 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 
 			final AssimilateSession relaySession = remoteSession(AssimilateSession.class, connection(relay));
 
+			relaySession.registerFailureListener()
+
 			relaySession.requestNewConnection(requestorAddress, requestorPubkey);
 		}
 	}
