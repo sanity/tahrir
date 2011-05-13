@@ -7,6 +7,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 
 import tahrir.io.serialization.TrSerializer;
+import tahrir.tools.TrUtils;
 
 public class RSAPrivateKeySerializer extends TrSerializer {
 
@@ -17,7 +18,7 @@ public class RSAPrivateKeySerializer extends TrSerializer {
 	@Override
 	protected RSAPrivateKey deserialize(final Type type, final DataInputStream dis) throws IOException {
 		final byte[] bytes = new byte[dis.readInt()];
-		dis.read(bytes);
+		TrUtils.readAllBytes(bytes, dis);
 		try {
 			return (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(bytes));
 		} catch (final Exception e) {
@@ -28,7 +29,7 @@ public class RSAPrivateKeySerializer extends TrSerializer {
 	@Override
 	protected void serialize(final Type type, final Object object, final DataOutputStream dos) throws IOException {
 		final RSAPrivateKey key = (RSAPrivateKey) object;
-		final byte[] encoded = key.getEncoded();
+		final byte[] encoded = new PKCS8EncodedKeySpec(key.getEncoded()).getEncoded();
 		dos.writeInt(encoded.length);
 		dos.write(encoded);
 	}

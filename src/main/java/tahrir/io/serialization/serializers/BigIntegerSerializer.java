@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.math.BigInteger;
 
 import tahrir.io.serialization.TrSerializer;
+import tahrir.tools.TrUtils;
 
 public class BigIntegerSerializer extends TrSerializer {
 
@@ -16,7 +17,7 @@ public class BigIntegerSerializer extends TrSerializer {
 	protected BigInteger deserialize(final Type type, final DataInputStream dis) throws IOException {
 		final int length = dis.readInt();
 		final byte[] bytes = new byte[length];
-		dis.read(bytes);
+		TrUtils.readAllBytes(bytes, dis);
 		return new BigInteger(bytes);
 	}
 

@@ -7,6 +7,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
 import tahrir.io.serialization.TrSerializer;
+import tahrir.tools.TrUtils;
 
 public class RSAPublicKeySerializer extends TrSerializer {
 
@@ -17,7 +18,7 @@ public class RSAPublicKeySerializer extends TrSerializer {
 	@Override
 	public RSAPublicKey deserialize(final Type type, final DataInputStream dis) throws IOException {
 		final byte[] bytes = new byte[dis.readInt()];
-		dis.read(bytes);
+		TrUtils.readAllBytes(bytes, dis);
 		try {
 			return (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(bytes));
 		} catch (final Exception e) {

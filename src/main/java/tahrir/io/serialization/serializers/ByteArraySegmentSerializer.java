@@ -4,7 +4,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 
 import tahrir.io.serialization.TrSerializer;
-import tahrir.tools.ByteArraySegment;
+import tahrir.tools.*;
 
 public class ByteArraySegmentSerializer extends TrSerializer {
 
@@ -16,7 +16,7 @@ public class ByteArraySegmentSerializer extends TrSerializer {
 	protected ByteArraySegment deserialize(final Type type, final DataInputStream dis) throws IOException {
 		final int length = dis.readInt();
 		final byte[] data = new byte[length];
-		dis.read(data);
+		TrUtils.readAllBytes(data, dis);
 		return new ByteArraySegment(data);
 	}
 
