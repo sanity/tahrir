@@ -192,7 +192,7 @@ public abstract class TrSerializer {
 				}
 				return returnObject;
 			} catch (final Exception e) {
-				throw new TrSerializableException(e);
+				throw new TrSerializableException("Exception deserializing " + c.getName(), e);
 			}
 		}
 	}

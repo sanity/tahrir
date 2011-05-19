@@ -1,6 +1,6 @@
 package tahrir;
 
-import java.io.File;
+import java.io.*;
 import java.net.*;
 import java.security.interfaces.*;
 import java.util.ArrayList;
@@ -15,7 +15,8 @@ import tahrir.tools.*;
 import tahrir.tools.Persistence.Modified;
 import tahrir.tools.Persistence.ModifyBlock;
 
-import com.google.inject.internal.Lists;
+import com.google.common.collect.Lists;
+
 
 
 /**
@@ -29,11 +30,16 @@ public class TrNode {
 
 	public final TrConfig config;
 
-	private File privNodeIdFile;
+	public File privNodeIdFile;
 
-	private File pubNodeIdFile;
+	public File pubNodeIdFile;
 
-	private File publicNodeIdsDir;
+	public File publicNodeIdsDir;
+
+	// Mainly for unit tests
+	public TrNode() throws IOException {
+		this(TrUtils.createTempDirectory(), new TrConfig());
+	}
 
 	public TrNode(final File rootDirectory, final TrConfig config)
 	throws SocketException {
@@ -53,7 +59,7 @@ public class TrNode {
 				public void run(final PublicNodeId publicNodeId, final Modified modified) {
 					try {
 						publicNodeId.address = new UdpRemoteAddress(InetAddress.getByName(config.localHostName),
-								config.udpListenPort);
+								config.udp.listenPort);
 					} catch (final UnknownHostException e) {
 						logger.error("Failed to set local node address", e);
 					}
@@ -73,14 +79,6 @@ public class TrNode {
 
 		logger.info("Set up peer manager");
 		peerManager = new TrPeerManager(config.peers, this);
-	}
-
-	// For unit tests
-	public TrNode() {
-		logger.warn("Creating empty TrNode, only do this for unit tests");
-		config = null;
-		peerManager = null;
-		rootDirectory = null;
 	}
 
 	public ArrayList<File> getPublicNodeIdFiles() {

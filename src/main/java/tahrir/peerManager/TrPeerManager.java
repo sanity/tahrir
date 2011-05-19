@@ -6,6 +6,10 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
+
+import org.slf4j.*;
+
 import tahrir.*;
 import tahrir.TrNode.PublicNodeIdInfo;
 import tahrir.io.net.TrRemoteAddress;
@@ -13,11 +17,12 @@ import tahrir.io.net.sessions.AssimilateSessionImpl;
 import tahrir.tools.*;
 import tahrir.tools.Persistence.Modified;
 
-import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
+import com.google.common.collect.*;
 
 public class TrPeerManager {
+	static Logger logger = LoggerFactory.getLogger(TrPeerManager.class);
+
 	public Map<TrRemoteAddress, TrPeerInfo> peers = new MapMaker().makeMap();
 	public final Config config;
 
@@ -53,17 +58,15 @@ public class TrPeerManager {
 		// Check to see whether we need new connections
 		if (config.assimilate && peers.size() < config.minPeers) {
 			final AssimilateSessionImpl as = node.trNet.getOrCreateLocalSession(AssimilateSessionImpl.class);
-
-			final Entry<TrRemoteAddress, TrPeerInfo> assimilatePeer = getPeerForAssimilation();
-
-			as.startAssimilation(new Runnable() {
-
-				public void run() {
-					// TODO Auto-generated method stub
-
-				}
-			}, assimilatePeer.getKey(), assimilatePeer.getValue().publicKey,
-			assimilatePeer.getValue().capabilities.allowsUnsolicitiedInbound);
+			if (peers.isEmpty()) {
+				final ArrayList<File> publicNodeIdFiles = node.getPublicNodeIdFiles();
+				final File assFile = publicNodeIdFiles.get(TrUtils.rand.nextInt(publicNodeIdFiles.size()));
+				final PublicNodeIdInfo assPNII = Persistence.loadReadOnly(PublicNodeIdInfo.class, assFile);
+				// as.startAssimilation(onFailure, assimilateViaAddress,
+				// assimilateViaPublicKey, unilateral)
+			} else {
+				logger.warn("Don't know how to assimilate through already connected peers yet");
+			}
 		}
 	}
 
@@ -79,8 +82,8 @@ public class TrPeerManager {
 		public Assimilation assimilation = new Assimilation();
 
 		public static class Assimilation {
-			public Stat successRate;
-			public Stat time;
+			public BinaryStat successRate = new BinaryStat();
+			public LinearStat successTime = new LinearStat();
 		}
 	}
 
@@ -90,28 +93,53 @@ public class TrPeerManager {
 		public int maxPeers = 20;
 	}
 
-	public static class Stat {
-		private double total;
-		private double sum;
+	public static final class LinearStat {
+		private long total;
+		private double sum, sq_sum;
 
-		public Stat() {
+		public LinearStat() {
 			total = 0;
 			sum = 0;
-		}
-
-		public Stat(final Iterable<Stat> stats) {
-			double ptotal = 0, psum = 0;
-			for (final Stat s : stats) {
-				ptotal++;
-				psum += s.get();
-			}
-			sum = 10;
-			total = (psum / ptotal) / 10.0;
+			sq_sum = 0;
 		}
 
 		public void sample(final double value) {
 			total++;
 			sum += value;
+			sq_sum += value * value;
+		}
+
+		public double getStandardDeviation() {
+			return Math.sqrt(sq_sum / total - (mean() * mean()));
+		}
+
+		public double getNormalRandom() {
+			return TrUtils.rand.nextGaussian() * getStandardDeviation() + mean();
+		}
+
+		public double mean() {
+			return sum / total;
+		}
+	}
+
+	public static class BinaryStat {
+		private long total;
+		private long sum;
+
+		public BinaryStat() {
+			total = 0;
+			sum = 0;
+		}
+
+		public void sample(final boolean value) {
+			total++;
+			if (value) {
+				sum++;
+			}
+		}
+
+		public double getBetaRandom() {
+			return BetaRandomVariable.nextRandomVariable(1 + sum, 1 + total - sum, TrUtils.rng);
 		}
 
 		public double get() {

@@ -38,7 +38,6 @@ public class TrNetTest {
 
 		final UdpNetworkInterface iface2 = new UdpNetworkInterface(conf2, kp2);
 
-
 		final TrNode node1 = new TrNode();
 		final TrNet trn1 = new TrNet(node1, iface1, false);
 
