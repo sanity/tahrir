@@ -1,11 +1,14 @@
 package tahrir.io.net.sessions;
 
 import java.io.File;
+import java.util.ArrayList;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import tahrir.*;
 import tahrir.TrNode.PublicNodeId;
+import tahrir.TrNode.PublicNodeIdInfo;
 import tahrir.tools.*;
 
 public class AssimilateTest {
@@ -20,6 +23,9 @@ public class AssimilateTest {
 
 		final PublicNodeId seedPublicNodeId = seedNode.getPublicNodeId();
 
+		final PublicNodeIdInfo seedNodeInfo = new PublicNodeIdInfo();
+		seedNodeInfo.id = seedPublicNodeId;
+
 		final File joinerDir = TrUtils.createTempDirectory();
 
 		final TrConfig joinerConfig = new TrConfig();
@@ -28,12 +34,18 @@ public class AssimilateTest {
 
 		joinerPubNodeIdsDir.mkdir();
 
-		Persistence.save(new File(joinerPubNodeIdsDir, "joiner-id"), seedPublicNodeId);
+		Persistence.save(new File(joinerPubNodeIdsDir, "joiner-id"), seedNodeInfo);
 
 		seedConfig.capabilities.allowsAssimilation = false;
 		seedConfig.capabilities.allowsUnsolicitiedInbound = false;
 		seedConfig.peers.assimilate = true;
 		final TrNode joinerNode = new TrNode(joinerDir, joinerConfig);
+
+		final ArrayList<File> pubNodeFiles = joinerNode.getPublicNodeIdFiles();
+
+		Assert.assertEquals(pubNodeFiles.size(), 1, "Ensure that the joiner has the seed node as a public node");
+
+		joinerNode.peerManager.maintainance();
 
 		Thread.sleep(10000);
 	}

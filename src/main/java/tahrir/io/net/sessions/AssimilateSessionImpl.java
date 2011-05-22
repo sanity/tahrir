@@ -1,7 +1,6 @@
 package tahrir.io.net.sessions;
 
 import java.security.interfaces.RSAPublicKey;
-import java.util.Set;
 import java.util.concurrent.*;
 
 import tahrir.*;
@@ -17,6 +16,7 @@ import tahrir.tools.*;
 import com.google.common.base.Function;
 
 public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSession {
+	public static final long RELAY_ASSIMILATION_TIMEOUT_SECONDS = 60;
 	private boolean locallyInitiated;
 	private AssimilateSession pubNodeSession;
 	private AssimilateSession receivedRequestFrom;
@@ -25,7 +25,6 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 	private Capabilities remoteCapabilities;
 	private TrRemoteAddress requestorAddress;
 	private RSAPublicKey requestorPubkey;
-	private Function<TrRemoteAddress, Void> onAssimilation;
 	private TrRemoteAddress assimilateViaAddress;
 	private long requestNewConnectionTime;
 	private ScheduledFuture<?> requestNewConnectionFuture;
@@ -36,9 +35,8 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 	}
 
 	public void startAssimilation(final Runnable onFailure,
-			final TrRemoteAddress assimilateViaAddress, final RSAPublicKey assimilateViaPublicKey,
+ final TrRemoteAddress assimilateViaAddress,
 			final boolean unilateral) {
-		onAssimilation = onAssimilation;
 		this.assimilateViaAddress = assimilateViaAddress;
 		locallyInitiated = true;
 		pubNodeSession = this.remoteSession(AssimilateSession.class,
@@ -106,29 +104,29 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 					node.peerManager.updatePeerInfo(relay, new Function<TrPeerManager.TrPeerInfo, Void>() {
 
 						public Void apply(final TrPeerInfo tpi) {
-							tpi.assimilation.successRate.sample(false);
+							node.peerManager.reportAssimilationFailure(relay);
 							return null;
 						}
 					});
 				}
-			}, 5, TimeUnit.MINUTES);
+			}, RELAY_ASSIMILATION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
 			final AssimilateSession relaySession = remoteSession(AssimilateSession.class, connection(relay));
 
 			relaySession.registerFailureListener(new Runnable() {
 
 				public void run() {
-					// TODO: Handle failure by trying a new relay having
-					// recorded that this one failed
-					logger.warn("Relay of Assimilate.requestNewConnection failed, handling not yet implemented");
+					node.peerManager.reportAssimilationFailure(relay);
+					// Note: Important to use requestAddress field rather than
+					// the parameter because the parameter may be null
+					AssimilateSessionImpl.this.requestNewConnection(AssimilateSessionImpl.this.requestorAddress,
+							requestorPubkey);
 				}
 			});
 
 			relaySession.requestNewConnection(requestorAddress, requestorPubkey);
 		}
 	}
-
-	Set<TrRemoteAddress> failedRelays = new ConcurrentSkipListSet<TrRemoteAddress>();
 
 	public void acceptNewConnection(final TrRemoteAddress acceptor, final RSAPublicKey acceptorPubkey) {
 		if (!sender().equals(relay)) {
@@ -138,13 +136,10 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 		node.peerManager.updatePeerInfo(relay, new Function<TrPeerManager.TrPeerInfo, Void>() {
 
 			public Void apply(final TrPeerInfo tpi) {
-				tpi.assimilation.successRate.sample(true);
-				tpi.assimilation.successTime.sample(System.currentTimeMillis() - requestNewConnectionTime);
+				node.peerManager.reportAssimilationSuccess(relay, System.currentTimeMillis() - requestNewConnectionTime);
 				return null;
 			}
 		});
-
-
 
 		if (!locallyInitiated) {
 			receivedRequestFrom.acceptNewConnection(acceptor, acceptorPubkey);

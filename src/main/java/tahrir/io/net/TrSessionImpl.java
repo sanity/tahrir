@@ -1,6 +1,5 @@
 package tahrir.io.net;
 
-import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -37,13 +36,6 @@ public abstract class TrSessionImpl implements TrSession {
 
 	public final TrRemoteConnection connection(final TrRemoteAddress address) {
 		return connection(address, null, false);
-	}
-
-	public final TrRemoteConnection connection(final TrRemoteAddress address,
-			final RSAPublicKey pubKey,
-			final boolean unilateral) {
-		toUnregister.add(address);
-		return trNet.connectionManager.getConnection(address, pubKey, unilateral, userLabel);
 	}
 
 	public final <T extends TrSession> T remoteSession(final Class<T> cls,
