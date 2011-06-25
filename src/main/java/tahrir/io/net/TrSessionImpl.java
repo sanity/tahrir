@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.slf4j.*;
 
 import tahrir.TrNode;
+import tahrir.peerManager.TrPeerManager.TrPeerInfo;
 
 public abstract class TrSessionImpl implements TrSession {
 	protected Logger logger;
@@ -24,6 +25,10 @@ public abstract class TrSessionImpl implements TrSession {
 		this.trNet = trNet;
 	}
 
+	protected TrRemoteConnection connection(final TrPeerInfo peerInfo) {
+		return connection(peerInfo.addr, peerInfo.publicKey, peerInfo.capabilities.allowsUnsolicitiedInbound);
+	}
+
 	public TrRemoteAddress sender() {
 		final TrRemoteAddress r = sender.get();
 		if (r == null)
@@ -35,23 +40,23 @@ public abstract class TrSessionImpl implements TrSession {
 	private final Set<TrRemoteAddress> toUnregister = Collections.synchronizedSet(new HashSet<TrRemoteAddress>());
 	private final String userLabel;
 
-	public final TrRemoteConnection connection(final TrRemoteAddress address) {
+	protected final TrRemoteConnection connection(final TrRemoteAddress address) {
 		return connection(address, null, false);
 	}
 
-	public final TrRemoteConnection connection(final TrRemoteAddress address,
+	protected final TrRemoteConnection connection(final TrRemoteAddress address,
 			final RSAPublicKey pubKey,
 			final boolean unilateral) {
 		toUnregister.add(address);
 		return trNet.connectionManager.getConnection(address, pubKey, unilateral, userLabel);
 	}
 
-	public final <T extends TrSession> T remoteSession(final Class<T> cls,
+	protected final <T extends TrSession> T remoteSession(final Class<T> cls,
 			final TrRemoteConnection conn) {
 		return remoteSession(cls, conn, sessionId);
 	}
 
-	public final <T extends TrSession> T remoteSession(final Class<T> cls,
+	protected final <T extends TrSession> T remoteSession(final Class<T> cls,
 			final TrRemoteConnection conn,
 			final int sessionId) {
 		return trNet.getOrCreateRemoteSession(cls, conn, sessionId);
@@ -65,7 +70,7 @@ public abstract class TrSessionImpl implements TrSession {
 		throw new RuntimeException("registerFailureListner() can only be called on a remote session");
 	}
 
-	public final void terminate() {
+	protected final void terminate() {
 		for (final TrRemoteAddress ra : toUnregister) {
 			trNet.connectionManager.noLongerNeeded(ra, userLabel);
 		}

@@ -36,7 +36,7 @@ public class TrNet {
 
 	private final Map<Integer, MethodPair> methodsById = Maps.newHashMap();
 
-	final Map<Tuple2<String, Integer>, TrSessionImpl> sessions = new MapMaker()
+	public final Map<Tuple2<String, Integer>, TrSessionImpl> sessions = new MapMaker()
 	.expiration(30, TimeUnit.MINUTES)
 	.evictionListener(new MapEvictionListener<Tuple2<String, Integer>, TrSessionImpl>() {
 

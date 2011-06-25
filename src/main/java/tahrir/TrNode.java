@@ -9,6 +9,7 @@ import org.slf4j.*;
 
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.*;
+import tahrir.io.net.sessions.*;
 import tahrir.io.net.udpV1.*;
 import tahrir.peerManager.TrPeerManager;
 import tahrir.tools.*;
@@ -79,6 +80,12 @@ public class TrNode {
 
 		logger.info("Set up peer manager");
 		peerManager = new TrPeerManager(config.peers, this);
+
+		registerSessions();
+	}
+
+	private void registerSessions() {
+		trNet.registerSessionClass(AssimilateSession.class, AssimilateSessionImpl.class);
 	}
 
 	public ArrayList<File> getPublicNodeIdFiles() {
