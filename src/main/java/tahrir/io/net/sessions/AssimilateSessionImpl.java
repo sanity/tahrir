@@ -34,13 +34,10 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 		super(sessionId, node, trNet);
 	}
 
-	public void startAssimilation(final Runnable onFailure, final TrRemoteAddress assimilateViaAddress,
-			final RSAPublicKey assimilateViaPublicKey,
-			final boolean unilateral) {
-		this.assimilateViaAddress = assimilateViaAddress;
+	public void startAssimilation(final Runnable onFailure, final TrRemoteConnection connection) {
+		assimilateViaAddress = connection.getRemoteAddress();
 		locallyInitiated = true;
-		pubNodeSession = this.remoteSession(AssimilateSession.class,
-				connection(assimilateViaAddress, assimilateViaPublicKey, unilateral));
+		pubNodeSession = this.remoteSession(AssimilateSession.class, connection);
 		pubNodeSession.registerFailureListener(onFailure);
 		pubNodeSession.requestNewConnection(node.getPublicNodeId().publicKey);
 	}

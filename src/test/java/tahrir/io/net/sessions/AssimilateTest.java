@@ -35,6 +35,6 @@ public class AssimilateTest {
 		seedConfig.peers.assimilate = true;
 		final TrNode joinerNode = new TrNode(joinerDir, joinerConfig);
 
-		Thread.sleep(10000);
+		Thread.sleep(1000000);
 	}
 }

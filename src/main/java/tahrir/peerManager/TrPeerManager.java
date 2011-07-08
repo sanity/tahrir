@@ -10,8 +10,7 @@ import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
 
 import org.slf4j.*;
 
-import tahrir.*;
-import tahrir.TrNode.PublicNodeIdInfo;
+import tahrir.TrNode;
 import tahrir.io.net.TrRemoteAddress;
 import tahrir.io.net.sessions.AssimilateSessionImpl;
 import tahrir.peerManager.TrPeerManager.TrPeerInfo.Assimilation;
@@ -117,17 +116,26 @@ public class TrPeerManager {
 		// Check to see whether we need new connections
 		if (config.assimilate && peers.size() < config.minPeers) {
 			final AssimilateSessionImpl as = node.trNet.getOrCreateLocalSession(AssimilateSessionImpl.class);
-			if (peers.isEmpty()) {
-				final ArrayList<File> publicNodeIdFiles = node.getPublicNodeIdFiles();
-				final File assFile = publicNodeIdFiles.get(TrUtils.rand.nextInt(publicNodeIdFiles.size()));
-				final PublicNodeIdInfo assPNII = Persistence.loadReadOnly(PublicNodeIdInfo.class, assFile);
-				final TrPeerInfo peerForAssimilation = getPeerForAssimilation();
+			// if (peers.isEmpty()) {
+			// final ArrayList<File> publicNodeIdFiles =
+			// node.getPublicNodeIdFiles();
+			// if (publicNodeIdFiles.isEmpty()) {
+			// logger.warn("Public node directory is empty: " +
+			// node.publicNodeIdsDir);
+			// }
+			// final File assFile =
+			// publicNodeIdFiles.get(TrUtils.rand.nextInt(publicNodeIdFiles.size()));
+			// logger.debug("Attempting to assimilate through public node id " +
+			// assFile);
+			// final PublicNodeIdInfo assPNII =
+			// Persistence.loadReadOnly(PublicNodeIdInfo.class, assFile);
+			final TrPeerInfo peerForAssimilation = getPeerForAssimilation();
 
-				as.startAssimilation(TrUtils.noopRunnable, peerForAssimilation.addr, peerForAssimilation.publicKey,
-						peerForAssimilation.capabilities.allowsUnsolicitiedInbound);
-			} else {
-				logger.warn("Don't know how to assimilate through already connected peers yet");
-			}
+			as.startAssimilation(TrUtils.noopRunnable, peerForAssimilation.addr, peerForAssimilation.publicKey,
+					peerForAssimilation.capabilities.allowsUnsolicitiedInbound);
+			// } else {
+			// logger.warn("Don't know how to assimilate through already connected peers yet");
+			// }
 		}
 	}
 

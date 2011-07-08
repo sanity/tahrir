@@ -28,6 +28,10 @@ public abstract class TrRemoteConnection {
 		this.unilateral = unilateral;
 	}
 
+	public TrRemoteAddress getRemoteAddress() {
+		return remoteAddress;
+	}
+
 	public abstract void send(final ByteArraySegment message, final double priority,
 			final TrSentReceivedListener sentListener) throws IOException;
 
