@@ -30,6 +30,15 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
 					<descriptorRefs>
@@ -58,7 +67,8 @@
 				<configuration>
 					<options>
 						<option>-allowaccessmodification</option>
-						<option>-keep public class ${project.build.mainClass} { public static void main(java.lang.String[]);}</option>
+						<option>-keep public class ${project.build.mainClass} { public
+							static void main(java.lang.String[]);}</option>
 						<option>-dontwarn</option>
 						<option>-dontskipnonpubliclibraryclasses</option>
 						<option>-dontskipnonpubliclibraryclassmembers</option>
@@ -67,8 +77,8 @@
 					<injar>${project.build.finalName}-jar-with-dependencies.jar</injar>
 					<outjar>${project.build.finalName}-shrunk.jar</outjar>
 					<libs>
-					    <!-- WARNING: This is required on OSX, will need to be adjusted for other platforms because
-					         these jar files are in a different location -->
+						<!-- WARNING: This is required on OSX, will need to be adjusted for 
+							other platforms because these jar files are in a different location -->
 						<lib>${java.home}/../Classes/classes.jar</lib>
 						<lib>${java.home}/../Classes/jce.jar</lib>
 					</libs>

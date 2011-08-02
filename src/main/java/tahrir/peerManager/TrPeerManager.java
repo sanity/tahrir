@@ -11,7 +11,7 @@ import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
 import org.slf4j.*;
 
 import tahrir.TrNode;
-import tahrir.io.net.TrRemoteAddress;
+import tahrir.io.net.*;
 import tahrir.io.net.sessions.AssimilateSessionImpl;
 import tahrir.peerManager.TrPeerManager.TrPeerInfo.Assimilation;
 import tahrir.tools.*;
@@ -40,7 +40,11 @@ public class TrPeerManager {
 		TrUtils.executor.scheduleAtFixedRate(new Runnable() {
 
 			public void run() {
-				maintainance();
+				try {
+					maintainance();
+				} catch (final Exception e) {
+					logger.error("Error running maintainance", e);
+				}
 			}
 		}, 0, 1, TimeUnit.MINUTES);
 	}
@@ -116,23 +120,15 @@ public class TrPeerManager {
 		// Check to see whether we need new connections
 		if (config.assimilate && peers.size() < config.minPeers) {
 			final AssimilateSessionImpl as = node.trNet.getOrCreateLocalSession(AssimilateSessionImpl.class);
-			// if (peers.isEmpty()) {
-			// final ArrayList<File> publicNodeIdFiles =
-			// node.getPublicNodeIdFiles();
-			// if (publicNodeIdFiles.isEmpty()) {
-			// logger.warn("Public node directory is empty: " +
-			// node.publicNodeIdsDir);
-			// }
-			// final File assFile =
-			// publicNodeIdFiles.get(TrUtils.rand.nextInt(publicNodeIdFiles.size()));
-			// logger.debug("Attempting to assimilate through public node id " +
-			// assFile);
-			// final PublicNodeIdInfo assPNII =
-			// Persistence.loadReadOnly(PublicNodeIdInfo.class, assFile);
-			final TrPeerInfo peerForAssimilation = getPeerForAssimilation();
+			final TrPeerInfo ap = getPeerForAssimilation();
 
-			as.startAssimilation(TrUtils.noopRunnable, peerForAssimilation.addr, peerForAssimilation.publicKey,
-					peerForAssimilation.capabilities.allowsUnsolicitiedInbound);
+			final TrRemoteConnection apc = node.trNet.connectionManager.getConnection(ap.addr, ap.publicKey,
+					ap.capabilities.allowsUnsolicitiedInbound, "assimilate");
+
+			as.startAssimilation(TrUtils.noopRunnable, apc);
+
+			node.trNet.connectionManager.noLongerNeeded(apc.getRemoteAddress(), "assimilate");
+
 			// } else {
 			// logger.warn("Don't know how to assimilate through already connected peers yet");
 			// }
