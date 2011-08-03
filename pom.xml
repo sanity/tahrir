@@ -49,6 +49,14 @@
 							<mainClass>tahrir.TrMain</mainClass>
 						</manifest>
 					</archive>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>attached</goal>
+							</goals>
+						</execution>
+					</executions>
 				</configuration>
 			</plugin>
 			<!-- Proguard setup, see http://blog.boxofrats.com/2009/08/07/setting-up-maven-for-scala-and-proguard/ -->
