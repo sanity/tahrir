@@ -39,27 +39,27 @@
 				</configuration>
 			</plugin>
 			<plugin>
-			    <artifactId>maven-assembly-plugin</artifactId>
-			    <version>2.2.1</version>
-			    <configuration>
-			        <descriptorRefs>
-			            <descriptorRef>jar-with-dependencies</descriptorRef>
-			        </descriptorRefs>
-			        <archive>
-			            <manifest>
-			                <mainClass>tahrir.TrMain</mainClass>
-			            </manifest>
-			        </archive>
-			     </configuration>
-			    <executions>
-			        <execution>
-			            <id>make-assembly</id> 
-			            <phase>package</phase> <!-- bind to the packaging phase -->
-			            <goals>
-			                <goal>single</goal>
-			            </goals>
-			        </execution>
-			    </executions>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<archive>
+						<manifest>
+							<mainClass>tahrir.TrMain</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase> <!-- bind to the packaging phase -->
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<!-- Proguard setup, see http://blog.boxofrats.com/2009/08/07/setting-up-maven-for-scala-and-proguard/ -->
 			<plugin>
@@ -97,6 +97,11 @@
 		</plugins>
 	</build>
 	<repositories>
+		<repository>
+			<id>doodleproject-repo</id>
+			<name>DoodleProject Maven 2 Repository</name>
+			<url>http://doodleproject.sourceforge.net/maven2/release</url>
+		</repository>
 		<repository>
 			<id>repo2_maven_org</id>
 			<url>http://repo2.maven.org/maven2</url>
