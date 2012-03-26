@@ -18,14 +18,6 @@
 				<enabled>false</enabled>
 			</releases>
 		</pluginRepository>
-		<pluginRepository>
-			<id>doodleproject-repo</id>
-			<name>DoodleProject Maven 2 Repository</name>
-			<url>http://doodleproject.sourceforge.net/maven2/release</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</pluginRepository>
 	</pluginRepositories>
 	<build>
 		<plugins>
