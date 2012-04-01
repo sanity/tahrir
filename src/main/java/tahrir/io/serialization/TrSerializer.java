@@ -196,6 +196,8 @@ public abstract class TrSerializer {
 					}
 				}
 				return returnObject;
+			} catch (final InstantiationException e) {
+				throw new TrSerializableException("Exception deserializing " + c.getName()+", confirm that it has a no-argument public constructor", e);
 			} catch (final Exception e) {
 				throw new TrSerializableException("Exception deserializing " + c.getName(), e);
 			}

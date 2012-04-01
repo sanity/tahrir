@@ -186,9 +186,14 @@ public class TrPeerManager {
 	}
 
 	public static class BinaryStat {
-		private final int maxRecall;
+		private int maxRecall;
 		private long sum;
 		private long total;
+
+		// For serialization
+		public BinaryStat() {
+
+		}
 
 		public BinaryStat(final int maxRecall) {
 			this.maxRecall = maxRecall;
@@ -229,9 +234,14 @@ public class TrPeerManager {
 	}
 
 	public static final class LinearStat {
-		private final int maxRecall;
+		private int maxRecall;
 		private double sum, sq_sum;
 		private long total;
+
+		// For serialization
+		public LinearStat() {
+
+		}
 
 		public LinearStat(final int maxRecall) {
 			this.maxRecall = maxRecall;
@@ -285,6 +295,17 @@ public class TrPeerManager {
 			public long lastFailureTime = 0;
 			public BinaryStat successRate = new BinaryStat(10);
 			public LinearStat successTimeSqrt = new LinearStat(10);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((addr == null) ? 0 : addr.hashCode());
+			result = prime * result + ((assimilation == null) ? 0 : assimilation.hashCode());
+			result = prime * result + ((capabilities == null) ? 0 : capabilities.hashCode());
+			result = prime * result + ((publicKey == null) ? 0 : publicKey.hashCode());
+			return result;
 		}
 	}
 }
