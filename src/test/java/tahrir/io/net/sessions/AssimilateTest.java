@@ -15,6 +15,7 @@ public class AssimilateTest {
 		seedConfig.capabilities.allowsAssimilation = true;
 		seedConfig.capabilities.allowsUnsolicitiedInbound = true;
 		seedConfig.peers.assimilate = false;
+		seedConfig.localHostName = "localhost";
 		final File seedDir = TrUtils.createTempDirectory();
 		final TrNode seedNode = new TrNode(seedDir, seedConfig);
 

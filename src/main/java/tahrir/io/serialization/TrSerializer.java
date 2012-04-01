@@ -6,10 +6,11 @@ import java.security.interfaces.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.common.collect.Maps;
+
+import tahrir.io.net.TrRemoteAddress;
 import tahrir.io.serialization.serializers.*;
 import tahrir.tools.ByteArraySegment;
-
-import com.google.common.collect.Maps;
 
 public abstract class TrSerializer {
 
@@ -33,7 +34,7 @@ public abstract class TrSerializer {
 		registerSerializer(new RSAPublicKeySerializer(), RSAPublicKey.class);
 		registerSerializer(new RSAPrivateKeySerializer(), RSAPrivateKey.class);
 		registerSerializer(new ByteArraySegmentSerializer(), ByteArraySegment.class);
-		registerSerializer(new TrRemoteAddressSerializer(), TrRemoteAddressSerializer.class);
+		registerSerializer(new TrRemoteAddressSerializer(), TrRemoteAddress.class);
 	}
 
 	private static final Map<Class<?>, Map<Integer, Field>> fieldMap = Maps.newHashMap();
@@ -86,7 +87,9 @@ public abstract class TrSerializer {
 			f.setAccessible(true);
 			ret.add(f);
 		}
-		ret.addAll(getAllFields(c.getSuperclass()));
+		if (c.getSuperclass() != null) {
+			ret.addAll(getAllFields(c.getSuperclass()));
+		}
 		return ret;
 	}
 
@@ -134,7 +137,7 @@ public abstract class TrSerializer {
 						} else {
 							if (field.getGenericType() instanceof ParameterizedType)
 								throw new TrSerializableException(
-								"If you want to serialize a generic type you must register a TahrirSerializer for it");
+										"If you want to serialize a generic type you must register a TahrirSerializer for it");
 							serializeTo(fieldObject, dos);
 						}
 
@@ -225,9 +228,9 @@ public abstract class TrSerializer {
 	// }
 
 	protected abstract Object deserialize(Type type, DataInputStream dis)
-	throws TrSerializableException, IOException;
+			throws TrSerializableException, IOException;
 
 	protected abstract void serialize(Type type, Object object, DataOutputStream dos)
-	throws TrSerializableException,
-	IOException;
+			throws TrSerializableException,
+			IOException;
 }

@@ -31,6 +31,7 @@ public class TrRemoteAddressSerializer extends TrSerializer {
 		if (!(object instanceof UdpRemoteAddress))
 			throw new TrSerializableException("Unrecognized TrRemoteAddress type: " + object.getClass());
 		else {
+			dos.writeByte(UDP_REMOTE_ADDRESS);
 			TrSerializer.serializeTo(object, dos);
 		}
 	}
