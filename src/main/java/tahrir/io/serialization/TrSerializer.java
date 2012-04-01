@@ -2,6 +2,7 @@ package tahrir.io.serialization;
 
 import java.io.*;
 import java.lang.reflect.*;
+import java.net.InetAddress;
 import java.security.interfaces.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,6 +35,7 @@ public abstract class TrSerializer {
 		registerSerializer(new RSAPublicKeySerializer(), RSAPublicKey.class);
 		registerSerializer(new RSAPrivateKeySerializer(), RSAPrivateKey.class);
 		registerSerializer(new ByteArraySegmentSerializer(), ByteArraySegment.class);
+		registerSerializer(new InetAddressSerializer(), InetAddress.class);
 		registerSerializer(new TrRemoteAddressSerializer(), TrRemoteAddress.class);
 	}
 

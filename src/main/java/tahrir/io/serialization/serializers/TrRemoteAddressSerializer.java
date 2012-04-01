@@ -2,6 +2,7 @@ package tahrir.io.serialization.serializers;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.net.InetAddress;
 
 import tahrir.io.net.TrRemoteAddress;
 import tahrir.io.net.udpV1.UdpRemoteAddress;
@@ -20,7 +21,7 @@ public class TrRemoteAddressSerializer extends TrSerializer {
 	TrSerializableException {
 		final byte raType = dis.readByte();
 		if (raType == UDP_REMOTE_ADDRESS)
-			return TrSerializer.deserializeFrom(UdpRemoteAddress.class, dis);
+			return new UdpRemoteAddress(TrSerializer.deserializeFrom(InetAddress.class, dis), dis.readInt());
 		else
 			throw new TrSerializableException("Unrecognised TrRemoteAddress type: " + raType);
 	}
@@ -32,7 +33,9 @@ public class TrRemoteAddressSerializer extends TrSerializer {
 			throw new TrSerializableException("Unrecognized TrRemoteAddress type: " + object.getClass());
 		else {
 			dos.writeByte(UDP_REMOTE_ADDRESS);
-			TrSerializer.serializeTo(object, dos);
+			final UdpRemoteAddress ura = (UdpRemoteAddress) object;
+			TrSerializer.serializeTo(ura.inetAddress, dos);
+			dos.writeInt(ura.port);
 		}
 	}
 
