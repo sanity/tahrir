@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 
 import tahrir.*;
 import tahrir.TrNode.PublicNodeId;
+import tahrir.peerManager.TrPeerManager;
 import tahrir.tools.*;
 
 public class AssimilateTest {
@@ -29,7 +30,7 @@ public class AssimilateTest {
 
 		joinerPubNodeIdsDir.mkdir();
 
-		Persistence.save(new File(joinerPubNodeIdsDir, "joiner-id"), seedPublicNodeId);
+		Persistence.save(new File(joinerPubNodeIdsDir, "joiner-id"), new TrPeerManager.TrPeerInfo(seedPublicNodeId));
 
 		seedConfig.capabilities.allowsAssimilation = false;
 		seedConfig.capabilities.allowsUnsolicitiedInbound = false;

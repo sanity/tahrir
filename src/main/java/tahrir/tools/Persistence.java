@@ -4,21 +4,21 @@ import java.io.*;
 import java.util.Map;
 import java.util.zip.*;
 
-import tahrir.io.serialization.*;
-
 import com.google.common.collect.MapMaker;
+
+import tahrir.io.serialization.*;
 
 public class Persistence {
 	private static final Map<File, Tuple2<Long, Object>> cache = new MapMaker().makeMap();
 
 	public static <T> void loadAndModify(final Class<T> cls, final File f, final ModifyBlock<T> mb) {
 		synchronized (f) {
-				final T object = loadReadOnly(cls, f);
-				final Modified wasModified = new Modified();
-				mb.run(object, wasModified);
-				if (wasModified.isModified()) {
-					save(f, object);
-				}
+			final T object = loadReadOnly(cls, f);
+			final Modified wasModified = new Modified();
+			mb.run(object, wasModified);
+			if (wasModified.isModified()) {
+				save(f, object);
+			}
 		}
 	}
 

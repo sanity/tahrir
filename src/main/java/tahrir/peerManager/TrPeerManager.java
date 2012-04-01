@@ -1,7 +1,6 @@
 package tahrir.peerManager;
 
 import java.io.File;
-import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
@@ -13,7 +12,8 @@ import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
 
 import org.slf4j.*;
 
-import tahrir.TrNode;
+import tahrir.*;
+import tahrir.TrNode.PublicNodeId;
 import tahrir.io.net.*;
 import tahrir.io.net.sessions.AssimilateSessionImpl;
 import tahrir.peerManager.TrPeerManager.TrPeerInfo.Assimilation;
@@ -49,15 +49,14 @@ public class TrPeerManager {
 		}, 0, 1, TimeUnit.MINUTES);
 	}
 
-	public void addNewPeer(final TrRemoteAddress address, final RSAPublicKey pubKey, final Capabilities capabilities) {
-		final TrPeerInfo tpi = new TrPeerInfo(address, pubKey);
+	public void addNewPeer(final PublicNodeId pubNodeId, final Capabilities capabilities) {
+		final TrPeerInfo tpi = new TrPeerInfo(pubNodeId);
 		tpi.capabilities = capabilities;
-		tpi.publicKey = pubKey;
-		peers.put(address, tpi);
-		node.trNet.connectionManager.getConnection(address, pubKey, false, trNetLabel, new Runnable() {
+		peers.put(pubNodeId.address, tpi);
+		node.trNet.connectionManager.getConnection(pubNodeId.address, pubNodeId.publicKey, false, trNetLabel, new Runnable() {
 
 			public void run() {
-				peers.remove(address);
+				peers.remove(pubNodeId.address);
 			}
 		});
 	}
@@ -122,7 +121,7 @@ public class TrPeerManager {
 			final AssimilateSessionImpl as = node.trNet.getOrCreateLocalSession(AssimilateSessionImpl.class);
 			final TrPeerInfo ap = getPeerForAssimilation();
 
-			final TrRemoteConnection apc = node.trNet.connectionManager.getConnection(ap.addr, ap.publicKey,
+			final TrRemoteConnection apc = node.trNet.connectionManager.getConnection(ap.publicNodeId.address, ap.publicNodeId.publicKey,
 					ap.capabilities.allowsUnsolicitiedInbound, "assimilate");
 
 			as.startAssimilation(TrUtils.noopRunnable, apc);
@@ -276,36 +275,23 @@ public class TrPeerManager {
 	}
 
 	public static class TrPeerInfo {
-		public TrRemoteAddress addr;
 		public Assimilation assimilation = new Assimilation();
 		public Capabilities capabilities;
-		public RSAPublicKey publicKey;
+		public PublicNodeId publicNodeId;
 
 		// To allow deserialization
 		public TrPeerInfo() {
 
 		}
 
-		public TrPeerInfo(final TrRemoteAddress addr, final RSAPublicKey pubKey) {
-			this.addr = addr;
-			publicKey = pubKey;
+		public TrPeerInfo(final PublicNodeId publicNodeId) {
+			this.publicNodeId = publicNodeId;
 		}
 
 		public static class Assimilation {
 			public long lastFailureTime = 0;
 			public BinaryStat successRate = new BinaryStat(10);
 			public LinearStat successTimeSqrt = new LinearStat(10);
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((addr == null) ? 0 : addr.hashCode());
-			result = prime * result + ((assimilation == null) ? 0 : assimilation.hashCode());
-			result = prime * result + ((capabilities == null) ? 0 : capabilities.hashCode());
-			result = prime * result + ((publicKey == null) ? 0 : publicKey.hashCode());
-			return result;
 		}
 	}
 }

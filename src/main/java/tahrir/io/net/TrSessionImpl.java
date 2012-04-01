@@ -26,7 +26,7 @@ public abstract class TrSessionImpl implements TrSession {
 	}
 
 	protected TrRemoteConnection connection(final TrPeerInfo peerInfo) {
-		return connection(peerInfo.addr, peerInfo.publicKey, peerInfo.capabilities.allowsUnsolicitiedInbound);
+		return connection(peerInfo.publicNodeId.address, peerInfo.publicNodeId.publicKey, peerInfo.capabilities.allowsUnsolicitiedInbound);
 	}
 
 	public TrRemoteAddress sender() {

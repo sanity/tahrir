@@ -3,6 +3,8 @@ package tahrir.io.net.sessions;
 import java.security.interfaces.RSAPublicKey;
 import java.util.concurrent.*;
 
+import com.google.common.base.Function;
+
 import tahrir.*;
 import tahrir.TrNode.PublicNodeId;
 import tahrir.io.net.*;
@@ -12,8 +14,6 @@ import tahrir.peerManager.TrPeerManager.TrPeerInfo;
 import tahrir.tools.Persistence.Modified;
 import tahrir.tools.Persistence.ModifyBlock;
 import tahrir.tools.*;
-
-import com.google.common.base.Function;
 
 public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSession {
 	public static final long RELAY_ASSIMILATION_TIMEOUT_SECONDS = 60;
@@ -98,10 +98,10 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 			requestNewConnectionFuture = TrUtils.executor.schedule(new Runnable() {
 
 				public void run() {
-					node.peerManager.updatePeerInfo(relay.addr, new Function<TrPeerManager.TrPeerInfo, Void>() {
+					node.peerManager.updatePeerInfo(relay.publicNodeId.address, new Function<TrPeerManager.TrPeerInfo, Void>() {
 
 						public Void apply(final TrPeerInfo tpi) {
-							node.peerManager.reportAssimilationFailure(relay.addr);
+							node.peerManager.reportAssimilationFailure(relay.publicNodeId.address);
 							return null;
 						}
 					});
@@ -113,7 +113,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 			relaySession.registerFailureListener(new Runnable() {
 
 				public void run() {
-					node.peerManager.reportAssimilationFailure(relay.addr);
+					node.peerManager.reportAssimilationFailure(relay.publicNodeId.address);
 					// Note: Important to use requestAddress field rather than
 					// the parameter because the parameter may be null
 					AssimilateSessionImpl.this.requestNewConnection(AssimilateSessionImpl.this.requestorAddress,
@@ -130,10 +130,10 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 			logger.warn("Received acceptNewConnection() from {}, but was expecting it from {}", sender(), relay);
 		}
 		requestNewConnectionFuture.cancel(false);
-		node.peerManager.updatePeerInfo(relay.addr, new Function<TrPeerManager.TrPeerInfo, Void>() {
+		node.peerManager.updatePeerInfo(relay.publicNodeId.address, new Function<TrPeerManager.TrPeerInfo, Void>() {
 
 			public Void apply(final TrPeerInfo tpi) {
-				node.peerManager.reportAssimilationSuccess(relay.addr, System.currentTimeMillis()
+				node.peerManager.reportAssimilationSuccess(relay.publicNodeId.address, System.currentTimeMillis()
 						- requestNewConnectionTime);
 				return null;
 			}
@@ -164,8 +164,8 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 
 	private void addNewConnection() {
 		if (acceptorAddress != null && remoteCapabilities != null) {
-			node.peerManager.addNewPeer(locallyInitiated ? acceptorAddress : requestorAddress,
-					locallyInitiated ? acceptorPubkey : requestorPubkey, remoteCapabilities);
+			node.peerManager.addNewPeer(new PublicNodeId(locallyInitiated ? acceptorAddress : requestorAddress,
+					locallyInitiated ? acceptorPubkey : requestorPubkey), remoteCapabilities);
 		}
 	}
 }

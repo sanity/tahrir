@@ -5,6 +5,8 @@ import java.net.*;
 import java.security.interfaces.*;
 import java.util.ArrayList;
 
+import com.google.common.collect.Lists;
+
 import org.slf4j.*;
 
 import tahrir.io.crypto.TrCrypto;
@@ -15,8 +17,6 @@ import tahrir.peerManager.TrPeerManager;
 import tahrir.tools.*;
 import tahrir.tools.Persistence.Modified;
 import tahrir.tools.Persistence.ModifyBlock;
-
-import com.google.common.collect.Lists;
 
 
 
@@ -43,7 +43,7 @@ public class TrNode {
 	}
 
 	public TrNode(final File rootDirectory, final TrConfig config)
-	throws SocketException {
+			throws SocketException {
 		this.rootDirectory = rootDirectory;
 		this.config = config;
 		privNodeIdFile = new File(rootDirectory, config.privateNodeId);
@@ -146,6 +146,16 @@ public class TrNode {
 	public static class PublicNodeId {
 		public TrRemoteAddress address;
 		public RSAPublicKey publicKey;
+
+		public PublicNodeId() {
+
+		}
+
+		public PublicNodeId(final TrRemoteAddress address,final RSAPublicKey publicKey) {
+			this.address = address;
+			this.publicKey = publicKey;
+
+		}
 
 		@Override
 		public int hashCode() {

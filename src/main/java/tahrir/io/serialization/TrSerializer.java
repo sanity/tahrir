@@ -178,7 +178,7 @@ public abstract class TrSerializer {
 					final int fieldHash = dis.readInt();
 					final Field field = fMap.get(fieldHash);
 					if (field == null)
-						throw new TrSerializableException("Unrecognized fieldHash: " + fieldHash);
+						throw new TrSerializableException("Unrecognized fieldHash: " + fieldHash+" while automatically deserializing a "+c);
 					if (field.getType().isArray()) {
 						final int arrayLen = dis.readInt();
 						final Object array = Array.newInstance(field.getType().getComponentType(), arrayLen);
