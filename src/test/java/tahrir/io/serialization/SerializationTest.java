@@ -1,10 +1,15 @@
 package tahrir.io.serialization;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.util.*;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import tahrir.io.crypto.TrCrypto;
+import tahrir.io.net.udpV1.UdpRemoteAddress;
+import tahrir.peerManager.TrPeerManager.TrPeerInfo;
 
 import com.google.inject.internal.*;
 
@@ -56,6 +61,17 @@ public class SerializationTest {
 		final ObjectTypes ot2 = TrSerializer.deserializeFrom(ObjectTypes.class, dis);
 		Assert.assertNull(ot2.nullTest);
 		Assert.assertEquals(ot2.subObj.i, ot.subObj.i);
+	}
+
+	@Test
+	public void trPeerInfoTest() throws Exception {
+		final TrPeerInfo ot = new TrPeerInfo(new UdpRemoteAddress(InetAddress.getLocalHost(), 1234), TrCrypto.createRsaKeyPair().a);
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+		final DataOutputStream dos = new DataOutputStream(baos);
+		TrSerializer.serializeTo(ot, dos);
+		final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
+		final TrPeerInfo ot2 = TrSerializer.deserializeFrom(TrPeerInfo.class, dis);
+		Assert.assertEquals(ot2, ot);
 	}
 
 	public static class ObjectTypes implements Serializable {

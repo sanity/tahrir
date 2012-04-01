@@ -6,6 +6,9 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
 
+import com.google.common.base.Function;
+import com.google.common.collect.MapMaker;
+
 import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
 
 import org.slf4j.*;
@@ -16,9 +19,6 @@ import tahrir.io.net.sessions.AssimilateSessionImpl;
 import tahrir.peerManager.TrPeerManager.TrPeerInfo.Assimilation;
 import tahrir.tools.*;
 import tahrir.tools.Persistence.Modified;
-
-import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
 
 public class TrPeerManager {
 	public static final double RECENTLY_ATTEMPTED_PENALTY = 1.3;
@@ -97,7 +97,7 @@ public class TrPeerManager {
 					guessSuccessTime = guessSuccessTimeSqrt * guessSuccessTimeSqrt;
 				}
 				double timeEstimate = guessSuccessTime + AssimilateSessionImpl.RELAY_ASSIMILATION_TIMEOUT_SECONDS
-				* 1000l * guessFailureProb;
+						* 1000l * guessFailureProb;
 
 				if (lastAttemptedRelays.contains(e.getValue())) {
 					timeEstimate *= RECENTLY_ATTEMPTED_PENALTY;
@@ -270,6 +270,11 @@ public class TrPeerManager {
 		public Assimilation assimilation = new Assimilation();
 		public Capabilities capabilities;
 		public RSAPublicKey publicKey;
+
+		// To allow deserialization
+		public TrPeerInfo() {
+
+		}
 
 		public TrPeerInfo(final TrRemoteAddress addr, final RSAPublicKey pubKey) {
 			this.addr = addr;
