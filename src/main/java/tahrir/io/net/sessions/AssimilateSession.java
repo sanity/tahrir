@@ -21,14 +21,18 @@ import tahrir.peerManager.TrPeerManager.Capabilities;
  */
 
 public interface AssimilateSession extends TrSession {
-
+	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
 	public void yourAddressIs(final TrRemoteAddress address);
 
+	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
 	public void requestNewConnection(final RSAPublicKey requestorPubkey);
 
+	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
 	public void requestNewConnection(TrRemoteAddress requestor, final RSAPublicKey requestorPubkey);
 
+	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
 	public void acceptNewConnection(TrRemoteAddress acceptor, final RSAPublicKey acceptorPubkey);
 
+	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
 	public void myCapabilitiesAre(Capabilities myCapabilities);
 }

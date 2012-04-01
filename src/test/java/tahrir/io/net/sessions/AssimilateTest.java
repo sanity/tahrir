@@ -30,7 +30,12 @@ public class AssimilateTest {
 
 		joinerPubNodeIdsDir.mkdir();
 
-		Persistence.save(new File(joinerPubNodeIdsDir, "joiner-id"), new TrPeerManager.TrPeerInfo(seedPublicNodeId));
+		// Ok, we should be getting this TrPeerInfo out of seedNode somehow rather
+		// than needing to set its capabilities manually like this
+		final TrPeerManager.TrPeerInfo seedPeerInfo = new TrPeerManager.TrPeerInfo(seedPublicNodeId);
+		seedPeerInfo.capabilities = seedConfig.capabilities;
+
+		Persistence.save(new File(joinerPubNodeIdsDir, "joiner-id"), seedPeerInfo);
 
 		seedConfig.capabilities.allowsAssimilation = false;
 		seedConfig.capabilities.allowsUnsolicitiedInbound = false;
