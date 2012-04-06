@@ -22,7 +22,7 @@ public class UdpNetworkInterfaceTest {
 	@Test
 	public void simpleSendReceiveTest() throws Exception {
 		final Config conf1 = new Config();
-		conf1.listenPort = 3956;
+		conf1.listenPort = 3056;
 		conf1.maxUpstreamBytesPerSecond = 1024;
 
 		final Tuple2<RSAPublicKey, RSAPrivateKey> kp1 = TrCrypto.createRsaKeyPair();
@@ -32,7 +32,7 @@ public class UdpNetworkInterfaceTest {
 		final UdpNetworkInterface i1 = new UdpNetworkInterface(conf1, kp1);
 
 		final Config conf2 = new Config();
-		conf2.listenPort = 3957;
+		conf2.listenPort = 3057;
 		conf2.maxUpstreamBytesPerSecond = 1024;
 		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2);
 		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort);
@@ -78,7 +78,7 @@ public class UdpNetworkInterfaceTest {
 	@Test
 	public void simpleReliableMessageSend() throws Exception {
 		final Config conf1 = new Config();
-		conf1.listenPort = 3956;
+		conf1.listenPort = 3156;
 		conf1.maxUpstreamBytesPerSecond = 1024;
 
 		final Tuple2<RSAPublicKey, RSAPrivateKey> kp1 = TrCrypto.createRsaKeyPair();
@@ -88,7 +88,7 @@ public class UdpNetworkInterfaceTest {
 		final UdpNetworkInterface i1 = new UdpNetworkInterface(conf1, kp1);
 
 		final Config conf2 = new Config();
-		conf2.listenPort = 3957;
+		conf2.listenPort = 3157;
 		conf2.maxUpstreamBytesPerSecond = 1024;
 		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2);
 
@@ -170,7 +170,7 @@ public class UdpNetworkInterfaceTest {
 	@Test
 	public void longReliableMessageSend() throws Exception {
 		final Config conf1 = new Config();
-		conf1.listenPort = 3986;
+		conf1.listenPort = 3286;
 		conf1.maxUpstreamBytesPerSecond = 1024;
 
 		final Tuple2<RSAPublicKey, RSAPrivateKey> kp1 = TrCrypto.createRsaKeyPair();
@@ -180,7 +180,7 @@ public class UdpNetworkInterfaceTest {
 		final UdpNetworkInterface i1 = new UdpNetworkInterface(conf1, kp1);
 
 		final Config conf2 = new Config();
-		conf2.listenPort = 3987;
+		conf2.listenPort = 3287;
 		conf2.maxUpstreamBytesPerSecond = 1024;
 		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2);
 
