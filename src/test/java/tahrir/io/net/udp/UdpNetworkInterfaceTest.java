@@ -137,6 +137,8 @@ public class UdpNetworkInterfaceTest {
 			}
 			Thread.sleep(100);
 		}
+		
+		Assert.assertTrue(connected1.called && connected2.called);
 
 		final Called ackReceived = new Called();
 
@@ -229,6 +231,8 @@ public class UdpNetworkInterfaceTest {
 			}
 			Thread.sleep(100);
 		}
+		
+		Assert.assertTrue(connected1.called && connected2.called);
 
 		final Called ackReceived = new Called();
 
