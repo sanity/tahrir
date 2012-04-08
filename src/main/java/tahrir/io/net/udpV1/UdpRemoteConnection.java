@@ -5,6 +5,9 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.concurrent.*;
 
+import com.google.common.base.Function;
+import com.google.common.collect.*;
+
 import org.slf4j.LoggerFactory;
 
 import tahrir.io.crypto.*;
@@ -15,9 +18,6 @@ import tahrir.io.net.TrNetworkInterface.TrSentReceivedListener;
 import tahrir.io.serialization.*;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
-
-import com.google.common.base.Function;
-import com.google.common.collect.*;
 
 public class UdpRemoteConnection extends TrRemoteConnection implements TrMessageListener {
 	private static final int MAX_RETRIES = 5;
@@ -186,7 +186,7 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 
 	@Override
 	public void send(final ByteArraySegment message, final double priority, final TrSentReceivedListener sentListener)
-	throws IOException {
+			throws IOException {
 		int estimatedPacketSize = 0;
 		if (!remoteHasCachedInboundKey) {
 			estimatedPacketSize += 256;
@@ -393,7 +393,18 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 		}
 	}
 
+	/**
+	 * This repeatedly resends a message until an acknowledgment
+	 * is received.
+	 * 
+	 * @author Ian Clarke <ian.clarke@gmail.com>
+	 *
+	 */
 	private static class Resender implements Runnable {
+		/**
+		 * This is set to true when an ACK is received in the received() method,
+		 * at which point this Resender's work is done
+		 */
 		public volatile boolean receiptConfirmed = false;
 		private final TrSentReceivedListener callbacks;
 		private final double initialPriority;
@@ -414,21 +425,25 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 
 		public void run() {
 			final int thisRetryNo = retryCount;
+			// If it's time to give up, give up
 			if (retryCount == maxRetries || receiptConfirmed || parent.shutdown) {
 				parent.resenders.remove(messageId);
 				if (retryCount == maxRetries || parent.shutdown) {
 					callbacks.failure();
 				}
 			} else {
+				// Otherwise, (re)send the message
 				parent.iface.sendTo(parent.remoteAddress, message, new TrSentListener() {
 
 					public void failure() {
+						// TODO: Should probably complain or something
 					}
 
 					public void sent() {
 						if (thisRetryNo == 0) {
 							callbacks.sent();
 						}
+						// And schedule sending the next message in case this one doesn't work
 						TrUtils.executor.schedule(Resender.this, 5, TimeUnit.SECONDS);
 					}
 				}, thisRetryNo == 0 ? initialPriority : TrNetworkInterface.PACKET_RESEND_PRIORITY);

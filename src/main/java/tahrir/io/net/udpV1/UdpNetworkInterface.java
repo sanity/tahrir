@@ -6,14 +6,18 @@ import java.security.interfaces.*;
 import java.util.Map;
 import java.util.concurrent.*;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
+
 import org.slf4j.LoggerFactory;
 
 import tahrir.io.net.*;
 import tahrir.tools.*;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Maps;
-
+/**
+ * @author Ian Clarke <ian.clarke@gmail.com>
+ *
+ */
 public class UdpNetworkInterface extends TrNetworkInterface {
 	private static org.slf4j.Logger logger = LoggerFactory.getLogger(UdpNetworkInterface.class);
 
@@ -43,7 +47,7 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 	}
 
 	public UdpNetworkInterface(final Config config, final Tuple2<RSAPublicKey, RSAPrivateKey> keyPair)
-	throws SocketException {
+			throws SocketException {
 		this.config = config;
 		myPublicKey = keyPair.a;
 		myPrivateKey = keyPair.b;
@@ -58,7 +62,7 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 	private final ConcurrentLinkedQueue<TrMessageListener> listeners = new ConcurrentLinkedQueue<TrMessageListener>();
 
 	private final ConcurrentMap<UdpRemoteAddress, TrMessageListener> listenersByAddress = Maps
-	.newConcurrentMap();
+			.newConcurrentMap();
 
 	@Override
 	public void registerListener(final TrMessageListener listener) {
@@ -85,9 +89,7 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 			final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener, final double priority) {
 		final UdpRemoteAddress recepient = (UdpRemoteAddress) recepient_;
 		assert encryptedMessage.length <= MAX_PACKET_SIZE_BYTES : "Packet length " + encryptedMessage.length
-		+ " greater than " + MAX_PACKET_SIZE_BYTES;
-		if (recepient.port == config.listenPort)
-			throw new RuntimeException(); // REMOVEME
+				+ " greater than " + MAX_PACKET_SIZE_BYTES;
 		final QueuedPacket qp = new QueuedPacket(recepient, encryptedMessage, sentListener, priority);
 		outbox.add(qp);
 	}
@@ -119,7 +121,7 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 						} catch (final Exception e) {
 							parent.logger.error(
 									"Error handling received UDP packet on port "
-									+ parent.datagramSocket.getLocalPort() + " from port " + dp.getPort(), e);
+											+ parent.datagramSocket.getLocalPort() + " from port " + dp.getPort(), e);
 						}
 					} else {
 						for (final tahrir.io.net.TrNetworkInterface.TrMessageListener li : parent.listeners) {
@@ -151,8 +153,7 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 				try {
 					final long startTime = System.currentTimeMillis();
 					final QueuedPacket packet = parent.outbox.poll(1, TimeUnit.SECONDS);
-					if (packet != null) {
-					}
+
 					if (packet != null) {
 						final DatagramPacket dp = new DatagramPacket(packet.data.array, packet.data.offset,
 								packet.data.length,
@@ -216,6 +217,14 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 		receiver.active = false;
 	}
 
+	/**
+	 * @param remoteAddress
+	 * @param remotePubKey
+	 * @param listener Listener for receiving inbound messages on this connection
+	 * @param connectedCallback Callback informing us whether the connection was successful
+	 * @param disconnectedCallback Callback for when this connection is broken
+	 * @param unilateral Is the other node trying to connect back to us?
+	 */
 	@Override
 	public TrRemoteConnection connect(final TrRemoteAddress remoteAddress,
 			final RSAPublicKey remotePubKey,

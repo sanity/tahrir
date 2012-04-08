@@ -2,6 +2,11 @@ package tahrir.io.net.udp;
 
 import java.net.InetAddress;
 import java.security.interfaces.*;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -15,8 +20,6 @@ import tahrir.io.net.udpV1.*;
 import tahrir.io.net.udpV1.UdpNetworkInterface.Config;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
-
-import com.google.common.base.Function;
 
 public class UdpNetworkInterfaceTest {
 	@Test
@@ -44,13 +47,13 @@ public class UdpNetworkInterfaceTest {
 
 		final ByteArraySegment msg = new ByteArraySegment(msg_);
 
-		final boolean[] receivedFlag = new boolean[2];
+		final List<AtomicBoolean> receivedFlag = Lists.newArrayList(new AtomicBoolean(false), new AtomicBoolean(false));
 
 		i2.registerListener(new TrMessageListener() {
 
 			public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender,
 					final ByteArraySegment message) {
-				receivedFlag[0] = true;
+				receivedFlag.get(0).set(true);
 				Assert.assertEquals(message, msg);
 
 			}
@@ -59,7 +62,7 @@ public class UdpNetworkInterfaceTest {
 		i1.sendTo(ra2, msg, new TrSentListener() {
 
 			public void sent() {
-				receivedFlag[1] = true;
+				receivedFlag.get(1).set(true);
 			}
 
 			public void failure() {
@@ -68,8 +71,8 @@ public class UdpNetworkInterfaceTest {
 
 		Thread.sleep(200);
 
-		Assert.assertTrue(receivedFlag[0]);
-		Assert.assertTrue(receivedFlag[1]);
+		Assert.assertTrue(receivedFlag.get(0).get());
+		Assert.assertTrue(receivedFlag.get(1).get());
 
 		i1.shutdown();
 		i2.shutdown();
