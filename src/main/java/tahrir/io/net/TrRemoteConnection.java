@@ -44,6 +44,12 @@ public abstract class TrRemoteConnection {
 	public boolean wasOutboundUnilateral() {
 		return unilateral;
 	}
+	
+	@Override
+	public String toString() {
+		return "TrRemoteConnection [remoteAddress=" + remoteAddress
+				+ ", remotePubKey=" + remotePubKey + "]";
+	}
 
 	public abstract void disconnect();
 }
