@@ -38,7 +38,7 @@ public class UdpNetworkInterfaceTest {
 		conf2.listenPort = 3057;
 		conf2.maxUpstreamBytesPerSecond = 1024;
 		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2);
-		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort);
+		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getByName("127.0.0.1"), conf2.listenPort);
 
 		final byte[] msg_ = new byte[900];
 		for (int x = 0; x < msg_.length; x++) {
@@ -95,8 +95,8 @@ public class UdpNetworkInterfaceTest {
 		conf2.maxUpstreamBytesPerSecond = 1024;
 		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2);
 
-		final UdpRemoteAddress ra1 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort);
-		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort);
+		final UdpRemoteAddress ra1 = new UdpRemoteAddress(InetAddress.getByName("127.0.0.1"), conf1.listenPort);
+		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getByName("127.0.0.1"), conf2.listenPort);
 
 		final TrMessageListener noopListener = new TrMessageListener() {
 
@@ -189,8 +189,8 @@ public class UdpNetworkInterfaceTest {
 		conf2.maxUpstreamBytesPerSecond = 1024;
 		final UdpNetworkInterface i2 = new UdpNetworkInterface(conf2, kp2);
 
-		final UdpRemoteAddress ra1 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf1.listenPort);
-		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getLocalHost(), conf2.listenPort);
+		final UdpRemoteAddress ra1 = new UdpRemoteAddress(InetAddress.getByName("127.0.0.1"), conf1.listenPort);
+		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getByName("127.0.0.1"), conf2.listenPort);
 
 		final TrMessageListener noopListener = new TrMessageListener() {
 
