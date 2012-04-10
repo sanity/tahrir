@@ -4,6 +4,7 @@ import java.io.*;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.base.Function;
 import com.google.common.collect.*;
@@ -115,31 +116,38 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 
 	public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender_,
 			ByteArraySegment message) {
+		logger.debug("Received message from "+sender_);
 		final UdpRemoteAddress sender = (UdpRemoteAddress) sender_;
 		if (inboundSymKey == null) {
+			logger.debug("No inboundSymKey, looking for it to be pre-pended to message");
 			// We don't have the inbound sym key, but it will be prepended
 			// to the message, 256 bytes
 			inboundSymKeyEncoded = message.subsegment(0, 256);
 			inboundSymKey = new TrSymKey(TrCrypto.decryptRaw(inboundSymKeyEncoded, iface.myPrivateKey));
+			logger.debug("decoded inboundSymKey");
 			if (remotePubKey == null) {
 				// We don't know the remote's public key, indicating this was a
 				// unilateral connection,
 				// remote will expect that we use the inboundSymKey to encrypt
 				// outbound too
+				logger.debug("Unilateral connection, assume same outboundSymKey");
 				outboundSymKey = inboundSymKey;
 			}
 			message = message.subsegment(inboundSymKeyEncoded.length);
 		} else if (message.startsWith(inboundSymKeyEncoded)) {
 			// Sender is still prepending the inboundSymKey even though we
 			// already have it, disregard it
+			logger.debug("Sender prepended the inboundSymKey even though we already have it");
 			message = message.subsegment(inboundSymKeyEncoded.length);
 		}
 		// Decode the message
 		try {
+			logger.debug("Decoding message");
 			message = inboundSymKey.decrypt(message);
 			final DataInputStream dis = message.toDataInputStream();
 			final PrimitiveMessageType type = PrimitiveMessageType.forBytes.get(dis.readByte());
-			// logger.info(iface.config.listenPort + " received " + type +
+			logger.debug("Message type: "+type);
+			// logger.debug(iface.config.listenPort + " received " + type +
 			// " from " + remoteAddress);
 			switch (type) {
 			case ACK:
@@ -196,7 +204,7 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 		if (estimatedPacketSize > UdpNetworkInterface.MAX_PACKET_SIZE_BYTES) {
 			sendLongMessage(message, priority, sentListener);
 		} else {
-			// logger.info("Sending short message");
+			// logger.debug("Sending short message");
 			final ByteArraySegmentBuilder builder = ByteArraySegment.builder();
 			PrimitiveMessageType.SHORT.write(builder);
 			final int messageId = TrUtils.rand.nextInt();
@@ -241,7 +249,7 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 			break;
 		case LONG_PART:
 			final LongPart lh = TrSerializer.deserializeFrom(LongPart.class, dis);
-			// logger.info("Received " + lh);
+			// logger.debug("Received " + lh);
 			PendingLongMessage plm = pendingReceivedLongMessages.get(lh.longMessageId);
 			if (plm == null) {
 				plm = new PendingLongMessage(lh.totalParts);
@@ -249,7 +257,7 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 			}
 			plm.parts[lh.partNumber] = lh.data;
 			if (plm.isComplete()) {
-				// logger.info("LongPart " + lh.longMessageId +
+				// logger.debug("LongPart " + lh.longMessageId +
 				// " received in its entirity");
 				pendingReceivedLongMessages.remove(lh.longMessageId);
 				final ByteArraySegmentBuilder longMessage = ByteArraySegment.builder();
@@ -271,9 +279,12 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 			startPos += packetSize;
 		}
 		final int longMessageId = TrUtils.rand.nextInt();
-		final boolean[] sent = new boolean[segments.size()];
-		final boolean[] received = new boolean[segments.size()];
+		final ArrayList<AtomicBoolean> sent = Lists.newArrayListWithCapacity(segments.size());
+		final ArrayList<AtomicBoolean> received = Lists.newArrayListWithCapacity(segments.size());
 		for (int x = 0; x < segments.size(); x++) {
+			sent.add(x, new AtomicBoolean(false));
+			received.add(x, new AtomicBoolean(false));
+
 			final int pos = x;
 			try {
 				final LongPart lp = new LongPart(longMessageId, x, segments.size(), segments.get(x));
@@ -295,23 +306,21 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 					}
 
 					public void received() {
-						received[pos] = true;
-						// logger.info("Longpart " + pos +
+						received.get(pos).set(true);
+						// logger.debug("Longpart " + pos +
 						// " receive confirmation: " +
 						// Arrays.toString(received));
-						for (final boolean r : received) {
-							if (!r)
+						for (final AtomicBoolean r : received) {
+							if (!r.get())
 								return;
 						}
 						sentListener.received();
 					}
 
 					public void sent() {
-						sent[pos] = true;
-						// logger.info("Longpart " + pos +
-						// " sent confirmation: " + Arrays.toString(sent));
-						for (final boolean s : sent) {
-							if (!s)
+						sent.get(pos).set(true);
+						for (final AtomicBoolean s : sent) {
+							if (!s.get())
 								return;
 						}
 						sentListener.sent();
