@@ -15,6 +15,7 @@ import tahrir.peerManager.TrPeerManager.TrPeerInfo;
 import com.google.inject.internal.*;
 
 public class SerializationTest {
+
 	@Test
 	public void primitiveTypesTest() throws Exception {
 		final PrimitiveTypes pt = new PrimitiveTypes();

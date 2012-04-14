@@ -53,7 +53,7 @@ public abstract class TrSerializer {
 		this.type = type;
 	}
 
-	public static TrSerializer getSerializerForType(final Class<?> type) {
+	private static TrSerializer getSerializerForType(final Class<?> type) {
 		if (type == null || type.equals(Object.class))
 			return null;
 		final TrSerializer fieldSerializer = serializers.get(type);
@@ -64,7 +64,6 @@ public abstract class TrSerializer {
 				return ifaceFS;
 		}
 		return getSerializerForType(type.getSuperclass());
-
 	}
 
 	private static Set<Field> getAllFields(final Class<?> c) {
@@ -142,8 +141,6 @@ public abstract class TrSerializer {
 										"If you want to serialize a generic type you must register a TahrirSerializer for it");
 							serializeTo(fieldObject, dos);
 						}
-
-
 					}
 				}
 			} catch (final Exception e) {
@@ -152,12 +149,24 @@ public abstract class TrSerializer {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public static <T> T deserializeFrom(final Class<T> c, final DataInputStream dis) throws TrSerializableException,
 	IOException {
+		return (T) deserializeFromType(c, dis);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Object deserializeFromType(final Type type, final DataInputStream dis) throws TrSerializableException,
+	IOException {
+		Class<?> c;
+		if (type instanceof Class) {
+			c = (Class<?>) type;
+		} else if (type instanceof ParameterizedType) {
+			c = (Class<?>) ((ParameterizedType) type).getRawType();
+		} else
+			throw new RuntimeException("Don't know how to handle "+type+" of type "+type.getClass());
 		final TrSerializer ts = getSerializerForType(c);
 		if (ts != null)
-			return (T) ts.deserialize(c, dis);
+			return ts.deserialize(type, dis);
 		else {
 			try {
 				Map<Integer, Field> fMap = fieldMap.get(c);
@@ -172,7 +181,7 @@ public abstract class TrSerializer {
 					}
 					fieldMap.put(c, fMap);
 				}
-				final T returnObject = c.newInstance();
+				final Object returnObject = c.newInstance();
 				final int fieldCount = dis.readByte();
 				for (int fix = 0; fix < fieldCount; fix++) {
 					final int fieldHash = dis.readInt();
@@ -183,7 +192,7 @@ public abstract class TrSerializer {
 						final int arrayLen = dis.readInt();
 						final Object array = Array.newInstance(field.getType().getComponentType(), arrayLen);
 						for (int x = 0; x < arrayLen; x++) {
-							Array.set(array, x, deserializeFrom(field.getType().getComponentType(), dis));
+							Array.set(array, x, deserializeFromType(field.getType().getComponentType(), dis));
 						}
 						field.set(returnObject, array);
 					} else {
@@ -191,7 +200,7 @@ public abstract class TrSerializer {
 						if (serializer != null) {
 							field.set(returnObject, serializer.deserialize(field.getGenericType(), dis));
 						} else {
-							field.set(returnObject, deserializeFrom(field.getType(), dis));
+							field.set(returnObject, deserializeFromType(field.getType(), dis));
 						}
 					}
 				}

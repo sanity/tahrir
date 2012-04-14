@@ -2,6 +2,9 @@ package tahrir.io.net;
 
 import java.net.InetAddress;
 import java.security.interfaces.*;
+import java.util.LinkedList;
+
+import com.google.common.collect.Lists;
 
 import org.slf4j.*;
 import org.testng.annotations.Test;
@@ -57,7 +60,11 @@ public class TrNetTest {
 
 		final TestSession remoteSession = trn1.getOrCreateRemoteSession(TestSession.class, one2two, 1234);
 
-		remoteSession.testMethod(0);
+		//remoteSession.testMethod(0);
+
+		final LinkedList<Integer> ll = Lists.newLinkedList();
+		ll.add(1);
+		remoteSession.testMethod2(ll);
 
 		Thread.sleep(1000);
 	}
@@ -65,6 +72,9 @@ public class TrNetTest {
 	public static interface TestSession extends TrSession {
 		@Priority(TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY)
 		public void testMethod(int param);
+
+		@Priority(TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY)
+		public void testMethod2(LinkedList<Integer> list);
 	}
 
 	public static class TestSessionImpl extends TrSessionImpl implements TestSession {
@@ -75,8 +85,24 @@ public class TrNetTest {
 
 		public void testMethod(final int param) {
 			if (param < 10) {
-				final TestSession remote = remoteSession(TestSession.class, connection(sender()));
-				remote.testMethod(param + 1);
+				final TrRemoteAddress senderRemoteAddress = sender();
+				final TrRemoteConnection connectionToSender = connection(senderRemoteAddress);
+				final TestSession remoteSessionOnSender = remoteSession(TestSession.class, connectionToSender);
+				remoteSessionOnSender.testMethod(param + 1);
+			}
+		}
+
+		public void testMethod2(final LinkedList<Integer> list) {
+			if (list.size() < 10) {
+				int sum = 0;
+				for (final int i : list) {
+					sum += i;
+				}
+				list.add(sum);
+				final TrRemoteAddress senderRemoteAddress = sender();
+				final TrRemoteConnection connectionToSender = connection(senderRemoteAddress);
+				final TestSession remoteSessionOnSender = remoteSession(TestSession.class, connectionToSender);
+				remoteSessionOnSender.testMethod2(list);
 			}
 		}
 	}

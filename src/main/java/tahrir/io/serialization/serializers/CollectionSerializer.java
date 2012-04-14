@@ -19,7 +19,7 @@ public class CollectionSerializer extends TrSerializer {
 		final int size = dis.readInt();
 		try {
 			final Collection<Object> collection = ((Class<Collection<Object>>) type.getRawType())
-			.newInstance();
+					.newInstance();
 			final Class<?> elementType = (Class<?>) type.getActualTypeArguments()[0];
 			for (int x = 0; x < size; x++) {
 				final Object element = deserializeFrom(elementType, dis);
@@ -33,8 +33,8 @@ public class CollectionSerializer extends TrSerializer {
 
 	@Override
 	protected void serialize(final Type type, final Object object,
- final DataOutputStream dos)
-			throws TrSerializableException, IOException {
+			final DataOutputStream dos)
+					throws TrSerializableException, IOException {
 		final Collection<?> collection = (Collection<?>) object;
 		dos.writeInt(collection.size());
 		for (final Object element : collection) {

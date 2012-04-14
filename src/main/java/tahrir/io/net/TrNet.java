@@ -6,6 +6,9 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.concurrent.*;
 
+import com.google.common.base.Function;
+import com.google.common.collect.*;
+
 import org.slf4j.*;
 
 import tahrir.TrNode;
@@ -16,9 +19,6 @@ import tahrir.io.serialization.TrSerializer;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
-import com.google.common.base.Function;
-import com.google.common.collect.*;
-
 public class TrNet {
 
 	private static final int hashCode(final Method method) {
@@ -26,7 +26,7 @@ public class TrNet {
 	}
 
 	private final Map<Class<? extends TrSession>, Class<? extends TrSessionImpl>> classesByInterface = Maps
-	.newHashMap();
+			.newHashMap();
 
 	private final ConcurrentLinkedQueue<Function<TrRemoteAddress, Void>> connectedListeners = new ConcurrentLinkedQueue<Function<TrRemoteAddress, Void>>();
 
@@ -278,7 +278,7 @@ public class TrNet {
 
 					final Object[] args = new Object[methodPair.cls.getParameterTypes().length];
 					for (int i = 0; i < args.length; i++) {
-						args[i] = TrSerializer.deserializeFrom(methodPair.cls.getParameterTypes()[i], dis);
+						args[i] = TrSerializer.deserializeFromType(methodPair.cls.getGenericParameterTypes()[i], dis);
 					}
 
 					TrSessionImpl.sender.set(sender);
