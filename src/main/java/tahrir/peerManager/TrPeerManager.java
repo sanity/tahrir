@@ -37,16 +37,18 @@ public class TrPeerManager {
 		this.config = config;
 		this.node = node;
 		trNetLabel = "TrPeerManager(" + TrUtils.rand.nextInt() + ")";
-		TrUtils.executor.scheduleAtFixedRate(new Runnable() {
+		if (config.runMaintainance ) {
+			TrUtils.executor.scheduleAtFixedRate(new Runnable() {
 
-			public void run() {
-				try {
-					maintainance();
-				} catch (final Exception e) {
-					logger.error("Error running maintainance", e);
+				public void run() {
+					try {
+						maintainance();
+					} catch (final Exception e) {
+						logger.error("Error running maintainance", e);
+					}
 				}
-			}
-		}, 0, 1, TimeUnit.MINUTES);
+			}, 0, 1, TimeUnit.MINUTES);
+		}
 	}
 
 	public void addNewPeer(final PublicNodeId pubNodeId, final Capabilities capabilities) {
@@ -227,6 +229,7 @@ public class TrPeerManager {
 	}
 
 	public static class Config {
+		public boolean runMaintainance = true;
 		public boolean assimilate = true;
 		public int maxPeers = 20;
 		public int minPeers = 10;

@@ -1,6 +1,6 @@
 package tahrir;
 
-import java.io.*;
+import java.io.File;
 import java.net.*;
 import java.security.interfaces.*;
 import java.util.ArrayList;
@@ -36,11 +36,6 @@ public class TrNode {
 	public File pubNodeIdFile;
 
 	public File publicNodeIdsDir;
-
-	// Mainly for unit tests
-	public TrNode() throws IOException {
-		this(TrUtils.createTempDirectory(), new TrConfig());
-	}
 
 	public TrNode(final File rootDirectory, final TrConfig config)
 			throws SocketException {

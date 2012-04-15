@@ -4,30 +4,36 @@ import java.net.InetAddress;
 import java.security.interfaces.*;
 import java.util.LinkedList;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.core.util.StatusPrinter;
+
 import com.google.common.collect.Lists;
 
 import org.slf4j.*;
 import org.testng.annotations.Test;
 
-import tahrir.TrNode;
+import tahrir.*;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.sessions.Priority;
 import tahrir.io.net.udpV1.*;
 import tahrir.io.net.udpV1.UdpNetworkInterface.Config;
-import tahrir.tools.Tuple2;
+import tahrir.tools.*;
 
 public class TrNetTest {
 	Logger logger = LoggerFactory.getLogger(TrNetTest.class);
 
 	@Test
 	public void simpleTest() throws Exception {
-		final Config conf1 = new Config();
-		conf1.listenPort = 3912;
-		conf1.maxUpstreamBytesPerSecond = 1024;
+		final LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+		StatusPrinter.print(lc);
 
-		final Config conf2 = new Config();
-		conf2.listenPort = 3913;
-		conf2.maxUpstreamBytesPerSecond = 1024;
+		final Config udpNetIfaceConf1 = new Config();
+		udpNetIfaceConf1.listenPort = 3912;
+		udpNetIfaceConf1.maxUpstreamBytesPerSecond = 1024;
+
+		final Config udpNetIfaceConf2 = new Config();
+		udpNetIfaceConf2.listenPort = 3913;
+		udpNetIfaceConf2.maxUpstreamBytesPerSecond = 1024;
 
 		logger.info("Generating public-private keys");
 
@@ -37,26 +43,31 @@ public class TrNetTest {
 
 		logger.info("Done");
 
-		final UdpNetworkInterface iface1 = new UdpNetworkInterface(conf1, kp1);
+		final UdpNetworkInterface iface1 = new UdpNetworkInterface(udpNetIfaceConf1, kp1);
 
-		final UdpNetworkInterface iface2 = new UdpNetworkInterface(conf2, kp2);
+		final UdpNetworkInterface iface2 = new UdpNetworkInterface(udpNetIfaceConf2, kp2);
 
-		final TrNode node1 = new TrNode();
+		final TrConfig trCfg1 = new TrConfig();
+		trCfg1.peers.assimilate = false;
+
+		final TrConfig trCfg2 = new TrConfig();
+		trCfg2.peers.assimilate = false;
+		final TrNode node1 = new TrNode(TrUtils.createTempDirectory(), trCfg1);
 		final TrNet trn1 = new TrNet(node1, iface1, false);
 
 		trn1.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
-		final TrNode node2 = new TrNode();
+		final TrNode node2 = new TrNode(TrUtils.createTempDirectory(), trCfg2);
 		final TrNet trn2 = new TrNet(node2, iface2, false);
 
 		trn2.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
 		final TrRemoteConnection one2two = trn1.connectionManager.getConnection(
 				new UdpRemoteAddress(
-						InetAddress.getLocalHost(), conf2.listenPort), kp2.a, false, "trn1");
+						InetAddress.getLocalHost(), udpNetIfaceConf2.listenPort), kp2.a, false, "trn1");
 		final TrRemoteConnection two2one = trn2.connectionManager.getConnection(
 				new UdpRemoteAddress(
-						InetAddress.getLocalHost(), conf1.listenPort), kp1.a, false, "trn2");
+						InetAddress.getLocalHost(), udpNetIfaceConf1.listenPort), kp1.a, false, "trn2");
 
 		final TestSession remoteSession = trn1.getOrCreateRemoteSession(TestSession.class, one2two, 1234);
 
