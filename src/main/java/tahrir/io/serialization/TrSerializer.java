@@ -149,12 +149,12 @@ public abstract class TrSerializer {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T> T deserializeFrom(final Class<T> c, final DataInputStream dis) throws TrSerializableException,
 	IOException {
 		return (T) deserializeFromType(c, dis);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static Object deserializeFromType(final Type type, final DataInputStream dis) throws TrSerializableException,
 	IOException {
 		Class<?> c;
