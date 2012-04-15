@@ -10,6 +10,7 @@ import ch.qos.logback.core.util.StatusPrinter;
 import com.google.common.collect.Lists;
 
 import org.slf4j.*;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import tahrir.*;
@@ -21,6 +22,8 @@ import tahrir.tools.*;
 
 public class TrNetTest {
 	Logger logger = LoggerFactory.getLogger(TrNetTest.class);
+
+	private static volatile boolean simpleTestDone = false;
 
 	@Test
 	public void simpleTest() throws Exception {
@@ -77,7 +80,14 @@ public class TrNetTest {
 		ll.add(1);
 		remoteSession.testMethod2(ll);
 
-		Thread.sleep(1000);
+		for (int x=0; x<100; x++) {
+			Thread.sleep(100);
+			if (simpleTestDone) {
+				break;
+			}
+		}
+
+		Assert.assertTrue(simpleTestDone);
 	}
 
 	public static interface TestSession extends TrSession {
@@ -101,6 +111,7 @@ public class TrNetTest {
 				final TestSession remoteSessionOnSender = remoteSession(TestSession.class, connectionToSender);
 				remoteSessionOnSender.testMethod(param + 1);
 			}
+
 		}
 
 		public void testMethod2(final LinkedList<Integer> list) {
@@ -114,6 +125,8 @@ public class TrNetTest {
 				final TrRemoteConnection connectionToSender = connection(senderRemoteAddress);
 				final TestSession remoteSessionOnSender = remoteSession(TestSession.class, connectionToSender);
 				remoteSessionOnSender.testMethod2(list);
+			} else {
+				simpleTestDone = true;
 			}
 		}
 	}
