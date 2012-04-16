@@ -64,10 +64,10 @@ public class TrNetTest {
 
 		final TrRemoteConnection one2two = trn1.connectionManager.getConnection(
 				new UdpRemoteAddress(
-						InetAddress.getLocalHost(), udpNetIfaceConf2.listenPort), kp2.a, false, "trn1");
+				        InetAddress.getByName("127.0.0.1"), udpNetIfaceConf2.listenPort), kp2.a, false, "trn1");
 		final TrRemoteConnection two2one = trn2.connectionManager.getConnection(
 				new UdpRemoteAddress(
-						InetAddress.getLocalHost(), udpNetIfaceConf1.listenPort), kp1.a, false, "trn2");
+				        InetAddress.getByName("127.0.0.1"), udpNetIfaceConf1.listenPort), kp1.a, false, "trn2");
 
 		final TestSession remoteSession = trn1.getOrCreateRemoteSession(TestSession.class, one2two, 1234);
 
@@ -77,7 +77,6 @@ public class TrNetTest {
 		ll.add(1);
 		remoteSession.testMethod2(ll);
 
-		Thread.sleep(1000);
 	}
 
 	public static interface TestSession extends TrSession {
