@@ -80,8 +80,6 @@ public class TrNetTest {
 		ll.add(1);
 		remoteSession.testMethod2(ll);
 
-<<<<<<< HEAD
-=======
 		for (int x=0; x<100; x++) {
 			Thread.sleep(100);
 			if (simpleTestDone) {
@@ -90,7 +88,6 @@ public class TrNetTest {
 		}
 
 		Assert.assertTrue(simpleTestDone);
->>>>>>> b95a7e4e15bbe6216ef4d4aac6053cc1b2ee8ac0
 	}
 
 	public static interface TestSession extends TrSession {
