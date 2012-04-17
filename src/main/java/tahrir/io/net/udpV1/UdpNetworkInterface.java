@@ -36,9 +36,9 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 	public final RSAPublicKey myPublicKey;
 
 	public static class Config {
-		public int listenPort;
+		public int listenPort = TrUtils.rand.nextInt(10000)+10000;
 
-		public volatile int maxUpstreamBytesPerSecond;
+		public volatile int maxUpstreamBytesPerSecond = 1024;
 	}
 
 	@Override
