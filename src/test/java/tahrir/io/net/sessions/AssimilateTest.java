@@ -10,13 +10,14 @@ import tahrir.peerManager.TrPeerManager;
 import tahrir.tools.*;
 
 public class AssimilateTest {
-	@Test(enabled=false)
+	@Test(enabled=true)
 	public void twoPeerTest() throws Exception {
 		final TrConfig seedConfig = new TrConfig();
 		seedConfig.capabilities.allowsAssimilation = true;
 		seedConfig.capabilities.allowsUnsolicitiedInbound = true;
 		seedConfig.peers.assimilate = false;
 		seedConfig.localHostName = "localhost";
+		seedConfig.udp.listenPort = 7643;
 		final File seedDir = TrUtils.createTempDirectory();
 		final TrNode seedNode = new TrNode(seedDir, seedConfig);
 
@@ -25,6 +26,8 @@ public class AssimilateTest {
 		final File joinerDir = TrUtils.createTempDirectory();
 
 		final TrConfig joinerConfig = new TrConfig();
+
+		joinerConfig.udp.listenPort = 7644;
 
 		final File joinerPubNodeIdsDir = new File(joinerDir, joinerConfig.publicNodeIdsDir);
 
