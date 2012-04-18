@@ -2,11 +2,14 @@ package tahrir.tools;
 
 import java.io.*;
 import java.net.DatagramPacket;
-import java.util.Arrays;
+import java.util.*;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.AbstractIterator;
 
 import tahrir.TrConstants;
 
-public final class ByteArraySegment {
+public final class ByteArraySegment implements Iterable<Byte> {
 	public final byte[] array;
 	public final int offset;
 	public final int length;
@@ -115,6 +118,15 @@ public final class ByteArraySegment {
 	}
 
 	@Override
+	public String toString() {
+		final StringBuffer ret = new StringBuffer();
+		ret.append("ByteArraySegment[length="+length+" data=[");
+		ret.append(Joiner.on(',').join(this));
+		ret.append("]");
+		return ret.toString();
+	}
+
+	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
@@ -131,5 +143,21 @@ public final class ByteArraySegment {
 				return false;
 		}
 		return true;
+	}
+
+	@Override
+	public Iterator<Byte> iterator() {
+		return new AbstractIterator<Byte>() {
+
+			int pos = 0;
+
+			@Override
+			protected Byte computeNext() {
+				if (pos >= length)
+					return endOfData();
+				else
+					return ByteArraySegment.this.byteAt(pos++);
+			}
+		};
 	}
 }

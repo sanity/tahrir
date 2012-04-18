@@ -4,9 +4,6 @@ import java.net.InetAddress;
 import java.security.interfaces.*;
 import java.util.LinkedList;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.core.util.StatusPrinter;
-
 import com.google.common.collect.Lists;
 
 import org.slf4j.*;
@@ -17,7 +14,7 @@ import tahrir.*;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.sessions.Priority;
 import tahrir.io.net.udpV1.*;
-import tahrir.io.net.udpV1.UdpNetworkInterface.Config;
+import tahrir.io.net.udpV1.UdpNetworkInterface.UNIConfig;
 import tahrir.tools.*;
 
 public class TrNetTest {
@@ -29,14 +26,11 @@ public class TrNetTest {
 
 	@BeforeTest
 	public void setUpNodes() throws Exception {
-		final LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-		StatusPrinter.print(lc);
-
-		final Config udpNetIfaceConf1 = new Config();
+		final UNIConfig udpNetIfaceConf1 = new UNIConfig();
 		udpNetIfaceConf1.listenPort = 3912;
 		udpNetIfaceConf1.maxUpstreamBytesPerSecond = 1024;
 
-		final Config udpNetIfaceConf2 = new Config();
+		final UNIConfig udpNetIfaceConf2 = new UNIConfig();
 		udpNetIfaceConf2.listenPort = 3913;
 		udpNetIfaceConf2.maxUpstreamBytesPerSecond = 1024;
 
@@ -48,9 +42,9 @@ public class TrNetTest {
 
 		logger.info("Done");
 
-		final UdpNetworkInterface iface1 = new UdpNetworkInterface(udpNetIfaceConf1, kp1);
+		final TrNetworkInterface iface1 = new UdpNetworkInterface(udpNetIfaceConf1, kp1);
 
-		final UdpNetworkInterface iface2 = new UdpNetworkInterface(udpNetIfaceConf2, kp2);
+		final TrNetworkInterface iface2 = new UdpNetworkInterface(udpNetIfaceConf2, kp2);
 
 		final TrConfig trCfg1 = new TrConfig();
 		trCfg1.peers.assimilate = false;

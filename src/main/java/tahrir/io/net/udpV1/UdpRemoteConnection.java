@@ -20,7 +20,7 @@ import tahrir.io.serialization.*;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
-public class UdpRemoteConnection extends TrRemoteConnection implements TrMessageListener {
+public class UdpRemoteConnection extends TrRemoteConnection {
 	private static final int MAX_RETRIES = 5;
 
 	private volatile boolean disconnectedCallbackCalled = false;
@@ -40,7 +40,7 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 	private final Set<Integer> recentlyReceivedShortMessages = Collections.newSetFromMap(new MapMaker().expiration(20,
 			TimeUnit.MINUTES).<Integer, Boolean> makeMap());
 
-	private boolean remoteHasCachedInboundKey = false;
+	private boolean remoteHasCachedOurOutboundSymKey = false;
 
 	private final Map<Integer, Resender> resenders = new MapMaker().makeMap();
 
@@ -48,30 +48,40 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 
 	private boolean unregisterScheduled = false;
 
-	protected UdpRemoteConnection(final UdpNetworkInterface iface, final UdpRemoteAddress remoteAddr,
-			final RSAPublicKey remotePubKey, final TrMessageListener listener,
+	protected UdpRemoteConnection(
+			final UdpNetworkInterface iface,
+			final UdpRemoteAddress remoteAddr,
+			final RSAPublicKey remotePubKey,
+			final TrMessageListener listener,
 			final Function<TrRemoteConnection, Void> connectedCallback,
-			final Runnable disconnectedCallback, final boolean unilateral) {
-		super(remoteAddr, remotePubKey, listener, connectedCallback, disconnectedCallback, unilateral);
+			final Runnable disconnectedCallback,
+			final boolean unilateralOutbound) {
+		super(remoteAddr, remotePubKey, listener, connectedCallback, disconnectedCallback, unilateralOutbound);
 		this.iface = iface;
 		logger = LoggerFactory.getLogger("UdpRemoteConnection(" + iface.config.listenPort + "-" + remoteAddress + ")");
-		iface.registerListenerForSender(remoteAddr, this);
 		if (remotePubKey != null) {
-			// If we don't know the remote's public key this must be a
-			// unilateral
-			// connection, and we will be using the inboundSymKey (once we are
-			// told it) to encrypt outbound messages too
 			outboundSymKey = TrCrypto.createAesKey();
+			//			inboundSymKey = outboundSymKey;
+			//			inboundSymKeyEncoded = inboundSymKey.toByteArraySegment();
+			//		remoteHasCachedOurOutboundSymKey = true;
+		} else {
+			// If we don't know the remote's public key this must be a
+			// unilateral inbound connection, and we will be using the
+			// inboundSymKey (once we are told it) to encrypt outbound
+			// messages too
 		}
-		if (unilateral) {
+
+		if (unilateralOutbound) {
+			// If it's unilateral outbound, then the other side will
+			// encrypt its reply with the outboundSymKey we provide
 			inboundSymKey = outboundSymKey;
-			inboundSymKeyEncoded = inboundSymKey.toByteArraySegment();
-			remoteHasCachedInboundKey = true;
 		}
 
 		keepAliveSender = TrUtils.executor.schedule(new Runnable() {
 
 			public void run() {
+				// Warning: We're assuming that the other node has cached
+				// our outboundSymKey here.  Save assumption?  Not sure :-/
 				final byte[] msg = new byte[1];
 				msg[0] = PrimitiveMessageType.KEEPALIVE.id;
 				final ByteArraySegment plainText = new ByteArraySegment(msg);
@@ -102,7 +112,7 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 			TrUtils.executor.schedule(new Runnable() {
 
 				public void run() {
-					iface.unregisterListenerForSender(remoteAddress);
+					iface.remoteConnections.remove(remoteAddress);
 				}
 			}, 60, TimeUnit.SECONDS);
 		}
@@ -110,7 +120,7 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 
 	@Override
 	public boolean isConnected() {
-		return !shutdown && remoteHasCachedInboundKey;
+		return !shutdown && remoteHasCachedOurOutboundSymKey;
 
 	}
 
@@ -119,12 +129,16 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 		logger.debug("Received message from "+sender_);
 		final UdpRemoteAddress sender = (UdpRemoteAddress) sender_;
 		if (inboundSymKey == null) {
-			logger.debug("No inboundSymKey, looking for it to be pre-pended to message");
-			// We don't have the inbound sym key, but it will be prepended
-			// to the message, 256 bytes
+			logger.debug("We don't know the inboundSymKey yet, looking for it to be pre-pended to message");
 			inboundSymKeyEncoded = message.subsegment(0, 256);
 			inboundSymKey = new TrSymKey(TrCrypto.decryptRaw(inboundSymKeyEncoded, iface.myPrivateKey));
 			logger.debug("decoded inboundSymKey");
+
+			if (isUnilateralInbound()) {
+				logger.debug("Unilateral inbound, so we use the inboundSymKey to encrypt outbound messages too");
+				outboundSymKey = inboundSymKey;
+			}
+
 			if (remotePubKey == null) {
 				// We don't know the remote's public key, indicating this was a
 				// unilateral connection,
@@ -132,9 +146,10 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 				// outbound too
 				logger.debug("Unilateral connection, assume same outboundSymKey");
 				outboundSymKey = inboundSymKey;
+				remoteHasCachedOurOutboundSymKey = true;
 			}
 			message = message.subsegment(inboundSymKeyEncoded.length);
-		} else if (message.startsWith(inboundSymKeyEncoded)) {
+		} else if (!unilateralOutbound && message.startsWith(inboundSymKeyEncoded)) {
 			// Sender is still prepending the inboundSymKey even though we
 			// already have it, disregard it
 			logger.debug("Sender prepended the inboundSymKey even though we already have it");
@@ -151,10 +166,10 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 			// " from " + remoteAddress);
 			switch (type) {
 			case ACK:
-				if (!remoteHasCachedInboundKey) {
+				if (!remoteHasCachedOurOutboundSymKey) {
 					// Receiving our first ACK indicates by-directional
 					// communication is established
-					remoteHasCachedInboundKey = true;
+					remoteHasCachedOurOutboundSymKey = true;
 					if (connectedCallback != null) {
 						connectedCallback.apply(this);
 					}
@@ -196,7 +211,7 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 	public void send(final ByteArraySegment message, final double priority, final TrSentReceivedListener sentListener)
 			throws IOException {
 		int estimatedPacketSize = 0;
-		if (!remoteHasCachedInboundKey) {
+		if (!remoteHasCachedOurOutboundSymKey) {
 			estimatedPacketSize += 256;
 		}
 		estimatedPacketSize += 5;
@@ -220,7 +235,7 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 
 	private ByteArraySegment encryptOutbound(final ByteArraySegment rawMessage) {
 		final ByteArraySegmentBuilder toSend = ByteArraySegment.builder();
-		if (!remoteHasCachedInboundKey) {
+		if (!remoteHasCachedOurOutboundSymKey) {
 			toSend.write(TrCrypto.encryptRaw(outboundSymKey.toByteArraySegment(), remotePubKey));
 		}
 		toSend.write(outboundSymKey.encrypt(rawMessage));
@@ -271,7 +286,7 @@ public class UdpRemoteConnection extends TrRemoteConnection implements TrMessage
 
 	private void sendLongMessage(final ByteArraySegment message, final double priority,
 			final TrSentReceivedListener sentListener) throws IOException {
-		final int packetSize = UdpNetworkInterface.MAX_PACKET_SIZE_BYTES - (remoteHasCachedInboundKey ? 60 : 316);
+		final int packetSize = UdpNetworkInterface.MAX_PACKET_SIZE_BYTES - (remoteHasCachedOurOutboundSymKey ? 60 : 316);
 		final List<ByteArraySegment> segments = Lists.newArrayList();
 		int startPos = 0;
 		while (startPos < message.length) {

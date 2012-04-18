@@ -70,7 +70,7 @@ public class TrNode {
 		logger.info("Set up UDP network interface");
 		final Tuple2<RSAPublicKey, RSAPrivateKey> keyPair = Tuple2.of(getPublicNodeId().publicKey,
 				getPrivateNodeId().privateKey);
-		final UdpNetworkInterface uni = new UdpNetworkInterface(config.udp, keyPair);
+		final TrNetworkInterface uni = new UdpNetworkInterface(config.udp, keyPair);
 		trNet = new TrNet(this, uni, config.capabilities.allowsUnsolicitiedInbound);
 
 		logger.info("Set up peer manager");

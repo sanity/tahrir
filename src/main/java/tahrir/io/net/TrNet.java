@@ -32,7 +32,7 @@ public class TrNet {
 
 	private final ConcurrentLinkedQueue<Function<TrRemoteAddress, Void>> disconnectedListeners = new ConcurrentLinkedQueue<Function<TrRemoteAddress, Void>>();
 
-	private final Logger logger;
+	private static final Logger logger = LoggerFactory.getLogger(TrNet.class);
 
 	private final Map<Integer, MethodPair> methodsById = Maps.newHashMap();
 
@@ -59,11 +59,10 @@ public class TrNet {
 		for (final TrNetworkInterface iface : interfaces) {
 			interfacesByAddressType.put(iface.getAddressClass(), iface);
 		}
-		logger = LoggerFactory.getLogger("TrNet");
 		this.trNode = trNode;
 		if (allowUnilateral) {
 			for (final TrNetworkInterface netIface : interfacesByAddressType.values()) {
-				netIface.registerListener(new TrNetMessageListener());
+				netIface.allowUnsolicitedInbound(new TrNetMessageListener());
 			}
 		}
 	}
@@ -197,7 +196,11 @@ public class TrNet {
 						+ " in interface "
 						+ method.getDeclaringClass());
 
-			connection.send(builder.build(), priority.value(), new TrSentReceivedListener() {
+			final ByteArraySegment messageBAS = builder.build();
+
+			logger.debug("Message to send: "+messageBAS);
+
+			connection.send(messageBAS, priority.value(), new TrSentReceivedListener() {
 
 				public void sent() {
 
@@ -254,9 +257,11 @@ public class TrNet {
 	private final class TrNetMessageListener implements TrMessageListener {
 		public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender,
 				final ByteArraySegment message) {
+			logger.debug("Message received: "+message);
 			final DataInputStream dis = message.toDataInputStream();
 			try {
-				final MessageType messageType = MessageType.forBytes.get(dis.readByte());
+				final byte messageTypeByte = dis.readByte();
+				final MessageType messageType = MessageType.forBytes.get(messageTypeByte);
 				switch (messageType) {
 				case METHOD_CALL:
 					final int sessionId = dis.readInt();

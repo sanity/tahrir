@@ -2,66 +2,69 @@ package tahrir.io.net;
 
 import java.security.interfaces.RSAPublicKey;
 
-import tahrir.tools.ByteArraySegment;
-
 import com.google.common.base.Function;
 
+import tahrir.tools.ByteArraySegment;
+
 public abstract class TrNetworkInterface {
-	protected abstract Class<? extends TrRemoteAddress> getAddressClass();
+	public static final double ASSIMILATION_PRIORITY = 4.0;
 
-	protected abstract void registerListener(TrMessageListener listener);
+	public static final double CONNECTION_MAINTAINANCE_PRIORITY = 1.0;
 
-	protected abstract void unregisterListenerForSender(TrRemoteAddress sender);
-
-	protected abstract void registerListenerForSender(TrRemoteAddress sender, TrMessageListener listener);
-
-	protected abstract void unregisterListener(TrMessageListener listener);
-
-	public abstract void shutdown();
-
-	protected abstract void sendTo(TrRemoteAddress recepient, ByteArraySegment message, TrSentListener sentListener,
-			double priority);
-
-	public void sendTo(final TrRemoteAddress recepient, final ByteArraySegment message, final double priority) {
-		sendTo(recepient, message, null, priority);
-	}
-
-	public static interface TrMessageListener {
-		public void received(TrNetworkInterface iFace, TrRemoteAddress sender, ByteArraySegment message);
-
-	}
+	public static final double LONG_MESSAGE_HEADER = 3.0;
 
 	public static final TrSentReceivedListener nullSentListener = new TrSentReceivedListener() {
-
-		public void sent() {
-		}
 
 		public void failure() {
 		}
 
 		public void received() {
 		}
+
+		public void sent() {
+		}
 	};
+
+	public static final double PACKET_RESEND_PRIORITY = 2.0;
+
+	protected volatile TrMessageListener newConnectionListener = null;
 
 	public abstract TrRemoteConnection connect(final TrRemoteAddress remoteAddress, final RSAPublicKey remotePubKey,
 			final TrMessageListener listener, final Function<TrRemoteConnection, Void> connectedCallback,
 			final Runnable disconnectedCallback, boolean unilateral);
 
-	public static interface TrSentListener {
-		public void sent();
+	public abstract void shutdown();
 
+	@Override
+	public abstract String toString();
+
+	protected abstract Class<? extends TrRemoteAddress> getAddressClass();
+
+	protected void sendTo(final TrRemoteAddress recepient, final ByteArraySegment message, final double priority) {
+		sendTo(recepient, message, null, priority);
+	}
+	protected abstract void sendTo(TrRemoteAddress recepient, ByteArraySegment message, TrSentListener sentListener,
+			double priority);
+	public void allowUnsolicitedInbound(final TrMessageListener newConnectionListener) {
+		if (this.newConnectionListener != null)
+			throw new RuntimeException("Only one newConnectionListener can be registered at a time");
+		this.newConnectionListener = newConnectionListener;
+	}
+
+	public void disallowUnsolicitedInbound() {
+		newConnectionListener = null;
+	}
+	public static interface TrMessageListener {
+		public void received(TrNetworkInterface iFace, TrRemoteAddress sender, ByteArraySegment message);
+
+	}
+	public static interface TrSentListener {
 		public void failure();
+
+		public void sent();
 	}
 
 	public static interface TrSentReceivedListener extends TrSentListener {
 		public void received();
 	}
-
-	public static final double CONNECTION_MAINTAINANCE_PRIORITY = 1.0;
-	public static final double PACKET_RESEND_PRIORITY = 2.0;
-	public static final double LONG_MESSAGE_HEADER = 3.0;
-	public static final double ASSIMILATION_PRIORITY = 4.0;
-
-	@Override
-	public abstract String toString();
 }

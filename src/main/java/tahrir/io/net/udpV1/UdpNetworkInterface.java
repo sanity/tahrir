@@ -19,34 +19,23 @@ import tahrir.tools.*;
  *
  */
 public class UdpNetworkInterface extends TrNetworkInterface {
+	public static final int MAX_PACKET_SIZE_BYTES = 1450;
+
 	private static org.slf4j.Logger logger = LoggerFactory.getLogger(UdpNetworkInterface.class);
+	public final RSAPrivateKey myPrivateKey;
+	public final RSAPublicKey myPublicKey;
+	public Map<TrRemoteAddress, UdpRemoteConnection> remoteConnections = Maps.newConcurrentMap();
+	private final DatagramSocket datagramSocket;
 
 	private final PriorityBlockingQueue<QueuedPacket> outbox = new PriorityBlockingQueue<UdpNetworkInterface.QueuedPacket>();
-	public static final int MAX_PACKET_SIZE_BYTES = 1450;
-	private final DatagramSocket datagramSocket;
-	final Config config;
-	private final Sender sender;
 
 	private final Receiver receiver;
 
-	public final RSAPrivateKey myPrivateKey;
+	private final Sender sender;
 
-	public Map<UdpRemoteAddress, UdpRemoteConnection> remoteConnections = Maps.newConcurrentMap();
+	final UNIConfig config;
 
-	public final RSAPublicKey myPublicKey;
-
-	public static class Config {
-		public int listenPort = TrUtils.rand.nextInt(10000)+10000;
-
-		public volatile int maxUpstreamBytesPerSecond = 1024;
-	}
-
-	@Override
-	public String toString() {
-		return "UDP<" + datagramSocket.getLocalPort() + ">";
-	}
-
-	public UdpNetworkInterface(final Config config, final Tuple2<RSAPublicKey, RSAPrivateKey> keyPair)
+	public UdpNetworkInterface(final UNIConfig config, final Tuple2<RSAPublicKey, RSAPrivateKey> keyPair)
 			throws SocketException {
 		this.config = config;
 		myPublicKey = keyPair.a;
@@ -59,39 +48,87 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 		receiver.start();
 	}
 
-	private final ConcurrentLinkedQueue<TrMessageListener> listeners = new ConcurrentLinkedQueue<TrMessageListener>();
-
-	private final ConcurrentMap<UdpRemoteAddress, TrMessageListener> listenersByAddress = Maps
-			.newConcurrentMap();
-
+	/**
+	 * @param remoteAddress
+	 * @param remotePubKey
+	 * @param listener Listener for receiving inbound messages on this connection
+	 * @param connectedCallback Callback informing us whether the connection was successful
+	 * @param disconnectedCallback Callback for when this connection is broken
+	 * @param unilateral Is the other node trying to connect back to us?
+	 */
 	@Override
-	public void registerListener(final TrMessageListener listener) {
-		listeners.add(listener);
+	public TrRemoteConnection connect(final TrRemoteAddress remoteAddress,
+			final RSAPublicKey remotePubKey,
+			final tahrir.io.net.TrNetworkInterface.TrMessageListener listener,
+			final Function<TrRemoteConnection, Void> connectedCallback,
+			final Runnable disconnectedCallback, final boolean unilateral) {
+		final UdpRemoteConnection conn = new UdpRemoteConnection(this, (UdpRemoteAddress) remoteAddress, remotePubKey, listener,
+				connectedCallback,
+				disconnectedCallback, unilateral);
+		remoteConnections.put(remoteAddress, conn);
+		return conn;
 	}
 
 	@Override
-	protected void registerListenerForSender(final TrRemoteAddress sender,
-			final TrMessageListener listener) {
-		if (listenersByAddress.put((UdpRemoteAddress) sender, listener) != null) {
-			logger.warn("Overwriting listener for sender {}", sender);
-		}
-	}
-
-
-	@Override
-	protected void unregisterListener(
-			final tahrir.io.net.TrNetworkInterface.TrMessageListener listener) {
-		listeners.remove(listener);
+	protected void sendTo(final TrRemoteAddress recepient, final ByteArraySegment message, final double priority) {
+		// We redeclare this to make it visible in this package
+		super.sendTo(recepient, message, priority);
 	}
 
 	@Override
-	public void sendTo(final TrRemoteAddress recepient_, final ByteArraySegment encryptedMessage,
+	protected void sendTo(final TrRemoteAddress recepient_, final ByteArraySegment encryptedMessage,
 			final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener, final double priority) {
 		final UdpRemoteAddress recepient = (UdpRemoteAddress) recepient_;
 		assert encryptedMessage.length <= MAX_PACKET_SIZE_BYTES : "Packet length " + encryptedMessage.length
 				+ " greater than " + MAX_PACKET_SIZE_BYTES;
 		final QueuedPacket qp = new QueuedPacket(recepient, encryptedMessage, sentListener, priority);
 		outbox.add(qp);
+	}
+
+	@Override
+	public void shutdown() {
+		sender.active = false;
+		sender.interrupt();
+		receiver.active = false;
+	}
+
+
+	@Override
+	public String toString() {
+		return "UDP<" + datagramSocket.getLocalPort() + ">";
+	}
+
+	@Override
+	protected Class<? extends TrRemoteAddress> getAddressClass() {
+		return UdpRemoteAddress.class;
+	}
+
+	public static class UNIConfig {
+		public int listenPort = TrUtils.rand.nextInt(10000)+10000;
+
+		public volatile int maxUpstreamBytesPerSecond = 1024;
+	}
+
+	private static class QueuedPacket implements Comparable<QueuedPacket> {
+
+		private final UdpRemoteAddress addr;
+		private final ByteArraySegment data;
+		private final double priority;
+		private final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener;
+
+		public QueuedPacket(final UdpRemoteAddress addr, final ByteArraySegment encryptedMessage,
+				final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener, final double priority) {
+			this.addr = addr;
+			data = encryptedMessage;
+			this.sentListener = sentListener;
+			this.priority = priority;
+
+		}
+
+		public int compareTo(final QueuedPacket other) {
+			return Double.compare(priority, other.priority);
+		}
+
 	}
 
 	private static class Receiver extends Thread {
@@ -113,19 +150,37 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 					parent.datagramSocket.receive(dp);
 
 					final UdpRemoteAddress ura = new UdpRemoteAddress(dp.getAddress(), dp.getPort());
-					final tahrir.io.net.TrNetworkInterface.TrMessageListener ml = parent.listenersByAddress.get(ura);
+					UdpRemoteConnection connection = parent.remoteConnections.get(ura);
 
-					if (ml != null) {
+					if (connection != null) {
+						// We have a connection to the sender, forward this message to it
 						try {
-							ml.received(parent, ura, ByteArraySegment.from(dp));
+							connection.received(parent, ura, ByteArraySegment.from(dp));
 						} catch (final Exception e) {
 							parent.logger.error(
 									"Error handling received UDP packet on port "
 											+ parent.datagramSocket.getLocalPort() + " from port " + dp.getPort(), e);
 						}
 					} else {
-						for (final tahrir.io.net.TrNetworkInterface.TrMessageListener li : parent.listeners) {
-							li.received(parent, ura, ByteArraySegment.from(dp));
+						if (parent.newConnectionListener == null) {
+							logger.debug("Ignoring unilateral message from "+ura+" as interface does not allow unilateral inbound");
+						} else {
+							logger.debug("Received unilateral message from "+ura+" creating connection to handle it");
+							connection = new UdpRemoteConnection(parent, ura, null, parent.newConnectionListener, new Function<TrRemoteConnection, Void>() {
+
+								@Override
+								public Void apply(final TrRemoteConnection input) {
+									// TODO Auto-generated method stub
+									return null;
+								}}, new Runnable() {
+
+									@Override
+									public void run() {
+										logger.debug("Ulilateral inbound connection from "+ura+" has disconnected");
+										parent.remoteConnections.remove(ura);
+									}}, true);
+							parent.remoteConnections.put(ura, connection);
+							connection.received(parent, ura, ByteArraySegment.from(dp));
 						}
 					}
 				} catch (final SocketTimeoutException e) {
@@ -167,12 +222,8 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 							if (packet.sentListener != null) {
 								packet.sentListener.failure();
 							}
-							parent.logger.error("Failed to send UDP packet", e);
+							UdpNetworkInterface.logger.error("Failed to send UDP packet", e);
 						}
-						// System.out.println("Sent: " +
-						// parent.config.listenPort + " -> " + packet.addr.port
-						// + " len: "
-						// + packet.data.length + " data: " + packet.data);
 						Thread.sleep((1000l * packet.data.length / parent.config.maxUpstreamBytesPerSecond));
 					}
 				} catch (final InterruptedException e) {
@@ -181,63 +232,5 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 			}
 
 		}
-	}
-
-	private static class QueuedPacket implements Comparable<QueuedPacket> {
-
-		private final UdpRemoteAddress addr;
-		private final ByteArraySegment data;
-		private final double priority;
-		private final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener;
-
-		public QueuedPacket(final UdpRemoteAddress addr, final ByteArraySegment encryptedMessage,
-				final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener, final double priority) {
-			this.addr = addr;
-			data = encryptedMessage;
-			this.sentListener = sentListener;
-			this.priority = priority;
-
-		}
-
-		public int compareTo(final QueuedPacket other) {
-			return Double.compare(priority, other.priority);
-		}
-
-	}
-
-	@Override
-	public void unregisterListenerForSender(final TrRemoteAddress sender) {
-		listenersByAddress.remove(sender);
-	}
-
-	@Override
-	public void shutdown() {
-		sender.active = false;
-		sender.interrupt();
-		receiver.active = false;
-	}
-
-	/**
-	 * @param remoteAddress
-	 * @param remotePubKey
-	 * @param listener Listener for receiving inbound messages on this connection
-	 * @param connectedCallback Callback informing us whether the connection was successful
-	 * @param disconnectedCallback Callback for when this connection is broken
-	 * @param unilateral Is the other node trying to connect back to us?
-	 */
-	@Override
-	public TrRemoteConnection connect(final TrRemoteAddress remoteAddress,
-			final RSAPublicKey remotePubKey,
-			final tahrir.io.net.TrNetworkInterface.TrMessageListener listener,
-			final Function<TrRemoteConnection, Void> connectedCallback,
-			final Runnable disconnectedCallback, final boolean unilateral) {
-		return new UdpRemoteConnection(this, (UdpRemoteAddress) remoteAddress, remotePubKey, listener,
-				connectedCallback,
-				disconnectedCallback, unilateral);
-	}
-
-	@Override
-	protected Class<? extends TrRemoteAddress> getAddressClass() {
-		return UdpRemoteAddress.class;
 	}
 }
