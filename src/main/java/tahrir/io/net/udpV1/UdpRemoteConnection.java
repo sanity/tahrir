@@ -58,7 +58,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 			final boolean unilateralOutbound) {
 		super(remoteAddr, remotePubKey, listener, connectedCallback, disconnectedCallback, unilateralOutbound);
 		this.iface = iface;
-		logger = LoggerFactory.getLogger("UdpRemoteConnection(" + iface.config.listenPort + "-" + remoteAddress + ")");
+		logger = LoggerFactory.getLogger("URC(" + iface.config.listenPort + "<->" + ((UdpRemoteAddress)remoteAddress).port + ")");
 		if (remotePubKey != null) {
 			outboundSymKey = TrCrypto.createAesKey();
 			//			inboundSymKey = outboundSymKey;
@@ -69,6 +69,8 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 			// unilateral inbound connection, and we will be using the
 			// inboundSymKey (once we are told it) to encrypt outbound
 			// messages too
+			if (unilateralOutbound)
+				throw new RuntimeException("remotePubKey can't be null for a unilateralOutbound connection");
 		}
 
 		if (unilateralOutbound) {
@@ -135,16 +137,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 			logger.debug("decoded inboundSymKey");
 
 			if (isUnilateralInbound()) {
-				logger.debug("Unilateral inbound, so we use the inboundSymKey to encrypt outbound messages too");
-				outboundSymKey = inboundSymKey;
-			}
-
-			if (remotePubKey == null) {
-				// We don't know the remote's public key, indicating this was a
-				// unilateral connection,
-				// remote will expect that we use the inboundSymKey to encrypt
-				// outbound too
-				logger.debug("Unilateral connection, assume same outboundSymKey");
+				logger.debug("Unilateral inbound, so we use the inboundSymKey to encrypt outbound messages too, and we know remote has cached it");
 				outboundSymKey = inboundSymKey;
 				remoteHasCachedOurOutboundSymKey = true;
 			}
@@ -159,14 +152,18 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 		try {
 			logger.debug("Decoding message");
 			message = inboundSymKey.decrypt(message);
+
+			if (!remoteHasCachedOurOutboundSymKey && unilateralOutbound) {
+				logger.debug("If this is a response to a unilateral message, we know remote has our outboundSymKey");
+				remoteHasCachedOurOutboundSymKey = true;
+			}
+
 			final DataInputStream dis = message.toDataInputStream();
 			final PrimitiveMessageType type = PrimitiveMessageType.forBytes.get(dis.readByte());
-			logger.debug("Message type: "+type);
-			// logger.debug(iface.config.listenPort + " received " + type +
-			// " from " + remoteAddress);
 			switch (type) {
 			case ACK:
 				if (!remoteHasCachedOurOutboundSymKey) {
+					logger.debug("Received first ACK, we know remote has cached our outboundSymKey");
 					// Receiving our first ACK indicates by-directional
 					// communication is established
 					remoteHasCachedOurOutboundSymKey = true;
@@ -236,6 +233,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 	private ByteArraySegment encryptOutbound(final ByteArraySegment rawMessage) {
 		final ByteArraySegmentBuilder toSend = ByteArraySegment.builder();
 		if (!remoteHasCachedOurOutboundSymKey) {
+			logger.debug("Remote hasn't yet cached our outboundSymKey, prepend it");
 			toSend.write(TrCrypto.encryptRaw(outboundSymKey.toByteArraySegment(), remotePubKey));
 		}
 		toSend.write(outboundSymKey.encrypt(rawMessage));
@@ -250,6 +248,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 			final ByteArraySegmentBuilder ackMessage = ByteArraySegment.builder();
 			PrimitiveMessageType.ACK.write(ackMessage);
 			ackMessage.writeInt(messageId);
+			logger.debug("Sending ACK");
 			iface.sendTo(remoteAddress, encryptOutbound(ackMessage.build()),
 					TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY);
 		}

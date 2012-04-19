@@ -62,7 +62,13 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 			final tahrir.io.net.TrNetworkInterface.TrMessageListener listener,
 			final Function<TrRemoteConnection, Void> connectedCallback,
 			final Runnable disconnectedCallback, final boolean unilateral) {
-		final UdpRemoteConnection conn = new UdpRemoteConnection(this, (UdpRemoteAddress) remoteAddress, remotePubKey, listener,
+		// Should they need to pass in all the additional info if we already
+		// have a connection, since it isn't used?
+		UdpRemoteConnection conn = remoteConnections.get(remoteAddress);
+		if (conn != null)
+			return conn;
+
+		conn = new UdpRemoteConnection(this, (UdpRemoteAddress) remoteAddress, remotePubKey, listener,
 				connectedCallback,
 				disconnectedCallback, unilateral);
 		remoteConnections.put(remoteAddress, conn);
@@ -178,7 +184,7 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 									public void run() {
 										logger.debug("Ulilateral inbound connection from "+ura+" has disconnected");
 										parent.remoteConnections.remove(ura);
-									}}, true);
+									}}, false);
 							parent.remoteConnections.put(ura, connection);
 							connection.received(parent, ura, ByteArraySegment.from(dp));
 						}

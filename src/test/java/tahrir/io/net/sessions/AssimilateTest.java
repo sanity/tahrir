@@ -10,7 +10,7 @@ import tahrir.peerManager.TrPeerManager;
 import tahrir.tools.*;
 
 public class AssimilateTest {
-	@Test(enabled=false)
+	@Test(enabled=true)
 	public void twoPeerTest() throws Exception {
 		final TrConfig seedConfig = new TrConfig();
 		seedConfig.capabilities.allowsAssimilation = true;
