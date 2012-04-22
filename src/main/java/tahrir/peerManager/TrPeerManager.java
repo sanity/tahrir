@@ -1,24 +1,29 @@
 package tahrir.peerManager;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
-
-import com.google.common.base.*;
-import com.google.common.collect.MapMaker;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
 
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import tahrir.*;
+import tahrir.TrNode;
 import tahrir.TrNode.PublicNodeId;
 import tahrir.io.net.TrRemoteAddress;
 import tahrir.io.net.sessions.AssimilateSessionImpl;
 import tahrir.peerManager.TrPeerManager.TrPeerInfo.Assimilation;
-import tahrir.tools.*;
+import tahrir.tools.Persistence;
 import tahrir.tools.Persistence.Modified;
+import tahrir.tools.TrUtils;
+
+import com.google.common.base.Function;
+import com.google.common.base.Objects;
+import com.google.common.collect.MapMaker;
 
 public class TrPeerManager {
 	public static final double RECENTLY_ATTEMPTED_PENALTY = 1.3;
