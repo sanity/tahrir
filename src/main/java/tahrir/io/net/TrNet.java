@@ -150,7 +150,7 @@ public class TrNet {
 		return disconnectedListeners.remove(disconnectedListener);
 	}
 
-	public class IH implements InvocationHandler {
+	public static class IH implements InvocationHandler {
 
 		private final Class<?> c;
 		private final TrRemoteConnection connection;

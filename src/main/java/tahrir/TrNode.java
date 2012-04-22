@@ -152,6 +152,8 @@ public class TrNode {
 
 		}
 
+
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -175,6 +177,15 @@ public class TrNode {
 			} else if (!address.equals(other.address))
 				return false;
 			return true;
+		}
+
+		@Override
+		public String toString() {
+			final StringBuilder builder = new StringBuilder();
+			builder.append("PublicNodeId [address=");
+			builder.append(address);
+			builder.append("]");
+			return builder.toString();
 		}
 	}
 }

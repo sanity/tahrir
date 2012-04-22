@@ -9,7 +9,7 @@ import java.util.concurrent.*;
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
 import tahrir.io.net.*;
 import tahrir.tools.*;
@@ -21,7 +21,7 @@ import tahrir.tools.*;
 public class UdpNetworkInterface extends TrNetworkInterface {
 	public static final int MAX_PACKET_SIZE_BYTES = 1450;
 
-	private static org.slf4j.Logger logger = LoggerFactory.getLogger(UdpNetworkInterface.class);
+	private final org.slf4j.Logger logger;
 	public final RSAPrivateKey myPrivateKey;
 	public final RSAPublicKey myPublicKey;
 	public Map<TrRemoteAddress, UdpRemoteConnection> remoteConnections = Maps.newConcurrentMap();
@@ -40,6 +40,8 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 		this.config = config;
 		myPublicKey = keyPair.a;
 		myPrivateKey = keyPair.b;
+
+		logger = LoggerFactory.getLogger(UdpNetworkInterface.class.getName()+" ("+config.listenPort+")");
 		datagramSocket = new DatagramSocket(config.listenPort);
 		datagramSocket.setSoTimeout(500);
 		sender = new Sender(this);
@@ -142,7 +144,10 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 
 		private final UdpNetworkInterface parent;
 
+		private final Logger logger;
+
 		public Receiver(final UdpNetworkInterface parent) {
+			logger = parent.logger;
 			this.parent = parent;
 		}
 
@@ -157,6 +162,7 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 
 					final UdpRemoteAddress ura = new UdpRemoteAddress(dp.getAddress(), dp.getPort());
 					UdpRemoteConnection connection = parent.remoteConnections.get(ura);
+					logger.debug("Retrieving "+ura+" (hash:"+ura.hashCode()+" from "+parent.remoteConnections+" => "+connection);
 
 					if (connection != null) {
 						// We have a connection to the sender, forward this message to it
@@ -182,7 +188,7 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 
 									@Override
 									public void run() {
-										logger.debug("Ulilateral inbound connection from "+ura+" has disconnected");
+										logger.debug("Ulilateral inbound connection from "+ura+" has disconnected, removing");
 										parent.remoteConnections.remove(ura);
 									}}, false);
 							parent.remoteConnections.put(ura, connection);
@@ -203,9 +209,11 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 	private static class Sender extends Thread {
 		public volatile boolean active = true;
 		private final UdpNetworkInterface parent;
+		private final Logger logger;
 
 		public Sender(final UdpNetworkInterface parent) {
 			this.parent = parent;
+			logger = parent.logger;
 		}
 
 		@Override
@@ -228,7 +236,7 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 							if (packet.sentListener != null) {
 								packet.sentListener.failure();
 							}
-							UdpNetworkInterface.logger.error("Failed to send UDP packet", e);
+							logger.error("Failed to send UDP packet", e);
 						}
 						Thread.sleep((1000l * packet.data.length / parent.config.maxUpstreamBytesPerSecond));
 					}

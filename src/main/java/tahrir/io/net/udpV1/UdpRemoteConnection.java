@@ -58,7 +58,9 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 			final boolean unilateralOutbound) {
 		super(remoteAddr, remotePubKey, listener, connectedCallback, disconnectedCallback, unilateralOutbound);
 		this.iface = iface;
-		logger = LoggerFactory.getLogger("URC(" + iface.config.listenPort + "<->" + ((UdpRemoteAddress)remoteAddress).port + ")");
+		logger = LoggerFactory.getLogger(UdpRemoteConnection.class.getName()+" ("+iface.config.listenPort+">"+remoteAddr.port+")");
+		logger.debug("Created");
+
 		if (remotePubKey != null) {
 			outboundSymKey = TrCrypto.createAesKey();
 			//			inboundSymKey = outboundSymKey;
@@ -95,6 +97,8 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 
 	@Override
 	public void disconnect() {
+		logger.debug("disconnect() called");
+		Thread.dumpStack();
 		if (!disconnectedCallbackCalled) {
 			disconnectedCallbackCalled = true;
 			if (disconnectedCallback != null) {
@@ -114,6 +118,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 			TrUtils.executor.schedule(new Runnable() {
 
 				public void run() {
+					logger.debug("Removing connection from parent after 60 second delay");
 					iface.remoteConnections.remove(remoteAddress);
 				}
 			}, 60, TimeUnit.SECONDS);
