@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
 
-import com.google.common.base.Function;
+import com.google.common.base.*;
 import com.google.common.collect.MapMaker;
 
 import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
@@ -14,7 +14,7 @@ import org.slf4j.*;
 
 import tahrir.*;
 import tahrir.TrNode.PublicNodeId;
-import tahrir.io.net.*;
+import tahrir.io.net.TrRemoteAddress;
 import tahrir.io.net.sessions.AssimilateSessionImpl;
 import tahrir.peerManager.TrPeerManager.TrPeerInfo.Assimilation;
 import tahrir.tools.*;
@@ -123,12 +123,7 @@ public class TrPeerManager {
 			final AssimilateSessionImpl as = node.trNet.getOrCreateLocalSession(AssimilateSessionImpl.class);
 			final TrPeerInfo ap = getPeerForAssimilation();
 
-			final TrRemoteConnection apc = node.trNet.connectionManager.getConnection(ap.publicNodeId.address, ap.publicNodeId.publicKey,
-					ap.capabilities.allowsUnsolicitiedInbound, "assimilate");
-
-			as.startAssimilation(TrUtils.noopRunnable, apc);
-
-			node.trNet.connectionManager.noLongerNeeded(apc.getRemoteAddress(), "assimilate");
+			as.startAssimilation(TrUtils.noopRunnable, ap);
 
 			// } else {
 			// logger.warn("Don't know how to assimilate through already connected peers yet");
@@ -226,6 +221,12 @@ public class TrPeerManager {
 		public boolean allowsAssimilation;
 		public boolean allowsUnsolicitiedInbound;
 		public boolean receivesMessageBroadcasts;
+
+		@Override
+		public String toString() {
+			return Objects.toStringHelper(this).add("allowsAssimilation", allowsAssimilation)
+					.add("allowsUnsolicitedInbound", allowsUnsolicitiedInbound).toString();
+		}
 	}
 
 	public static class Config {
@@ -275,6 +276,7 @@ public class TrPeerManager {
 				sq_sum = sq_sum / 2;
 			}
 		}
+
 	}
 
 	public static class TrPeerInfo {
@@ -296,5 +298,16 @@ public class TrPeerManager {
 			public BinaryStat successRate = new BinaryStat(10);
 			public LinearStat successTimeSqrt = new LinearStat(10);
 		}
+
+		@Override
+		public String toString() {
+			final StringBuilder builder = new StringBuilder();
+			builder.append("TrPeerInfo [publicNodeId=");
+			builder.append(publicNodeId);
+			builder.append("]");
+			return builder.toString();
+		}
+
+
 	}
 }

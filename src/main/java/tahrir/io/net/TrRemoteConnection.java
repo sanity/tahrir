@@ -52,8 +52,7 @@ public abstract class TrRemoteConnection {
 
 	@Override
 	public String toString() {
-		return "TrRemoteConnection [remoteAddress=" + remoteAddress
-				+ ", remotePubKey=" + remotePubKey + "]";
+		return "TrRemoteConnection [remoteAddress=" + remoteAddress+"]";
 	}
 
 	public abstract void disconnect();

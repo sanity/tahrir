@@ -150,7 +150,7 @@ public class TrNet {
 		return disconnectedListeners.remove(disconnectedListener);
 	}
 
-	public class IH implements InvocationHandler {
+	public static class IH implements InvocationHandler {
 
 		private final Class<?> c;
 		private final TrRemoteConnection connection;
@@ -197,8 +197,6 @@ public class TrNet {
 						+ method.getDeclaringClass());
 
 			final ByteArraySegment messageBAS = builder.build();
-
-			logger.debug("Message to send: "+messageBAS);
 
 			connection.send(messageBAS, priority.value(), new TrSentReceivedListener() {
 
@@ -257,7 +255,6 @@ public class TrNet {
 	private final class TrNetMessageListener implements TrMessageListener {
 		public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender,
 				final ByteArraySegment message) {
-			logger.debug("Message received: "+message);
 			final DataInputStream dis = message.toDataInputStream();
 			try {
 				final byte messageTypeByte = dis.readByte();

@@ -44,6 +44,10 @@ public abstract class TrSessionImpl implements TrSession {
 		return connection(address, null, false);
 	}
 
+	protected final TrRemoteConnection connection(final TrRemoteAddress address, final boolean unilateral) {
+		return connection(address, null, unilateral);
+	}
+
 	protected final TrRemoteConnection connection(final TrRemoteAddress address,
 			final RSAPublicKey pubKey,
 			final boolean unilateral) {
