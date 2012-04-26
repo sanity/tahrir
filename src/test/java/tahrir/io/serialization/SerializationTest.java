@@ -1,8 +1,16 @@
 package tahrir.io.serialization;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.InetAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -12,7 +20,8 @@ import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.udpV1.UdpRemoteAddress;
 import tahrir.peerManager.TrPeerManager.TrPeerInfo;
 
-import com.google.inject.internal.*;
+import com.google.inject.internal.Maps;
+import com.google.inject.internal.Sets;
 
 public class SerializationTest {
 
@@ -106,6 +115,35 @@ public class SerializationTest {
 		final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
 		final CollectionsTypes ct2 = TrSerializer.deserializeFrom(CollectionsTypes.class, dis);
 		Assert.assertEquals(ct, ct2);
+	}
+
+	@Test
+	public void duplicateObjectTest() throws Exception {
+		final ArrayList<String> listWithDuplicate = new ArrayList<String>();
+
+		final String string1 = "a";
+		final String string2 = "b";
+		final String string3 = "c";
+
+		listWithDuplicate.add(string1);
+		listWithDuplicate.add(string1);
+
+		final ArrayList<String> listNoDuplicate = new ArrayList<String>();
+
+		listNoDuplicate.add(string3);
+		listNoDuplicate.add(string2);
+
+		final ByteArrayOutputStream baos1 = new ByteArrayOutputStream(1024);
+		final DataOutputStream dos1 = new DataOutputStream(baos1);
+		TrSerializer.serializeTo(listWithDuplicate, dos1);
+
+		final ByteArrayOutputStream baos2 = new ByteArrayOutputStream(1024);
+		final DataOutputStream dos2 = new DataOutputStream(baos2);
+		TrSerializer.serializeTo(listNoDuplicate, dos2);
+
+		System.out.println(baos1.size() + " " + baos2.size());
+
+		Assert.assertFalse(baos1.size() == baos2.size());
 	}
 
 	@SuppressWarnings("serial")
