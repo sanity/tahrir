@@ -1,4 +1,4 @@
-package tahrir.io.net.udp;
+package tahrir.io.net.udpV1;
 
 import java.net.InetAddress;
 import java.security.interfaces.RSAPrivateKey;
@@ -16,9 +16,7 @@ import tahrir.io.net.TrNetworkInterface.TrMessageListener;
 import tahrir.io.net.TrNetworkInterface.TrSentReceivedListener;
 import tahrir.io.net.TrRemoteAddress;
 import tahrir.io.net.TrRemoteConnection;
-import tahrir.io.net.udpV1.UdpNetworkInterface;
 import tahrir.io.net.udpV1.UdpNetworkInterface.UNIConfig;
-import tahrir.io.net.udpV1.UdpRemoteAddress;
 import tahrir.tools.ByteArraySegment;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 import tahrir.tools.Tuple2;
@@ -31,8 +29,8 @@ public class UdpNetworkInterfaceTest {
 	private int port1 = 3156;
 	private int port2 = 3157;
 
-	private TrNetworkInterface i1;
-	private TrNetworkInterface i2;
+	private UdpNetworkInterface i1;
+	private UdpNetworkInterface i2;
 
 	private TrMessageListener listener;
 
@@ -103,21 +101,7 @@ public class UdpNetworkInterfaceTest {
 
 		sentMessage = msgBuilder.build();
 
-		one2two.send(sentMessage, 1, new TrSentReceivedListener() {
-
-			public void sent() {
-				System.out.println("Sent successfully");
-			}
-
-			public void failure() {
-				Assert.fail();
-			}
-
-			public void received() {
-				ackReceived.called = true;
-				System.out.println("Received successfully");
-			}
-		});
+		one2two.send(sentMessage, 1, new TrSentReceivedListenerBasicImpl());
 
 		for (int x = 0; x < 10; x++) {
 			if (ackReceived.called && receivedSuccessfully.called) {
@@ -142,21 +126,7 @@ public class UdpNetworkInterfaceTest {
 
 		i2.allowUnsolicitedInbound(listener);
 
-		one2two.send(sentMessage, 1, new TrSentReceivedListener() {
-
-			public void sent() {
-				logger.debug("Sent successfully");
-			}
-
-			public void failure() {
-				Assert.fail();
-			}
-
-			public void received() {
-				ackReceived.called = true;
-				System.out.println("Received successfully");
-			}
-		});
+		one2two.send(sentMessage, 1, new TrSentReceivedListenerBasicImpl());
 
 		for (int x = 0; x < 10; x++) {
 			if (ackReceived.called && receivedSuccessfully.called) {
@@ -188,21 +158,7 @@ public class UdpNetworkInterfaceTest {
 		//
 		//		Assert.assertTrue(connected1.called && connected2.called);
 
-		one2two.send(sentMessage, 1, new TrSentReceivedListener() {
-
-			public void sent() {
-				System.out.println("Sent successfully");
-			}
-
-			public void failure() {
-				Assert.fail();
-			}
-
-			public void received() {
-				ackReceived.called = true;
-				System.out.println("Received successfully");
-			}
-		});
+		one2two.send(sentMessage, 1, new TrSentReceivedListenerBasicImpl());
 
 		for (int x = 0; x < 10; x++) {
 			if (ackReceived.called && receivedSuccessfully.called) {
@@ -213,6 +169,71 @@ public class UdpNetworkInterfaceTest {
 
 		Assert.assertTrue(ackReceived.called);
 		Assert.assertTrue(receivedSuccessfully.called);
+	}
+
+	@Test
+	public void unreliableSimpleMessageSend() throws Exception {
+		i1.setSimPercentageLoss(.2);
+
+		final ByteArraySegmentBuilder msgBuilder = ByteArraySegment.builder();
+
+		for (int x = 0; x < 10; x++) {
+			msgBuilder.writeByte(33);
+		}
+
+		sentMessage = msgBuilder.build();
+
+		one2two.send(sentMessage, 1, new TrSentReceivedListenerBasicImpl());
+
+		for (int x = 0; x < 10; x++) {
+			if (ackReceived.called && receivedSuccessfully.called) {
+				break;
+			}
+			Thread.sleep(500);
+		}
+
+		Assert.assertTrue(ackReceived.called);
+		Assert.assertTrue(receivedSuccessfully.called);
+	}
+
+	@Test
+	public void longUnreliableMessageSend() throws Exception {
+		i1.setSimPercentageLoss(.2);
+
+		final ByteArraySegmentBuilder msgBuilder = ByteArraySegment.builder();
+
+		for (int x = 0; x < 2000; x++) {
+			msgBuilder.writeByte(33);
+		}
+
+		sentMessage = msgBuilder.build();
+
+		one2two.send(sentMessage, 1, new TrSentReceivedListenerBasicImpl());
+
+		for (int x = 0; x < 1000; x++) {
+			if (ackReceived.called && receivedSuccessfully.called) {
+				break;
+			}
+			Thread.sleep(500);
+		}
+
+		Assert.assertTrue(ackReceived.called);
+		Assert.assertTrue(receivedSuccessfully.called);
+	}
+
+	public class TrSentReceivedListenerBasicImpl implements TrSentReceivedListener {
+		public void sent() {
+			System.out.println("Sent successfully");
+		}
+
+		public void failure() {
+			Assert.fail();
+		}
+
+		public void received() {
+			ackReceived.called = true;
+			System.out.println("Received successfully");
+		}
 	}
 
 	public static class Called implements Runnable, Function<TrRemoteConnection, Void> {

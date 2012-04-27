@@ -1,18 +1,28 @@
 package tahrir.io.net.udpV1;
 
 import java.io.IOException;
-import java.net.*;
-import java.security.interfaces.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import tahrir.io.net.TrNetworkInterface;
+import tahrir.io.net.TrRemoteAddress;
+import tahrir.io.net.TrRemoteConnection;
+import tahrir.tools.ByteArraySegment;
+import tahrir.tools.TrUtils;
+import tahrir.tools.Tuple2;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
-
-import org.slf4j.*;
-
-import tahrir.io.net.*;
-import tahrir.tools.*;
 
 /**
  * @author Ian Clarke <ian.clarke@gmail.com>
@@ -32,6 +42,8 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 	private final Receiver receiver;
 
 	private final Sender sender;
+
+	private double simPercentageLoss = 0;
 
 	final UNIConfig config;
 
@@ -111,6 +123,10 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 		return UdpRemoteAddress.class;
 	}
 
+	protected void setSimPercentageLoss(final Double percentage) {
+		simPercentageLoss = percentage;
+	}
+
 	public static class UNIConfig {
 		public int listenPort = TrUtils.rand.nextInt(10000)+10000;
 
@@ -160,6 +176,11 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 				try {
 					parent.datagramSocket.receive(dp);
 
+					if (isPacketToDrop()) {
+						logger.debug("Dropping packet");
+						continue;
+					}
+
 					final UdpRemoteAddress ura = new UdpRemoteAddress(dp.getAddress(), dp.getPort());
 					UdpRemoteConnection connection = parent.remoteConnections.get(ura);
 					logger.debug("Retrieving "+ura+" (hash:"+ura.hashCode()+" from "+parent.remoteConnections+" => "+connection);
@@ -203,6 +224,10 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 				}
 			}
 			parent.datagramSocket.close();
+		}
+
+		private boolean isPacketToDrop() {
+			return parent.simPercentageLoss > 0 && Math.random() <= parent.simPercentageLoss;
 		}
 	}
 
