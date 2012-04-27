@@ -13,7 +13,6 @@ import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.*;
 import tahrir.io.net.sessions.*;
 import tahrir.io.net.udpV1.*;
-import tahrir.peerManager.TrPeerManager;
 import tahrir.tools.*;
 import tahrir.tools.Persistence.Modified;
 import tahrir.tools.Persistence.ModifyBlock;
@@ -45,16 +44,16 @@ public class TrNode {
 		pubNodeIdFile = new File(rootDirectory, config.publicNodeId);
 		if (!privNodeIdFile.exists()) {
 			logger.info("Generating new Node ID");
-			final Tuple2<PrivateNodeId, PublicNodeId> kp = PrivateNodeId.generate();
+			final Tuple2<PrivateNodeId, RemoteNodeAddress> kp = PrivateNodeId.generate();
 			Persistence.save(privNodeIdFile, kp.a);
 			Persistence.save(pubNodeIdFile, kp.b);
 		}
 		if (config.localHostName != null) {
-			modifyPublicNodeId(new ModifyBlock<TrNode.PublicNodeId>() {
+			modifyPublicNodeId(new ModifyBlock<RemoteNodeAddress>() {
 
-				public void run(final PublicNodeId publicNodeId, final Modified modified) {
+				public void run(final RemoteNodeAddress remoteNodeAddress, final Modified modified) {
 					try {
-						publicNodeId.address = new UdpRemoteAddress(InetAddress.getByName(config.localHostName),
+						remoteNodeAddress.location = new UdpNetworkLocation(InetAddress.getByName(config.localHostName),
 								config.udp.listenPort);
 					} catch (final UnknownHostException e) {
 						logger.error("Failed to set local node address", e);
@@ -68,7 +67,7 @@ public class TrNode {
 		}
 
 		logger.info("Set up UDP network interface");
-		final Tuple2<RSAPublicKey, RSAPrivateKey> keyPair = Tuple2.of(getPublicNodeId().publicKey,
+		final Tuple2<RSAPublicKey, RSAPrivateKey> keyPair = Tuple2.of(getRemoteNodeAddress().publicKey,
 				getPrivateNodeId().privateKey);
 		final TrNetworkInterface uni = new UdpNetworkInterface(config.udp, keyPair);
 		trNet = new TrNet(this, uni, config.capabilities.allowsUnsolicitiedInbound);
@@ -87,7 +86,7 @@ public class TrNode {
 		return Lists.newArrayList(publicNodeIdsDir.listFiles());
 	}
 
-	public File getFileForPublicNode(final TrRemoteAddress addr) {
+	public File getFileForPublicNode(final PhysicalNetworkLocation addr) {
 		final int hc = Math.abs(addr.hashCode());
 		return new File(publicNodeIdsDir, "pn-" + hc + ".dat");
 	}
@@ -100,12 +99,12 @@ public class TrNode {
 		Persistence.loadAndModify(PrivateNodeId.class, privNodeIdFile, mb);
 	}
 
-	public PublicNodeId getPublicNodeId() {
-		return Persistence.loadReadOnly(PublicNodeId.class, pubNodeIdFile);
+	public RemoteNodeAddress getRemoteNodeAddress() {
+		return Persistence.loadReadOnly(RemoteNodeAddress.class, pubNodeIdFile);
 	}
 
-	public void modifyPublicNodeId(final ModifyBlock<PublicNodeId> mb) {
-		Persistence.loadAndModify(PublicNodeId.class, pubNodeIdFile, mb);
+	public void modifyPublicNodeId(final ModifyBlock<RemoteNodeAddress> mb) {
+		Persistence.loadAndModify(RemoteNodeAddress.class, pubNodeIdFile, mb);
 	}
 
 	public final TrPeerManager peerManager;
@@ -115,77 +114,20 @@ public class TrNode {
 	public TrNet trNet;
 
 	public static class PrivateNodeId {
-		public static Tuple2<PrivateNodeId, PublicNodeId> generate() {
+		public static Tuple2<PrivateNodeId, RemoteNodeAddress> generate() {
 			final PrivateNodeId privateNodeId = new PrivateNodeId();
-			final PublicNodeId publicNodeId = new PublicNodeId();
+			final RemoteNodeAddress remoteNodeAddress = new RemoteNodeAddress();
 
-			publicNodeId.address = null;
+			remoteNodeAddress.location = null;
 
 			final Tuple2<RSAPublicKey, RSAPrivateKey> kp = TrCrypto.createRsaKeyPair();
 
-			publicNodeId.publicKey = kp.a;
+			remoteNodeAddress.publicKey = kp.a;
 			privateNodeId.privateKey = kp.b;
 
-			return Tuple2.of(privateNodeId, publicNodeId);
+			return Tuple2.of(privateNodeId, remoteNodeAddress);
 		}
 
 		public RSAPrivateKey privateKey;
-	}
-
-	public static class PublicNodeIdInfo {
-		public PublicNodeId id;
-		public int connectionAttempts = 0;
-		public int connectionFailures = 0;
-	}
-
-	public static class PublicNodeId {
-		public TrRemoteAddress address;
-		public RSAPublicKey publicKey;
-
-		public PublicNodeId() {
-
-		}
-
-		public PublicNodeId(final TrRemoteAddress address,final RSAPublicKey publicKey) {
-			this.address = address;
-			this.publicKey = publicKey;
-
-		}
-
-
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((address == null) ? 0 : address.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(final Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (!(obj instanceof PublicNodeId))
-				return false;
-			final PublicNodeId other = (PublicNodeId) obj;
-			if (address == null) {
-				if (other.address != null)
-					return false;
-			} else if (!address.equals(other.address))
-				return false;
-			return true;
-		}
-
-		@Override
-		public String toString() {
-			final StringBuilder builder = new StringBuilder();
-			builder.append("PublicNodeId [address=");
-			builder.append(address);
-			builder.append("]");
-			return builder.toString();
-		}
 	}
 }

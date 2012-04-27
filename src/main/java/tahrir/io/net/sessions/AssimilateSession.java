@@ -3,7 +3,7 @@ package tahrir.io.net.sessions;
 import java.security.interfaces.RSAPublicKey;
 
 import tahrir.io.net.*;
-import tahrir.peerManager.TrPeerManager.Capabilities;
+import tahrir.io.net.TrPeerManager.Capabilities;
 
 /*
  * This is the assimilation procedure, we have a requestor, who needs a new connection, zero or more
@@ -22,16 +22,16 @@ import tahrir.peerManager.TrPeerManager.Capabilities;
 
 public interface AssimilateSession extends TrSession {
 	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
-	public void yourAddressIs(final TrRemoteAddress address);
+	public void yourAddressIs(final PhysicalNetworkLocation address);
 
 	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
 	public void requestNewConnection(final RSAPublicKey requestorPubkey);
 
 	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
-	public void requestNewConnection(TrRemoteAddress requestor, final RSAPublicKey requestorPubkey);
+	public void requestNewConnection(PhysicalNetworkLocation requestor, final RSAPublicKey requestorPubkey);
 
 	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
-	public void acceptNewConnection(TrRemoteAddress acceptor, final RSAPublicKey acceptorPubkey);
+	public void acceptNewConnection(PhysicalNetworkLocation acceptor, final RSAPublicKey acceptorPubkey);
 
 	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
 	public void myCapabilitiesAre(Capabilities myCapabilities);

@@ -7,11 +7,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.slf4j.*;
 
 import tahrir.TrNode;
-import tahrir.peerManager.TrPeerManager.TrPeerInfo;
+import tahrir.io.net.TrPeerManager.TrPeerInfo;
 
 public abstract class TrSessionImpl implements TrSession {
 	protected Logger logger;
-	public static final ThreadLocal<TrRemoteAddress> sender = new ThreadLocal<TrRemoteAddress>();
+	public static final ThreadLocal<PhysicalNetworkLocation> sender = new ThreadLocal<PhysicalNetworkLocation>();
 	protected final int sessionId;
 	protected final TrNode node;
 	protected final TrNet trNet;
@@ -26,29 +26,29 @@ public abstract class TrSessionImpl implements TrSession {
 	}
 
 	protected TrRemoteConnection connection(final TrPeerInfo peerInfo) {
-		return connection(peerInfo.publicNodeId.address, peerInfo.publicNodeId.publicKey, peerInfo.capabilities.allowsUnsolicitiedInbound);
+		return connection(peerInfo.remoteNodeAddress.location, peerInfo.remoteNodeAddress.publicKey, peerInfo.capabilities.allowsUnsolicitiedInbound);
 	}
 
-	public TrRemoteAddress sender() {
-		final TrRemoteAddress r = sender.get();
+	public PhysicalNetworkLocation sender() {
+		final PhysicalNetworkLocation r = sender.get();
 		if (r == null)
 			throw new RuntimeException("No sender stored in this thread.  Is this a local Session?  Are you calling getSender() from within a callback?  In either case, don't!");
 		else
 			return r;
 	}
 
-	private final Set<TrRemoteAddress> toUnregister = Collections.synchronizedSet(new HashSet<TrRemoteAddress>());
+	private final Set<PhysicalNetworkLocation> toUnregister = Collections.synchronizedSet(new HashSet<PhysicalNetworkLocation>());
 	private final String userLabel;
 
-	protected final TrRemoteConnection connection(final TrRemoteAddress address) {
+	protected final TrRemoteConnection connection(final PhysicalNetworkLocation address) {
 		return connection(address, null, false);
 	}
 
-	protected final TrRemoteConnection connection(final TrRemoteAddress address, final boolean unilateral) {
+	protected final TrRemoteConnection connection(final PhysicalNetworkLocation address, final boolean unilateral) {
 		return connection(address, null, unilateral);
 	}
 
-	protected final TrRemoteConnection connection(final TrRemoteAddress address,
+	protected final TrRemoteConnection connection(final PhysicalNetworkLocation address,
 			final RSAPublicKey pubKey,
 			final boolean unilateral) {
 		toUnregister.add(address);
@@ -75,7 +75,7 @@ public abstract class TrSessionImpl implements TrSession {
 	}
 
 	protected final void terminate() {
-		for (final TrRemoteAddress ra : toUnregister) {
+		for (final PhysicalNetworkLocation ra : toUnregister) {
 			trNet.connectionManager.noLongerNeeded(ra, userLabel);
 		}
 		for (final Runnable r : terminatedCallbacks) {

@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.collect.Maps;
 
-import tahrir.io.net.TrRemoteAddress;
+import tahrir.io.net.PhysicalNetworkLocation;
 import tahrir.io.serialization.serializers.*;
 import tahrir.tools.ByteArraySegment;
 
@@ -36,7 +36,7 @@ public abstract class TrSerializer {
 		registerSerializer(new RSAPrivateKeySerializer(), RSAPrivateKey.class);
 		registerSerializer(new ByteArraySegmentSerializer(), ByteArraySegment.class);
 		registerSerializer(new InetAddressSerializer(), InetAddress.class);
-		registerSerializer(new TrRemoteAddressSerializer(), TrRemoteAddress.class);
+		registerSerializer(new NetworkLocationSerializer(), PhysicalNetworkLocation.class);
 	}
 
 	private static final Map<Class<?>, Map<Integer, Field>> fieldMap = Maps.newHashMap();

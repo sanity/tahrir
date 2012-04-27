@@ -12,12 +12,12 @@ import tahrir.tools.ByteArraySegment;
 public abstract class TrRemoteConnection {
 	protected final TrMessageListener listener;
 	protected final Function<TrRemoteConnection, Void> connectedCallback;
-	protected final TrRemoteAddress remoteAddress;
+	protected final PhysicalNetworkLocation remoteAddress;
 	protected RSAPublicKey remotePubKey;
 	protected final Runnable disconnectedCallback;
 	protected final boolean unilateralOutbound;
 
-	protected TrRemoteConnection(final TrRemoteAddress remoteAddress, final RSAPublicKey remotePubKey,
+	protected TrRemoteConnection(final PhysicalNetworkLocation remoteAddress, final RSAPublicKey remotePubKey,
 			final TrMessageListener listener, final Function<TrRemoteConnection, Void> connectedCallback,
 			final Runnable disconnectedCallback, final boolean unilateralOutbound) {
 		this.remoteAddress = remoteAddress;
@@ -33,7 +33,7 @@ public abstract class TrRemoteConnection {
 		return remotePubKey == null;
 	}
 
-	public TrRemoteAddress getRemoteAddress() {
+	public PhysicalNetworkLocation getRemoteAddress() {
 		return remoteAddress;
 	}
 

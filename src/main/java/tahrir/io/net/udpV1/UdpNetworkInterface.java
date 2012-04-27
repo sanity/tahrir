@@ -24,7 +24,7 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 	private final org.slf4j.Logger logger;
 	public final RSAPrivateKey myPrivateKey;
 	public final RSAPublicKey myPublicKey;
-	public Map<TrRemoteAddress, UdpRemoteConnection> remoteConnections = Maps.newConcurrentMap();
+	public Map<PhysicalNetworkLocation, UdpRemoteConnection> remoteConnections = Maps.newConcurrentMap();
 	private final DatagramSocket datagramSocket;
 
 	private final PriorityBlockingQueue<QueuedPacket> outbox = new PriorityBlockingQueue<UdpNetworkInterface.QueuedPacket>();
@@ -59,7 +59,7 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 	 * @param unilateral Is the other node trying to connect back to us?
 	 */
 	@Override
-	public TrRemoteConnection connect(final TrRemoteAddress remoteAddress,
+	public TrRemoteConnection connect(final PhysicalNetworkLocation remoteAddress,
 			final RSAPublicKey remotePubKey,
 			final tahrir.io.net.TrNetworkInterface.TrMessageListener listener,
 			final Function<TrRemoteConnection, Void> connectedCallback,
@@ -70,7 +70,7 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 		if (conn != null)
 			return conn;
 
-		conn = new UdpRemoteConnection(this, (UdpRemoteAddress) remoteAddress, remotePubKey, listener,
+		conn = new UdpRemoteConnection(this, (UdpNetworkLocation) remoteAddress, remotePubKey, listener,
 				connectedCallback,
 				disconnectedCallback, unilateral);
 		remoteConnections.put(remoteAddress, conn);
@@ -78,15 +78,15 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 	}
 
 	@Override
-	protected void sendTo(final TrRemoteAddress recepient, final ByteArraySegment message, final double priority) {
+	protected void sendTo(final PhysicalNetworkLocation recepient, final ByteArraySegment message, final double priority) {
 		// We redeclare this to make it visible in this package
 		super.sendTo(recepient, message, priority);
 	}
 
 	@Override
-	protected void sendTo(final TrRemoteAddress recepient_, final ByteArraySegment encryptedMessage,
+	protected void sendTo(final PhysicalNetworkLocation recepient_, final ByteArraySegment encryptedMessage,
 			final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener, final double priority) {
-		final UdpRemoteAddress recepient = (UdpRemoteAddress) recepient_;
+		final UdpNetworkLocation recepient = (UdpNetworkLocation) recepient_;
 		assert encryptedMessage.length <= MAX_PACKET_SIZE_BYTES : "Packet length " + encryptedMessage.length
 				+ " greater than " + MAX_PACKET_SIZE_BYTES;
 		final QueuedPacket qp = new QueuedPacket(recepient, encryptedMessage, sentListener, priority);
@@ -107,8 +107,8 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 	}
 
 	@Override
-	protected Class<? extends TrRemoteAddress> getAddressClass() {
-		return UdpRemoteAddress.class;
+	protected Class<? extends PhysicalNetworkLocation> getAddressClass() {
+		return UdpNetworkLocation.class;
 	}
 
 	public static class UNIConfig {
@@ -119,12 +119,12 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 
 	private static class QueuedPacket implements Comparable<QueuedPacket> {
 
-		private final UdpRemoteAddress addr;
+		private final UdpNetworkLocation addr;
 		private final ByteArraySegment data;
 		private final double priority;
 		private final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener;
 
-		public QueuedPacket(final UdpRemoteAddress addr, final ByteArraySegment encryptedMessage,
+		public QueuedPacket(final UdpNetworkLocation addr, final ByteArraySegment encryptedMessage,
 				final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener, final double priority) {
 			this.addr = addr;
 			data = encryptedMessage;
@@ -160,7 +160,7 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 				try {
 					parent.datagramSocket.receive(dp);
 
-					final UdpRemoteAddress ura = new UdpRemoteAddress(dp.getAddress(), dp.getPort());
+					final UdpNetworkLocation ura = new UdpNetworkLocation(dp.getAddress(), dp.getPort());
 					UdpRemoteConnection connection = parent.remoteConnections.get(ura);
 					logger.debug("Retrieving "+ura+" (hash:"+ura.hashCode()+" from "+parent.remoteConnections+" => "+connection);
 

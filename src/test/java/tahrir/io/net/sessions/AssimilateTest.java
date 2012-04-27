@@ -5,8 +5,7 @@ import java.io.File;
 import org.testng.annotations.Test;
 
 import tahrir.*;
-import tahrir.TrNode.PublicNodeId;
-import tahrir.peerManager.TrPeerManager;
+import tahrir.io.net.TrPeerManager;
 import tahrir.tools.*;
 
 public class AssimilateTest {
@@ -21,7 +20,7 @@ public class AssimilateTest {
 		final File seedDir = TrUtils.createTempDirectory();
 		final TrNode seedNode = new TrNode(seedDir, seedConfig);
 
-		final PublicNodeId seedPublicNodeId = seedNode.getPublicNodeId();
+		final RemoteNodeAddress seedPublicNodeId = seedNode.getRemoteNodeAddress();
 
 		final File joinerDir = TrUtils.createTempDirectory();
 

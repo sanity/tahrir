@@ -28,9 +28,9 @@ public class TrNet {
 	private final Map<Class<? extends TrSession>, Class<? extends TrSessionImpl>> classesByInterface = Maps
 			.newHashMap();
 
-	private final ConcurrentLinkedQueue<Function<TrRemoteAddress, Void>> connectedListeners = new ConcurrentLinkedQueue<Function<TrRemoteAddress, Void>>();
+	private final ConcurrentLinkedQueue<Function<PhysicalNetworkLocation, Void>> connectedListeners = new ConcurrentLinkedQueue<Function<PhysicalNetworkLocation, Void>>();
 
-	private final ConcurrentLinkedQueue<Function<TrRemoteAddress, Void>> disconnectedListeners = new ConcurrentLinkedQueue<Function<TrRemoteAddress, Void>>();
+	private final ConcurrentLinkedQueue<Function<PhysicalNetworkLocation, Void>> disconnectedListeners = new ConcurrentLinkedQueue<Function<PhysicalNetworkLocation, Void>>();
 
 	private static final Logger logger = LoggerFactory.getLogger(TrNet.class);
 
@@ -47,7 +47,7 @@ public class TrNet {
 
 	private final TrNode trNode;
 
-	private final Map<Class<? extends TrRemoteAddress>, TrNetworkInterface> interfacesByAddressType;
+	private final Map<Class<? extends PhysicalNetworkLocation>, TrNetworkInterface> interfacesByAddressType;
 
 	public TrNet(final TrNode trNode, final TrNetworkInterface i, final boolean allowUnilateral) {
 		this(trNode, Collections.singleton(i), allowUnilateral);
@@ -67,11 +67,11 @@ public class TrNet {
 		}
 	}
 
-	public void addConnectedListener(final Function<TrRemoteAddress, Void> connectedListener) {
+	public void addConnectedListener(final Function<PhysicalNetworkLocation, Void> connectedListener) {
 		connectedListeners.add(connectedListener);
 	}
 
-	public void addDisconnectedListener(final Function<TrRemoteAddress, Void> disconnectedListener) {
+	public void addDisconnectedListener(final Function<PhysicalNetworkLocation, Void> disconnectedListener) {
 		disconnectedListeners.add(disconnectedListener);
 	}
 
@@ -142,11 +142,11 @@ public class TrNet {
 			}
 		}
 	}
-	public boolean removeConnectedListener(final Function<TrRemoteAddress, Void> connectedListener) {
+	public boolean removeConnectedListener(final Function<PhysicalNetworkLocation, Void> connectedListener) {
 		return connectedListeners.remove(connectedListener);
 	}
 
-	public boolean removeDisconnectedListener(final Function<TrRemoteAddress, Void> disconnectedListener) {
+	public boolean removeDisconnectedListener(final Function<PhysicalNetworkLocation, Void> disconnectedListener) {
 		return disconnectedListeners.remove(disconnectedListener);
 	}
 
@@ -253,7 +253,7 @@ public class TrNet {
 	}
 
 	private final class TrNetMessageListener implements TrMessageListener {
-		public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender,
+		public void received(final TrNetworkInterface iFace, final PhysicalNetworkLocation sender,
 				final ByteArraySegment message) {
 			final DataInputStream dis = message.toDataInputStream();
 			try {
@@ -304,14 +304,14 @@ public class TrNet {
 
 	public class ConnectionManager {
 
-		private final Map<TrRemoteAddress, ConnectionInfo> connections = new MapMaker().makeMap();
+		private final Map<PhysicalNetworkLocation, ConnectionInfo> connections = new MapMaker().makeMap();
 
-		public TrRemoteConnection getConnection(final TrRemoteAddress address, final RSAPublicKey pubKey,
+		public TrRemoteConnection getConnection(final PhysicalNetworkLocation address, final RSAPublicKey pubKey,
 				final boolean unilateral, final String userLabel) {
 			return getConnection(address, pubKey, unilateral, userLabel, TrUtils.noopRunnable);
 		}
 
-		public TrRemoteConnection getConnection(final TrRemoteAddress address, final RSAPublicKey pubKey,
+		public TrRemoteConnection getConnection(final PhysicalNetworkLocation address, final RSAPublicKey pubKey,
 				final boolean unilateral, final String userLabel, final Runnable disconnectCallback) {
 			ConnectionInfo ci = connections.get(address);
 			if (ci == null) {
@@ -337,7 +337,7 @@ public class TrNet {
 			return ci.remoteConnection;
 		}
 
-		public void noLongerNeeded(final TrRemoteAddress address, final String userLabel) {
+		public void noLongerNeeded(final PhysicalNetworkLocation address, final String userLabel) {
 			final ConnectionInfo ci = connections.get(address);
 			ci.interests.remove(userLabel);
 			if (ci.interests.isEmpty()) {

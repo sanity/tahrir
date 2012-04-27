@@ -14,11 +14,11 @@ import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.TrNetworkInterface;
 import tahrir.io.net.TrNetworkInterface.TrMessageListener;
 import tahrir.io.net.TrNetworkInterface.TrSentReceivedListener;
-import tahrir.io.net.TrRemoteAddress;
+import tahrir.io.net.PhysicalNetworkLocation;
 import tahrir.io.net.TrRemoteConnection;
 import tahrir.io.net.udpV1.UdpNetworkInterface;
 import tahrir.io.net.udpV1.UdpNetworkInterface.UNIConfig;
-import tahrir.io.net.udpV1.UdpRemoteAddress;
+import tahrir.io.net.udpV1.UdpNetworkLocation;
 import tahrir.tools.ByteArraySegment;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 import tahrir.tools.Tuple2;
@@ -61,12 +61,12 @@ public class UdpNetworkInterfaceTest {
 		conf2.maxUpstreamBytesPerSecond = 1024;
 		i2 = new UdpNetworkInterface(conf2, kp2);
 
-		final UdpRemoteAddress ra1 = new UdpRemoteAddress(InetAddress.getByName("127.0.0.1"), conf1.listenPort);
-		final UdpRemoteAddress ra2 = new UdpRemoteAddress(InetAddress.getByName("127.0.0.1"), conf2.listenPort);
+		final UdpNetworkLocation ra1 = new UdpNetworkLocation(InetAddress.getByName("127.0.0.1"), conf1.listenPort);
+		final UdpNetworkLocation ra2 = new UdpNetworkLocation(InetAddress.getByName("127.0.0.1"), conf2.listenPort);
 
 		final TrMessageListener noopListener = new TrMessageListener() {
 
-			public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender,
+			public void received(final TrNetworkInterface iFace, final PhysicalNetworkLocation sender,
 					final ByteArraySegment message) {
 			}
 
@@ -74,7 +74,7 @@ public class UdpNetworkInterfaceTest {
 
 		listener = new TrMessageListener() {
 
-			public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender,
+			public void received(final TrNetworkInterface iFace, final PhysicalNetworkLocation sender,
 					final ByteArraySegment message) {
 				Assert.assertEquals(message, sentMessage);
 				receivedSuccessfully.called = true;

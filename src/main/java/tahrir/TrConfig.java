@@ -1,8 +1,8 @@
 package tahrir;
 
+import tahrir.io.net.*;
+import tahrir.io.net.TrPeerManager.Capabilities;
 import tahrir.io.net.udpV1.UdpNetworkInterface.UNIConfig;
-import tahrir.peerManager.*;
-import tahrir.peerManager.TrPeerManager.Capabilities;
 
 public class TrConfig {
 	public String privateNodeId = "myprivnodeid.dat";
