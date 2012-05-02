@@ -1,22 +1,27 @@
 package tahrir.io.net;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
-
-import com.google.common.base.*;
-import com.google.common.collect.MapMaker;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
 
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import tahrir.*;
+import tahrir.RemoteNodeAddress;
+import tahrir.TrNode;
 import tahrir.io.net.TrPeerManager.TrPeerInfo.Assimilation;
 import tahrir.io.net.sessions.AssimilateSessionImpl;
-import tahrir.tools.*;
+import tahrir.tools.Persistence;
 import tahrir.tools.Persistence.Modified;
+import tahrir.tools.TrUtils;
+
+import com.google.common.base.Function;
+import com.google.common.collect.MapMaker;
 
 public class TrPeerManager {
 	public static final double RECENTLY_ATTEMPTED_PENALTY = 1.3;
@@ -222,8 +227,8 @@ public class TrPeerManager {
 
 		@Override
 		public String toString() {
-			return Objects.toStringHelper(this).add("allowsAssimilation", allowsAssimilation)
-					.add("allowsUnsolicitedInbound", allowsUnsolicitiedInbound).toString();
+			return "Capabilities [allowsAssimilation=" + allowsAssimilation + ", allowsUnsolicitiedInbound="
+					+ allowsUnsolicitiedInbound + ", receivesMessageBroadcasts=" + receivesMessageBroadcasts + "]";
 		}
 	}
 

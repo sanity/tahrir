@@ -1,18 +1,28 @@
 package tahrir.io.net.udpV1;
 
 import java.io.IOException;
-import java.net.*;
-import java.security.interfaces.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import tahrir.io.net.PhysicalNetworkLocation;
+import tahrir.io.net.TrNetworkInterface;
+import tahrir.io.net.TrRemoteConnection;
+import tahrir.tools.ByteArraySegment;
+import tahrir.tools.TrUtils;
+import tahrir.tools.Tuple2;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
-
-import org.slf4j.*;
-
-import tahrir.io.net.*;
-import tahrir.tools.*;
 
 /**
  * @author Ian Clarke <ian.clarke@gmail.com>
@@ -165,6 +175,11 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 						UdpNetworkInterface.MAX_PACKET_SIZE_BYTES);
 				try {
 					parent.datagramSocket.receive(dp);
+
+					if (isPacketToDrop()) {
+						logger.debug("Dropping packet");
+						continue;
+					}
 
 					final UdpNetworkLocation ura = new UdpNetworkLocation(dp.getAddress(), dp.getPort());
 					UdpRemoteConnection connection = parent.remoteConnections.get(ura);
