@@ -70,7 +70,7 @@ public class TrNode {
 		final Tuple2<RSAPublicKey, RSAPrivateKey> keyPair = Tuple2.of(getRemoteNodeAddress().publicKey,
 				getPrivateNodeId().privateKey);
 		final TrNetworkInterface uni = new UdpNetworkInterface(config.udp, keyPair);
-		trNet = new TrNet(this, uni, config.capabilities.allowsUnsolicitiedInbound);
+		trNet = new TrSessionManager(this, uni, config.capabilities.allowsUnsolicitiedInbound);
 
 		logger.info("Set up peer manager");
 		peerManager = new TrPeerManager(config.peers, this);
@@ -111,7 +111,7 @@ public class TrNode {
 
 	public final File rootDirectory;
 
-	public TrNet trNet;
+	public TrSessionManager trNet;
 
 	public static class PrivateNodeId {
 		public static Tuple2<PrivateNodeId, RemoteNodeAddress> generate() {

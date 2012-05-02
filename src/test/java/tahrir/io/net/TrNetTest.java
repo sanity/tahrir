@@ -52,12 +52,12 @@ public class TrNetTest {
 		final TrConfig trCfg2 = new TrConfig();
 		trCfg2.peers.assimilate = false;
 		final TrNode node1 = new TrNode(TrUtils.createTempDirectory(), trCfg1);
-		final TrNet trn1 = new TrNet(node1, iface1, false);
+		final TrSessionManager trn1 = new TrSessionManager(node1, iface1, false);
 
 		trn1.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
 		final TrNode node2 = new TrNode(TrUtils.createTempDirectory(), trCfg2);
-		final TrNet trn2 = new TrNet(node2, iface2, false);
+		final TrSessionManager trn2 = new TrSessionManager(node2, iface2, false);
 
 		trn2.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
@@ -116,7 +116,7 @@ public class TrNetTest {
 
 	public static class TestSessionImpl extends TrSessionImpl implements TestSession {
 
-		public TestSessionImpl(final Integer sessionId, final TrNode node, final TrNet trNet) {
+		public TestSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager trNet) {
 			super(sessionId, node, trNet);
 		}
 

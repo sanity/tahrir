@@ -14,10 +14,10 @@ public abstract class TrSessionImpl implements TrSession {
 	public static final ThreadLocal<PhysicalNetworkLocation> sender = new ThreadLocal<PhysicalNetworkLocation>();
 	protected final int sessionId;
 	protected final TrNode node;
-	protected final TrNet trNet;
+	protected final TrSessionManager trNet;
 	private final ConcurrentLinkedQueue<Runnable> terminatedCallbacks = new ConcurrentLinkedQueue<Runnable>();
 
-	public TrSessionImpl(final Integer sessionId, final TrNode node, final TrNet trNet) {
+	public TrSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager trNet) {
 		userLabel = this.getClass().getName() + "(" + sessionId + ")";
 		logger = LoggerFactory.getLogger(userLabel);
 		this.sessionId = sessionId;

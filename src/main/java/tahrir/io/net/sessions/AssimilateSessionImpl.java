@@ -32,7 +32,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 	private ScheduledFuture<?> requestNewConnectionFuture;
 	private TrPeerInfo relay;
 
-	public AssimilateSessionImpl(final Integer sessionId, final TrNode node, final TrNet trNet) {
+	public AssimilateSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager trNet) {
 		super(sessionId, node, trNet);
 		logger = LoggerFactory.getLogger(AssimilateSessionImpl.class.getName()+" ("+sessionId+")");
 	}
