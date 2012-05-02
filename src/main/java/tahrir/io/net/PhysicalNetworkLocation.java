@@ -1,6 +1,6 @@
 package tahrir.io.net;
 
-public interface TrRemoteAddress {
+public interface PhysicalNetworkLocation {
 	@Override
 	public boolean equals(Object other);
 

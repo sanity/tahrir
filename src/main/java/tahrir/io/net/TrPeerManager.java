@@ -1,29 +1,22 @@
-package tahrir.peerManager;
+package tahrir.io.net;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+
+import com.google.common.base.*;
+import com.google.common.collect.MapMaker;
 
 import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
-import tahrir.TrNode;
-import tahrir.TrNode.PublicNodeId;
-import tahrir.io.net.TrRemoteAddress;
+import tahrir.*;
+import tahrir.io.net.TrPeerManager.TrPeerInfo.Assimilation;
 import tahrir.io.net.sessions.AssimilateSessionImpl;
-import tahrir.peerManager.TrPeerManager.TrPeerInfo.Assimilation;
-import tahrir.tools.Persistence;
+import tahrir.tools.*;
 import tahrir.tools.Persistence.Modified;
-import tahrir.tools.TrUtils;
-
-import com.google.common.base.Function;
-import com.google.common.base.Objects;
-import com.google.common.collect.MapMaker;
 
 public class TrPeerManager {
 	public static final double RECENTLY_ATTEMPTED_PENALTY = 1.3;
@@ -33,7 +26,7 @@ public class TrPeerManager {
 
 	public ConcurrentLinkedQueue<TrPeerInfo> lastAttemptedRelays = new ConcurrentLinkedQueue<TrPeerInfo>();
 
-	public Map<TrRemoteAddress, TrPeerInfo> peers = new MapMaker().makeMap();
+	public Map<PhysicalNetworkLocation, TrPeerInfo> peers = new MapMaker().makeMap();
 	public final String trNetLabel;
 
 	private final TrNode node;
@@ -56,14 +49,14 @@ public class TrPeerManager {
 		}
 	}
 
-	public void addNewPeer(final PublicNodeId pubNodeId, final Capabilities capabilities) {
+	public void addNewPeer(final RemoteNodeAddress pubNodeId, final Capabilities capabilities) {
 		final TrPeerInfo tpi = new TrPeerInfo(pubNodeId);
 		tpi.capabilities = capabilities;
-		peers.put(pubNodeId.address, tpi);
-		node.trNet.connectionManager.getConnection(pubNodeId.address, pubNodeId.publicKey, false, trNetLabel, new Runnable() {
+		peers.put(pubNodeId.location, tpi);
+		node.trNet.connectionManager.getConnection(pubNodeId.location, pubNodeId.publicKey, false, trNetLabel, new Runnable() {
 
 			public void run() {
-				peers.remove(pubNodeId.address);
+				peers.remove(pubNodeId.location);
 			}
 		});
 	}
@@ -90,7 +83,7 @@ public class TrPeerManager {
 					globalSuccessTime.sample(ifo.assimilation.successTimeSqrt.mean());
 				}
 			}
-			for (final Entry<TrRemoteAddress, TrPeerInfo> e : peers.entrySet()) {
+			for (final Entry<PhysicalNetworkLocation, TrPeerInfo> e : peers.entrySet()) {
 				final double guessFailureProb = e.getValue().assimilation.successRate.getBetaRandom();
 				double guessSuccessTime;
 				// If we don't have at least 2 samples, use our global success
@@ -136,7 +129,7 @@ public class TrPeerManager {
 		}
 	}
 
-	public void reportAssimilationFailure(final TrRemoteAddress addr) {
+	public void reportAssimilationFailure(final PhysicalNetworkLocation addr) {
 		updatePeerInfo(addr, new Function<TrPeerManager.TrPeerInfo, Void>() {
 
 			public Void apply(final TrPeerInfo peerInfo) {
@@ -153,7 +146,7 @@ public class TrPeerManager {
 		});
 	}
 
-	public void reportAssimilationSuccess(final TrRemoteAddress addr, final long timeMS) {
+	public void reportAssimilationSuccess(final PhysicalNetworkLocation addr, final long timeMS) {
 		updatePeerInfo(addr, new Function<TrPeerManager.TrPeerInfo, Void>() {
 
 			public Void apply(final TrPeerInfo peerInfo) {
@@ -172,7 +165,7 @@ public class TrPeerManager {
 	 * @param addr
 	 * @param updateFunction
 	 */
-	public void updatePeerInfo(final TrRemoteAddress addr, final Function<TrPeerInfo, Void> updateFunction) {
+	public void updatePeerInfo(final PhysicalNetworkLocation addr, final Function<TrPeerInfo, Void> updateFunction) {
 		final File pubNodeFile = node.getFileForPublicNode(addr);
 		if (pubNodeFile.exists()) {
 			Persistence.loadAndModify(TrPeerInfo.class, pubNodeFile, new Persistence.ModifyBlock<TrPeerInfo>() {
@@ -287,15 +280,15 @@ public class TrPeerManager {
 	public static class TrPeerInfo {
 		public Assimilation assimilation = new Assimilation();
 		public Capabilities capabilities;
-		public PublicNodeId publicNodeId;
+		public RemoteNodeAddress remoteNodeAddress;
 
 		// To allow deserialization
 		public TrPeerInfo() {
 
 		}
 
-		public TrPeerInfo(final PublicNodeId publicNodeId) {
-			this.publicNodeId = publicNodeId;
+		public TrPeerInfo(final RemoteNodeAddress remoteNodeAddress) {
+			this.remoteNodeAddress = remoteNodeAddress;
 		}
 
 		public static class Assimilation {
@@ -307,8 +300,8 @@ public class TrPeerManager {
 		@Override
 		public String toString() {
 			final StringBuilder builder = new StringBuilder();
-			builder.append("TrPeerInfo [publicNodeId=");
-			builder.append(publicNodeId);
+			builder.append("TrPeerInfo [remoteNodeAddress=");
+			builder.append(remoteNodeAddress);
 			builder.append("]");
 			return builder.toString();
 		}

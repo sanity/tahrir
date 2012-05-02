@@ -50,7 +50,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 
 	protected UdpRemoteConnection(
 			final UdpNetworkInterface iface,
-			final UdpRemoteAddress remoteAddr,
+			final UdpNetworkLocation remoteAddr,
 			final RSAPublicKey remotePubKey,
 			final TrMessageListener listener,
 			final Function<TrRemoteConnection, Void> connectedCallback,
@@ -131,10 +131,10 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 
 	}
 
-	public void received(final TrNetworkInterface iFace, final TrRemoteAddress sender_,
+	public void received(final TrNetworkInterface iFace, final PhysicalNetworkLocation sender_,
 			ByteArraySegment message) {
 		logger.debug("Received message from "+sender_);
-		final UdpRemoteAddress sender = (UdpRemoteAddress) sender_;
+		final UdpNetworkLocation sender = (UdpNetworkLocation) sender_;
 		if (inboundSymKey == null) {
 			logger.debug("We don't know the inboundSymKey yet, looking for it to be pre-pended to message");
 			inboundSymKeyEncoded = message.subsegment(0, 256);

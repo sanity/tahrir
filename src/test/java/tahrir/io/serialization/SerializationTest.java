@@ -7,10 +7,10 @@ import java.util.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import tahrir.TrNode.PublicNodeId;
+import tahrir.RemoteNodeAddress;
 import tahrir.io.crypto.TrCrypto;
-import tahrir.io.net.udpV1.UdpRemoteAddress;
-import tahrir.peerManager.TrPeerManager.TrPeerInfo;
+import tahrir.io.net.TrPeerManager.TrPeerInfo;
+import tahrir.io.net.udpV1.UdpNetworkLocation;
 
 import com.google.inject.internal.*;
 
@@ -67,7 +67,7 @@ public class SerializationTest {
 
 	@Test
 	public void trPeerInfoTest() throws Exception {
-		final TrPeerInfo ot = new TrPeerInfo(new PublicNodeId(new UdpRemoteAddress(InetAddress.getByName("127.0.0.1"), 1234), TrCrypto.createRsaKeyPair().a));
+		final TrPeerInfo ot = new TrPeerInfo(new RemoteNodeAddress(new UdpNetworkLocation(InetAddress.getByName("127.0.0.1"), 1234), TrCrypto.createRsaKeyPair().a));
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
 		final DataOutputStream dos = new DataOutputStream(baos);
 		TrSerializer.serializeTo(ot, dos);

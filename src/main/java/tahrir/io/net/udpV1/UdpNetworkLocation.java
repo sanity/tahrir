@@ -2,13 +2,13 @@ package tahrir.io.net.udpV1;
 
 import java.net.InetAddress;
 
-import tahrir.io.net.TrRemoteAddress;
+import tahrir.io.net.PhysicalNetworkLocation;
 
-public class UdpRemoteAddress implements TrRemoteAddress {
+public class UdpNetworkLocation implements PhysicalNetworkLocation {
 	public final InetAddress inetAddress;
 	public final int port;
 
-	public UdpRemoteAddress(final InetAddress inetAddress, final int port) {
+	public UdpNetworkLocation(final InetAddress inetAddress, final int port) {
 		this.inetAddress = inetAddress;
 		this.port = port;
 	}
@@ -28,9 +28,9 @@ public class UdpRemoteAddress implements TrRemoteAddress {
 			return true;
 		if (obj == null)
 			return false;
-		if (!(obj instanceof UdpRemoteAddress))
+		if (!(obj instanceof UdpNetworkLocation))
 			return false;
-		final UdpRemoteAddress other = (UdpRemoteAddress) obj;
+		final UdpNetworkLocation other = (UdpNetworkLocation) obj;
 		if (inetAddress == null) {
 			if (other.inetAddress != null)
 				return false;

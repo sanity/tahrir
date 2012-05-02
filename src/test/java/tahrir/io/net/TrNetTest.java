@@ -62,10 +62,10 @@ public class TrNetTest {
 		trn2.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
 		final TrRemoteConnection one2two = trn1.connectionManager.getConnection(
-				new UdpRemoteAddress(InetAddress.getByName("127.0.0.1"), udpNetIfaceConf2.listenPort), kp2.a, false,
+				new UdpNetworkLocation(InetAddress.getByName("127.0.0.1"), udpNetIfaceConf2.listenPort), kp2.a, false,
 				"trn1");
 		final TrRemoteConnection two2one = trn2.connectionManager.getConnection(
-				new UdpRemoteAddress(InetAddress.getByName("127.0.0.1"), udpNetIfaceConf1.listenPort), kp1.a, false,
+				new UdpNetworkLocation(InetAddress.getByName("127.0.0.1"), udpNetIfaceConf1.listenPort), kp1.a, false,
 				"trn2");
 
 		remoteSession = trn1.getOrCreateRemoteSession(TestSession.class, one2two, 1234);
@@ -122,7 +122,7 @@ public class TrNetTest {
 
 		public void testMethod(final int param) {
 			if (param < 10) {
-				final TrRemoteAddress senderRemoteAddress = sender();
+				final PhysicalNetworkLocation senderRemoteAddress = sender();
 				final TrRemoteConnection connectionToSender = connection(senderRemoteAddress);
 				final TestSession remoteSessionOnSender = remoteSession(TestSession.class, connectionToSender);
 				remoteSessionOnSender.testMethod(param + 1);
@@ -139,7 +139,7 @@ public class TrNetTest {
 					sum += i;
 				}
 				list.add(sum);
-				final TrRemoteAddress senderRemoteAddress = sender();
+				final PhysicalNetworkLocation senderRemoteAddress = sender();
 				final TrRemoteConnection connectionToSender = connection(senderRemoteAddress);
 				final TestSession remoteSessionOnSender = remoteSession(TestSession.class, connectionToSender);
 				remoteSessionOnSender.testMethod2(list);

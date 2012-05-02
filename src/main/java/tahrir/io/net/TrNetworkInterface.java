@@ -29,7 +29,7 @@ public abstract class TrNetworkInterface {
 
 	protected volatile TrMessageListener newConnectionListener = null;
 
-	public abstract TrRemoteConnection connect(final TrRemoteAddress remoteAddress, final RSAPublicKey remotePubKey,
+	public abstract TrRemoteConnection connect(final PhysicalNetworkLocation remoteAddress, final RSAPublicKey remotePubKey,
 			final TrMessageListener listener, final Function<TrRemoteConnection, Void> connectedCallback,
 			final Runnable disconnectedCallback, boolean unilateral);
 
@@ -38,12 +38,12 @@ public abstract class TrNetworkInterface {
 	@Override
 	public abstract String toString();
 
-	protected abstract Class<? extends TrRemoteAddress> getAddressClass();
+	protected abstract Class<? extends PhysicalNetworkLocation> getAddressClass();
 
-	protected void sendTo(final TrRemoteAddress recepient, final ByteArraySegment message, final double priority) {
+	public void sendTo(final PhysicalNetworkLocation recepient, final ByteArraySegment message, final double priority) {
 		sendTo(recepient, message, null, priority);
 	}
-	protected abstract void sendTo(TrRemoteAddress recepient, ByteArraySegment message, TrSentListener sentListener,
+	protected abstract void sendTo(PhysicalNetworkLocation recepient, ByteArraySegment message, TrSentListener sentListener,
 			double priority);
 	public void allowUnsolicitedInbound(final TrMessageListener newConnectionListener) {
 		if (this.newConnectionListener != null)
@@ -55,7 +55,7 @@ public abstract class TrNetworkInterface {
 		newConnectionListener = null;
 	}
 	public static interface TrMessageListener {
-		public void received(TrNetworkInterface iFace, TrRemoteAddress sender, ByteArraySegment message);
+		public void received(TrNetworkInterface iFace, PhysicalNetworkLocation sender, ByteArraySegment message);
 
 	}
 	public static interface TrSentListener {
