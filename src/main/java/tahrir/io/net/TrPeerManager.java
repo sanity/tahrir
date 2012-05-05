@@ -32,14 +32,14 @@ public class TrPeerManager {
 	public ConcurrentLinkedQueue<TrPeerInfo> lastAttemptedRelays = new ConcurrentLinkedQueue<TrPeerInfo>();
 
 	public Map<PhysicalNetworkLocation, TrPeerInfo> peers = new MapMaker().makeMap();
-	public final String trNetLabel;
+	public final String sessionMgrLabel;
 
 	private final TrNode node;
 
 	public TrPeerManager(final Config config, final TrNode node) {
 		this.config = config;
 		this.node = node;
-		trNetLabel = "TrPeerManager(" + TrUtils.rand.nextInt() + ")";
+		sessionMgrLabel = "TrPeerManager(" + TrUtils.rand.nextInt() + ")";
 		if (config.runMaintainance ) {
 			TrUtils.executor.scheduleAtFixedRate(new Runnable() {
 
@@ -58,7 +58,7 @@ public class TrPeerManager {
 		final TrPeerInfo tpi = new TrPeerInfo(pubNodeId);
 		tpi.capabilities = capabilities;
 		peers.put(pubNodeId.location, tpi);
-		node.trNet.connectionManager.getConnection(pubNodeId.location, pubNodeId.publicKey, false, trNetLabel, new Runnable() {
+		node.sessionMgr.connectionManager.getConnection(pubNodeId.location, pubNodeId.publicKey, false, sessionMgrLabel, new Runnable() {
 
 			public void run() {
 				peers.remove(pubNodeId.location);
@@ -123,7 +123,7 @@ public class TrPeerManager {
 	public void maintainance() {
 		// Check to see whether we need new connections
 		if (config.assimilate && peers.size() < config.minPeers) {
-			final AssimilateSessionImpl as = node.trNet.getOrCreateLocalSession(AssimilateSessionImpl.class);
+			final AssimilateSessionImpl as = node.sessionMgr.getOrCreateLocalSession(AssimilateSessionImpl.class);
 			final TrPeerInfo ap = getPeerForAssimilation();
 
 			as.startAssimilation(TrUtils.noopRunnable, ap);
@@ -144,7 +144,7 @@ public class TrPeerManager {
 				// If we've tried it three times, and it failed more than half
 				// the time, let's get rid of it
 				if (a.successRate.total > 3 && a.successRate.get() < 0.5) {
-					node.trNet.connectionManager.noLongerNeeded(addr, trNetLabel);
+					node.sessionMgr.connectionManager.noLongerNeeded(addr, sessionMgrLabel);
 				}
 				return null;
 			}

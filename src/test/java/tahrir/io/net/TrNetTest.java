@@ -116,8 +116,8 @@ public class TrNetTest {
 
 	public static class TestSessionImpl extends TrSessionImpl implements TestSession {
 
-		public TestSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager trNet) {
-			super(sessionId, node, trNet);
+		public TestSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager sessionMgr) {
+			super(sessionId, node, sessionMgr);
 		}
 
 		public void testMethod(final int param) {

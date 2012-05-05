@@ -14,15 +14,15 @@ public abstract class TrSessionImpl implements TrSession {
 	public static final ThreadLocal<PhysicalNetworkLocation> sender = new ThreadLocal<PhysicalNetworkLocation>();
 	protected final int sessionId;
 	protected final TrNode node;
-	protected final TrSessionManager trNet;
+	protected final TrSessionManager sessionMgr;
 	private final ConcurrentLinkedQueue<Runnable> terminatedCallbacks = new ConcurrentLinkedQueue<Runnable>();
 
-	public TrSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager trNet) {
+	public TrSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager sessionMgr) {
 		userLabel = this.getClass().getName() + "(" + sessionId + ")";
 		logger = LoggerFactory.getLogger(userLabel);
 		this.sessionId = sessionId;
 		this.node = node;
-		this.trNet = trNet;
+		this.sessionMgr = sessionMgr;
 	}
 
 	protected TrRemoteConnection connection(final TrPeerInfo peerInfo) {
@@ -52,7 +52,7 @@ public abstract class TrSessionImpl implements TrSession {
 			final RSAPublicKey pubKey,
 			final boolean unilateral) {
 		toUnregister.add(address);
-		return trNet.connectionManager.getConnection(address, pubKey, unilateral, userLabel);
+		return sessionMgr.connectionManager.getConnection(address, pubKey, unilateral, userLabel);
 	}
 
 	protected final <T extends TrSession> T remoteSession(final Class<T> cls,
@@ -63,7 +63,7 @@ public abstract class TrSessionImpl implements TrSession {
 	protected final <T extends TrSession> T remoteSession(final Class<T> cls,
 			final TrRemoteConnection conn,
 			final int sessionId) {
-		return trNet.getOrCreateRemoteSession(cls, conn, sessionId);
+		return sessionMgr.getOrCreateRemoteSession(cls, conn, sessionId);
 	}
 
 	public final void addTerminateCallback(final Runnable cb) {
@@ -76,11 +76,11 @@ public abstract class TrSessionImpl implements TrSession {
 
 	protected final void terminate() {
 		for (final PhysicalNetworkLocation ra : toUnregister) {
-			trNet.connectionManager.noLongerNeeded(ra, userLabel);
+			sessionMgr.connectionManager.noLongerNeeded(ra, userLabel);
 		}
 		for (final Runnable r : terminatedCallbacks) {
 			r.run();
 		}
-		trNet.sessions.remove(sessionId);
+		sessionMgr.sessions.remove(sessionId);
 	}
 }
