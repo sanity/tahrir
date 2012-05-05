@@ -19,13 +19,7 @@ import tahrir.io.serialization.TrSerializer;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
-/**
- * Manages sessions
- * 
- * @author Ian Clarke <ian.clarke@gmail.com>
- *
- */
-public class TrNet {
+public class TrSessionManager {
 
 	private static final int hashCode(final Method method) {
 		return method.hashCode() ^ Arrays.deepHashCode(method.getGenericParameterTypes());
@@ -38,7 +32,7 @@ public class TrNet {
 
 	private final ConcurrentLinkedQueue<Function<PhysicalNetworkLocation, Void>> disconnectedListeners = new ConcurrentLinkedQueue<Function<PhysicalNetworkLocation, Void>>();
 
-	private static final Logger logger = LoggerFactory.getLogger(TrNet.class);
+	private static final Logger logger = LoggerFactory.getLogger(TrSessionManager.class);
 
 	private final Map<Integer, MethodPair> methodsById = Maps.newHashMap();
 
@@ -55,11 +49,11 @@ public class TrNet {
 
 	private final Map<Class<? extends PhysicalNetworkLocation>, TrNetworkInterface> interfacesByAddressType;
 
-	public TrNet(final TrNode trNode, final TrNetworkInterface i, final boolean allowUnilateral) {
+	public TrSessionManager(final TrNode trNode, final TrNetworkInterface i, final boolean allowUnilateral) {
 		this(trNode, Collections.singleton(i), allowUnilateral);
 	}
 
-	public TrNet(final TrNode trNode, final Iterable<TrNetworkInterface> interfaces,
+	public TrSessionManager(final TrNode trNode, final Iterable<TrNetworkInterface> interfaces,
 			final boolean allowUnilateral) {
 		interfacesByAddressType = Maps.newHashMap();
 		for (final TrNetworkInterface iface : interfaces) {
@@ -87,7 +81,7 @@ public class TrNet {
 		try {
 			T session = (T) sessions.get(Tuple2.of(c.getName(), sessionId));
 			if (session == null) {
-				final Constructor<?> constructor = c.getConstructor(Integer.class, TrNode.class, TrNet.class);
+				final Constructor<?> constructor = c.getConstructor(Integer.class, TrNode.class, TrSessionManager.class);
 				session = (T) constructor.newInstance(sessionId, trNode, this);
 			}
 			// We put regardless of whether it is new or not to reset cache
@@ -120,7 +114,7 @@ public class TrNet {
 		if (!iface.isAssignableFrom(cls))
 			throw new RuntimeException(cls + " is not an implementation of " + iface);
 		try {
-			if (cls.getConstructor(Integer.class, TrNode.class, TrNet.class) == null)
+			if (cls.getConstructor(Integer.class, TrNode.class, TrSessionManager.class) == null)
 				throw new RuntimeException(
 						cls
 						+ " must have a constructor that takes parameters (java.lang.Integer, tahrir.TrNode, tahrir.io.net.TrNet)");
@@ -186,7 +180,7 @@ public class TrNet {
 				logger.debug("Sending " + method.getName() + "(" + args.substring(1, args.length() - 1)
 						+ ")");
 			}
-			final int methodId = TrNet.hashCode(method);
+			final int methodId = TrSessionManager.hashCode(method);
 			final ByteArraySegmentBuilder builder = ByteArraySegment.builder();
 			MessageType.METHOD_CALL.write(builder);
 			builder.writeInt(sessionId);
@@ -277,8 +271,8 @@ public class TrNet {
 					if (session == null) {
 						// New session, we need to create it
 						final Constructor<?> constructor = methodPair.cls.getDeclaringClass().getConstructor(
-								Integer.class, TrNode.class, TrNet.class);
-						session = (TrSessionImpl) constructor.newInstance(sessionId, trNode, TrNet.this);
+								Integer.class, TrNode.class, TrSessionManager.class);
+						session = (TrSessionImpl) constructor.newInstance(sessionId, trNode, TrSessionManager.this);
 					}
 					// We put regardless of whether it is new or not to
 					// reset cache expiry time

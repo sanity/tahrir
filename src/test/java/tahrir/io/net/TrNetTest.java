@@ -4,8 +4,6 @@ import java.net.InetAddress;
 import java.security.interfaces.*;
 import java.util.LinkedList;
 
-import com.google.common.collect.Lists;
-
 import org.slf4j.*;
 import org.testng.Assert;
 import org.testng.annotations.*;
@@ -16,6 +14,8 @@ import tahrir.io.net.sessions.Priority;
 import tahrir.io.net.udpV1.*;
 import tahrir.io.net.udpV1.UdpNetworkInterface.UNIConfig;
 import tahrir.tools.*;
+
+import com.google.common.collect.Lists;
 
 public class TrNetTest {
 	Logger logger = LoggerFactory.getLogger(TrNetTest.class);
@@ -52,23 +52,23 @@ public class TrNetTest {
 		final TrConfig trCfg2 = new TrConfig();
 		trCfg2.peers.assimilate = false;
 		final TrNode node1 = new TrNode(TrUtils.createTempDirectory(), trCfg1);
-		final TrNet trn1 = new TrNet(node1, iface1, false);
+		final TrSessionManager sessionMgr1 = new TrSessionManager(node1, iface1, false);
 
-		trn1.registerSessionClass(TestSession.class, TestSessionImpl.class);
+		sessionMgr1.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
 		final TrNode node2 = new TrNode(TrUtils.createTempDirectory(), trCfg2);
-		final TrNet trn2 = new TrNet(node2, iface2, false);
+		final TrSessionManager sessionMgr2 = new TrSessionManager(node2, iface2, false);
 
-		trn2.registerSessionClass(TestSession.class, TestSessionImpl.class);
+		sessionMgr2.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
-		final TrRemoteConnection one2two = trn1.connectionManager.getConnection(
+		final TrRemoteConnection one2two = sessionMgr1.connectionManager.getConnection(
 				new UdpNetworkLocation(InetAddress.getByName("127.0.0.1"), udpNetIfaceConf2.listenPort), kp2.a, false,
-				"trn1");
-		final TrRemoteConnection two2one = trn2.connectionManager.getConnection(
+				"sessionMgr1");
+		final TrRemoteConnection two2one = sessionMgr2.connectionManager.getConnection(
 				new UdpNetworkLocation(InetAddress.getByName("127.0.0.1"), udpNetIfaceConf1.listenPort), kp1.a, false,
-				"trn2");
+				"sessionMgr2");
 
-		remoteSession = trn1.getOrCreateRemoteSession(TestSession.class, one2two, 1234);
+		remoteSession = sessionMgr1.getOrCreateRemoteSession(TestSession.class, one2two, 1234);
 	}
 
 	@AfterMethod
@@ -116,8 +116,8 @@ public class TrNetTest {
 
 	public static class TestSessionImpl extends TrSessionImpl implements TestSession {
 
-		public TestSessionImpl(final Integer sessionId, final TrNode node, final TrNet trNet) {
-			super(sessionId, node, trNet);
+		public TestSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager sessionMgr) {
+			super(sessionId, node, sessionMgr);
 		}
 
 		public void testMethod(final int param) {

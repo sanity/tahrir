@@ -1,22 +1,27 @@
 package tahrir.io.net;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
-
-import com.google.common.base.*;
-import com.google.common.collect.MapMaker;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
 
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import tahrir.*;
+import tahrir.RemoteNodeAddress;
+import tahrir.TrNode;
 import tahrir.io.net.TrPeerManager.TrPeerInfo.Assimilation;
 import tahrir.io.net.sessions.AssimilateSessionImpl;
-import tahrir.tools.*;
+import tahrir.tools.Persistence;
 import tahrir.tools.Persistence.Modified;
+import tahrir.tools.TrUtils;
+
+import com.google.common.base.Function;
+import com.google.common.collect.MapMaker;
 
 public class TrPeerManager {
 	public static final double RECENTLY_ATTEMPTED_PENALTY = 1.3;
@@ -27,14 +32,14 @@ public class TrPeerManager {
 	public ConcurrentLinkedQueue<TrPeerInfo> lastAttemptedRelays = new ConcurrentLinkedQueue<TrPeerInfo>();
 
 	public Map<PhysicalNetworkLocation, TrPeerInfo> peers = new MapMaker().makeMap();
-	public final String trNetLabel;
+	public final String sessionMgrLabel;
 
 	private final TrNode node;
 
 	public TrPeerManager(final Config config, final TrNode node) {
 		this.config = config;
 		this.node = node;
-		trNetLabel = "TrPeerManager(" + TrUtils.rand.nextInt() + ")";
+		sessionMgrLabel = "TrPeerManager(" + TrUtils.rand.nextInt() + ")";
 		if (config.runMaintainance ) {
 			TrUtils.executor.scheduleAtFixedRate(new Runnable() {
 
@@ -53,7 +58,7 @@ public class TrPeerManager {
 		final TrPeerInfo tpi = new TrPeerInfo(pubNodeId);
 		tpi.capabilities = capabilities;
 		peers.put(pubNodeId.location, tpi);
-		node.trNet.connectionManager.getConnection(pubNodeId.location, pubNodeId.publicKey, false, trNetLabel, new Runnable() {
+		node.sessionMgr.connectionManager.getConnection(pubNodeId.location, pubNodeId.publicKey, false, sessionMgrLabel, new Runnable() {
 
 			public void run() {
 				peers.remove(pubNodeId.location);
@@ -118,7 +123,7 @@ public class TrPeerManager {
 	public void maintainance() {
 		// Check to see whether we need new connections
 		if (config.assimilate && peers.size() < config.minPeers) {
-			final AssimilateSessionImpl as = node.trNet.getOrCreateLocalSession(AssimilateSessionImpl.class);
+			final AssimilateSessionImpl as = node.sessionMgr.getOrCreateLocalSession(AssimilateSessionImpl.class);
 			final TrPeerInfo ap = getPeerForAssimilation();
 
 			as.startAssimilation(TrUtils.noopRunnable, ap);
@@ -139,7 +144,7 @@ public class TrPeerManager {
 				// If we've tried it three times, and it failed more than half
 				// the time, let's get rid of it
 				if (a.successRate.total > 3 && a.successRate.get() < 0.5) {
-					node.trNet.connectionManager.noLongerNeeded(addr, trNetLabel);
+					node.sessionMgr.connectionManager.noLongerNeeded(addr, sessionMgrLabel);
 				}
 				return null;
 			}
@@ -222,8 +227,8 @@ public class TrPeerManager {
 
 		@Override
 		public String toString() {
-			return Objects.toStringHelper(this).add("allowsAssimilation", allowsAssimilation)
-					.add("allowsUnsolicitedInbound", allowsUnsolicitiedInbound).toString();
+			return "Capabilities [allowsAssimilation=" + allowsAssimilation + ", allowsUnsolicitiedInbound="
+					+ allowsUnsolicitiedInbound + ", receivesMessageBroadcasts=" + receivesMessageBroadcasts + "]";
 		}
 	}
 
