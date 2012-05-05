@@ -19,6 +19,12 @@ import tahrir.io.serialization.TrSerializer;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
+/**
+ * Manages sessions
+ * 
+ * @author Ian Clarke <ian.clarke@gmail.com>
+ *
+ */
 public class TrNet {
 
 	private static final int hashCode(final Method method) {
