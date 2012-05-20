@@ -1,27 +1,22 @@
 package tahrir.io.net;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
-
-import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import tahrir.RemoteNodeAddress;
-import tahrir.TrNode;
-import tahrir.io.net.TrPeerManager.TrPeerInfo.Assimilation;
-import tahrir.io.net.sessions.AssimilateSessionImpl;
-import tahrir.tools.Persistence;
-import tahrir.tools.Persistence.Modified;
-import tahrir.tools.TrUtils;
+import java.util.concurrent.*;
 
 import com.google.common.base.Function;
 import com.google.common.collect.MapMaker;
+
+import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
+
+import org.slf4j.*;
+
+import tahrir.*;
+import tahrir.io.net.TrPeerManager.TrPeerInfo.Assimilation;
+import tahrir.io.net.sessions.AssimilateSessionImpl;
+import tahrir.tools.*;
+import tahrir.tools.Persistence.Modified;
 
 public class TrPeerManager {
 	public static final double RECENTLY_ATTEMPTED_PENALTY = 1.3;
@@ -55,6 +50,7 @@ public class TrPeerManager {
 	}
 
 	public void addNewPeer(final RemoteNodeAddress pubNodeId, final Capabilities capabilities) {
+		logger.debug("addNewPeer "+pubNodeId);
 		final TrPeerInfo tpi = new TrPeerInfo(pubNodeId);
 		tpi.capabilities = capabilities;
 		peers.put(pubNodeId.location, tpi);
@@ -180,7 +176,12 @@ public class TrPeerManager {
 				}
 			});
 		} else {
-			updateFunction.apply(peers.get(addr));
+			final TrPeerInfo peerToUpdate = peers.get(addr);
+			if (peerToUpdate != null) {
+				updateFunction.apply(peerToUpdate);
+			} else {
+				logger.warn("Attempted to update unknown peer "+addr+", ignoring");
+			}
 		}
 	}
 

@@ -6,7 +6,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.concurrent.*;
 
-import com.google.common.base.Function;
+import com.google.common.base.*;
 import com.google.common.collect.*;
 
 import org.slf4j.*;
@@ -15,6 +15,7 @@ import tahrir.TrNode;
 import tahrir.io.net.TrNetworkInterface.TrMessageListener;
 import tahrir.io.net.TrNetworkInterface.TrSentReceivedListener;
 import tahrir.io.net.sessions.Priority;
+import tahrir.io.net.udpV1.UdpNetworkLocation;
 import tahrir.io.serialization.TrSerializer;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
@@ -176,9 +177,9 @@ public class TrSessionManager {
 			// We have to include the parameter types because for some dumb
 			// reason Method.hashCode() ignores these.
 			if (logger.isDebugEnabled()) {
-				final String args = Arrays.toString(arguments);
-				logger.debug("Sending " + method.getName() + "(" + args.substring(1, args.length() - 1)
-						+ ")");
+				final String args = Joiner.on(",").join(Iterables.transform(Lists.newArrayList(arguments), toStringer));
+				logger.debug("\tSending " + method.getName() + "(" + args
+						+ ")\t -> "+connection.remoteAddress);
 			}
 			final int methodId = TrSessionManager.hashCode(method);
 			final ByteArraySegmentBuilder builder = ByteArraySegment.builder();
@@ -286,9 +287,9 @@ public class TrSessionManager {
 					TrSessionImpl.sender.set(sender);
 
 					if (logger.isDebugEnabled()) {
-						final String argsStr = Arrays.toString(args);
+						final String argsStr = Joiner.on(",").join(Iterables.transform(Lists.newArrayList(args), toStringer));
 						logger.debug("Received " + methodPair.cls.getName() + "("
-								+ argsStr.substring(1, argsStr.length() - 1) + ")");
+								+ argsStr + ")\t <- "+sender);
 					}
 
 					methodPair.cls.invoke(session, args);
@@ -356,4 +357,16 @@ public class TrSessionManager {
 	public <T extends TrSessionImpl> T getOrCreateLocalSession(final Class<T> cls) {
 		return this.getOrCreateLocalSession(cls, TrUtils.rand.nextInt());
 	}
+
+	public static final Function<Object, String> toStringer = new Function<Object, String>() {
+
+		@Override
+		public String apply(final Object input) {
+			if (input instanceof RSAPublicKey)
+				return "RSAPublicKey["+input.hashCode()+"]";
+			else if (input instanceof UdpNetworkLocation)
+				return "UDP:"+((UdpNetworkLocation) input).port;
+			else
+				return input.toString();
+		}};
 }

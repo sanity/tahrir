@@ -44,9 +44,7 @@ public class UdpNetworkLocation implements PhysicalNetworkLocation {
 	@Override
 	public String toString() {
 		final StringBuilder builder = new StringBuilder();
-		builder.append("UdpRemoteAddress [inetAddress=");
-		builder.append(inetAddress);
-		builder.append(", port=");
+		builder.append("UDP NetLoc[");
 		builder.append(port);
 		builder.append("]");
 		return builder.toString();
