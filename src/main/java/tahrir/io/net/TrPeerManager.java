@@ -118,6 +118,9 @@ public class TrPeerManager {
 
 	public void maintainance() {
 		// Check to see whether we need new connections
+
+		// TODO: We might want to spawn multiple assimilation requests (say, up to 3)
+		// in the event that we are well below minPeers to speed this up
 		if (config.assimilate && peers.size() < config.minPeers) {
 			final AssimilateSessionImpl as = node.sessionMgr.getOrCreateLocalSession(AssimilateSessionImpl.class);
 			final TrPeerInfo ap = getPeerForAssimilation();
