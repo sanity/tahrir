@@ -7,10 +7,6 @@ public class RemoteNodeAddress {
 	public PhysicalNetworkLocation location;
 	public RSAPublicKey publicKey;
 
-	public RemoteNodeAddress() {
-
-	}
-
 	public RemoteNodeAddress(final PhysicalNetworkLocation location,final RSAPublicKey publicKey) {
 		this.location = location;
 		this.publicKey = publicKey;

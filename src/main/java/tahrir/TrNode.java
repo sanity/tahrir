@@ -5,8 +5,6 @@ import java.net.*;
 import java.security.interfaces.*;
 import java.util.ArrayList;
 
-import com.google.common.collect.Lists;
-
 import org.slf4j.*;
 
 import tahrir.io.crypto.TrCrypto;
@@ -16,6 +14,8 @@ import tahrir.io.net.udpV1.*;
 import tahrir.tools.*;
 import tahrir.tools.Persistence.Modified;
 import tahrir.tools.Persistence.ModifyBlock;
+
+import com.google.common.collect.Lists;
 
 
 
@@ -115,15 +115,12 @@ public class TrNode {
 
 	public static class PrivateNodeId {
 		public static Tuple2<PrivateNodeId, RemoteNodeAddress> generate() {
-			final PrivateNodeId privateNodeId = new PrivateNodeId();
-			final RemoteNodeAddress remoteNodeAddress = new RemoteNodeAddress();
-
-			remoteNodeAddress.location = null;
-
 			final Tuple2<RSAPublicKey, RSAPrivateKey> kp = TrCrypto.createRsaKeyPair();
 
-			remoteNodeAddress.publicKey = kp.a;
+			final PrivateNodeId privateNodeId = new PrivateNodeId();
 			privateNodeId.privateKey = kp.b;
+
+			final RemoteNodeAddress remoteNodeAddress = new RemoteNodeAddress(null, kp.a);
 
 			return Tuple2.of(privateNodeId, remoteNodeAddress);
 		}
