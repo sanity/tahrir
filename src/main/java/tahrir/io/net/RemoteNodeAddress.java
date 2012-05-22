@@ -7,12 +7,17 @@ public class RemoteNodeAddress {
 	public PhysicalNetworkLocation location;
 	public RSAPublicKey publicKey;
 
+	/**
+	 * No-arg constructor for serialization
+	 */
+	public RemoteNodeAddress() {
+
+	}
+
 	public RemoteNodeAddress(final PhysicalNetworkLocation location,final RSAPublicKey publicKey) {
 		this.location = location;
 		this.publicKey = publicKey;
 	}
-
-
 
 	@Override
 	public int hashCode() {
