@@ -1,25 +1,16 @@
 package tahrir.io.net.udpV1;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
+import java.net.*;
+import java.security.interfaces.*;
 import java.util.Map;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
-import tahrir.io.net.PhysicalNetworkLocation;
-import tahrir.io.net.TrNetworkInterface;
-import tahrir.io.net.TrRemoteConnection;
-import tahrir.tools.ByteArraySegment;
-import tahrir.tools.TrUtils;
-import tahrir.tools.Tuple2;
+import tahrir.TrConstants;
+import tahrir.io.net.*;
+import tahrir.tools.*;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
@@ -29,8 +20,6 @@ import com.google.common.collect.Maps;
  *
  */
 public class UdpNetworkInterface extends TrNetworkInterface {
-	public static final int MAX_PACKET_SIZE_BYTES = 1450;
-
 	private final org.slf4j.Logger logger;
 	public final RSAPrivateKey myPrivateKey;
 	public final RSAPublicKey myPublicKey;
@@ -99,8 +88,8 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 	protected void sendTo(final PhysicalNetworkLocation recepient_, final ByteArraySegment encryptedMessage,
 			final tahrir.io.net.TrNetworkInterface.TrSentListener sentListener, final double priority) {
 		final UdpNetworkLocation recepient = (UdpNetworkLocation) recepient_;
-		assert encryptedMessage.length <= MAX_PACKET_SIZE_BYTES : "Packet length " + encryptedMessage.length
-				+ " greater than " + MAX_PACKET_SIZE_BYTES;
+		assert encryptedMessage.length <= TrConstants.MAX_UDP_PACKET_SIZE : "Packet length " + encryptedMessage.length
+				+ " greater than " + TrConstants.MAX_UDP_PACKET_SIZE;
 		final QueuedPacket qp = new QueuedPacket(recepient, encryptedMessage, sentListener, priority);
 		outbox.add(qp);
 	}
@@ -171,8 +160,8 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 		public void run() {
 
 			while (active) {
-				final DatagramPacket dp = new DatagramPacket(new byte[UdpNetworkInterface.MAX_PACKET_SIZE_BYTES],
-						UdpNetworkInterface.MAX_PACKET_SIZE_BYTES);
+				final DatagramPacket dp = new DatagramPacket(new byte[TrConstants.MAX_UDP_PACKET_SIZE ],
+						TrConstants.MAX_UDP_PACKET_SIZE );
 				try {
 					parent.datagramSocket.receive(dp);
 

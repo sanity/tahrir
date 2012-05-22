@@ -6,11 +6,9 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.google.common.base.Function;
-import com.google.common.collect.*;
-
 import org.slf4j.LoggerFactory;
 
+import tahrir.TrConstants;
 import tahrir.io.crypto.*;
 import tahrir.io.net.*;
 import tahrir.io.net.TrNetworkInterface.TrMessageListener;
@@ -20,16 +18,16 @@ import tahrir.io.serialization.*;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
-public class UdpRemoteConnection extends TrRemoteConnection {
-	private static final int MAX_RETRIES = 5;
+import com.google.common.base.Function;
+import com.google.common.collect.*;
 
+public class UdpRemoteConnection extends TrRemoteConnection {
 	private volatile boolean disconnectedCallbackCalled = false;
 	private final UdpNetworkInterface iface;
 	private TrSymKey inboundSymKey;
 
 	private ByteArraySegment inboundSymKeyEncoded = null;
 
-	private final int KEEP_ALIVE_INTERVAL_SEC = 7;
 	private final ScheduledFuture<?> keepAliveSender;
 	private final org.slf4j.Logger logger;
 	private TrSymKey outboundSymKey;
@@ -92,7 +90,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 				final ByteArraySegment cipherText = encryptOutbound(plainText);
 				iface.sendTo(remoteAddr, cipherText, TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY);
 			}
-		}, KEEP_ALIVE_INTERVAL_SEC, TimeUnit.SECONDS);
+		}, TrConstants.UDP_KEEP_ALIVE_DURATION, TimeUnit.SECONDS);
 	}
 
 	@Override
@@ -218,7 +216,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 		}
 		estimatedPacketSize += 5;
 		estimatedPacketSize += message.length;
-		if (estimatedPacketSize > UdpNetworkInterface.MAX_PACKET_SIZE_BYTES) {
+		if (estimatedPacketSize > TrConstants.MAX_UDP_PACKET_SIZE) {
 			sendLongMessage(message, priority, sentListener);
 		} else {
 			// logger.debug("Sending short message");
@@ -228,7 +226,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 			builder.writeInt(messageId);
 			ShortMessageType.SIMPLE.write(builder);
 			builder.write(message);
-			final Resender resender = new Resender(messageId, MAX_RETRIES, sentListener,
+			final Resender resender = new Resender(messageId, TrConstants.UDP_SHORT_MESSAGE_RETRY_ATTEMPTS, sentListener,
 					encryptOutbound(builder.build()), this, priority);
 			resenders.put(messageId, resender);
 			resender.run();
@@ -290,7 +288,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 
 	private void sendLongMessage(final ByteArraySegment message, final double priority,
 			final TrSentReceivedListener sentListener) throws IOException {
-		final int packetSize = UdpNetworkInterface.MAX_PACKET_SIZE_BYTES - (remoteHasCachedOurOutboundSymKey ? 60 : 316);
+		final int packetSize = TrConstants.MAX_UDP_PACKET_SIZE - (remoteHasCachedOurOutboundSymKey ? 60 : 316);
 		final List<ByteArraySegment> segments = Lists.newArrayList();
 		int startPos = 0;
 		while (startPos < message.length) {
@@ -313,7 +311,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 				builder.writeInt(messageId);
 				ShortMessageType.LONG_PART.write(builder);
 				TrSerializer.serializeTo(lp, builder);
-				final Resender resender = new Resender(messageId, MAX_RETRIES, new TrSentReceivedListener() {
+				final Resender resender = new Resender(messageId, TrConstants.UDP_SHORT_MESSAGE_RETRY_ATTEMPTS, new TrSentReceivedListener() {
 
 					boolean failureReported = false;
 
