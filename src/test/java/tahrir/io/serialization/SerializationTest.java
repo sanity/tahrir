@@ -7,8 +7,8 @@ import java.util.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import tahrir.RemoteNodeAddress;
 import tahrir.io.crypto.TrCrypto;
+import tahrir.io.net.RemoteNodeAddress;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.io.net.udpV1.UdpNetworkLocation;
 
