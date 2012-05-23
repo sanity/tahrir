@@ -3,17 +3,17 @@ package tahrir.io.net.sessions;
 import java.security.interfaces.RSAPublicKey;
 import java.util.concurrent.*;
 
-import com.google.common.base.Function;
-
 import org.slf4j.*;
 
-import tahrir.*;
+import tahrir.TrNode;
 import tahrir.io.net.*;
 import tahrir.io.net.TrPeerManager.Capabilities;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.tools.Persistence.Modified;
 import tahrir.tools.Persistence.ModifyBlock;
 import tahrir.tools.*;
+
+import com.google.common.base.Function;
 
 public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSession {
 
@@ -23,7 +23,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 	private boolean locallyInitiated;
 	private AssimilateSession pubNodeSession;
 	private AssimilateSession receivedRequestFrom;
-	private PhysicalNetworkLocation acceptorAddress, joinerAddress;
+	private PhysicalNetworkLocation acceptorPhysicalLocation, joinerPhysicalLocation;
 	private RSAPublicKey acceptorPubkey;
 	private long requestNewConnectionTime;
 	private ScheduledFuture<?> requestNewConnectionFuture;
@@ -87,12 +87,12 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 
 
 	public void requestNewConnection(final RSAPublicKey requestorPubkey) {
-		requestNewConnection(sender(), requestorPubkey);
+		requestNewConnection(new RemoteNodeAddress(sender(), requestorPubkey));
 	}
 
-	public void requestNewConnection(PhysicalNetworkLocation joinerAddress, final RSAPublicKey joinerPublicKey) {
-		this.joinerAddress = joinerAddress;
-		this.joinerPublicKey = joinerPublicKey;
+	public void requestNewConnection(final RemoteNodeAddress joinerAddress) {
+		joinerPhysicalLocation = joinerAddress.location;
+		joinerPublicKey = joinerAddress.publicKey;
 
 		final PhysicalNetworkLocation senderFV = sender();
 		if (locallyInitiated) {
@@ -105,9 +105,9 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 			return;
 		}
 		receivedRequestFrom = this.remoteSession(AssimilateSession.class, connection(senderFV));
-		if (joinerAddress == null) {
+		if (joinerPhysicalLocation == null) {
 			receivedRequestFrom.yourAddressIs(senderFV);
-			joinerAddress = senderFV;
+			joinerPhysicalLocation = senderFV;
 		}
 		if (node.peerManager.peers.size() < node.peerManager.config.maxPeers) {
 			if (logger.isDebugEnabled()) {
@@ -115,9 +115,9 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 			}
 			// We're going to accept them
 			final RemoteNodeAddress remoteNodeAddress = node.getRemoteNodeAddress();
-			receivedRequestFrom.acceptNewConnection(remoteNodeAddress.location, remoteNodeAddress.publicKey);
+			receivedRequestFrom.acceptNewConnection(remoteNodeAddress);
 			final AssimilateSession requestorSession = remoteSession(AssimilateSession.class,
-					connection(joinerAddress, joinerPublicKey, false));
+					connection(joinerPhysicalLocation, joinerPublicKey, false));
 			requestorSession.myCapabilitiesAre(node.config.capabilities);
 		} else {
 			relay = node.peerManager.getPeerForAssimilation();
@@ -145,7 +145,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 			final AssimilateSession relaySession = remoteSession(AssimilateSession.class, connection(relay));
 
 			// A hack so that we can pass this into the Runnable callback
-			final PhysicalNetworkLocation finalRequestorAddress = joinerAddress;
+			final PhysicalNetworkLocation finalRequestorPhysicalAddress = joinerPhysicalLocation;
 
 			relaySession.registerFailureListener(new Runnable() {
 
@@ -156,21 +156,23 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 					node.peerManager.reportAssimilationFailure(relay.remoteNodeAddress.location);
 					// Note: Important to use requestAddress field rather than
 					// the parameter because the parameter may be null
-					AssimilateSessionImpl.this.requestNewConnection(finalRequestorAddress,
-							joinerPublicKey);
+					AssimilateSessionImpl.this.requestNewConnection(new RemoteNodeAddress(finalRequestorPhysicalAddress, joinerPublicKey));
 				}
 			});
 
-			relaySession.requestNewConnection(joinerAddress, joinerPublicKey);
+			relaySession.requestNewConnection(new RemoteNodeAddress(joinerPhysicalLocation, joinerPublicKey));
 		}
 	}
 
-	public void acceptNewConnection(final PhysicalNetworkLocation acceptor, final RSAPublicKey acceptorPubkey) {
+	public void acceptNewConnection(final RemoteNodeAddress acceptorAddress) {
+		final PhysicalNetworkLocation acceptorPhysicalLocation = acceptorAddress.location;
+		final RSAPublicKey acceptorPubkey = acceptorAddress.publicKey;
+
 		if (!sender().equals(relay.remoteNodeAddress.location)) {
 			logger.warn("Received acceptNewConnection() from {}, but was expecting it from {}", sender(), relay.remoteNodeAddress.location);
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("{} is accepting assimiliation request", acceptor);
+			logger.debug("{} is accepting assimiliation request", acceptorPhysicalLocation);
 		}
 		requestNewConnectionFuture.cancel(false);
 		node.peerManager.updatePeerInfo(relay.remoteNodeAddress.location, new Function<TrPeerManager.TrPeerInfo, Void>() {
@@ -184,26 +186,28 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 
 		if (!locallyInitiated) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Forwarding acceptance back to {}", joinerAddress);
+				logger.debug("Forwarding acceptance back to {}", joinerPhysicalLocation);
 			}
-			receivedRequestFrom.acceptNewConnection(acceptor, acceptorPubkey);
+			receivedRequestFrom.acceptNewConnection(acceptorAddress);
 		} else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("We initiated this assimiliation, add a new connection to {}", acceptor);
+				logger.debug("We initiated this assimiliation, add a new connection to {}", acceptorPhysicalLocation);
 			}
-			acceptorAddress = acceptor;
+
+			// We now need to allow other methods to use the acceptor information
+			this.acceptorPhysicalLocation = acceptorPhysicalLocation;
 			this.acceptorPubkey = acceptorPubkey;
 
-			logger.debug("Inform acceptor {} of our capabilities", acceptor);
+			logger.debug("Inform acceptor {} of our capabilities", acceptorPhysicalLocation);
 			final AssimilateSession acceptorSession = remoteSession(AssimilateSession.class,
-					connection(acceptor, acceptorPubkey, false));
+					connection(acceptorPhysicalLocation, acceptorPubkey, false));
 			acceptorSession.myCapabilitiesAre(node.config.capabilities);
 
 			if (acceptorCapabilities != null) {
 				// If we've already received the myCapabilitiesAre from the acceptor
 				// then we can now add it to our peer manager
-				logger.debug("Adding new connection to acceptor {}", acceptorAddress);
-				node.peerManager.addNewPeer(new RemoteNodeAddress(acceptorAddress,
+				logger.debug("Adding new connection to acceptor {}", acceptorPhysicalLocation);
+				node.peerManager.addNewPeer(new RemoteNodeAddress(acceptorPhysicalLocation,
 						acceptorPubkey), acceptorCapabilities);
 			}
 		}
@@ -211,25 +215,25 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 
 	public void myCapabilitiesAre(final Capabilities myCapabilities) {
 		if (locallyInitiated) {
-			if (acceptorAddress != null && !sender().equals(acceptorAddress)) {
+			if (acceptorPhysicalLocation != null && !sender().equals(acceptorPhysicalLocation)) {
 				logger.error("Received myCapabiltiesAre but not from acceptor, ignoring");
 				return;
 			}
 			acceptorCapabilities = myCapabilities;
-			if (acceptorAddress != null && acceptorPubkey != null) {
+			if (acceptorPhysicalLocation != null && acceptorPubkey != null) {
 				// If we've already received the acceptorAddress and acceptorPubkey from an
 				// acceptNewConnection message from the acceptor then we can now add it to
 				// our peer manager
-				logger.debug("Adding new connection to acceptor {}", acceptorAddress);
-				node.peerManager.addNewPeer(new RemoteNodeAddress(acceptorAddress,
+				logger.debug("Adding new connection to acceptor {}", acceptorPhysicalLocation);
+				node.peerManager.addNewPeer(new RemoteNodeAddress(acceptorPhysicalLocation,
 						acceptorPubkey), myCapabilities);
 			}
 		} else {
-			if ( !sender().equals(joinerAddress)) {
-				logger.error("Received myCapabiltiesAre from "+sender()+", but not from the joiner "+joinerAddress+", ignoring");
+			if ( !sender().equals(joinerPhysicalLocation)) {
+				logger.error("Received myCapabiltiesAre from "+sender()+", but not from the joiner "+joinerPhysicalLocation+", ignoring");
 				return;
 			}
-			node.peerManager.addNewPeer(new RemoteNodeAddress(joinerAddress,
+			node.peerManager.addNewPeer(new RemoteNodeAddress(joinerPhysicalLocation,
 					joinerPublicKey), myCapabilities);
 		}
 

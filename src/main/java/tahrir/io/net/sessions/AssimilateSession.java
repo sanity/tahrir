@@ -28,10 +28,10 @@ public interface AssimilateSession extends TrSession {
 	public void requestNewConnection(final RSAPublicKey requestorPubkey);
 
 	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
-	public void requestNewConnection(PhysicalNetworkLocation requestor, final RSAPublicKey requestorPubkey);
+	public void requestNewConnection(RemoteNodeAddress requestorAddress);
 
 	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
-	public void acceptNewConnection(PhysicalNetworkLocation acceptor, final RSAPublicKey acceptorPubkey);
+	public void acceptNewConnection(RemoteNodeAddress acceptorAddress);
 
 	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
 	public void myCapabilitiesAre(Capabilities myCapabilities);
