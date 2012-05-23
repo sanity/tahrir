@@ -96,7 +96,6 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 	@Override
 	public void disconnect() {
 		logger.debug("disconnect() called");
-		Thread.dumpStack();
 		if (!disconnectedCallbackCalled) {
 			disconnectedCallbackCalled = true;
 			if (disconnectedCallback != null) {
