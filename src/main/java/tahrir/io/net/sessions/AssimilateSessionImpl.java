@@ -41,21 +41,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 		logger.debug("Start assimilation via "+assimilateVia);
 		relay = assimilateVia;
 		requestNewConnectionTime = System.currentTimeMillis();
-		requestNewConnectionFuture = TrUtils.executor.schedule(new Runnable() {
-
-			public void run() {
-				node.peerManager.updatePeerInfo(relay.remoteNodeAddress.location, new Function<TrPeerManager.TrPeerInfo, Void>() {
-
-					public Void apply(final TrPeerInfo tpi) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Reporting assimilation failure for "+relay.remoteNodeAddress.location);
-						}
-						node.peerManager.reportAssimilationFailure(relay.remoteNodeAddress.location);
-						return null;
-					}
-				});
-			}
-		}, RELAY_ASSIMILATION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+		requestNewConnectionFuture = TrUtils.executor.schedule(new AssimilationFailureChecker(), RELAY_ASSIMILATION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 		locallyInitiated = true;
 		pubNodeSession = this.remoteSession(AssimilateSession.class, this.connection(assimilateVia.remoteNodeAddress.location, assimilateVia.remoteNodeAddress.publicKey, true));
 		pubNodeSession.registerFailureListener(onFailure);
@@ -126,21 +112,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 			}
 
 			requestNewConnectionTime = System.currentTimeMillis();
-			requestNewConnectionFuture = TrUtils.executor.schedule(new Runnable() {
-
-				public void run() {
-					node.peerManager.updatePeerInfo(relay.remoteNodeAddress.location, new Function<TrPeerManager.TrPeerInfo, Void>() {
-
-						public Void apply(final TrPeerInfo tpi) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Reporting assimilation failure to peerManager after sending assimilation request to {}", relay);
-							}
-							node.peerManager.reportAssimilationFailure(relay.remoteNodeAddress.location);
-							return null;
-						}
-					});
-				}
-			}, RELAY_ASSIMILATION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+			requestNewConnectionFuture = TrUtils.executor.schedule(new AssimilationFailureChecker(), RELAY_ASSIMILATION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
 			final AssimilateSession relaySession = remoteSession(AssimilateSession.class, connection(relay));
 
@@ -236,7 +208,20 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 			node.peerManager.addNewPeer(new RemoteNodeAddress(joinerPhysicalLocation,
 					joinerPublicKey), myCapabilities);
 		}
+	}
 
+	private class AssimilationFailureChecker implements Runnable {
+		public void run() {
+			node.peerManager.updatePeerInfo(relay.remoteNodeAddress.location, new Function<TrPeerManager.TrPeerInfo, Void>() {
 
+				public Void apply(final TrPeerInfo tpi) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Reporting assimilation failure to peerManager after sending assimilation request to {}", relay);
+					}
+					node.peerManager.reportAssimilationFailure(relay.remoteNodeAddress.location);
+					return null;
+				}
+			});
+		}
 	}
 }
