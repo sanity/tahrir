@@ -1,6 +1,7 @@
 package tahrir.io.net;
 
 import java.io.File;
+import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
@@ -162,6 +163,18 @@ public class TrPeerManager {
 		});
 	}
 
+	public RemoteNodeAddress getClosestPeer(final int location) {
+		// closest peer is initially calling node
+		final RemoteNodeAddress closestPeer = node.getRemoteNodeAddress();
+		final int closestLocation = closestPeer.publicKey.hashCode(); // TODO: find another way, not good to be getting this here
+
+		for (final TrPeerInfo ifo : peers.values()) {
+			// code that does math to find closest peer and updates address/location
+		}
+
+		return closestPeer;
+	}
+
 	/**
 	 * If you need to modify a peer's information you must do it using this
 	 * method, as it ensures that persistent peer information gets persisted
@@ -290,6 +303,7 @@ public class TrPeerManager {
 		public Assimilation assimilation = new Assimilation();
 		public Capabilities capabilities;
 		public RemoteNodeAddress remoteNodeAddress;
+		public int smallWorldLocation;
 
 		// To allow deserialization
 		public TrPeerInfo() {
@@ -298,6 +312,7 @@ public class TrPeerManager {
 
 		public TrPeerInfo(final RemoteNodeAddress remoteNodeAddress) {
 			this.remoteNodeAddress = remoteNodeAddress;
+			smallWorldLocation = computeSmallWorldLocation(remoteNodeAddress.publicKey);
 		}
 
 		public static class Assimilation {
@@ -315,6 +330,9 @@ public class TrPeerManager {
 			return builder.toString();
 		}
 
-
+		// TODO: how should this actually be found, this probably isn't correct
+		private int computeSmallWorldLocation(final RSAPublicKey publicKey) {
+			return publicKey.hashCode();
+		}
 	}
 }
