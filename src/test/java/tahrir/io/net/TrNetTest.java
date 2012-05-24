@@ -62,10 +62,10 @@ public class TrNetTest {
 		sessionMgr2.registerSessionClass(TestSession.class, TestSessionImpl.class);
 
 		final TrRemoteConnection one2two = sessionMgr1.connectionManager.getConnection(
-				new UdpNetworkLocation(InetAddress.getByName("127.0.0.1"), udpNetIfaceConf2.listenPort), kp2.a, false,
+				new RemoteNodeAddress(new UdpNetworkLocation(InetAddress.getByName("127.0.0.1"), udpNetIfaceConf2.listenPort), kp2.a), false,
 				"sessionMgr1");
 		final TrRemoteConnection two2one = sessionMgr2.connectionManager.getConnection(
-				new UdpNetworkLocation(InetAddress.getByName("127.0.0.1"), udpNetIfaceConf1.listenPort), kp1.a, false,
+				new RemoteNodeAddress(new UdpNetworkLocation(InetAddress.getByName("127.0.0.1"), udpNetIfaceConf1.listenPort), kp1.a), false,
 				"sessionMgr2");
 
 		remoteSession = sessionMgr1.getOrCreateRemoteSession(TestSession.class, one2two, 1234);

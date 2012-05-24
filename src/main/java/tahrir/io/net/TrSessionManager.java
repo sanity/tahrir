@@ -6,9 +6,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.concurrent.*;
 
-import com.google.common.base.*;
-import com.google.common.collect.*;
-
 import org.slf4j.*;
 
 import tahrir.TrNode;
@@ -19,6 +16,9 @@ import tahrir.io.net.udpV1.UdpNetworkLocation;
 import tahrir.io.serialization.TrSerializer;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
+
+import com.google.common.base.*;
+import com.google.common.collect.*;
 
 public class TrSessionManager {
 
@@ -307,42 +307,42 @@ public class TrSessionManager {
 
 		private final Map<PhysicalNetworkLocation, ConnectionInfo> connections = new MapMaker().makeMap();
 
-		public TrRemoteConnection getConnection(final PhysicalNetworkLocation address, final RSAPublicKey pubKey,
+		public TrRemoteConnection getConnection(final RemoteNodeAddress address,
 				final boolean unilateral, final String userLabel) {
-			return getConnection(address, pubKey, unilateral, userLabel, TrUtils.noopRunnable);
+			return getConnection(address, unilateral, userLabel, TrUtils.noopRunnable);
 		}
 
-		public TrRemoteConnection getConnection(final PhysicalNetworkLocation address, final RSAPublicKey pubKey,
+		public TrRemoteConnection getConnection(final RemoteNodeAddress address,
 				final boolean unilateral, final String userLabel, final Runnable disconnectCallback) {
-			ConnectionInfo ci = connections.get(address);
+			ConnectionInfo ci = connections.get(address.location);
 			if (ci == null) {
 				ci = new ConnectionInfo();
 				final ConnectionInfo finalCi = ci;
-				final TrNetworkInterface netIface = interfacesByAddressType.get(address.getClass());
+				final TrNetworkInterface netIface = interfacesByAddressType.get(address.location.getClass());
 				if (netIface == null)
-					throw new RuntimeException("Unknown TrRemoteAddress type: " + address.getClass());
-				ci.remoteConnection = netIface.connect(address, pubKey, new TrNetMessageListener(), null,
+					throw new RuntimeException("Unknown TrRemoteAddress type: " + address.location.getClass());
+				ci.remoteConnection = netIface.connect(address.location, address.publicKey, new TrNetMessageListener(), null,
 						new Runnable() {
 
 					public void run() {
-						connections.remove(address);
+						connections.remove(address.location);
 						for (final Runnable r : finalCi.interests.values()) {
 							r.run();
 						}
 					}
 
 				}, unilateral);
-				connections.put(address, ci);
+				connections.put(address.location, ci);
 			}
 			ci.interests.put(userLabel, disconnectCallback);
 			return ci.remoteConnection;
 		}
 
-		public void noLongerNeeded(final PhysicalNetworkLocation address, final String userLabel) {
-			final ConnectionInfo ci = connections.get(address);
+		public void noLongerNeeded(final PhysicalNetworkLocation physicalLocation, final String userLabel) {
+			final ConnectionInfo ci = connections.get(physicalLocation);
 			ci.interests.remove(userLabel);
 			if (ci.interests.isEmpty()) {
-				connections.remove(address);
+				connections.remove(physicalLocation);
 				ci.remoteConnection.disconnect();
 			}
 		}

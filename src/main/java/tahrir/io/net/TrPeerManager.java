@@ -5,18 +5,18 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
 
-import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
-
 import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
 
 import org.slf4j.*;
 
-import tahrir.*;
+import tahrir.TrNode;
 import tahrir.io.net.TrPeerManager.TrPeerInfo.Assimilation;
 import tahrir.io.net.sessions.AssimilateSessionImpl;
 import tahrir.tools.*;
 import tahrir.tools.Persistence.Modified;
+
+import com.google.common.base.Function;
+import com.google.common.collect.MapMaker;
 
 public class TrPeerManager {
 	public static final double RECENTLY_ATTEMPTED_PENALTY = 1.3;
@@ -49,15 +49,15 @@ public class TrPeerManager {
 		}
 	}
 
-	public void addNewPeer(final RemoteNodeAddress pubNodeId, final Capabilities capabilities) {
-		logger.debug("addNewPeer "+pubNodeId);
-		final TrPeerInfo tpi = new TrPeerInfo(pubNodeId);
+	public void addNewPeer(final RemoteNodeAddress pubNodeAddress, final Capabilities capabilities) {
+		logger.debug("addNewPeer "+pubNodeAddress);
+		final TrPeerInfo tpi = new TrPeerInfo(pubNodeAddress);
 		tpi.capabilities = capabilities;
-		peers.put(pubNodeId.location, tpi);
-		node.sessionMgr.connectionManager.getConnection(pubNodeId.location, pubNodeId.publicKey, false, sessionMgrLabel, new Runnable() {
+		peers.put(pubNodeAddress.location, tpi);
+		node.sessionMgr.connectionManager.getConnection(pubNodeAddress, false, sessionMgrLabel, new Runnable() {
 
 			public void run() {
-				peers.remove(pubNodeId.location);
+				peers.remove(pubNodeAddress.location);
 			}
 		});
 	}

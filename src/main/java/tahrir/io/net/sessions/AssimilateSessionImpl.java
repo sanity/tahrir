@@ -43,7 +43,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 		requestNewConnectionTime = System.currentTimeMillis();
 		requestNewConnectionFuture = TrUtils.executor.schedule(new AssimilationFailureChecker(), RELAY_ASSIMILATION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 		locallyInitiated = true;
-		pubNodeSession = this.remoteSession(AssimilateSession.class, this.connection(assimilateVia.remoteNodeAddress.location, assimilateVia.remoteNodeAddress.publicKey, true));
+		pubNodeSession = this.remoteSession(AssimilateSession.class, this.connection(assimilateVia.remoteNodeAddress, true));
 		pubNodeSession.registerFailureListener(onFailure);
 		pubNodeSession.requestNewConnection(node.getRemoteNodeAddress().publicKey);
 	}
@@ -103,7 +103,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 			final RemoteNodeAddress remoteNodeAddress = node.getRemoteNodeAddress();
 			receivedRequestFrom.acceptNewConnection(remoteNodeAddress);
 			final AssimilateSession requestorSession = remoteSession(AssimilateSession.class,
-					connection(joinerPhysicalLocation, joinerPublicKey, false));
+					connection(joinerAddress, false));
 			requestorSession.myCapabilitiesAre(node.config.capabilities);
 		} else {
 			relay = node.peerManager.getPeerForAssimilation();
@@ -172,7 +172,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 
 			logger.debug("Inform acceptor {} of our capabilities", acceptorPhysicalLocation);
 			final AssimilateSession acceptorSession = remoteSession(AssimilateSession.class,
-					connection(acceptorPhysicalLocation, acceptorPubkey, false));
+					connection(acceptorAddress, false));
 			acceptorSession.myCapabilitiesAre(node.config.capabilities);
 
 			if (acceptorCapabilities != null) {

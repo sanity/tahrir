@@ -31,10 +31,13 @@ public class TrNode {
 	public final TrConfig config;
 
 	public File privNodeIdFile;
-
 	public File pubNodeIdFile;
-
 	public File publicNodeIdsDir;
+	public final File rootDirectory;
+
+	public final TrPeerManager peerManager;
+
+	public TrSessionManager sessionMgr;
 
 	public TrNode(final File rootDirectory, final TrConfig config)
 			throws SocketException {
@@ -106,12 +109,6 @@ public class TrNode {
 	public void modifyPublicNodeId(final ModifyBlock<RemoteNodeAddress> mb) {
 		Persistence.loadAndModify(RemoteNodeAddress.class, pubNodeIdFile, mb);
 	}
-
-	public final TrPeerManager peerManager;
-
-	public final File rootDirectory;
-
-	public TrSessionManager sessionMgr;
 
 	public static class PrivateNodeId {
 		public static Tuple2<PrivateNodeId, RemoteNodeAddress> generate() {
