@@ -16,4 +16,6 @@ public class TrConstants {
 	public static final int UDP_KEEP_ALIVE_DURATION = 7;
 
 	public static final int PUB_PEER_CONCURRENT_ASSIMILATE = 3;
+
+	public static final int MAINTENANCE_HOPS_TO_LIVE = 8;
 }

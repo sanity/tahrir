@@ -10,9 +10,9 @@ import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
 
 import org.slf4j.*;
 
-import tahrir.TrNode;
+import tahrir.*;
 import tahrir.io.net.TrPeerManager.TrPeerInfo.Assimilation;
-import tahrir.io.net.sessions.AssimilateSessionImpl;
+import tahrir.io.net.sessions.*;
 import tahrir.tools.*;
 import tahrir.tools.Persistence.Modified;
 
@@ -131,6 +131,11 @@ public class TrPeerManager {
 			// } else {
 			// logger.warn("Don't know how to assimilate through already connected peers yet");
 			// }
+		} else {
+			// do maintenance on topology for small world network
+			final int randomLocationToFind = Math.abs(TrUtils.rand.nextInt());
+			final TopologyMaintenanceSessionImpl tm = node.sessionMgr.getOrCreateLocalSession(TopologyMaintenanceSessionImpl.class);
+			tm.startTopologyMaintenance(randomLocationToFind, TrConstants.MAINTENANCE_HOPS_TO_LIVE);
 		}
 	}
 
@@ -163,16 +168,27 @@ public class TrPeerManager {
 		});
 	}
 
-	public RemoteNodeAddress getClosestPeer(final int location) {
+	public RemoteNodeAddress getClosestPeer(final int locationToFind) {
 		// closest peer is initially calling node
-		final RemoteNodeAddress closestPeer = node.getRemoteNodeAddress();
-		final int closestLocation = closestPeer.publicKey.hashCode(); // TODO: find another way, not good to be getting this here
+		RemoteNodeAddress closestPeer = node.getRemoteNodeAddress();
+		final int callingNodeTopologyLoc = TrPeerManager.calcTopologyLoc(closestPeer.publicKey);
+		int closestDistance = findDistanceWithRollover(callingNodeTopologyLoc, locationToFind);
 
 		for (final TrPeerInfo ifo : peers.values()) {
-			// code that does math to find closest peer and updates address/location
+			final int currentPeerDistance = findDistanceWithRollover(ifo.topologyLocation, locationToFind);
+
+			if (currentPeerDistance < closestDistance) {
+				closestDistance = currentPeerDistance;
+				closestPeer  = ifo.remoteNodeAddress;
+			}
 		}
 
 		return closestPeer;
+	}
+
+	private int findDistanceWithRollover(final int from, final int to) {
+		return Math.abs((from % Integer.MAX_VALUE) - to);
+
 	}
 
 	/**
@@ -199,6 +215,11 @@ public class TrPeerManager {
 				logger.warn("Attempted to update unknown peer "+addr+", ignoring");
 			}
 		}
+	}
+
+	public static int calcTopologyLoc(final RSAPublicKey publicKey) {
+		// getting abs makes math easier but is it ok?
+		return Math.abs(publicKey.hashCode());
 	}
 
 	public static class BinaryStat {
@@ -303,7 +324,7 @@ public class TrPeerManager {
 		public Assimilation assimilation = new Assimilation();
 		public Capabilities capabilities;
 		public RemoteNodeAddress remoteNodeAddress;
-		public int smallWorldLocation;
+		public int topologyLocation;
 
 		// To allow deserialization
 		public TrPeerInfo() {
@@ -312,7 +333,7 @@ public class TrPeerManager {
 
 		public TrPeerInfo(final RemoteNodeAddress remoteNodeAddress) {
 			this.remoteNodeAddress = remoteNodeAddress;
-			smallWorldLocation = computeSmallWorldLocation(remoteNodeAddress.publicKey);
+			topologyLocation = TrPeerManager.calcTopologyLoc(remoteNodeAddress.publicKey);
 		}
 
 		public static class Assimilation {
@@ -328,11 +349,6 @@ public class TrPeerManager {
 			builder.append(remoteNodeAddress);
 			builder.append("]");
 			return builder.toString();
-		}
-
-		// TODO: how should this actually be found, this probably isn't correct
-		private int computeSmallWorldLocation(final RSAPublicKey publicKey) {
-			return publicKey.hashCode();
 		}
 	}
 }
