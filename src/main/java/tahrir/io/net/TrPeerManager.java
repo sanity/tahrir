@@ -186,9 +186,12 @@ public class TrPeerManager {
 		return closestPeer;
 	}
 
+	public int getNumFreePeerSlots() {
+		return config.maxPeers - peers.size();
+	}
+
 	private int findDistanceWithRollover(final int from, final int to) {
 		return Math.abs((from % Integer.MAX_VALUE) - to);
-
 	}
 
 	/**

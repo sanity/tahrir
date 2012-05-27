@@ -18,4 +18,8 @@ public class TrConstants {
 	public static final int PUB_PEER_CONCURRENT_ASSIMILATE = 3;
 
 	public static final int MAINTENANCE_HOPS_TO_LIVE = 8;
+
+	public static final int TOPOLOGY_MAINTENANCE_PEERS_TO_REPLACE = 3;
+
+	public static final int HOPS_TO_LIVE_RESET = 4;
 }
