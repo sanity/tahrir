@@ -6,6 +6,8 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<properties>
 		<project.build.mainClass>tahrir.TrMain</project.build.mainClass>
+		<!-- I need to explicitly specify encoding to avoid non-standard, like was GBK or GB18030. Because I live in China. -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<pluginRepositories>
 		<pluginRepository>
