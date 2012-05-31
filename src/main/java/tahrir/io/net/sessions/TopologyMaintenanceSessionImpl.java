@@ -36,6 +36,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 	}
 
 	public void startTopologyMaintenance(final int locationToFind, final int hopsToLive) {
+		logger.debug("Starting maintenance from {} with location {}", node.getRemoteNodeAddress(), locationToFind);
 		requester = true;
 		final List<RemoteNodeAddress> requestors = new ArrayList<RemoteNodeAddress>();
 		requestors.add(node.getRemoteNodeAddress());
@@ -53,7 +54,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 			}
 
 			if (hopsToLive == 0 || closestPeerAddress.equals(node.getRemoteNodeAddress())) {
-				// found the closest location or gave up
+				// the current node is the closest to what we're looking for or we've given up
 				responder = true;
 				peersToAccept = calcPeersToAccept(requesters);
 				sendResponses(requesters);
@@ -61,6 +62,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 				hopsToLive = hopsToLive > TrConstants.MAINTENANCE_HOPS_TO_LIVE
 						? TrConstants.HOPS_TO_LIVE_RESET
 								: hopsToLive - 1;
+				node.peerManager.updateTimeLastUsed(closestPeerAddress.location);
 				// get next location
 				final TopologyMaintenanceSession closestPeerSession = this.remoteSession(TopologyMaintenanceSession.class, this.connection(closestPeerAddress.location));
 				requesters.add(closestPeerAddress);
@@ -70,6 +72,10 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 	}
 
 	public void sendResponses(final List<RemoteNodeAddress> requesters) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("{} is sending reponses to {}", node.getRemoteNodeAddress(), requesters);
+		}
+
 		for (int i = 0; i < requesters.size() && peersToAccept > 0; i++) {
 			final RemoteNodeAddress requestorAddress = requesters.get(i);
 			final TopologyMaintenanceSession requestorSession = this.remoteSession(TopologyMaintenanceSession.class, this.connection(requestorAddress.location));
@@ -81,7 +87,10 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 	}
 
 	public void acceptMe(final RemoteNodeAddress askerAddress, final Capabilities askerCapabilites) {
-		// TODO: peers shouldn't just be added like this to end of peers list
+		if (logger.isDebugEnabled()) {
+			logger.debug("{} is asking to be accapted to {}", askerAddress, node.getRemoteNodeAddress());
+		}
+
 		node.peerManager.addByReplacement(askerAddress, askerCapabilites);
 		if (!responder) {
 			// we have accepted the responder now send them our capabilites so they can accept us

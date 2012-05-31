@@ -198,6 +198,17 @@ public class TrPeerManager {
 		return closestPeer;
 	}
 
+	public void updateTimeLastUsed(final PhysicalNetworkLocation physicalLocation) {
+		// TODO: is this the correct way to use this?
+		updatePeerInfo(physicalLocation, new Function<TrPeerManager.TrPeerInfo, Void>() {
+
+			public Void apply(final TrPeerInfo peerInfo) {
+				peerInfo.lastTimeUsed = System.currentTimeMillis();
+				return null;
+			}
+		});
+	}
+
 	public int getNumFreePeerSlots() {
 		return config.maxPeers - peers.size();
 	}
@@ -379,10 +390,6 @@ public class TrPeerManager {
 			builder.append(remoteNodeAddress);
 			builder.append("]");
 			return builder.toString();
-		}
-
-		public void updateLastTimeUsed() {
-			lastTimeUsed = System.currentTimeMillis();
 		}
 	}
 }
