@@ -22,4 +22,6 @@ public class TrConstants {
 	public static final int TOPOLOGY_MAINTENANCE_PEERS_TO_REPLACE = 3;
 
 	public static final int HOPS_TO_LIVE_RESET = 4;
+
+	public static final int FORWARD_AGAIN_WAIT_SEC = 30;
 }

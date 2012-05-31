@@ -63,6 +63,18 @@ public class TrPeerManager {
 		});
 	}
 
+	public void addByReplacement(final RemoteNodeAddress pubNodeAddress, final Capabilities capabilities) {
+		if (peers.size() < config.maxPeers) {
+			// just add it regularly
+			addNewPeer(pubNodeAddress, capabilities);
+		} else {
+			// add it by replacement removing LRU peer
+			final PhysicalNetworkLocation toRemove = getLeastRecentlyUsedPeer();
+			peers.remove(toRemove);
+			addNewPeer(pubNodeAddress, capabilities);
+		}
+	}
+
 	public TrPeerInfo getPeerForAssimilation() {
 		if (peers.isEmpty()) {
 			// We need to use a public peer
@@ -192,6 +204,20 @@ public class TrPeerManager {
 
 	private int findDistanceWithRollover(final int from, final int to) {
 		return Math.abs((from % Integer.MAX_VALUE) - to);
+	}
+
+	private PhysicalNetworkLocation getLeastRecentlyUsedPeer() {
+		PhysicalNetworkLocation leastRecentlyUsedPeer = null;
+		long longestTimeSinceUsed = Long.MIN_VALUE;
+
+		for (final TrPeerInfo ifo : peers.values()) {
+			if (ifo.lastTimeUsed > longestTimeSinceUsed) {
+				leastRecentlyUsedPeer = ifo.remoteNodeAddress.location;
+				longestTimeSinceUsed = ifo.lastTimeUsed;
+			}
+		}
+
+		return leastRecentlyUsedPeer;
 	}
 
 	/**
@@ -328,6 +354,7 @@ public class TrPeerManager {
 		public Capabilities capabilities;
 		public RemoteNodeAddress remoteNodeAddress;
 		public int topologyLocation;
+		public long lastTimeUsed;
 
 		// To allow deserialization
 		public TrPeerInfo() {
@@ -352,6 +379,10 @@ public class TrPeerManager {
 			builder.append(remoteNodeAddress);
 			builder.append("]");
 			return builder.toString();
+		}
+
+		public void updateLastTimeUsed() {
+			lastTimeUsed = System.currentTimeMillis();
 		}
 	}
 }
