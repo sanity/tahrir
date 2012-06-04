@@ -10,5 +10,5 @@ public interface TopologyMaintenanceSession extends TrSession {
 	public void probeForLocation(final int locationToFind, int hopsToLive, final List<RemoteNodeAddress> requestors);
 
 	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY) // TODO: change priority
-	public void acceptMe(RemoteNodeAddress askerAddress, Capabilities askerCapabilites);
+	public void accept(RemoteNodeAddress askerAddress, Capabilities askerCapabilites);
 }

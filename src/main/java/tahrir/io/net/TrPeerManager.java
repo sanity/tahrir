@@ -1,7 +1,6 @@
 package tahrir.io.net;
 
 import java.io.File;
-import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
@@ -183,7 +182,7 @@ public class TrPeerManager {
 	public RemoteNodeAddress getClosestPeer(final int locationToFind) {
 		// closest peer is initially calling node
 		RemoteNodeAddress closestPeer = node.getRemoteNodeAddress();
-		final int callingNodeTopologyLoc = TrPeerManager.calcTopologyLoc(closestPeer.publicKey);
+		final int callingNodeTopologyLoc = TopologyMaintenanceSessionImpl.calcTopologyLoc(closestPeer.publicKey);
 		int closestDistance = findDistanceWithRollover(callingNodeTopologyLoc, locationToFind);
 
 		for (final TrPeerInfo ifo : peers.values()) {
@@ -207,6 +206,22 @@ public class TrPeerManager {
 				return null;
 			}
 		});
+	}
+
+	public void enableDebugMaintenance() {
+		// run maintenance more often
+		TrUtils.executor.scheduleAtFixedRate(new Runnable() {
+
+			public void run() {
+				try {
+					maintainance();
+				} catch (final Exception e) {
+					logger.error("Error running maintainance", e);
+				}
+			}
+		}, 0, 5, TimeUnit.SECONDS);
+		// allow topology probing more often
+		TopologyMaintenanceSessionImpl.enableDebugProbing();
 	}
 
 	public int getNumFreePeerSlots() {
@@ -255,11 +270,6 @@ public class TrPeerManager {
 				logger.warn("Attempted to update unknown peer "+addr+", ignoring");
 			}
 		}
-	}
-
-	public static int calcTopologyLoc(final RSAPublicKey publicKey) {
-		// getting abs makes math easier but is it ok?
-		return Math.abs(publicKey.hashCode());
 	}
 
 	public static class BinaryStat {
@@ -374,7 +384,7 @@ public class TrPeerManager {
 
 		public TrPeerInfo(final RemoteNodeAddress remoteNodeAddress) {
 			this.remoteNodeAddress = remoteNodeAddress;
-			topologyLocation = TrPeerManager.calcTopologyLoc(remoteNodeAddress.publicKey);
+			topologyLocation = TopologyMaintenanceSessionImpl.calcTopologyLoc(remoteNodeAddress.publicKey);
 		}
 
 		public static class Assimilation {
