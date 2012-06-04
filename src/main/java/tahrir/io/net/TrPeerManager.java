@@ -5,6 +5,9 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
 
+import com.google.common.base.Function;
+import com.google.common.collect.MapMaker;
+
 import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
 
 import org.slf4j.*;
@@ -14,9 +17,6 @@ import tahrir.io.net.TrPeerManager.TrPeerInfo.Assimilation;
 import tahrir.io.net.sessions.*;
 import tahrir.tools.*;
 import tahrir.tools.Persistence.Modified;
-
-import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
 
 public class TrPeerManager {
 	public static final double RECENTLY_ATTEMPTED_PENALTY = 1.3;
@@ -219,7 +219,7 @@ public class TrPeerManager {
 					logger.error("Error running maintainance", e);
 				}
 			}
-		}, 0, 5, TimeUnit.SECONDS);
+		}, 5, 5, TimeUnit.SECONDS);
 		// allow topology probing more often
 		TopologyMaintenanceSessionImpl.enableDebugProbing();
 	}
