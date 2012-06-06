@@ -48,9 +48,11 @@ public class TrNetTest {
 
 		final TrConfig trCfg1 = new TrConfig();
 		trCfg1.peers.assimilate = false;
+		trCfg1.peers.runMaintainance = false;
 
 		final TrConfig trCfg2 = new TrConfig();
 		trCfg2.peers.assimilate = false;
+		trCfg2.peers.runMaintainance = false;
 		final TrNode node1 = new TrNode(TrUtils.createTempDirectory(), trCfg1);
 		final TrSessionManager sessionMgr1 = new TrSessionManager(node1, iface1, false);
 
@@ -106,12 +108,31 @@ public class TrNetTest {
 		Assert.assertTrue(testDone);
 	}
 
+	@Test
+	public void multipleParameterTest() throws Exception {
+		final LinkedList<Integer> ll = Lists.newLinkedList();
+		ll.add(1);
+		remoteSession.testMethod3(0, ll);
+
+		for (int x = 0; x < 100; x++) {
+			Thread.sleep(100);
+			if (testDone) {
+				break;
+			}
+		}
+
+		Assert.assertTrue(testDone);
+	}
+
 	public static interface TestSession extends TrSession {
 		@Priority(TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY)
 		public void testMethod(int param);
 
 		@Priority(TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY)
 		public void testMethod2(LinkedList<Integer> list);
+
+		@Priority(TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY)
+		public void testMethod3(int param1, LinkedList<Integer> param2);
 	}
 
 	public static class TestSessionImpl extends TrSessionImpl implements TestSession {
@@ -143,6 +164,23 @@ public class TrNetTest {
 				final TrRemoteConnection connectionToSender = connection(senderRemoteAddress);
 				final TestSession remoteSessionOnSender = remoteSession(TestSession.class, connectionToSender);
 				remoteSessionOnSender.testMethod2(list);
+			} else {
+				testDone = true;
+			}
+		}
+
+		public void testMethod3(int param1, final LinkedList<Integer> param2) {
+			if (param1 < 10 && param2.size() < 10) {
+				param1++;
+				int sum = 0;
+				for (final int i : param2) {
+					sum += i;
+				}
+				param2.add(sum);
+				final PhysicalNetworkLocation senderRemoteAddress = sender();
+				final TrRemoteConnection connectionToSender = connection(senderRemoteAddress);
+				final TestSession remoteSessionOnSender = remoteSession(TestSession.class, connectionToSender);
+				remoteSessionOnSender.testMethod3(param1, param2);
 			} else {
 				testDone = true;
 			}
