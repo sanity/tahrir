@@ -18,6 +18,7 @@ public class AssimilateTest {
 		seedConfig.capabilities.allowsAssimilation = true;
 		seedConfig.capabilities.allowsUnsolicitiedInbound = true;
 		seedConfig.peers.assimilate = false;
+		seedConfig.peers.runMaintainance = false;
 		seedConfig.localHostName = "localhost";
 		seedConfig.udp.listenPort = 7643;
 		final File seedDir = TrUtils.createTempDirectory();
@@ -31,6 +32,7 @@ public class AssimilateTest {
 		joinerConfig.udp.listenPort = 7644;
 		joinerConfig.localHostName = "localhost";
 		joinerConfig.peers.assimilate = true;
+		joinerConfig.peers.runMaintainance = false;
 
 		final File joinerPubNodeIdsDir = new File(joinerDir, joinerConfig.publicNodeIdsDir);
 
@@ -45,7 +47,7 @@ public class AssimilateTest {
 
 		final TrNode joinerNode = new TrNode(joinerDir, joinerConfig);
 
-		for (int x=0; x<50; x++) {
+		for (int x=0; x<200; x++) {
 			Thread.sleep(200);
 			if (joinerNode.peerManager.peers.containsKey(seedNode.getRemoteNodeAddress().location)
 					&& seedNode.peerManager.peers.containsKey(joinerNode.getRemoteNodeAddress().location)) {

@@ -22,28 +22,24 @@ public class LongTests {
 		seedConfig.capabilities.allowsUnsolicitiedInbound = true;
 		seedConfig.peers.assimilate = false;
 		seedConfig.peers.runMaintainance = false;
-		seedConfig.peers.maxPeers = 5;
-		seedConfig.peers.minPeers = 2;
 		seedConfig.localHostName = "localhost";
-		seedConfig.udp.listenPort = 10648;
+		seedConfig.udp.listenPort = 9648;
 		final File seedDir = TrUtils.createTempDirectory();
 		final TrNode seedNode = new TrNode(seedDir, seedConfig);
 		final RemoteNodeAddress seedPublicNodeId = seedNode.getRemoteNodeAddress();
 
 		final List<TrNode> joiners = Lists.newLinkedList();
 
-		for (int x=0; x<100; x++) {
+		for (int x=0; x<800; x++) {
 			Thread.sleep(500);
 			final File joinerDir = TrUtils.createTempDirectory();
 
 			final TrConfig joinerConfig = new TrConfig();
 
-			joinerConfig.udp.listenPort = 16050+x;
+			joinerConfig.udp.listenPort = 9050+x;
 			joinerConfig.localHostName = "localhost";
 			joinerConfig.peers.assimilate = true;
 			joinerConfig.peers.runMaintainance = true;
-			joinerConfig.peers.maxPeers = 5;
-			joinerConfig.peers.minPeers = 2;
 			final File joinerPubNodeIdsDir = new File(joinerDir, joinerConfig.publicNodeIdsDir);
 
 			joinerPubNodeIdsDir.mkdir();
@@ -59,7 +55,7 @@ public class LongTests {
 			joiners.add(node);
 		}
 
-		Thread.sleep(20000);
+		Thread.sleep(500000);
 
 		final StringBuilder builder = new StringBuilder();
 		builder.append(getVertex(seedNode));
@@ -68,7 +64,7 @@ public class LongTests {
 		}
 		final String graph = builder.toString();
 		System.out.println(graph);
-		//saveGraph(graph);
+		saveGraph(graph);
 	}
 
 	private String getVertex(final TrNode node) throws Exception {

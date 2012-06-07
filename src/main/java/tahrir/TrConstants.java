@@ -23,5 +23,5 @@ public class TrConstants {
 
 	public static final int HOPS_TO_LIVE_RESET = 4;
 
-	public static final int WAIT_FROM_PROBING_SEC = 30;
+	public static final int WAIT_FROM_FORWARDING_SEC = 30;
 }
