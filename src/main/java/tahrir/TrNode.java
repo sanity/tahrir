@@ -81,7 +81,11 @@ public class TrNode {
 		registerSessions();
 	}
 
+	/**
+	 * If you want to use a session you must register it with this method.
+	 */
 	private void registerSessions() {
+		sessionMgr.registerSessionClass(TopologyMaintenanceSession.class, TopologyMaintenanceSessionImpl.class);
 		sessionMgr.registerSessionClass(AssimilateSession.class, AssimilateSessionImpl.class);
 	}
 

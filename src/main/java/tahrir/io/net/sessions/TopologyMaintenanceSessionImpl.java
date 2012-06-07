@@ -1,7 +1,7 @@
 package tahrir.io.net.sessions;
 
 import java.security.interfaces.RSAPublicKey;
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.*;
@@ -10,6 +10,8 @@ import tahrir.*;
 import tahrir.io.net.*;
 import tahrir.io.net.TrPeerManager.Capabilities;
 import tahrir.tools.TrUtils;
+
+import com.google.common.collect.Lists;
 
 public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements TopologyMaintenanceSession {
 	private final Logger logger;
@@ -40,14 +42,16 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		logger = LoggerFactory.getLogger(TopologyMaintenanceSessionImpl.class.getName()+" ("+sessionId+")");
 	}
 
-	public void startTopologyMaintenance(final int locationToFind, final int hopsToLive) {
+	public void startTopologyMaintenance(final int locationToFind) {
+		// TODO: check it hasn't done maintenance recently
 		// this might be better in TrPeerManager
-		if (!hasProbedRecently) {
-			logger.debug("Starting maintenance from {} with location {}", node.getRemoteNodeAddress(), locationToFind);
-			initator = true;
-			final List<RemoteNodeAddress> requesters = new ArrayList<RemoteNodeAddress>();
-			probeForLocation(locationToFind, hopsToLive, requesters);
-		}
+		logger.debug("Starting maintenance from {} with location {}", node.getRemoteNodeAddress(), locationToFind);
+
+		initator = true;
+		final List<RemoteNodeAddress> requesters = Lists.newLinkedList();
+		final int hopsToLive = TrConstants.MAINTENANCE_HOPS_TO_LIVE;
+
+		probeForLocation(locationToFind, hopsToLive, requesters);
 	}
 
 	public void probeForLocation(final int locationToFind, int hopsToLive, final List<RemoteNodeAddress> requesters) {
@@ -67,17 +71,18 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		} else {
 			if (hopsToLive > TrConstants.MAINTENANCE_HOPS_TO_LIVE) {
 				hopsToLive = TrConstants.HOPS_TO_LIVE_RESET;
-			} else if (!initator) {
+			}
+
+			if (!initator) {
 				hopsToLive--;
+				node.peerManager.updateTimeLastUsed(closestPeerAddress.location);
 			}
 
 			// add this node to the list of requesters
 			requesters.add(node.getRemoteNodeAddress());
 
-			node.peerManager.updateTimeLastUsed(closestPeerAddress.location);
 			// get next location
-			final TopologyMaintenanceSession closestPeerSession = this.remoteSession(TopologyMaintenanceSession.class, this.connection(closestPeerAddress.location));
-			requesters.add(closestPeerAddress);
+			final TopologyMaintenanceSession closestPeerSession = this.remoteSession(TopologyMaintenanceSession.class, this.connection(closestPeerAddress));
 			closestPeerSession.probeForLocation(locationToFind, hopsToLive, requesters);
 		}
 	}
@@ -87,13 +92,11 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 			logger.debug("{} is sending reponses to {}", node.getRemoteNodeAddress(), requesters);
 		}
 
-		while (peersToAccept > 0) {
+		while (peersToAccept > 0 && requesters.size() > 0) {
 			final int randomRequester = TrUtils.rand.nextInt(requesters.size());
 			final RemoteNodeAddress requesterAddress = requesters.remove(randomRequester);
 
-			System.out.println("Accepting peer " + requesterAddress);
-
-			final TopologyMaintenanceSession requesterSession = this.remoteSession(TopologyMaintenanceSession.class, this.connection(requesterAddress.location));
+			final TopologyMaintenanceSession requesterSession = this.remoteSession(TopologyMaintenanceSession.class, this.connection(requesterAddress));
 
 			// tell requester to accept responder
 			requesterSession.accept(node.getRemoteNodeAddress(), node.config.capabilities);
@@ -109,7 +112,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		node.peerManager.addByReplacement(addressToAccept, capabilitesToAccept);
 		if (!responder) {
 			// we have accepted the responder now send them our capabilites so they can accept us
-			final TopologyMaintenanceSession responderSession = this.remoteSession(TopologyMaintenanceSession.class, this.connection(addressToAccept.location));
+			final TopologyMaintenanceSession responderSession = this.remoteSession(TopologyMaintenanceSession.class, this.connection(sender()));
 			responderSession.accept(node.getRemoteNodeAddress(), node.config.capabilities);
 		}
 	}
@@ -121,8 +124,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 	}
 
 	public static int calcTopologyLoc(final RSAPublicKey publicKey) {
-		// getting abs makes math easier but is it ok?
-		return Math.abs(publicKey.hashCode());
+		return publicKey.hashCode();
 	}
 
 	private static class HasProbedRecentlyReset implements Runnable {

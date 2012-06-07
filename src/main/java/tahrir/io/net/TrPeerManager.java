@@ -5,18 +5,18 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
 
-import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
-
 import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
 
 import org.slf4j.*;
 
-import tahrir.*;
+import tahrir.TrNode;
 import tahrir.io.net.TrPeerManager.TrPeerInfo.Assimilation;
 import tahrir.io.net.sessions.*;
 import tahrir.tools.*;
 import tahrir.tools.Persistence.Modified;
+
+import com.google.common.base.Function;
+import com.google.common.collect.MapMaker;
 
 public class TrPeerManager {
 	public static final double RECENTLY_ATTEMPTED_PENALTY = 1.3;
@@ -142,11 +142,11 @@ public class TrPeerManager {
 			// } else {
 			// logger.warn("Don't know how to assimilate through already connected peers yet");
 			// }
-		} else {
+		} else if (config.runMaintainance) {
 			// do maintenance on topology for small world network
 			final int randomLocationToFind = Math.abs(TrUtils.rand.nextInt());
 			final TopologyMaintenanceSessionImpl tm = node.sessionMgr.getOrCreateLocalSession(TopologyMaintenanceSessionImpl.class);
-			tm.startTopologyMaintenance(randomLocationToFind, TrConstants.MAINTENANCE_HOPS_TO_LIVE);
+			tm.startTopologyMaintenance(randomLocationToFind);
 		}
 	}
 
@@ -183,10 +183,10 @@ public class TrPeerManager {
 		// closest peer is initially calling node
 		RemoteNodeAddress closestPeer = node.getRemoteNodeAddress();
 		final int callingNodeTopologyLoc = TopologyMaintenanceSessionImpl.calcTopologyLoc(closestPeer.publicKey);
-		int closestDistance = findDistanceWithRollover(callingNodeTopologyLoc, locationToFind);
+		int closestDistance = findDistance(callingNodeTopologyLoc, locationToFind);
 
 		for (final TrPeerInfo ifo : peers.values()) {
-			final int currentPeerDistance = findDistanceWithRollover(ifo.topologyLocation, locationToFind);
+			final int currentPeerDistance = findDistance(ifo.topologyLocation, locationToFind);
 
 			if (currentPeerDistance < closestDistance) {
 				closestDistance = currentPeerDistance;
@@ -198,7 +198,6 @@ public class TrPeerManager {
 	}
 
 	public void updateTimeLastUsed(final PhysicalNetworkLocation physicalLocation) {
-		// TODO: is this the correct way to use this?
 		updatePeerInfo(physicalLocation, new Function<TrPeerManager.TrPeerInfo, Void>() {
 
 			public Void apply(final TrPeerInfo peerInfo) {
@@ -228,8 +227,8 @@ public class TrPeerManager {
 		return config.maxPeers - peers.size();
 	}
 
-	private int findDistanceWithRollover(final int from, final int to) {
-		return Math.abs((from % Integer.MAX_VALUE) - to);
+	private int findDistance(final int from, final int to) {
+		return Math.abs(from - to);
 	}
 
 	private PhysicalNetworkLocation getLeastRecentlyUsedPeer() {
@@ -384,6 +383,7 @@ public class TrPeerManager {
 
 		public TrPeerInfo(final RemoteNodeAddress remoteNodeAddress) {
 			this.remoteNodeAddress = remoteNodeAddress;
+			lastTimeUsed = 0;
 			topologyLocation = TopologyMaintenanceSessionImpl.calcTopologyLoc(remoteNodeAddress.publicKey);
 		}
 
