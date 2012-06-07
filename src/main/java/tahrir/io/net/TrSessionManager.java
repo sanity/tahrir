@@ -6,6 +6,9 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.concurrent.*;
 
+import com.google.common.base.*;
+import com.google.common.collect.*;
+
 import org.slf4j.*;
 
 import tahrir.TrNode;
@@ -16,9 +19,6 @@ import tahrir.io.net.udpV1.UdpNetworkLocation;
 import tahrir.io.serialization.TrSerializer;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
-
-import com.google.common.base.*;
-import com.google.common.collect.*;
 
 public class TrSessionManager {
 
@@ -124,6 +124,9 @@ public class TrSessionManager {
 		}
 		classesByInterface.put(iface, cls);
 		for (final Method ifaceMethod : iface.getMethods()) {
+			if (ifaceMethod.getName().equals("registerFailureListener")) {
+				continue;
+			}
 			try {
 				final MethodPair methodPair = new MethodPair(ifaceMethod, cls.getMethod(ifaceMethod.getName(),
 						ifaceMethod.getParameterTypes()));
