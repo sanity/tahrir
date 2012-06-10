@@ -3,6 +3,8 @@ package tahrir.io.net.sessions;
 import java.security.interfaces.RSAPublicKey;
 import java.util.concurrent.*;
 
+import com.google.common.base.Function;
+
 import org.slf4j.*;
 
 import tahrir.TrNode;
@@ -12,8 +14,6 @@ import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.tools.Persistence.Modified;
 import tahrir.tools.Persistence.ModifyBlock;
 import tahrir.tools.*;
-
-import com.google.common.base.Function;
 
 public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSession {
 
@@ -103,7 +103,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 			final RemoteNodeAddress remoteNodeAddress = node.getRemoteNodeAddress();
 			receivedRequestFrom.acceptNewConnection(remoteNodeAddress);
 			final AssimilateSession requestorSession = remoteSession(AssimilateSession.class,
-					connection(joinerAddress, false));
+					connectionWithUserLabel(joinerAddress, false, "topology"));
 			requestorSession.myCapabilitiesAre(node.config.capabilities);
 		} else {
 			relay = node.peerManager.getPeerForAssimilation();
@@ -172,7 +172,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 
 			logger.debug("Inform acceptor {} of our capabilities", acceptorPhysicalLocation);
 			final AssimilateSession acceptorSession = remoteSession(AssimilateSession.class,
-					connection(acceptorAddress, false));
+					connectionWithUserLabel(acceptorAddress, false, "topology"));
 			acceptorSession.myCapabilitiesAre(node.config.capabilities);
 
 			if (acceptorCapabilities != null) {
