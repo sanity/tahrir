@@ -4,7 +4,7 @@ import java.security.interfaces.RSAPublicKey;
 
 
 public class RemoteNodeAddress {
-	public PhysicalNetworkLocation location;
+	public PhysicalNetworkLocation physicalLocation;
 	public RSAPublicKey publicKey;
 
 	/**
@@ -15,7 +15,7 @@ public class RemoteNodeAddress {
 	}
 
 	public RemoteNodeAddress(final PhysicalNetworkLocation location,final RSAPublicKey publicKey) {
-		this.location = location;
+		this.physicalLocation = location;
 		this.publicKey = publicKey;
 	}
 
@@ -23,7 +23,7 @@ public class RemoteNodeAddress {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((location == null) ? 0 : location.hashCode());
+		result = prime * result + ((physicalLocation == null) ? 0 : physicalLocation.hashCode());
 		return result;
 	}
 
@@ -36,10 +36,10 @@ public class RemoteNodeAddress {
 		if (!(obj instanceof RemoteNodeAddress))
 			return false;
 		final RemoteNodeAddress other = (RemoteNodeAddress) obj;
-		if (location == null) {
-			if (other.location != null)
+		if (physicalLocation == null) {
+			if (other.physicalLocation != null)
 				return false;
-		} else if (!location.equals(other.location))
+		} else if (!physicalLocation.equals(other.physicalLocation))
 			return false;
 		return true;
 	}
@@ -48,7 +48,7 @@ public class RemoteNodeAddress {
 	public String toString() {
 		final StringBuilder builder = new StringBuilder();
 		builder.append("RemoteNodeAddress [address=");
-		builder.append(location);
+		builder.append(physicalLocation);
 		builder.append("]");
 		return builder.toString();
 	}

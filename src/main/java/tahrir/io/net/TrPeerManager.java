@@ -1,6 +1,7 @@
 package tahrir.io.net;
 
 import java.io.File;
+import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
@@ -29,6 +30,7 @@ public class TrPeerManager {
 	public Map<PhysicalNetworkLocation, TrPeerInfo> peers = new MapMaker().makeMap();
 	public final String sessionMgrLabel;
 
+	public final TopologyLocationInfo locInfo;
 	public boolean hasForwardedRecenlty = false;
 
 	private final TrNode node;
@@ -37,6 +39,7 @@ public class TrPeerManager {
 		this.config = config;
 		this.node = node;
 		sessionMgrLabel = "TrPeerManager(" + TrUtils.rand.nextInt() + ")";
+		locInfo = new TopologyLocationInfo(this);
 		if (config.runMaintainance ) {
 			TrUtils.executor.scheduleAtFixedRate(new Runnable() {
 
@@ -49,11 +52,13 @@ public class TrPeerManager {
 				}
 			}, 0, 1, TimeUnit.MINUTES);
 
-			TrUtils.executor.scheduleWithFixedDelay(new Runnable() {
-				public void run() {
-					hasForwardedRecenlty = false;
-				}
-			},0, TrConstants.WAIT_FROM_FORWARDING_SEC, TimeUnit.SECONDS);
+			if (config.topologyMaintenance) {
+				TrUtils.executor.scheduleWithFixedDelay(new Runnable() {
+					public void run() {
+						hasForwardedRecenlty = false;
+					}
+				},0, TrConstants.WAIT_FROM_FORWARDING_SEC, TimeUnit.SECONDS);
+			}
 		}
 	}
 
@@ -61,11 +66,11 @@ public class TrPeerManager {
 		logger.debug("addNewPeer "+pubNodeAddress);
 		final TrPeerInfo tpi = new TrPeerInfo(pubNodeAddress);
 		tpi.capabilities = capabilities;
-		peers.put(pubNodeAddress.location, tpi);
+		peers.put(pubNodeAddress.physicalLocation, tpi);
 		node.sessionMgr.connectionManager.getConnection(pubNodeAddress, false, sessionMgrLabel, new Runnable() {
 
 			public void run() {
-				peers.remove(pubNodeAddress.location);
+				peers.remove(pubNodeAddress.physicalLocation);
 			}
 		});
 	}
@@ -77,7 +82,7 @@ public class TrPeerManager {
 		} else {
 			// add it by replacement removing LRU peer
 			final PhysicalNetworkLocation toRemove = getLeastRecentlyUsedPeer();
-			//TODO: remove the peer right now
+			node.sessionMgr.connectionManager.noLongerNeeded(toRemove, sessionMgrLabel); // is this correct way?
 			peers.remove(toRemove);
 			addNewPeer(pubNodeAddress, capabilities);
 		}
@@ -151,7 +156,7 @@ public class TrPeerManager {
 			// } else {
 			// logger.warn("Don't know how to assimilate through already connected peers yet");
 			// }
-		} else if (config.runMaintainance) { // && !hasForwardedRecenlty) {
+		} else if (config.topologyMaintenance) { // && !hasForwardedRecenlty) {
 			// do maintenance on topology for small world network
 			final int randomLocationToFind = Math.abs(TrUtils.rand.nextInt());
 			final TopologyMaintenanceSessionImpl tm = node.sessionMgr.getOrCreateLocalSession(TopologyMaintenanceSessionImpl.class);
@@ -191,11 +196,11 @@ public class TrPeerManager {
 	public RemoteNodeAddress getClosestPeer(final int locationToFind) {
 		// closest peer is initially calling node
 		RemoteNodeAddress closestPeer = node.getRemoteNodeAddress();
-		final int callingNodeTopologyLoc = TopologyMaintenanceSessionImpl.calcTopologyLoc(closestPeer.publicKey);
-		int closestDistance = findClosestDistance(callingNodeTopologyLoc, locationToFind);
+		final int callingNodeTopologyLoc = locInfo.location;
+		int closestDistance = getLinearDistanceWithRollover(callingNodeTopologyLoc, locationToFind);
 
 		for (final TrPeerInfo ifo : peers.values()) {
-			final int currentPeerDistance = findClosestDistance(ifo.topologyLocation, locationToFind);
+			final int currentPeerDistance = getLinearDistanceWithRollover(ifo.topologyLocation, locationToFind);
 
 			if (currentPeerDistance < closestDistance) {
 				closestDistance = currentPeerDistance;
@@ -228,6 +233,7 @@ public class TrPeerManager {
 				}
 			}
 		}, 5, 5, TimeUnit.SECONDS);
+
 		// allow topology probing more often
 		TrUtils.executor.scheduleWithFixedDelay(new Runnable() {
 			public void run() {
@@ -240,11 +246,11 @@ public class TrPeerManager {
 		return config.maxPeers - peers.size();
 	}
 
-	private int findClosestDistance(final int from, final int to) {
-		final int rollover = Integer.MAX_VALUE;
-		final int firstDistance = Math.abs(from - to);
-		final int secondDistance = (Math.max(from, to) + firstDistance) % rollover;
-		return firstDistance < secondDistance ? firstDistance : secondDistance;
+	private int getLinearDistanceWithRollover(final int point1, final int point2) {
+		// this is a silly way of doing it but it seems to work
+		final int d1 = Math.abs(point1 - point2);
+		final int d2 = Integer.MAX_VALUE - Math.max(point1, point2) + Math.min(point1, point2);
+		return Math.min(d1, d2);
 	}
 
 	private PhysicalNetworkLocation getLeastRecentlyUsedPeer() {
@@ -253,9 +259,13 @@ public class TrPeerManager {
 
 		for (final TrPeerInfo ifo : peers.values()) {
 			if (ifo.lastTimeUsed > longestTimeSinceUsed) {
-				leastRecentlyUsedPeer = ifo.remoteNodeAddress.location;
+				leastRecentlyUsedPeer = ifo.remoteNodeAddress.physicalLocation;
 				longestTimeSinceUsed = ifo.lastTimeUsed;
 			}
+		}
+
+		if (leastRecentlyUsedPeer == null) {
+			logger.warn("LRU peer was null.");
 		}
 
 		return leastRecentlyUsedPeer;
@@ -338,6 +348,7 @@ public class TrPeerManager {
 	public static class Config {
 		public boolean runMaintainance = true;
 		public boolean assimilate = true;
+		public boolean topologyMaintenance = true;
 		public int maxPeers = 20;
 		public int minPeers = 10;
 	}
@@ -400,7 +411,7 @@ public class TrPeerManager {
 		public TrPeerInfo(final RemoteNodeAddress remoteNodeAddress) {
 			this.remoteNodeAddress = remoteNodeAddress;
 			lastTimeUsed = System.currentTimeMillis();
-			topologyLocation = TopologyMaintenanceSessionImpl.calcTopologyLoc(remoteNodeAddress.publicKey);
+			topologyLocation = TopologyLocationInfo.calcDefaultTopologyLoc(remoteNodeAddress.publicKey);
 		}
 
 		public static class Assimilation {
@@ -416,6 +427,42 @@ public class TrPeerManager {
 			builder.append(remoteNodeAddress);
 			builder.append("]");
 			return builder.toString();
+		}
+	}
+
+	/**
+	 * This stores the node's own topology location which may also need to be sent to other nodes
+	 * if it is different from the default.
+	 */
+	public static class TopologyLocationInfo {
+		private final TrPeerManager peerManager;
+		private int location;
+
+		public TopologyLocationInfo(final TrPeerManager peerManager) {
+			this.peerManager = peerManager;
+			location = TopologyLocationInfo.calcDefaultTopologyLoc(peerManager.node.getRemoteNodeAddress().publicKey);
+		}
+
+		/**
+		 * Sets the topology location of the node, currently does not notify
+		 * peers that its location is changed from default so should only be called
+		 * before it has any peers.
+		 * @param location
+		 */
+		public void setLocation(final int location) {
+			if (location >= 0) {
+				this.location = location;
+			} else {
+				// warn or something: locations must be greater than 0
+			}
+		}
+
+		public static int calcDefaultTopologyLoc(final RSAPublicKey publicKey) {
+			return Math.abs(publicKey.hashCode());
+		}
+
+		public int getLocation() {
+			return location;
 		}
 	}
 }

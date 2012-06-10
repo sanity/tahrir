@@ -54,9 +54,9 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 					sender());
 			return;
 		}
-		if (!sender().equals(relay.remoteNodeAddress.location)) {
+		if (!sender().equals(relay.remoteNodeAddress.physicalLocation)) {
 			logger.warn("Received yourAddressIs() from {}, yet the public node we expected it from was {}, ignoring",
-					sender(), relay.remoteNodeAddress.location);
+					sender(), relay.remoteNodeAddress.physicalLocation);
 
 			return;
 		}
@@ -66,7 +66,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 		node.modifyPublicNodeId(new ModifyBlock<RemoteNodeAddress>() {
 
 			public void run(final RemoteNodeAddress object, final Modified modified) {
-				object.location = address;
+				object.physicalLocation = address;
 			}
 		});
 	}
@@ -77,7 +77,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 	}
 
 	public void requestNewConnection(final RemoteNodeAddress joinerAddress) {
-		joinerPhysicalLocation = joinerAddress.location;
+		joinerPhysicalLocation = joinerAddress.physicalLocation;
 		joinerPublicKey = joinerAddress.publicKey;
 
 		final PhysicalNetworkLocation senderFV = sender();
@@ -125,7 +125,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 					if (logger.isDebugEnabled()) {
 						logger.debug("Reporting assimilation failure to peerManager after sending assimilation request to {}, and then trying again", relay);
 					}
-					node.peerManager.reportAssimilationFailure(relay.remoteNodeAddress.location);
+					node.peerManager.reportAssimilationFailure(relay.remoteNodeAddress.physicalLocation);
 					// Note: Important to use requestAddress field rather than
 					// the parameter because the parameter may be null
 					AssimilateSessionImpl.this.requestNewConnection(new RemoteNodeAddress(finalRequestorPhysicalAddress, joinerPublicKey));
@@ -137,20 +137,20 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 	}
 
 	public void acceptNewConnection(final RemoteNodeAddress acceptorAddress) {
-		final PhysicalNetworkLocation acceptorPhysicalLocation = acceptorAddress.location;
+		final PhysicalNetworkLocation acceptorPhysicalLocation = acceptorAddress.physicalLocation;
 		final RSAPublicKey acceptorPubkey = acceptorAddress.publicKey;
 
-		if (!sender().equals(relay.remoteNodeAddress.location)) {
-			logger.warn("Received acceptNewConnection() from {}, but was expecting it from {}", sender(), relay.remoteNodeAddress.location);
+		if (!sender().equals(relay.remoteNodeAddress.physicalLocation)) {
+			logger.warn("Received acceptNewConnection() from {}, but was expecting it from {}", sender(), relay.remoteNodeAddress.physicalLocation);
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("{} is accepting assimiliation request", acceptorPhysicalLocation);
 		}
 		requestNewConnectionFuture.cancel(false);
-		node.peerManager.updatePeerInfo(relay.remoteNodeAddress.location, new Function<TrPeerManager.TrPeerInfo, Void>() {
+		node.peerManager.updatePeerInfo(relay.remoteNodeAddress.physicalLocation, new Function<TrPeerManager.TrPeerInfo, Void>() {
 
 			public Void apply(final TrPeerInfo tpi) {
-				node.peerManager.reportAssimilationSuccess(relay.remoteNodeAddress.location, System.currentTimeMillis()
+				node.peerManager.reportAssimilationSuccess(relay.remoteNodeAddress.physicalLocation, System.currentTimeMillis()
 						- requestNewConnectionTime);
 				return null;
 			}
@@ -212,13 +212,13 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 
 	private class AssimilationFailureChecker implements Runnable {
 		public void run() {
-			node.peerManager.updatePeerInfo(relay.remoteNodeAddress.location, new Function<TrPeerManager.TrPeerInfo, Void>() {
+			node.peerManager.updatePeerInfo(relay.remoteNodeAddress.physicalLocation, new Function<TrPeerManager.TrPeerInfo, Void>() {
 
 				public Void apply(final TrPeerInfo tpi) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Reporting assimilation failure to peerManager after sending assimilation request to {}", relay);
 					}
-					node.peerManager.reportAssimilationFailure(relay.remoteNodeAddress.location);
+					node.peerManager.reportAssimilationFailure(relay.remoteNodeAddress.physicalLocation);
 					return null;
 				}
 			});

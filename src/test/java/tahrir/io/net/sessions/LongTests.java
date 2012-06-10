@@ -22,24 +22,29 @@ public class LongTests {
 		seedConfig.capabilities.allowsUnsolicitiedInbound = true;
 		seedConfig.peers.assimilate = false;
 		seedConfig.peers.runMaintainance = false;
+		seedConfig.peers.maxPeers = 8;
+		seedConfig.peers.minPeers = 4;
 		seedConfig.localHostName = "localhost";
-		seedConfig.udp.listenPort = 9648;
+		seedConfig.udp.listenPort = 20648;
 		final File seedDir = TrUtils.createTempDirectory();
 		final TrNode seedNode = new TrNode(seedDir, seedConfig);
 		final RemoteNodeAddress seedPublicNodeId = seedNode.getRemoteNodeAddress();
 
 		final List<TrNode> joiners = Lists.newLinkedList();
 
-		for (int x=0; x<800; x++) {
+		for (int x=0; x<200; x++) {
 			Thread.sleep(500);
 			final File joinerDir = TrUtils.createTempDirectory();
 
 			final TrConfig joinerConfig = new TrConfig();
 
-			joinerConfig.udp.listenPort = 9050+x;
+			joinerConfig.udp.listenPort = 20050+x;
 			joinerConfig.localHostName = "localhost";
-			joinerConfig.peers.assimilate = true;
 			joinerConfig.peers.runMaintainance = true;
+			joinerConfig.peers.assimilate = true;
+			joinerConfig.peers.topologyMaintenance = true;
+			joinerConfig.peers.maxPeers = 8;
+			joinerConfig.peers.minPeers = 4;
 			final File joinerPubNodeIdsDir = new File(joinerDir, joinerConfig.publicNodeIdsDir);
 
 			joinerPubNodeIdsDir.mkdir();
@@ -55,7 +60,7 @@ public class LongTests {
 			joiners.add(node);
 		}
 
-		Thread.sleep(500000);
+		Thread.sleep(400000);
 
 		final StringBuilder builder = new StringBuilder();
 		builder.append(getVertex(seedNode));
@@ -70,7 +75,7 @@ public class LongTests {
 	private String getVertex(final TrNode node) throws Exception {
 		final StringBuilder builder = new StringBuilder();
 		for (final TrPeerInfo o : node.peerManager.peers.values()) {
-			final int nodeTopologyLoc = TopologyMaintenanceSessionImpl.calcTopologyLoc(node.getRemoteNodeAddress().publicKey);
+			final int nodeTopologyLoc = node.peerManager.locInfo.getLocation();
 			builder.append( nodeTopologyLoc + " -- " + o.topologyLocation + "; ");
 		}
 		return builder.toString();
