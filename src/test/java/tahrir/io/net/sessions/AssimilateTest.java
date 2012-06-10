@@ -17,7 +17,6 @@ public class AssimilateTest {
 		final TrConfig seedConfig = new TrConfig();
 		seedConfig.capabilities.allowsAssimilation = true;
 		seedConfig.capabilities.allowsUnsolicitiedInbound = true;
-		seedConfig.peers.assimilate = false;
 		seedConfig.peers.runMaintainance = false;
 		seedConfig.localHostName = "localhost";
 		seedConfig.udp.listenPort = 7643;
@@ -31,8 +30,8 @@ public class AssimilateTest {
 
 		joinerConfig.udp.listenPort = 7644;
 		joinerConfig.localHostName = "localhost";
-		joinerConfig.peers.assimilate = true;
-		joinerConfig.peers.runMaintainance = false;
+		joinerConfig.peers.runMaintainance = true;
+		joinerConfig.peers.topologyMaintenance = false;
 
 		final File joinerPubNodeIdsDir = new File(joinerDir, joinerConfig.publicNodeIdsDir);
 
@@ -47,16 +46,15 @@ public class AssimilateTest {
 
 		final TrNode joinerNode = new TrNode(joinerDir, joinerConfig);
 
-		for (int x=0; x<200; x++) {
+		for (int x=0; x<50; x++) {
 			Thread.sleep(200);
-			if (joinerNode.peerManager.peers.containsKey(seedNode.getRemoteNodeAddress().location)
-					&& seedNode.peerManager.peers.containsKey(joinerNode.getRemoteNodeAddress().location)) {
+			if (joinerNode.peerManager.peers.containsKey(seedNode.getRemoteNodeAddress().physicalLocation)
+					&& seedNode.peerManager.peers.containsKey(joinerNode.getRemoteNodeAddress().physicalLocation)) {
 				break;
 			}
 		}
 		// Verify that they are now connected
-		Assert.assertTrue(joinerNode.peerManager.peers.containsKey(seedNode.getRemoteNodeAddress().location), "The joiner peer manager should contain the seed peer");
-		Assert.assertTrue(seedNode.peerManager.peers.containsKey(joinerNode.getRemoteNodeAddress().location), "The seed peer manager should contain the joiner peer");
-
+		Assert.assertTrue(joinerNode.peerManager.peers.containsKey(seedNode.getRemoteNodeAddress().physicalLocation), "The joiner peer manager should contain the seed peer");
+		Assert.assertTrue(seedNode.peerManager.peers.containsKey(joinerNode.getRemoteNodeAddress().physicalLocation), "The seed peer manager should contain the joiner peer");
 	}
 }
