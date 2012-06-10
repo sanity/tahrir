@@ -317,25 +317,25 @@ public class TrSessionManager {
 
 		public TrRemoteConnection getConnection(final RemoteNodeAddress address,
 				final boolean unilateral, final String userLabel, final Runnable disconnectCallback) {
-			ConnectionInfo ci = connections.get(address.location);
+			ConnectionInfo ci = connections.get(address.physicalLocation);
 			if (ci == null) {
 				ci = new ConnectionInfo();
 				final ConnectionInfo finalCi = ci;
-				final TrNetworkInterface netIface = interfacesByAddressType.get(address.location.getClass());
+				final TrNetworkInterface netIface = interfacesByAddressType.get(address.physicalLocation.getClass());
 				if (netIface == null)
-					throw new RuntimeException("Unknown TrRemoteAddress type: " + address.location.getClass());
-				ci.remoteConnection = netIface.connect(address.location, address.publicKey, new TrNetMessageListener(), null,
+					throw new RuntimeException("Unknown TrRemoteAddress type: " + address.physicalLocation.getClass());
+				ci.remoteConnection = netIface.connect(address.physicalLocation, address.publicKey, new TrNetMessageListener(), null,
 						new Runnable() {
 
 					public void run() {
-						connections.remove(address.location);
+						connections.remove(address.physicalLocation);
 						for (final Runnable r : finalCi.interests.values()) {
 							r.run();
 						}
 					}
 
 				}, unilateral);
-				connections.put(address.location, ci);
+				connections.put(address.physicalLocation, ci);
 			}
 			ci.interests.put(userLabel, disconnectCallback);
 			return ci.remoteConnection;

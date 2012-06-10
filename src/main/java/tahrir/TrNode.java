@@ -56,7 +56,7 @@ public class TrNode {
 
 				public void run(final RemoteNodeAddress remoteNodeAddress, final Modified modified) {
 					try {
-						remoteNodeAddress.location = new UdpNetworkLocation(InetAddress.getByName(config.localHostName),
+						remoteNodeAddress.physicalLocation = new UdpNetworkLocation(InetAddress.getByName(config.localHostName),
 								config.udp.listenPort);
 					} catch (final UnknownHostException e) {
 						logger.error("Failed to set local node address", e);
