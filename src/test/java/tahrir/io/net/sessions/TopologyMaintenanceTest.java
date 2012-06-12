@@ -50,7 +50,7 @@ public class TopologyMaintenanceTest {
 		final TrConfig nodeConfig = new TrConfig();
 
 		nodeConfig.udp.listenPort = port++;
-		nodeConfig.localHostName = "localhost";
+		nodeConfig.localHostName = "127.0.0.1";
 		nodeConfig.peers.runMaintainance = initiator;
 		nodeConfig.peers.assimilate = false;
 		nodeConfig.peers.topologyMaintenance = initiator;

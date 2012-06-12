@@ -135,7 +135,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 
 		if (!initator) {
 			final TopologyMaintenanceSession senderSess = this.remoteSession(TopologyMaintenanceSession.class, connection(receivedProbeFrom));
-			senderSess.sendAcceptInfo(node.getRemoteNodeAddress(), willConnectTo);
+			senderSess.sendAcceptInfo(acceptor, willConnectTo);
 		}
 	}
 
@@ -143,7 +143,14 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		if (!acceptor) {
 			node.peerManager.addNewPeer(acceptorAddress, myCapabilities, topologyLocation);
 		} else {
-			final RemoteNodeAddress forwarderAddress = willConnectTo.get(willConnectTo.indexOf(sender()));
+			RemoteNodeAddress forwarderAddress = null;
+			for (int i = 0; i < willConnectTo.size(); i++) {
+				final RemoteNodeAddress address = willConnectTo.get(i);
+				if (address.physicalLocation.equals(sender())) {
+					forwarderAddress = address;
+					break;
+				}
+			}
 			node.peerManager.addNewPeer(forwarderAddress, myCapabilities, topologyLocation);
 		}
 	}
