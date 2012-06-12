@@ -319,6 +319,8 @@ public class TrSessionManager {
 				final boolean unilateral, final String userLabel, final Runnable disconnectCallback) {
 			ConnectionInfo ci = connections.get(address.physicalLocation);
 			if (ci == null) {
+				if (address.publicKey == null)
+					throw new RuntimeException("We need the peer's public key unless we're already connected to it");
 				ci = new ConnectionInfo();
 				final ConnectionInfo finalCi = ci;
 				final TrNetworkInterface netIface = interfacesByAddressType.get(address.physicalLocation.getClass());
