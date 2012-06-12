@@ -68,7 +68,7 @@ public abstract class TrSessionImpl implements TrSession {
 	}
 
 	protected final TrRemoteConnection connectionWithUserLabel(final RemoteNodeAddress address, final boolean unilateral, final String label) {
-		toUnregister.add(address.location);
+		toUnregister.add(address.physicalLocation);
 		return sessionMgr.connectionManager.getConnection(address, unilateral, label);
 	}
 
