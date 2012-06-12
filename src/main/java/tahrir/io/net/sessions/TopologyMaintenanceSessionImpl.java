@@ -7,10 +7,8 @@ import org.slf4j.*;
 import tahrir.*;
 import tahrir.io.net.*;
 import tahrir.io.net.TrPeerManager.Capabilities;
-import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.tools.TrUtils;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 /**
@@ -26,11 +24,16 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 
 	private boolean initator = false;
 
+	private PhysicalNetworkLocation receivedProbeFrom;
+
 	/**
-	 * A responder is the node where the search for a location ends, they will try accept as many
+	 * A acceptor is the node where the search for a location ends, they will try accept as many
 	 * forwarders as possible.
 	 */
-	private boolean responder = false;
+	private boolean acceptor = false;
+	private RemoteNodeAddress acceptorAddress;
+
+	private RemoteNodeAddress forwarderAddress;
 
 	public TopologyMaintenanceSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager sessionMgr) {
 		super(sessionId, node, sessionMgr);
@@ -50,6 +53,10 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 	}
 
 	public void probeForLocation(final int locationToFind, int hopsToLive, final LinkedList<RemoteNodeAddress> forwarders) {
+		if (!initator) {
+			receivedProbeFrom = sender();
+		}
+
 		final RemoteNodeAddress closestPeerAddress = node.peerManager.getClosestPeer(locationToFind);
 
 		if (logger.isDebugEnabled()) {
@@ -58,8 +65,8 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 
 		if (hopsToLive == 0 || closestPeerAddress.equals(node.getRemoteNodeAddress()) || (!initator && closestPeerAddress.physicalLocation.equals(sender()))) {
 			// the current node is the closest to what we're looking for or we've given up
-			responder = true;
-			peersToAccept = calcPeersToAccept(forwarders);
+			acceptor = true;
+			peersToAccept = getNumPeerToAccept(forwarders);
 			sendResponses(forwarders);
 		} else {
 			if (hopsToLive > TrConstants.MAINTENANCE_HOPS_TO_LIVE) {
@@ -69,6 +76,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 			if (!initator) {
 				hopsToLive--;
 				node.peerManager.hasForwardedRecenlty = true;
+				receivedProbeFrom = sender();
 			}
 
 			node.peerManager.updateTimeLastUsed(closestPeerAddress.physicalLocation);
@@ -86,49 +94,60 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 			logger.debug("{} is sending reponses to {}", node.getRemoteNodeAddress(), forwarders);
 		}
 
+		final LinkedList<RemoteNodeAddress> willConnectTo = Lists.newLinkedList();
+
+		// get nodes we're going to connect to
 		while (peersToAccept > 0 && forwarders.size() > 0) {
-			final int randomRequester = TrUtils.rand.nextInt(forwarders.size());
-			final RemoteNodeAddress requesterAddress = forwarders.remove(randomRequester);
+			final int randomNum = TrUtils.rand.nextInt(forwarders.size());
+			final RemoteNodeAddress randomForwarder = forwarders.remove(randomNum);
 
 			// check to see if connected
-			if (!node.peerManager.peers.containsKey(requesterAddress.physicalLocation)) {
-				final TopologyMaintenanceSession forwardersession = this.remoteSession(TopologyMaintenanceSession.class, this.connection(requesterAddress));
-
-				// tell requester to accept responder
-				forwardersession.accept(node.getRemoteNodeAddress(), node.config.capabilities, node.peerManager.locInfo.getLocation());
+			if (!node.peerManager.peers.containsKey(randomForwarder.physicalLocation)) {
+				willConnectTo.add(randomForwarder);
 				peersToAccept--;
 			}
 		}
+
+		// trace back so that then can accept us
+		if (!initator && willConnectTo.size() > 0) {
+			final TopologyMaintenanceSession senderSess = this.remoteSession(TopologyMaintenanceSession.class, connection(receivedProbeFrom));
+			senderSess.sendAcceptInfo(node.getRemoteNodeAddress(), willConnectTo);
+		}
+
+		// tell them we're trying to connect
+		for (final RemoteNodeAddress nodeToConnect : willConnectTo) {
+			final TopologyMaintenanceSession forwarderSess = this.remoteSession(TopologyMaintenanceSession.class, connection(nodeToConnect));
+			forwarderSess.myCapabilitiesAre(node.config.capabilities);
+		}
 	}
 
-	public void accept(final RemoteNodeAddress addressToAccept, final Capabilities capabilitesToAccept, final int peerToAcceptLocation) {
+	public void sendAcceptInfo(final RemoteNodeAddress acceptor, final LinkedList<RemoteNodeAddress> willConnectTo) {
+		/*
 		if (logger.isDebugEnabled()) {
 			logger.debug("{} is asking to be accepted to {}", addressToAccept, node.getRemoteNodeAddress());
 		}
-
-		node.peerManager.addByReplacement(addressToAccept, capabilitesToAccept);
-
-		final TrPeerInfo accecptedPeerInfo = node.peerManager.peers.get(addressToAccept.physicalLocation);
-
-		// check to see if topology location was set manually, if it was update the value from default
-		if (peerToAcceptLocation != accecptedPeerInfo.topologyLocation) {
-			node.peerManager.updatePeerInfo(addressToAccept.physicalLocation, new Function<TrPeerManager.TrPeerInfo, Void>() {
-
-				public Void apply(final TrPeerInfo peerInfo) {
-					peerInfo.topologyLocation = peerToAcceptLocation;
-					return null;
-				}
-			});
+		 */
+		if (willConnectTo.remove(node.getRemoteNodeAddress())) {
+			final TopologyMaintenanceSession acceptorSess = this.remoteSession(TopologyMaintenanceSession.class, connection(acceptor));
+			acceptorAddress = acceptor;
+			acceptorSess.myCapabilitiesAre(node.config.capabilities, node.getRemoteNodeAddress());
 		}
 
-		if (!responder) {
-			// we have accepted the responder now send them our capabilites so they can accept us
-			final TopologyMaintenanceSession responderSession = this.remoteSession(TopologyMaintenanceSession.class, this.connection(sender()));
-			responderSession.accept(node.getRemoteNodeAddress(), node.config.capabilities, node.peerManager.locInfo.getLocation());
+		if (!initator && willConnectTo.size() > 0) {
+			final TopologyMaintenanceSession senderSess = this.remoteSession(TopologyMaintenanceSession.class, connection(receivedProbeFrom));
+			senderSess.sendAcceptInfo(node.getRemoteNodeAddress(), willConnectTo);
 		}
 	}
 
-	private int calcPeersToAccept(final LinkedList<RemoteNodeAddress> forwarders) {
+	public void myCapabilitiesAre(final Capabilities myCapabilities, final RemoteNodeAddress myAddress) {
+		node.peerManager.addNewPeer(myAddress, myCapabilities);
+	}
+
+	public void myCapabilitiesAre(final Capabilities myCapabilities) {
+		node.peerManager.addNewPeer(acceptorAddress, myCapabilities);
+	}
+
+	private int getNumPeerToAccept(final LinkedList<RemoteNodeAddress> forwarders) {
 		return forwarders.size() <= node.peerManager.getNumFreePeerSlots()
 				? forwarders.size()
 						: TrConstants.TOPOLOGY_MAINTENANCE_PEERS_TO_REPLACE;

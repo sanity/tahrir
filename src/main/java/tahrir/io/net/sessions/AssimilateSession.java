@@ -34,5 +34,5 @@ public interface AssimilateSession extends TrSession {
 	public void acceptNewConnection(RemoteNodeAddress acceptorAddress);
 
 	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
-	public void myCapabilitiesAre(Capabilities myCapabilities);
+	public void myCapabilitiesAre(Capabilities myCapabilities, int topologyLocation);
 }

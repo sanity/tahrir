@@ -3,8 +3,6 @@ package tahrir.io.net.sessions;
 import java.security.interfaces.RSAPublicKey;
 import java.util.concurrent.*;
 
-import com.google.common.base.Function;
-
 import org.slf4j.*;
 
 import tahrir.TrNode;
@@ -14,6 +12,8 @@ import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.tools.Persistence.Modified;
 import tahrir.tools.Persistence.ModifyBlock;
 import tahrir.tools.*;
+
+import com.google.common.base.Function;
 
 public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSession {
 
@@ -104,7 +104,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 			receivedRequestFrom.acceptNewConnection(remoteNodeAddress);
 			final AssimilateSession requestorSession = remoteSession(AssimilateSession.class,
 					connectionWithUserLabel(joinerAddress, false, "topology"));
-			requestorSession.myCapabilitiesAre(node.config.capabilities);
+			requestorSession.myCapabilitiesAre(node.config.capabilities, node.peerManager.locInfo.getLocation());
 		} else {
 			relay = node.peerManager.getPeerForAssimilation();
 			if (logger.isDebugEnabled()) {
@@ -173,7 +173,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 			logger.debug("Inform acceptor {} of our capabilities", acceptorPhysicalLocation);
 			final AssimilateSession acceptorSession = remoteSession(AssimilateSession.class,
 					connectionWithUserLabel(acceptorAddress, false, "topology"));
-			acceptorSession.myCapabilitiesAre(node.config.capabilities);
+			acceptorSession.myCapabilitiesAre(node.config.capabilities, node.peerManager.locInfo.getLocation());
 
 			if (acceptorCapabilities != null) {
 				// If we've already received the myCapabilitiesAre from the acceptor
@@ -185,7 +185,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 		}
 	}
 
-	public void myCapabilitiesAre(final Capabilities myCapabilities) {
+	public void myCapabilitiesAre(final Capabilities myCapabilities, final int topologyLocation) {
 		if (locallyInitiated) {
 			if (acceptorPhysicalLocation != null && !sender().equals(acceptorPhysicalLocation)) {
 				logger.error("Received myCapabiltiesAre but not from acceptor, ignoring");

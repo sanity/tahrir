@@ -1,13 +1,9 @@
 package tahrir.io.net;
 
 import java.io.File;
-import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
-
-import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
 
 import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
 
@@ -18,6 +14,9 @@ import tahrir.io.net.TrPeerManager.TrPeerInfo.Assimilation;
 import tahrir.io.net.sessions.*;
 import tahrir.tools.*;
 import tahrir.tools.Persistence.Modified;
+
+import com.google.common.base.Function;
+import com.google.common.collect.MapMaker;
 
 public class TrPeerManager {
 	public static final double RECENTLY_ATTEMPTED_PENALTY = 1.3;
@@ -411,7 +410,6 @@ public class TrPeerManager {
 		public TrPeerInfo(final RemoteNodeAddress remoteNodeAddress) {
 			this.remoteNodeAddress = remoteNodeAddress;
 			lastTimeUsed = System.currentTimeMillis();
-			topologyLocation = TopologyLocationInfo.calcDefaultTopologyLoc(remoteNodeAddress.publicKey);
 		}
 
 		public static class Assimilation {
@@ -435,12 +433,10 @@ public class TrPeerManager {
 	 * if it is different from the default.
 	 */
 	public static class TopologyLocationInfo {
-		private final TrPeerManager peerManager;
 		private int location;
 
 		public TopologyLocationInfo(final TrPeerManager peerManager) {
-			this.peerManager = peerManager;
-			location = TopologyLocationInfo.calcDefaultTopologyLoc(peerManager.node.getRemoteNodeAddress().publicKey);
+			location = Math.abs(TrUtils.rand.nextInt());
 		}
 
 		/**
@@ -455,10 +451,6 @@ public class TrPeerManager {
 			} else {
 				// warn or something: locations must be greater than 0
 			}
-		}
-
-		public static int calcDefaultTopologyLoc(final RSAPublicKey publicKey) {
-			return Math.abs(publicKey.hashCode());
 		}
 
 		public int getLocation() {
