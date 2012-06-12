@@ -62,9 +62,13 @@ public class TrPeerManager {
 	}
 
 	public void addNewPeer(final RemoteNodeAddress pubNodeAddress, final Capabilities capabilities) {
+		addNewPeer(pubNodeAddress, capabilities, 0);
+	}
+	public void addNewPeer(final RemoteNodeAddress pubNodeAddress, final Capabilities capabilities, final int topologyLocation) {
 		logger.debug("addNewPeer "+pubNodeAddress);
 		final TrPeerInfo tpi = new TrPeerInfo(pubNodeAddress);
 		tpi.capabilities = capabilities;
+		tpi.topologyLocation = topologyLocation;
 		peers.put(pubNodeAddress.physicalLocation, tpi);
 		node.sessionMgr.connectionManager.getConnection(pubNodeAddress, false, sessionMgrLabel, new Runnable() {
 

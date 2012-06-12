@@ -6,9 +6,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.concurrent.*;
 
-import com.google.common.base.*;
-import com.google.common.collect.*;
-
 import org.slf4j.*;
 
 import tahrir.TrNode;
@@ -19,6 +16,9 @@ import tahrir.io.net.udpV1.UdpNetworkLocation;
 import tahrir.io.serialization.TrSerializer;
 import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
+
+import com.google.common.base.*;
+import com.google.common.collect.*;
 
 public class TrSessionManager {
 
@@ -319,8 +319,8 @@ public class TrSessionManager {
 				final boolean unilateral, final String userLabel, final Runnable disconnectCallback) {
 			ConnectionInfo ci = connections.get(address.physicalLocation);
 			if (ci == null) {
-				if (address.publicKey == null)
-					throw new RuntimeException("We need the peer's public key unless we're already connected to it");
+				//if (address.publicKey == null)
+				//	throw new RuntimeException("We need the peer's public key unless we're already connected to it");
 				ci = new ConnectionInfo();
 				final ConnectionInfo finalCi = ci;
 				final TrNetworkInterface netIface = interfacesByAddressType.get(address.physicalLocation.getClass());

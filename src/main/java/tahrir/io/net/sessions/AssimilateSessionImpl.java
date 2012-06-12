@@ -29,6 +29,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 	private ScheduledFuture<?> requestNewConnectionFuture;
 	private TrPeerInfo relay;
 	private Capabilities acceptorCapabilities;
+	private int acceptorLocation;
 
 	private RSAPublicKey joinerPublicKey;
 
@@ -180,7 +181,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 				// then we can now add it to our peer manager
 				logger.debug("Adding new connection to acceptor {}", acceptorPhysicalLocation);
 				node.peerManager.addNewPeer(new RemoteNodeAddress(acceptorPhysicalLocation,
-						acceptorPubkey), acceptorCapabilities);
+						acceptorPubkey), acceptorCapabilities, acceptorLocation);
 			}
 		}
 	}
@@ -192,13 +193,14 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 				return;
 			}
 			acceptorCapabilities = myCapabilities;
+			acceptorLocation = topologyLocation;
 			if (acceptorPhysicalLocation != null && acceptorPubkey != null) {
 				// If we've already received the acceptorAddress and acceptorPubkey from an
 				// acceptNewConnection message from the acceptor then we can now add it to
 				// our peer manager
 				logger.debug("Adding new connection to acceptor {}", acceptorPhysicalLocation);
 				node.peerManager.addNewPeer(new RemoteNodeAddress(acceptorPhysicalLocation,
-						acceptorPubkey), myCapabilities);
+						acceptorPubkey), myCapabilities, topologyLocation);
 			}
 		} else {
 			if ( !sender().equals(joinerPhysicalLocation)) {
@@ -206,7 +208,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 				return;
 			}
 			node.peerManager.addNewPeer(new RemoteNodeAddress(joinerPhysicalLocation,
-					joinerPublicKey), myCapabilities);
+					joinerPublicKey), myCapabilities, topologyLocation);
 		}
 	}
 

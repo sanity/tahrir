@@ -20,10 +20,6 @@ public class TopologyMaintenanceTest {
 		final TrNode initiator1 = makeNode(true);
 		final TrNode forwarder2 = makeNode(false);
 
-		forwarder.peerManager.locInfo.setLocation(1);
-		initiator1.peerManager.locInfo.setLocation(2);
-		forwarder2.peerManager.locInfo.setLocation(0);
-
 		System.out.println("initiator1 has a location of " + forwarder.peerManager.locInfo.getLocation());
 		System.out.println("forwarder has a location of " + initiator1.peerManager.locInfo.getLocation());
 		System.out.println("initiator2 has a location of " + forwarder2.peerManager.locInfo.getLocation());
@@ -35,7 +31,7 @@ public class TopologyMaintenanceTest {
 
 		for (int x=0; x<200000000; x++) {
 			Thread.sleep(500);
-			if (isConnected(initiator1, forwarder2)) {
+			if (isConnected(initiator1, forwarder2) || !isConnected(forwarder, initiator1)) {
 				break;
 			}
 		}
@@ -67,7 +63,7 @@ public class TopologyMaintenanceTest {
 	}
 
 	private void createBidirectionalConnection(final TrNode node1, final TrNode node2) {
-		node1.peerManager.addNewPeer(node2.getRemoteNodeAddress(), node2.config.capabilities);
-		node2.peerManager.addNewPeer(node1.getRemoteNodeAddress(), node1.config.capabilities);
+		node1.peerManager.addNewPeer(node2.getRemoteNodeAddress(), node2.config.capabilities, node2.peerManager.locInfo.getLocation());
+		node2.peerManager.addNewPeer(node1.getRemoteNodeAddress(), node1.config.capabilities, node1.peerManager.locInfo.getLocation());
 	}
 }

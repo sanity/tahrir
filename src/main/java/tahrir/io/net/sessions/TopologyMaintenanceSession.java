@@ -13,8 +13,5 @@ public interface TopologyMaintenanceSession extends TrSession {
 	public void sendAcceptInfo(final RemoteNodeAddress acceptor, final LinkedList<RemoteNodeAddress> willConnectTo);
 
 	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY) // TODO: change priority
-	public void myCapabilitiesAre(final Capabilities myCapabilities);
-
-	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY) // TODO: change priority
-	public void myCapabilitiesAre(final Capabilities myCapabilities, final RemoteNodeAddress myAddress);
+	public void myCapabilitiesAre(final Capabilities myCapabilities, int topologyLocation);
 }
