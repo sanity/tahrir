@@ -70,7 +70,7 @@ public class LongTests {
 		}
 		final String graph = builder.toString();
 		System.out.println(graph);
-		saveGraph(graph);
+		//saveGraph(graph);
 	}
 
 	private String getVertex(final TrNode node) throws Exception {
@@ -84,7 +84,7 @@ public class LongTests {
 
 	private void saveGraph(final String graph) {
 		try {
-			final String path = "/home/kieran/tahrir_graph/graph.dot";
+			final String path = "path_to_save";
 			final BufferedWriter out = new BufferedWriter(new FileWriter(path));
 			out.write("graph tahrir_topology_graph { " + graph + " }");
 			out.close();

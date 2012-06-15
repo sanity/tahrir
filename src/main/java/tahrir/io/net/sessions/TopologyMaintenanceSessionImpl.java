@@ -72,11 +72,6 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 				hopsToLive = TrConstants.HOPS_TO_LIVE_RESET;
 			}
 
-			if (!initator) {
-				hopsToLive--;
-				node.peerManager.hasForwardedRecenlty = true;
-			}
-
 			node.peerManager.updateTimeLastUsed(closestPeerAddress.physicalLocation);
 
 			forwarders.add(node.getRemoteNodeAddress());
