@@ -78,16 +78,16 @@ public class TrPeerManager {
 		});
 	}
 
-	public void addByReplacement(final RemoteNodeAddress pubNodeAddress, final Capabilities capabilities) {
+	public void addByReplacement(final RemoteNodeAddress pubNodeAddress, final Capabilities capabilities, final int topologyLocation) {
 		if (peers.size() < config.maxPeers) {
 			// just add it regularly
-			addNewPeer(pubNodeAddress, capabilities);
+			addNewPeer(pubNodeAddress, capabilities, topologyLocation);
 		} else {
 			// add it by replacement removing LRU peer
 			final PhysicalNetworkLocation toRemove = getLeastRecentlyUsedPeer();
-			node.sessionMgr.connectionManager.noLongerNeeded(toRemove, sessionMgrLabel); // is this correct way?
+			node.sessionMgr.connectionManager.noLongerNeeded(toRemove, "topology");
 			peers.remove(toRemove);
-			addNewPeer(pubNodeAddress, capabilities);
+			addNewPeer(pubNodeAddress, capabilities, topologyLocation);
 		}
 	}
 
@@ -392,7 +392,7 @@ public class TrPeerManager {
 
 			if (total >= maxRecall) {
 				total = total / 2;
-				sum = sum / 2;
+				sum /= 2;
 				sq_sum = sq_sum / 2;
 			}
 		}

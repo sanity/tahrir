@@ -24,7 +24,7 @@ public class LongTests {
 		seedConfig.peers.runMaintainance = false;
 		seedConfig.peers.maxPeers = 8;
 		seedConfig.peers.minPeers = 4;
-		seedConfig.localHostName = "localhost";
+		seedConfig.localHostName = "127.0.0.1";
 		seedConfig.udp.listenPort = 20648;
 		final File seedDir = TrUtils.createTempDirectory();
 		final TrNode seedNode = new TrNode(seedDir, seedConfig);
@@ -39,7 +39,7 @@ public class LongTests {
 			final TrConfig joinerConfig = new TrConfig();
 
 			joinerConfig.udp.listenPort = 20050+x;
-			joinerConfig.localHostName = "localhost";
+			joinerConfig.localHostName = "127.0.0.1";
 			joinerConfig.peers.runMaintainance = true;
 			joinerConfig.peers.assimilate = true;
 			joinerConfig.peers.topologyMaintenance = true;
@@ -57,10 +57,11 @@ public class LongTests {
 			Persistence.save(new File(joinerPubNodeIdsDir, "joiner-id"), seedPeerInfo);
 
 			final TrNode node = new TrNode(joinerDir, joinerConfig);
+
 			joiners.add(node);
 		}
 
-		Thread.sleep(400000);
+		Thread.sleep(80000);
 
 		final StringBuilder builder = new StringBuilder();
 		builder.append(getVertex(seedNode));
@@ -83,7 +84,8 @@ public class LongTests {
 
 	private void saveGraph(final String graph) {
 		try {
-			final BufferedWriter out = new BufferedWriter(new FileWriter("/home/kieran/tahrir_graph/graph.dot"));
+			final String path = "/home/kieran/tahrir_graph/graph.dot";
+			final BufferedWriter out = new BufferedWriter(new FileWriter(path));
 			out.write("graph tahrir_topology_graph { " + graph + " }");
 			out.close();
 		} catch (final Exception e) {

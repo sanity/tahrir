@@ -12,31 +12,35 @@ public class TopologyMaintenanceTest {
 	private static int port = 8644;
 
 	/**
-	 * Nodes initially connected initiator<->fowarder1<->fowarder2<->responder
+	 * Nodes initially connected initiator<->forwarder1<->forwader2<->responder
 	 */
 	@Test
 	public void smallWorldMaintenanceTest() throws Exception {
-		final TrNode forwarder = makeNode(false);
-		final TrNode initiator1 = makeNode(true);
+		final TrNode initiator = makeNode(true);
+		final TrNode forwarder1 = makeNode(false);
 		final TrNode forwarder2 = makeNode(false);
+		final TrNode responder = makeNode(false);
 
-		System.out.println("initiator1 has a location of " + forwarder.peerManager.locInfo.getLocation());
-		System.out.println("forwarder has a location of " + initiator1.peerManager.locInfo.getLocation());
-		System.out.println("initiator2 has a location of " + forwarder2.peerManager.locInfo.getLocation());
+		initiator.peerManager.locInfo.setLocation(0);
+		forwarder1.peerManager.locInfo.setLocation(1);
+		forwarder2.peerManager.locInfo.setLocation(2);
+		responder.peerManager.locInfo.setLocation(3);
 
-		createBidirectionalConnection(forwarder2, forwarder);
-		createBidirectionalConnection(initiator1, forwarder);
+		createBidirectionalConnection(initiator, forwarder1);
+		createBidirectionalConnection(forwarder1, forwarder2);
+		createBidirectionalConnection(forwarder2, responder);
 
-		initiator1.peerManager.enableDebugMaintenance();
+		initiator.peerManager.enableDebugMaintenance();
 
-		for (int x=0; x<200000000; x++) {
-			Thread.sleep(500);
-			if (isConnected(initiator1, forwarder2) || !isConnected(forwarder, initiator1)) {
+		for (int x=0; x<100; x++) {
+			Thread.sleep(200);
+			if (isConnected(initiator, responder) && isConnected (forwarder1, responder)) {
 				break;
 			}
 		}
 
-		Assert.assertTrue(isConnected(initiator1, forwarder2), "The initiator should be connected to forwarder2");
+		Assert.assertTrue(isConnected(initiator, responder), "The initiator should be connected to responder");
+		Assert.assertTrue(isConnected(forwarder1, responder), "The first forwarder should be connected to responder");
 	}
 
 	private boolean isConnected(final TrNode node1, final TrNode node2) {

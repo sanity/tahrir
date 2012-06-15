@@ -20,8 +20,6 @@ import com.google.common.collect.Lists;
 public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements TopologyMaintenanceSession {
 	private final Logger logger;
 
-	private int peersToAccept;
-
 	private boolean initator = false;
 
 	private PhysicalNetworkLocation receivedProbeFrom;
@@ -55,6 +53,8 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 	public void probeForLocation(final int locationToFind, int hopsToLive, final LinkedList<RemoteNodeAddress> forwarders) {
 		if (!initator) {
 			receivedProbeFrom = sender();
+			hopsToLive--;
+			node.peerManager.hasForwardedRecenlty = true;
 		}
 
 		final RemoteNodeAddress closestPeerAddress = node.peerManager.getClosestPeer(locationToFind);
@@ -66,7 +66,6 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		if (hopsToLive == 0 || closestPeerAddress.equals(node.getRemoteNodeAddress()) || (!initator && closestPeerAddress.physicalLocation.equals(sender()))) {
 			// the current node is the closest to what we're looking for or we've given up
 			acceptor = true;
-			peersToAccept = getNumPeerToAccept(forwarders);
 			sendResponses(forwarders);
 		} else {
 			if (hopsToLive > TrConstants.MAINTENANCE_HOPS_TO_LIVE) {
@@ -76,7 +75,6 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 			if (!initator) {
 				hopsToLive--;
 				node.peerManager.hasForwardedRecenlty = true;
-				receivedProbeFrom = sender();
 			}
 
 			node.peerManager.updateTimeLastUsed(closestPeerAddress.physicalLocation);
@@ -90,9 +88,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 	}
 
 	public void sendResponses(final LinkedList<RemoteNodeAddress> forwarders) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("{} is sending reponses to {}", node.getRemoteNodeAddress(), forwarders);
-		}
+		int peersToAccept = getNumPeerToAccept(forwarders);
 
 		willConnectTo = Lists.newLinkedList();
 
@@ -122,11 +118,6 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 	}
 
 	public void sendAcceptInfo(final RemoteNodeAddress acceptor, final LinkedList<RemoteNodeAddress> willConnectTo) {
-		/*
-		if (logger.isDebugEnabled()) {
-			logger.debug("{} is asking to be accepted to {}", addressToAccept, node.getRemoteNodeAddress());
-		}
-		 */
 		if (willConnectTo.contains(node.getRemoteNodeAddress())) {
 			final TopologyMaintenanceSession acceptorSess = this.remoteSession(TopologyMaintenanceSession.class, connection(acceptor));
 			acceptorAddress = acceptor;
@@ -141,9 +132,10 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 
 	public void myCapabilitiesAre(final Capabilities myCapabilities, final int topologyLocation) {
 		if (!acceptor) {
-			node.peerManager.addNewPeer(acceptorAddress, myCapabilities, topologyLocation);
+			node.peerManager.addByReplacement(acceptorAddress, myCapabilities, topologyLocation);
 		} else {
 			RemoteNodeAddress forwarderAddress = null;
+			// find the remote address corresponding to sender()
 			for (int i = 0; i < willConnectTo.size(); i++) {
 				final RemoteNodeAddress address = willConnectTo.get(i);
 				if (address.physicalLocation.equals(sender())) {
@@ -151,7 +143,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 					break;
 				}
 			}
-			node.peerManager.addNewPeer(forwarderAddress, myCapabilities, topologyLocation);
+			node.peerManager.addByReplacement(forwarderAddress, myCapabilities, topologyLocation);
 		}
 	}
 
