@@ -87,6 +87,7 @@ public class TrNode {
 	private void registerSessions() {
 		sessionMgr.registerSessionClass(TopologyMaintenanceSession.class, TopologyMaintenanceSessionImpl.class);
 		sessionMgr.registerSessionClass(AssimilateSession.class, AssimilateSessionImpl.class);
+		sessionMgr.registerSessionClass(MicoblogBroadcastSession.class, MicroblogBroadcastSessionImpl.class);
 	}
 
 	public ArrayList<File> getPublicNodeIdFiles() {

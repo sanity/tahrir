@@ -49,7 +49,7 @@ public class TrPeerManager {
 						logger.error("Error running maintainance", e);
 					}
 				}
-			}, 0, 1, TimeUnit.MINUTES);
+			}, 0, TrConstants.MAINTENANCE_FREQUENCY_MIN, TimeUnit.MINUTES);
 
 			if (config.topologyMaintenance) {
 				TrUtils.executor.scheduleWithFixedDelay(new Runnable() {
@@ -58,6 +58,14 @@ public class TrPeerManager {
 					}
 				},0, TrConstants.WAIT_FROM_FORWARDING_SEC, TimeUnit.SECONDS);
 			}
+		}
+
+		if (config.runBroadcast) {
+			TrUtils.executor.scheduleWithFixedDelay(new Runnable() {
+				public void run() {
+					broadcast();
+				}
+			}, TrConstants.WAIT_TO_START_BROADCAST_SEC, TrConstants.BROADCAST_FREQUENCY_SEC, TimeUnit.SECONDS);
 		}
 	}
 
@@ -165,6 +173,11 @@ public class TrPeerManager {
 			final TopologyMaintenanceSessionImpl tm = node.sessionMgr.getOrCreateLocalSession(TopologyMaintenanceSessionImpl.class);
 			tm.startTopologyMaintenance(randomLocationToFind);
 		}
+	}
+
+	public void broadcast() {
+		final MicroblogBroadcastSessionImpl broadcastSess = node.sessionMgr.getOrCreateLocalSession(MicroblogBroadcastSessionImpl.class);
+		broadcastSess.startBroadcast();
 	}
 
 	public void reportAssimilationFailure(final PhysicalNetworkLocation addr) {
@@ -352,6 +365,7 @@ public class TrPeerManager {
 		public boolean runMaintainance = true;
 		public boolean assimilate = true;
 		public boolean topologyMaintenance = true;
+		public boolean runBroadcast = true;
 		public int maxPeers = 20;
 		public int minPeers = 10;
 	}
