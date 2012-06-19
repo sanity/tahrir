@@ -37,6 +37,8 @@ public class TrNode {
 
 	public final TrPeerManager peerManager;
 
+	public MicroblogHandler mbHandler;
+
 	public TrSessionManager sessionMgr;
 
 	public TrNode(final File rootDirectory, final TrConfig config)
@@ -77,6 +79,8 @@ public class TrNode {
 
 		logger.info("Set up peer manager");
 		peerManager = new TrPeerManager(config.peers, this);
+
+		mbHandler = new MicroblogHandler(this);
 
 		registerSessions();
 	}

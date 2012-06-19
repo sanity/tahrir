@@ -1,9 +1,18 @@
 package tahrir.io.net.sessions;
 
 import tahrir.io.net.*;
-import tahrir.io.net.sessions.MicroblogBroadcastSessionImpl.Microblog;
+import tahrir.io.net.sessions.MicroblogHandler.Microblog;
 
 public interface MicoblogBroadcastSession extends TrSession {
-	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
+	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY) // TODO: change priority
+	public void areYouInterested(final int mbHash);
+
+	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY) // TODO: change priority
 	public void insertMicroblog(final Microblog mb);
+
+	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY) // TODO: change priority
+	public void yesInterested();
+
+	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY) // TODO: change priority
+	public void noInterest();
 }

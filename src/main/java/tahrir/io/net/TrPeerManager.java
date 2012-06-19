@@ -59,14 +59,6 @@ public class TrPeerManager {
 				},0, TrConstants.WAIT_FROM_FORWARDING_SEC, TimeUnit.SECONDS);
 			}
 		}
-
-		if (config.runBroadcast) {
-			TrUtils.executor.scheduleWithFixedDelay(new Runnable() {
-				public void run() {
-					broadcast();
-				}
-			}, TrConstants.WAIT_TO_START_BROADCAST_SEC, TrConstants.BROADCAST_FREQUENCY_SEC, TimeUnit.SECONDS);
-		}
 	}
 
 	public void addNewPeer(final RemoteNodeAddress pubNodeAddress, final Capabilities capabilities) {
@@ -173,11 +165,6 @@ public class TrPeerManager {
 			final TopologyMaintenanceSessionImpl tm = node.sessionMgr.getOrCreateLocalSession(TopologyMaintenanceSessionImpl.class);
 			tm.startTopologyMaintenance(randomLocationToFind);
 		}
-	}
-
-	public void broadcast() {
-		final MicroblogBroadcastSessionImpl broadcastSess = node.sessionMgr.getOrCreateLocalSession(MicroblogBroadcastSessionImpl.class);
-		broadcastSess.startBroadcast();
 	}
 
 	public void reportAssimilationFailure(final PhysicalNetworkLocation addr) {
