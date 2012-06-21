@@ -41,7 +41,6 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Mico
 		if (interest) {
 			receiverSess.insertMicroblog(beingSent);
 		} else {
-			// TODO: this is a workaround until we have a registerSuccessListener
 			sessionFinished();
 		}
 	}
