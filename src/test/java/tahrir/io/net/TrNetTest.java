@@ -80,7 +80,7 @@ public class TrNetTest {
 
 	@Test
 	public void simpleTest() throws Exception {
-		remoteSession.testMethod(0);
+		remoteSession.simpleMethod(0);
 
 		for (int x = 0; x < 100; x++) {
 			Thread.sleep(100);
@@ -96,9 +96,23 @@ public class TrNetTest {
 	public void parameterisedTypeTest() throws Exception {
 		final LinkedList<Integer> ll = Lists.newLinkedList();
 		ll.add(1);
-		remoteSession.testMethod2(ll);
+		remoteSession.methodWithparameterizedType(ll);
 
 		for (int x = 0; x < 100; x++) {
+			Thread.sleep(100);
+			if (testDone) {
+				break;
+			}
+		}
+
+		Assert.assertTrue(testDone);
+	}
+
+	@Test
+	public void noParameterTest() throws Exception {
+		remoteSession.noParamMethod();
+
+		for (int x = 0; x < 20; x++) {
 			Thread.sleep(100);
 			if (testDone) {
 				break;
@@ -112,7 +126,7 @@ public class TrNetTest {
 	public void multipleParameterTest() throws Exception {
 		final LinkedList<Integer> ll = Lists.newLinkedList();
 		ll.add(1);
-		remoteSession.testMethod3(0, ll);
+		remoteSession.methodWithMultipleParams(0, ll);
 
 		for (int x = 0; x < 100; x++) {
 			Thread.sleep(100);
@@ -126,13 +140,16 @@ public class TrNetTest {
 
 	public static interface TestSession extends TrSession {
 		@Priority(TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY)
-		public void testMethod(int param);
+		public void simpleMethod(int param);
 
 		@Priority(TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY)
-		public void testMethod2(LinkedList<Integer> list);
+		public void methodWithparameterizedType(LinkedList<Integer> list);
 
 		@Priority(TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY)
-		public void testMethod3(int param1, LinkedList<Integer> param2);
+		public void methodWithMultipleParams(int param1, LinkedList<Integer> param2);
+
+		@Priority(TrNetworkInterface.CONNECTION_MAINTAINANCE_PRIORITY)
+		public void noParamMethod();
 	}
 
 	public static class TestSessionImpl extends TrSessionImpl implements TestSession {
@@ -141,19 +158,19 @@ public class TrNetTest {
 			super(sessionId, node, sessionMgr);
 		}
 
-		public void testMethod(final int param) {
+		public void simpleMethod(final int param) {
 			if (param < 10) {
 				final PhysicalNetworkLocation senderRemoteAddress = sender();
 				final TrRemoteConnection connectionToSender = connection(senderRemoteAddress);
 				final TestSession remoteSessionOnSender = remoteSession(TestSession.class, connectionToSender);
-				remoteSessionOnSender.testMethod(param + 1);
+				remoteSessionOnSender.simpleMethod(param + 1);
 			} else {
 				testDone = true;
 			}
 
 		}
 
-		public void testMethod2(final LinkedList<Integer> list) {
+		public void methodWithparameterizedType(final LinkedList<Integer> list) {
 			if (list.size() < 10) {
 				int sum = 0;
 				for (final int i : list) {
@@ -163,13 +180,13 @@ public class TrNetTest {
 				final PhysicalNetworkLocation senderRemoteAddress = sender();
 				final TrRemoteConnection connectionToSender = connection(senderRemoteAddress);
 				final TestSession remoteSessionOnSender = remoteSession(TestSession.class, connectionToSender);
-				remoteSessionOnSender.testMethod2(list);
+				remoteSessionOnSender.methodWithparameterizedType(list);
 			} else {
 				testDone = true;
 			}
 		}
 
-		public void testMethod3(int param1, final LinkedList<Integer> param2) {
+		public void methodWithMultipleParams(int param1, final LinkedList<Integer> param2) {
 			if (param1 < 10 && param2.size() < 10) {
 				param1++;
 				int sum = 0;
@@ -180,10 +197,14 @@ public class TrNetTest {
 				final PhysicalNetworkLocation senderRemoteAddress = sender();
 				final TrRemoteConnection connectionToSender = connection(senderRemoteAddress);
 				final TestSession remoteSessionOnSender = remoteSession(TestSession.class, connectionToSender);
-				remoteSessionOnSender.testMethod3(param1, param2);
+				remoteSessionOnSender.methodWithMultipleParams(param1, param2);
 			} else {
 				testDone = true;
 			}
+		}
+
+		public void noParamMethod() {
+			testDone = true;
 		}
 	}
 }
