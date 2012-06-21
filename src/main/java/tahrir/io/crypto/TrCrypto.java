@@ -6,6 +6,8 @@ import java.security.interfaces.*;
 
 import javax.crypto.*;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import tahrir.TrConstants;
 import tahrir.io.serialization.*;
 import tahrir.tools.*;
@@ -18,6 +20,10 @@ import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
  */
 public class TrCrypto {
 	static SecureRandom sRand = new SecureRandom();
+
+	static {
+		Security.addProvider(new BouncyCastleProvider());
+	}
 
 	public static Tuple2<RSAPublicKey, RSAPrivateKey> createRsaKeyPair() {
 		try {
@@ -70,7 +76,7 @@ public class TrCrypto {
 	}
 
 	public static boolean verify(final TrSignature signature, final Object toVerify, final RSAPublicKey pubKey)
-	throws TrSerializableException {
+			throws TrSerializableException {
 		// TODO: We serialize this object and then throw the result away, which
 		// is probably wasteful as frequently the object will be serialized
 		// elsewhere
@@ -89,7 +95,7 @@ public class TrCrypto {
 	}
 
 	public static <T> TrPPKEncrypted<T> encrypt(final T plainText, final RSAPublicKey pubKey)
-	throws TrSerializableException {
+			throws TrSerializableException {
 		// TODO: Lots of reading from and writing to byte arrays, inefficient
 		final ByteArrayOutputStream serializedPlaintext = new ByteArrayOutputStream(TrConstants.DEFAULT_BAOS_SIZE);
 		final ByteArraySegmentBuilder dos = ByteArraySegment.builder();
