@@ -11,7 +11,7 @@ public interface MicoblogBroadcastSession extends TrSession {
 	public void insertMicroblog(final Microblog mb);
 
 	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY) // TODO: change priority
-	public void interested(boolean interest);
+	public void interestIs(boolean interest);
 
 	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY) // TODO: change priority
 	public void sessionFinished();

@@ -34,10 +34,10 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Mico
 	public void areYouInterested(final int mbHash) {
 		initiatorSess = remoteSession(MicoblogBroadcastSession.class, connection(sender()));
 
-		initiatorSess.interested(!node.mbHandler.getMbQueue().isLikelyToContain(mbHash));
+		initiatorSess.interestIs(!node.mbHandler.getMbQueue().isLikelyToContain(mbHash));
 	}
 
-	public void interested(final boolean interest) {
+	public void interestIs(final boolean interest) {
 		if (interest) {
 			receiverSess.insertMicroblog(beingSent);
 		} else {
