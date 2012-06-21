@@ -42,31 +42,27 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Mico
 			receiverSess.insertMicroblog(beingSent);
 		} else {
 			// TODO: this is a workaround until we have a registerSuccessListener
-			// the dummy parameter is also a workaround for until no param RPC works
-			final byte dummyParameter = 0;
-			receiverSess.sessionFinished(dummyParameter);
+			receiverSess.sessionFinished();
 		}
 	}
 
 	public void insertMicroblog(final Microblog mb) {
 		node.mbHandler.getMbQueue().insert(mb);
 		// TODO: this is a workaround until we have a registerSuccessListener
-		// the dummy parameter is also a workaround for until no param RPC works
-		final byte dummyParameter = 0;
-		initiatorSess.sessionFinished(dummyParameter);
+		initiatorSess.sessionFinished();
 	}
 
-	public void sessionFinished(final byte dummyParam) {
-		finished();
+	public void sessionFinished() {
+		startBroadcastToNextPeer();
 	}
 
-	private void finished() {
+	private void startBroadcastToNextPeer() {
 		node.mbHandler.startNext();
 	}
 
 	private class OnFailureRun implements Runnable {
 		public void run() {
-			finished();
+			startBroadcastToNextPeer();
 		}
 	}
 }
