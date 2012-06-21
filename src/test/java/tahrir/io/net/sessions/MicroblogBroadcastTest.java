@@ -34,7 +34,7 @@ public class MicroblogBroadcastTest {
 			}
 		}
 
-		Assert.assertTrue(receivingNode.mbHandler.getMbQueue().contains(testMb));
+		Assert.assertTrue(receivingNode.mbHandler.getMbQueue().contains(testMb), "Should contain the microblog");
 	}
 
 	@Test
@@ -48,14 +48,14 @@ public class MicroblogBroadcastTest {
 		sendingNode.mbHandler.setUpForNextMicroblog();
 		sendingNode.mbHandler.setUpForNextMicroblog();
 
-		for (int x=0; x<100; x++) {
+		for (int x=0; x<50; x++) {
 			Thread.sleep(200);
 			if (receivingNode.mbHandler.getMbQueue().contains(testMb0) && !receivingNode.mbHandler.getMbQueue().contains(testMb1)) {
 				break;
 			}
 		}
 
-		Assert.assertTrue(receivingNode.mbHandler.getMbQueue().contains(testMb0));
-		Assert.assertTrue(!receivingNode.mbHandler.getMbQueue().contains(testMb1));
+		Assert.assertTrue(receivingNode.mbHandler.getMbQueue().contains(testMb0), "Should contain the microblog with low priority.");
+		Assert.assertTrue(!receivingNode.mbHandler.getMbQueue().contains(testMb1), "Should not contain the microblog with high priority.");
 	}
 }
