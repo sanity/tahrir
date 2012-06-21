@@ -63,12 +63,15 @@ public class TrUtils {
 		}
 	}
 
+	/*
+	 * These methods are only for testing purposes.
+	 */
 	public static boolean testIsConnected(final TrNode node1, final TrNode node2) {
 		return node1.peerManager.peers.containsKey(node2.getRemoteNodeAddress().physicalLocation)
 				&& node2.peerManager.peers.containsKey(node1.getRemoteNodeAddress().physicalLocation);
 	}
 
-	public static TrNode testMakeNode(final int port, final boolean maintenance, final boolean assimilate, final boolean topologyMaintenace) throws Exception {
+	public static TrNode makeTestNode(final int port, final boolean maintenance, final boolean assimilate, final boolean topologyMaintenace, final boolean broadcast, final int minPeers, final int maxPeers) throws Exception {
 		final File nodeDir = TrUtils.createTempDirectory();
 
 		final TrConfig nodeConfig = new TrConfig();
@@ -78,6 +81,9 @@ public class TrUtils {
 		nodeConfig.peers.runMaintainance = maintenance;
 		nodeConfig.peers.assimilate = assimilate;
 		nodeConfig.peers.topologyMaintenance = topologyMaintenace;
+		nodeConfig.peers.runBroadcast = broadcast;
+		nodeConfig.peers.minPeers = minPeers;
+		nodeConfig.peers.maxPeers = maxPeers;
 
 		final File joinerPubNodeIdsDir = new File(nodeDir, nodeConfig.publicNodeIdsDir);
 
@@ -86,7 +92,7 @@ public class TrUtils {
 		return new TrNode(nodeDir, nodeConfig);
 	}
 
-	public static void testCreateBidirectionalConnection(final TrNode node1, final TrNode node2) {
+	public static void createTestBidirectionalConnection(final TrNode node1, final TrNode node2) {
 		node1.peerManager.addNewPeer(node2.getRemoteNodeAddress(), node2.config.capabilities, node2.peerManager.locInfo.getLocation());
 		node2.peerManager.addNewPeer(node1.getRemoteNodeAddress(), node1.config.capabilities, node1.peerManager.locInfo.getLocation());
 	}

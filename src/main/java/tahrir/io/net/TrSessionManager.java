@@ -179,7 +179,7 @@ public class TrSessionManager {
 
 			// We have to include the parameter types because for some dumb
 			// reason Method.hashCode() ignores these.
-			if (logger.isDebugEnabled()) {
+			if (logger.isDebugEnabled() && arguments != null) {
 				final String args = Joiner.on(",").join(Iterables.transform(Lists.newArrayList(arguments), toStringer));
 				logger.debug("\tSending " + method.getName() + "(" + args
 						+ ")\t -> "+connection.remoteAddress);
@@ -189,8 +189,10 @@ public class TrSessionManager {
 			MessageType.METHOD_CALL.write(builder);
 			builder.writeInt(sessionId);
 			builder.writeInt(methodId);
-			for (final Object argument : arguments) {
-				TrSerializer.serializeTo(argument, builder);
+			if (arguments != null) {
+				for (final Object argument : arguments) {
+					TrSerializer.serializeTo(argument, builder);
+				}
 			}
 
 			final Priority priority = method.getAnnotation(Priority.class);

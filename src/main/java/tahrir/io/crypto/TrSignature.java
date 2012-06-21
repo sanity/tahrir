@@ -4,7 +4,12 @@ import java.util.Arrays;
 
 
 public class TrSignature {
-	public final byte[] signature;
+	public byte[] signature;
+
+	// for serialization
+	public TrSignature() {
+
+	}
 
 	protected TrSignature(final byte[] signature) {
 		this.signature = signature;

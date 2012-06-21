@@ -80,9 +80,9 @@ public class TrNode {
 		logger.info("Set up peer manager");
 		peerManager = new TrPeerManager(config.peers, this);
 
-		mbHandler = new MicroblogHandler(this);
-
 		registerSessions();
+
+		mbHandler = new MicroblogHandler(this);
 	}
 
 	/**

@@ -23,22 +23,24 @@ public class MicroblogHandler {
 
 	private final MicroblogQueue mbQueue = new MicroblogQueue();
 
-	private final TrNode node;
+	private TrNode node;
 
 	private Microblog currentlyBroadcasting;
 	private Iterator<PhysicalNetworkLocation> peerIter;
 
 	public MicroblogHandler(final TrNode node) {
-		this.node = node;
-		scheduleForLater();
+		if (node.config.peers.runBroadcast) {
+			this.node = node;
+			scheduleForLater();
+		}
 	}
 
-	private void setUpForBroadcast() {
-		if (node.peerManager.peers.size() > node.peerManager.config.minPeers) {
+	protected void setUpForBroadcast() {
+		if (node.peerManager.peers.size() >= node.peerManager.config.minPeers) {
 			// we don't want to iterate over any new peers added as we could be there forever
 			// so we take a snap shot of the set
-			final Set<PhysicalNetworkLocation> snapShot = new TreeSet<PhysicalNetworkLocation>();
-			node.peerManager.peers.keySet().addAll(snapShot);
+			final Set<PhysicalNetworkLocation> snapShot = new HashSet<PhysicalNetworkLocation>();
+			snapShot.addAll(node.peerManager.peers.keySet());
 			peerIter = snapShot.iterator();
 
 			currentlyBroadcasting = mbQueue.getMicroblogForBroadcast();
@@ -49,11 +51,11 @@ public class MicroblogHandler {
 		}
 	}
 
-	public void start() {
+	private void start() {
 		startNext();
 	}
 
-	public void startNext() {
+	protected void startNext() {
 		if (peerIter.hasNext()) {
 			final PhysicalNetworkLocation currentPeer = peerIter.next();
 			final MicroblogBroadcastSessionImpl localBroadcastSess = node.sessionMgr.getOrCreateLocalSession(MicroblogBroadcastSessionImpl.class);
@@ -107,19 +109,28 @@ public class MicroblogHandler {
 		public boolean isLikelyToContain(final int microblogHash) {
 			return seen.contains(microblogHash);
 		}
+
+		public boolean contains(final Microblog mb) {
+			return microBlogs.contains(mb);
+		}
 	}
 
 	public static class Microblog implements Comparable<Microblog> {
 		public int priority;
-		private final TrSignature signature;
-		private final String languageCode;
-		private final String authorNick;
-		private final RSAPublicKey publicKey;
-		private final String message;
-		private final long timeCreated;
+		private TrSignature signature;
+		private String languageCode;
+		private String authorNick;
+		private RSAPublicKey publicKey;
+		private String message;
+		private long timeCreated;
+
+		// for serialization
+		public Microblog() {
+
+		}
 
 		// messy to have constructor throwing exception?
-		public Microblog (final TrNode creatingNode, final String message) throws Exception {
+		public Microblog(final TrNode creatingNode, final String message) throws Exception {
 			priority = TrConstants.BROADCAST_INIT_TSU;
 			timeCreated = System.currentTimeMillis();
 			this.message = message;

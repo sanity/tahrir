@@ -18,6 +18,8 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Mico
 	private Microblog beingSent;
 	private MicoblogBroadcastSession receiverSess;
 
+	private MicoblogBroadcastSession initiatorSess;
+
 	public MicroblogBroadcastSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager sessionMgr) {
 		super(sessionId, node, sessionMgr);
 	}
@@ -26,30 +28,36 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Mico
 		beingSent = mbToBroadcast;
 		receiverSess = remoteSession(MicoblogBroadcastSession.class, connection(peerPhysicalLoc));
 		receiverSess.areYouInterested(beingSent.hashCode());
+		receiverSess.registerFailureListener(new OnFailureRun());
 	}
 
 	public void areYouInterested(final int mbHash) {
-		final MicoblogBroadcastSession senderSess = remoteSession(MicoblogBroadcastSession.class, connection(sender()));
-		senderSess.registerFailureListener(new OnFailureRun());
+		initiatorSess = remoteSession(MicoblogBroadcastSession.class, connection(sender()));
 
-		if (!node.mbHandler.getMbQueue().isLikelyToContain(mbHash)) {
-			senderSess.yesInterested();
+		initiatorSess.interested(!node.mbHandler.getMbQueue().isLikelyToContain(mbHash));
+	}
+
+	public void interested(final boolean interest) {
+		if (interest) {
+			receiverSess.insertMicroblog(beingSent);
 		} else {
-			senderSess.noInterest();
+			// TODO: this is a workaround until we have a registerSuccessListener
+			// the dummy parameter is also a workaround for until no param RPC works
+			final byte dummyParameter = 0;
+			receiverSess.sessionFinished(dummyParameter);
 		}
-	}
-
-	public void yesInterested() {
-		receiverSess.insertMicroblog(beingSent);
-		finished();
-	}
-
-	public void noInterest() {
-		finished();
 	}
 
 	public void insertMicroblog(final Microblog mb) {
 		node.mbHandler.getMbQueue().insert(mb);
+		// TODO: this is a workaround until we have a registerSuccessListener
+		// the dummy parameter is also a workaround for until no param RPC works
+		final byte dummyParameter = 0;
+		initiatorSess.sessionFinished(dummyParameter);
+	}
+
+	public void sessionFinished(final byte dummyParam) {
+		finished();
 	}
 
 	private void finished() {

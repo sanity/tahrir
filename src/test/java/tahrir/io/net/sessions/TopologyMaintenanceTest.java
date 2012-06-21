@@ -14,19 +14,19 @@ public class TopologyMaintenanceTest {
 	 */
 	@Test
 	public void smallWorldMaintenanceTest() throws Exception {
-		final TrNode initiator = TrUtils.testMakeNode(port++, true, false, true);
-		final TrNode forwarder1 = TrUtils.testMakeNode(port++, false, false, false);
-		final TrNode forwarder2 = TrUtils.testMakeNode(port++, false, false, false);
-		final TrNode responder = TrUtils.testMakeNode(port++, false, false, false);
+		final TrNode initiator = TrUtils.makeTestNode(port++, true, false, true, false, 4, 4);
+		final TrNode forwarder1 = TrUtils.makeTestNode(port++, false, false, false, false, 4, 4);
+		final TrNode forwarder2 = TrUtils.makeTestNode(port++, false, false, false, false, 4, 4);
+		final TrNode responder = TrUtils.makeTestNode(port++, false, false, false, false, 4, 4);
 
 		initiator.peerManager.locInfo.setLocation(0);
 		forwarder1.peerManager.locInfo.setLocation(1);
 		forwarder2.peerManager.locInfo.setLocation(2);
 		responder.peerManager.locInfo.setLocation(3);
 
-		TrUtils.testCreateBidirectionalConnection(initiator, forwarder1);
-		TrUtils.testCreateBidirectionalConnection(forwarder1, forwarder2);
-		TrUtils.testCreateBidirectionalConnection(forwarder2, responder);
+		TrUtils.createTestBidirectionalConnection(initiator, forwarder1);
+		TrUtils.createTestBidirectionalConnection(forwarder1, forwarder2);
+		TrUtils.createTestBidirectionalConnection(forwarder2, responder);
 
 		initiator.peerManager.enableDebugMaintenance();
 
