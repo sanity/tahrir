@@ -31,11 +31,11 @@ public class MicroblogHandler {
 	public MicroblogHandler(final TrNode node) {
 		if (node.config.peers.runBroadcast) {
 			this.node = node;
-			scheduleForLater();
+			setUpForNextMicroblog();
 		}
 	}
 
-	protected void setUpForBroadcast() {
+	protected void setUpForNextMicroblog() {
 		if (node.peerManager.peers.size() >= node.peerManager.config.minPeers) {
 			// we don't want to iterate over any new peers added as we could be there forever
 			// so we take a snap shot of the set
@@ -45,23 +45,19 @@ public class MicroblogHandler {
 
 			currentlyBroadcasting = mbQueue.getMicroblogForBroadcast();
 
-			start();
+			startBroadcastToPeer();
 		} else {
 			scheduleForLater();
 		}
 	}
 
-	private void start() {
-		startNext();
-	}
-
-	protected void startNext() {
+	protected void startBroadcastToPeer() {
 		if (peerIter.hasNext()) {
 			final PhysicalNetworkLocation currentPeer = peerIter.next();
 			final MicroblogBroadcastSessionImpl localBroadcastSess = node.sessionMgr.getOrCreateLocalSession(MicroblogBroadcastSessionImpl.class);
 			localBroadcastSess.startSingleBroadcast(currentlyBroadcasting, currentPeer);
 		} else {
-			setUpForBroadcast();
+			setUpForNextMicroblog();
 		}
 	}
 
@@ -75,7 +71,7 @@ public class MicroblogHandler {
 
 	private class RunBroadcast implements Runnable {
 		public void run() {
-			setUpForBroadcast();
+			setUpForNextMicroblog();
 		}
 	}
 
@@ -129,9 +125,13 @@ public class MicroblogHandler {
 
 		}
 
-		// messy to have constructor throwing exception?
 		public Microblog(final TrNode creatingNode, final String message) throws Exception {
-			priority = TrConstants.BROADCAST_INIT_TSU;
+			this(creatingNode, message, TrConstants.BROADCAST_INIT_PRIORITY);
+		}
+
+		// messy to have constructor throwing exception?
+		public Microblog(final TrNode creatingNode, final String message, final int priority) throws Exception {
+			this.priority = priority;
 			timeCreated = System.currentTimeMillis();
 			this.message = message;
 			languageCode = ""; // TODO: get language code from config?

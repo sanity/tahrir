@@ -27,7 +27,7 @@ public class TrConstants {
 
 	public static final double TOPOLOGY_MAINTENANCE_PRIORITY = 5.0;
 
-	public static final int BROADCAST_INIT_TSU = 0;
+	public static final int BROADCAST_INIT_PRIORITY = 0;
 
 	public static final int MAINTENANCE_FREQUENCY_MIN = 1;
 

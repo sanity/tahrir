@@ -57,7 +57,7 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Mico
 	}
 
 	private void startBroadcastToNextPeer() {
-		node.mbHandler.startNext();
+		node.mbHandler.startBroadcastToPeer();
 	}
 
 	private class OnFailureRun implements Runnable {
