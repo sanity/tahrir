@@ -27,8 +27,8 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Mico
 	public void startSingleBroadcast(final Microblog mbToBroadcast, final PhysicalNetworkLocation peerPhysicalLoc) {
 		beingSent = mbToBroadcast;
 		receiverSess = remoteSession(MicoblogBroadcastSession.class, connection(peerPhysicalLoc));
-		receiverSess.areYouInterested(beingSent.hashCode());
 		receiverSess.registerFailureListener(new OnFailureRun());
+		receiverSess.areYouInterested(beingSent.hashCode());
 	}
 
 	public void areYouInterested(final int mbHash) {

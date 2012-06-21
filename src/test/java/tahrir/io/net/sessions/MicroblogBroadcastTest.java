@@ -1,7 +1,7 @@
 package tahrir.io.net.sessions;
 
 import org.testng.Assert;
-import org.testng.annotations.*;
+import org.testng.annotations.Test;
 
 import tahrir.TrNode;
 import tahrir.tools.TrUtils;
@@ -12,15 +12,12 @@ public class MicroblogBroadcastTest {
 	private TrNode sendingNode;
 	private TrNode receivingNode;
 
-	@BeforeTest
-	public void setUpNodes() throws Exception {
+	@Test
+	public void simpleTest() throws Exception {
 		sendingNode = TrUtils.makeTestNode(port++, false, false, false, true, 1, 1);
 		receivingNode = TrUtils.makeTestNode(port++, false, false, false, true, 1 , 1);
 		TrUtils.createTestBidirectionalConnection(sendingNode, receivingNode);
-	}
 
-	@Test
-	public void simpleTest() throws Exception {
 		final MicroblogHandler.Microblog testMb = new MicroblogHandler.Microblog(sendingNode, "Hello world");
 		sendingNode.mbHandler.getMbQueue().insert(testMb);
 
@@ -39,6 +36,10 @@ public class MicroblogBroadcastTest {
 
 	@Test
 	public void priorityTest() throws Exception {
+		sendingNode = TrUtils.makeTestNode(port++, false, false, false, true, 1, 1);
+		receivingNode = TrUtils.makeTestNode(port++, false, false, false, true, 1 , 1);
+		TrUtils.createTestBidirectionalConnection(sendingNode, receivingNode);
+
 		final MicroblogHandler.Microblog testMb0 = new MicroblogHandler.Microblog(sendingNode, "You SHOULD have this microblog!");
 		final MicroblogHandler.Microblog testMb1 = new MicroblogHandler.Microblog(sendingNode, "You should NOT have this microblog!", Integer.MAX_VALUE);
 		sendingNode.mbHandler.getMbQueue().insert(testMb0);
@@ -55,7 +56,7 @@ public class MicroblogBroadcastTest {
 			}
 		}
 
-		Assert.assertTrue(receivingNode.mbHandler.getMbQueue().contains(testMb0), "Should contain the microblog with low priority.");
+		Assert.assertTrue(receivingNode.mbHandler.getMbQueue().contains(testMb0), "Should contain the microblog with low priority");
 		Assert.assertTrue(!receivingNode.mbHandler.getMbQueue().contains(testMb1), "Should not contain the microblog with high priority.");
 	}
 }
