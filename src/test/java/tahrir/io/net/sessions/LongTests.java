@@ -22,6 +22,7 @@ public class LongTests {
 		seedConfig.capabilities.allowsUnsolicitiedInbound = true;
 		seedConfig.peers.assimilate = false;
 		seedConfig.peers.runMaintainance = false;
+		seedConfig.peers.runBroadcast = false;
 		seedConfig.peers.maxPeers = 8;
 		seedConfig.peers.minPeers = 4;
 		seedConfig.localHostName = "127.0.0.1";
@@ -43,6 +44,7 @@ public class LongTests {
 			joinerConfig.peers.runMaintainance = true;
 			joinerConfig.peers.assimilate = true;
 			joinerConfig.peers.topologyMaintenance = true;
+			seedConfig.peers.runBroadcast = false;
 			joinerConfig.peers.maxPeers = 8;
 			joinerConfig.peers.minPeers = 4;
 			final File joinerPubNodeIdsDir = new File(joinerDir, joinerConfig.publicNodeIdsDir);
