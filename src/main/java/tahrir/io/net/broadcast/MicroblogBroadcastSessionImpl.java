@@ -20,11 +20,14 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Mico
 
 	private MicoblogBroadcastSession initiatorSess;
 
+	private boolean nextBroadcastStarted;
+
 	public MicroblogBroadcastSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager sessionMgr) {
 		super(sessionId, node, sessionMgr);
 	}
 
 	public void startSingleBroadcast(final Microblog mbToBroadcast, final PhysicalNetworkLocation peerPhysicalLoc) {
+		nextBroadcastStarted = false;
 		beingSent = mbToBroadcast;
 		receiverSess = remoteSession(MicoblogBroadcastSession.class, connection(peerPhysicalLoc));
 		receiverSess.registerFailureListener(new OnFailureRun());
@@ -55,8 +58,11 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Mico
 		startBroadcastToNextPeer();
 	}
 
-	private void startBroadcastToNextPeer() {
-		node.mbHandler.startBroadcastToPeer();
+	private synchronized void startBroadcastToNextPeer() {
+		if (!nextBroadcastStarted) {
+			nextBroadcastStarted = true;
+			node.mbHandler.startBroadcastToPeer();
+		}
 	}
 
 	private class OnFailureRun implements Runnable {
