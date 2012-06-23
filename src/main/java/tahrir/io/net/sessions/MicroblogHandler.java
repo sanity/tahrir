@@ -117,7 +117,7 @@ public class MicroblogHandler {
 		private String languageCode;
 		private String authorNick;
 		private RSAPublicKey publicKey;
-		private String message;
+		public String message;
 		private long timeCreated;
 
 		// for serialization
@@ -142,8 +142,7 @@ public class MicroblogHandler {
 
 		@Override
 		public int compareTo(final Microblog mb) {
-			// a lower TSU should be greater
-			return -1 * Double.compare(priority, mb.priority);
+			return Double.compare(priority, mb.priority);
 		}
 
 		@Override
