@@ -1,8 +1,9 @@
-package tahrir.io.net.sessions;
+package tahrir.io.net.broadcast;
 
 import tahrir.TrConstants;
 import tahrir.io.net.TrSession;
-import tahrir.io.net.sessions.MicroblogHandler.Microblog;
+import tahrir.io.net.broadcast.MicroblogHandler.Microblog;
+import tahrir.io.net.sessions.*;
 
 public interface MicoblogBroadcastSession extends TrSession {
 	@Priority(TrConstants.MICROBLOG_BROADCAST_PRIORITY)

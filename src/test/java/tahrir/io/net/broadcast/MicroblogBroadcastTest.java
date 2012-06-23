@@ -1,10 +1,11 @@
-package tahrir.io.net.sessions;
+package tahrir.io.net.broadcast;
 
 import org.testng.Assert;
 import org.testng.annotations.*;
 
 import tahrir.TrNode;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
+import tahrir.io.net.broadcast.MicroblogHandler;
 import tahrir.tools.TrUtils;
 
 public class MicroblogBroadcastTest {

@@ -1,10 +1,10 @@
-package tahrir.io.net.sessions;
+package tahrir.io.net.broadcast;
 
 import org.slf4j.*;
 
 import tahrir.TrNode;
 import tahrir.io.net.*;
-import tahrir.io.net.sessions.MicroblogHandler.Microblog;
+import tahrir.io.net.broadcast.MicroblogHandler.Microblog;
 
 /**
  * Responsible for creating sessions for sending a single microblog between this node
