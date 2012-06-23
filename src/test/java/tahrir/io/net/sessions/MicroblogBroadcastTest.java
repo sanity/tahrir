@@ -4,6 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.*;
 
 import tahrir.TrNode;
+import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.tools.TrUtils;
 
 public class MicroblogBroadcastTest {
@@ -17,6 +18,9 @@ public class MicroblogBroadcastTest {
 		sendingNode = TrUtils.makeTestNode(port++, false, false, false, true, 1, 1);
 		receivingNode = TrUtils.makeTestNode(port++, false, false, false, true, 1 , 1);
 		TrUtils.createTestBidirectionalConnection(sendingNode, receivingNode);
+		for (final TrPeerInfo pi :sendingNode.peerManager.peers.values()) {
+			pi.capabilities.receivesMessageBroadcasts = true;
+		}
 	}
 
 	@Test
@@ -24,8 +28,8 @@ public class MicroblogBroadcastTest {
 		final MicroblogHandler.Microblog testMb = new MicroblogHandler.Microblog(sendingNode, "Hello world");
 		sendingNode.mbHandler.getMbQueue().insert(testMb);
 
-		// don't want to have to wait the initial wait
-		sendingNode.mbHandler.setUpForNextMicroblog();
+		// don't want initial wait
+		sendingNode.mbHandler.setupForNextMicroblog();
 
 		for (int x=0; x<50; x++) {
 			Thread.sleep(200);
@@ -44,8 +48,8 @@ public class MicroblogBroadcastTest {
 		sendingNode.mbHandler.getMbQueue().insert(testMb0);
 		sendingNode.mbHandler.getMbQueue().insert(testMb1);
 
-		// don't want to have to wait the initial wait
-		sendingNode.mbHandler.setUpForNextMicroblog();
+		// don't want initial wait
+		sendingNode.mbHandler.setupForNextMicroblog();
 
 		for (int x=0; x<50; x++) {
 			Thread.sleep(200);

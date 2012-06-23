@@ -32,23 +32,25 @@ public class MicroblogHandler {
 	public MicroblogHandler(final TrNode node) {
 		if (node.config.peers.runBroadcast) {
 			this.node = node;
-			setUpForNextMicroblog();
+			scheduleForLater();
 		}
 	}
 
-	protected void setUpForNextMicroblog() {
+	protected void setupForNextMicroblog() {
 		final Map<PhysicalNetworkLocation, TrPeerInfo> peerMap = node.peerManager.peers;
 
-		if (peerMap.size() >= node.peerManager.config.minPeers) {
-			// we don't want to iterate over any new peers added as we could be there forever
-			// so we take a snap shot of the set
-			final Set<PhysicalNetworkLocation> snapShot = new HashSet<PhysicalNetworkLocation>();
+		// we don't want to iterate over any new peers added as we could be there forever
+		// so we take a snap shot of the set
+		final Set<PhysicalNetworkLocation> snapShot = new HashSet<PhysicalNetworkLocation>();
 
-			for (final TrPeerInfo peerInfo : peerMap.values()) {
-				if (peerInfo.capabilities.receivesMessageBroadcasts) {
-					snapShot.add(peerInfo.remoteNodeAddress.physicalLocation);
-				}
+		for (final TrPeerInfo peerInfo : peerMap.values()) {
+			if (peerInfo.capabilities.receivesMessageBroadcasts) {
+				snapShot.add(peerInfo.remoteNodeAddress.physicalLocation);
 			}
+		}
+
+		// don't want to clog up network if we don't have minimum peers
+		if (snapShot.size() >= node.peerManager.config.minPeers) {
 			peerIter = snapShot.iterator();
 
 			currentlyBroadcasting = mbQueue.getMicroblogForBroadcast();
@@ -65,7 +67,7 @@ public class MicroblogHandler {
 			final MicroblogBroadcastSessionImpl localBroadcastSess = node.sessionMgr.getOrCreateLocalSession(MicroblogBroadcastSessionImpl.class);
 			localBroadcastSess.startSingleBroadcast(currentlyBroadcasting, currentPeer);
 		} else {
-			setUpForNextMicroblog();
+			setupForNextMicroblog();
 		}
 	}
 
@@ -79,7 +81,7 @@ public class MicroblogHandler {
 
 	private class RunBroadcast implements Runnable {
 		public void run() {
-			setUpForNextMicroblog();
+			setupForNextMicroblog();
 		}
 	}
 
