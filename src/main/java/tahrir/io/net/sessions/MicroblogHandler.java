@@ -8,7 +8,8 @@ import org.slf4j.*;
 
 import tahrir.*;
 import tahrir.io.crypto.*;
-import tahrir.io.net.PhysicalNetworkLocation;
+import tahrir.io.net.*;
+import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.tools.TrUtils;
 
 import com.google.inject.internal.Sets;
@@ -36,11 +37,18 @@ public class MicroblogHandler {
 	}
 
 	protected void setUpForNextMicroblog() {
-		if (node.peerManager.peers.size() >= node.peerManager.config.minPeers) {
+		final Map<PhysicalNetworkLocation, TrPeerInfo> peerMap = node.peerManager.peers;
+
+		if (peerMap.size() >= node.peerManager.config.minPeers) {
 			// we don't want to iterate over any new peers added as we could be there forever
 			// so we take a snap shot of the set
 			final Set<PhysicalNetworkLocation> snapShot = new HashSet<PhysicalNetworkLocation>();
-			snapShot.addAll(node.peerManager.peers.keySet());
+
+			for (final TrPeerInfo peerInfo : peerMap.values()) {
+				if (peerInfo.capabilities.receivesMessageBroadcasts) {
+					snapShot.add(peerInfo.remoteNodeAddress.physicalLocation);
+				}
+			}
 			peerIter = snapShot.iterator();
 
 			currentlyBroadcasting = mbQueue.getMicroblogForBroadcast();
