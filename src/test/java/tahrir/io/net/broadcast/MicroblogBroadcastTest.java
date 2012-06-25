@@ -5,7 +5,6 @@ import org.testng.annotations.*;
 
 import tahrir.TrNode;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
-import tahrir.io.net.broadcast.MicroblogHandler;
 import tahrir.tools.TrUtils;
 
 public class MicroblogBroadcastTest {
@@ -17,7 +16,7 @@ public class MicroblogBroadcastTest {
 	@BeforeTest
 	public void setUpNodes() throws Exception {
 		sendingNode = TrUtils.makeTestNode(port++, false, false, false, true, 1, 1);
-		receivingNode = TrUtils.makeTestNode(port++, false, false, false, true, 1 , 1);
+		receivingNode = TrUtils.makeTestNode(port++, false, false, false, false, 1 , 1);
 		TrUtils.createTestBidirectionalConnection(sendingNode, receivingNode);
 		for (final TrPeerInfo pi :sendingNode.peerManager.peers.values()) {
 			pi.capabilities.receivesMessageBroadcasts = true;

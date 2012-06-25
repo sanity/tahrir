@@ -86,7 +86,7 @@ public class MicroblogHandler {
 	}
 
 	public static class MicroblogQueue {
-		private final PriorityQueue<Microblog> microBlogs = new PriorityQueue<Microblog>();
+		private final PriorityQueue<Microblog> microBlogs = new PriorityQueue<Microblog>(11, new MicroblogPriorityComparator());
 		private final Set<Integer> seen = Sets.newLinkedHashSet();
 
 		public void insert(final Microblog mb) {
@@ -121,7 +121,7 @@ public class MicroblogHandler {
 		}
 	}
 
-	public static class Microblog implements Comparable<Microblog> {
+	public static class Microblog {
 		public int priority;
 		private TrSignature signature;
 		private String languageCode;
@@ -151,11 +151,6 @@ public class MicroblogHandler {
 		}
 
 		@Override
-		public int compareTo(final Microblog mb) {
-			return Double.compare(priority, mb.priority);
-		}
-
-		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
@@ -178,6 +173,13 @@ public class MicroblogHandler {
 			} else if (!signature.equals(other.signature))
 				return false;
 			return true;
+		}
+	}
+
+	public static class MicroblogPriorityComparator implements Comparator<Microblog> {
+		@Override
+		public int compare(final Microblog mb1, final Microblog mb2) {
+			return Double.compare(mb1.priority, mb2.priority);
 		}
 	}
 }
