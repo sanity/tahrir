@@ -22,7 +22,7 @@ import com.google.inject.internal.Sets;
 public class MicroblogHandler {
 	private final Logger logger = LoggerFactory.getLogger(MicroblogBroadcastSessionImpl.class.getName());
 
-	private final MicroblogQueue mbQueue = new MicroblogQueue();
+	private final MicroblogContainer mbQueue = new MicroblogContainer();
 
 	private TrNode node;
 
@@ -71,7 +71,7 @@ public class MicroblogHandler {
 		}
 	}
 
-	public MicroblogQueue getMbQueue() {
+	public MicroblogContainer getMbQueue() {
 		return mbQueue;
 	}
 
@@ -85,31 +85,36 @@ public class MicroblogHandler {
 		}
 	}
 
-	public static class MicroblogQueue {
-		private final PriorityQueue<Microblog> microBlogs = new PriorityQueue<Microblog>(11, new MicroblogPriorityComparator());
+	public static class MicroblogContainer {
+		private final PriorityQueue<Microblog> microblogBroadcastQueue = new PriorityQueue<Microblog>(11, new MicroblogPriorityComparator());
 		private final Set<Integer> seen = Sets.newLinkedHashSet();
+
+		private final SortedSet<Microblog> microblogsForViewing = Collections.synchronizedSortedSet(new TreeSet<Microblog>(new MicroblogViewingComparator()));
 
 		public void insert(final Microblog mb) {
 			// this check probably isn't necessary but just to be sure...
-			if (!microBlogs.contains(mb)) {
-				microBlogs.add(mb);
+			if (!microblogBroadcastQueue.contains(mb)) {
+				microblogBroadcastQueue.add(mb);
 				seen.add(mb.hashCode());
+			}
+			if (isMicroblogForViewing()) {
+				microblogsForViewing.add(mb);
 			}
 		}
 
 		public Microblog getMicroblogForBroadcast() {
-			final Microblog mb =  microBlogs.poll();
+			final Microblog mb =  microblogBroadcastQueue.poll();
 			if (mb != null) {
 				mb.priority++;
-				microBlogs.add(mb);
+				microblogBroadcastQueue.add(mb);
 			}
 			return mb;
 		}
 
 		public void changePriority(final Microblog mb, final int priority) {
-			microBlogs.remove(mb);
+			microblogBroadcastQueue.remove(mb);
 			mb.priority = priority;
-			microBlogs.add(mb);
+			microblogBroadcastQueue.add(mb);
 		}
 
 		public boolean isLikelyToContain(final int microblogHash) {
@@ -117,7 +122,15 @@ public class MicroblogHandler {
 		}
 
 		public boolean contains(final Microblog mb) {
-			return microBlogs.contains(mb);
+			return microblogBroadcastQueue.contains(mb);
+		}
+
+		/*
+		 * TODO: Checks if the user is going to want to read the message if they do
+		 * want to do read it might be a good idea to reset the priority
+		 */
+		private boolean isMicroblogForViewing() {
+			return true;
 		}
 	}
 
@@ -128,7 +141,7 @@ public class MicroblogHandler {
 		private String authorNick;
 		private RSAPublicKey publicKey;
 		public String message;
-		private long timeCreated;
+		public long timeCreated;
 
 		// for serialization
 		public Microblog() {
@@ -176,10 +189,18 @@ public class MicroblogHandler {
 		}
 	}
 
-	public static class MicroblogPriorityComparator implements Comparator<Microblog> {
+	private static class MicroblogPriorityComparator implements Comparator<Microblog> {
 		@Override
 		public int compare(final Microblog mb1, final Microblog mb2) {
 			return Double.compare(mb1.priority, mb2.priority);
+		}
+	}
+
+	private static class MicroblogViewingComparator implements Comparator<Microblog> {
+		// not sure how good this is a way of comparing them, we'll have to wait to the GUI
+		@Override
+		public int compare(final Microblog mb1, final Microblog mb2) {
+			return Double.compare(mb1.timeCreated, mb2.timeCreated);
 		}
 	}
 }
