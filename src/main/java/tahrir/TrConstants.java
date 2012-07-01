@@ -32,8 +32,4 @@ public class TrConstants {
 	public static final int BROADCAST_INIT_PRIORITY = 0;
 
 	public static final int MAINTENANCE_FREQUENCY_MIN = 1;
-
-	public static final int WAIT_TO_START_BROADCAST_SEC = 300; // will need changing?
-
-	public static final int BROADCAST_FREQUENCY_SEC = 30; // will also need changing?
 }
