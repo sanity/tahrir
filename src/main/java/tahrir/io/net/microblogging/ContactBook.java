@@ -2,12 +2,14 @@ package tahrir.io.net.microblogging;
 
 import java.io.*;
 import java.security.interfaces.RSAPublicKey;
-import java.util.*;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentMap;
 
 import org.slf4j.*;
 
 import tahrir.TrNode;
-import tahrir.tools.TrUtils;
+import tahrir.io.serialization.TrSerializer;
+import tahrir.tools.*;
 
 import com.google.gson.JsonParseException;
 import com.google.inject.internal.MapMaker;
@@ -75,28 +77,17 @@ public class ContactBook {
 	}
 
 	private void addContactsToFile() {
-		// instead of doing entire object modify contact if exists?
-		logger.info("Saving contact to file");
-		try {
-			final FileWriter contactsWriter = new FileWriter(contactsFile);
-			contactsWriter.write(TrUtils.gson.toJson(contactsInformation));
-			contactsWriter.close();
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
+		Persistence.save(contactsFile, contactsInformation);
 	}
 
 	private void tryLoadContactsFromFile() {
 		if (contactsFile.exists()) {
 			logger.info("Loading contacts from file");
 			try {
-				final FileReader json = new FileReader(contactsFile);
-				contactsInformation = TrUtils.gson.fromJson(json, ContactsContainer.class);
-				json.close();
-			} catch (final JsonParseException jsonException) {
-				throw new RuntimeException(jsonException);
-			} catch (final IOException ioException) {
-				throw new RuntimeException(ioException);
+				final DataInputStream dis = new DataInputStream(new FileInputStream(contactsFile));
+				contactsInformation = TrSerializer.deserializeFrom(ContactsContainer.class, dis);
+			} catch (final Exception e) {
+				throw new RuntimeException(e);
 			}
 		} else {
 			logger.info("Making new contacts container");
@@ -105,7 +96,6 @@ public class ContactBook {
 	}
 
 	private void tryLoadPublicKeyCharsFile() {
-		// might be better if this used Tahrir's serializer seeing as we don't want it to be edited
 		if (publicKeyCharsFile.exists()) {
 			logger.info("Loading public key chars file");
 			try {
@@ -129,7 +119,8 @@ public class ContactBook {
 		}
 	}
 
-	public static class ContactInformation {
+	@SuppressWarnings("serial")
+	public static class ContactInformation implements Serializable {
 		private final String nickName;
 		private final String appendedToNick;
 
@@ -151,13 +142,13 @@ public class ContactBook {
 		}
 	}
 
-	public static class ContactsContainer {
-		private final Map<RSAPublicKey, ContactInformation> contacts;
+	@SuppressWarnings("serial")
+	public static class ContactsContainer implements Serializable {
+		private final ConcurrentMap<RSAPublicKey, ContactInformation> contacts;
 
 		public ContactsContainer() {
 			contacts = new MapMaker().makeMap();
 		}
-
 
 		public void add(final RSAPublicKey publicKey, final ContactInformation contact) {
 			contacts.put(publicKey, contact);

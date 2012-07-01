@@ -103,12 +103,7 @@ public class MicroblogHandler {
 		}
 
 		public Microblog getMicroblogForBroadcast() {
-			final Microblog mb =  microblogBroadcastQueue.poll();
-			if (mb != null) {
-				mb.priority++;
-				microblogBroadcastQueue.add(mb);
-			}
-			return mb;
+			return microblogBroadcastQueue.poll();
 		}
 
 		public void changePriority(final Microblog mb, final int priority) {
