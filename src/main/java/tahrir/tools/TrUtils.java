@@ -2,6 +2,8 @@ package tahrir.tools;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.security.*;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Random;
 import java.util.concurrent.*;
 
@@ -15,8 +17,6 @@ public class TrUtils {
 
 	public static final Random rand = new Random();
 
-	public static final Gson gson = new GsonBuilder().create();
-
 	public static final RandomRNG rng = new RandomRNG();
 
 	public static final Runnable noopRunnable = new Runnable() {
@@ -24,6 +24,15 @@ public class TrUtils {
 		public void run() {
 		}
 	};
+
+	public static final Gson gson;
+
+	static {
+		final GsonBuilder builder = new GsonBuilder();
+		builder.registerTypeAdapter(RSAPublicKey.class, new PublicKeyInstanceCreator());
+		//builder.registerTypeAdapter(RSAPublicKey.class, new RSAPublicKeySerializer());
+		gson = builder.create();
+	}
 
 	@SuppressWarnings("unchecked")
 	public static <T> T parseJson(final File jsonFile, final Type type) throws JsonParseException, IOException {
@@ -95,5 +104,21 @@ public class TrUtils {
 	public static void createTestBidirectionalConnection(final TrNode node1, final TrNode node2) {
 		node1.peerManager.addNewPeer(node2.getRemoteNodeAddress(), node2.config.capabilities, node2.peerManager.locInfo.getLocation());
 		node2.peerManager.addNewPeer(node1.getRemoteNodeAddress(), node1.config.capabilities, node1.peerManager.locInfo.getLocation());
+	}
+
+	/*
+	 * This allows deserialzing of RSAPublicKey with gson as a no-arg constructor is needed
+	 */
+	public static class PublicKeyInstanceCreator implements InstanceCreator<RSAPublicKey> {
+		public RSAPublicKey createInstance(final Type type) {
+			try {
+				final KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+				keyGen.initialize(2048);
+				final KeyPair key = keyGen.generateKeyPair();
+				return (RSAPublicKey) key.getPublic();
+			} catch (final NoSuchAlgorithmException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 }

@@ -38,9 +38,7 @@ public class TrNode {
 
 	public final TrPeerManager peerManager;
 
-	public MicroblogHandler mbHandler;
-
-	public ContactBook contactBook;
+	public MicrobloggingManger mbManager;
 
 	public TrSessionManager sessionMgr;
 
@@ -85,9 +83,7 @@ public class TrNode {
 
 		registerSessions();
 
-		mbHandler = new MicroblogHandler(this);
-
-		contactBook = new ContactBook(this);
+		mbManager = new MicrobloggingManger(this);
 	}
 
 	/**

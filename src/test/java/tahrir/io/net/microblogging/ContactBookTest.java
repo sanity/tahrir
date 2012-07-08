@@ -1,5 +1,6 @@
 package tahrir.io.net.microblogging;
 
+import java.io.File;
 import java.security.interfaces.*;
 
 import org.testng.Assert;
@@ -13,7 +14,8 @@ import tahrir.tools.*;
 public class ContactBookTest {
 	@Test
 	public void duplicateContactTest() throws Exception {
-		final TrNode node = TrUtils.makeTestNode(8001, false, false, false, false, 0, 0);
+		final TrNode node = TrUtils.makeTestNode(8001, false, false, false, true, 0, 0);
+		final ContactBook contactBook = node.mbManager.contactBook;
 
 		final String name = "name";
 
@@ -21,12 +23,12 @@ public class ContactBookTest {
 
 		final Tuple2<RSAPublicKey, RSAPrivateKey> kp2 = TrCrypto.createRsaKeyPair();
 
-		node.contactBook.addContact(name, kp1.a);
-		node.contactBook.addContact(name, kp2.a);
+		contactBook.addContact(name, kp1.a);
+		contactBook.addContact(name, kp2.a);
 
-		final ContactInformation contact1 = node.contactBook.contactsInformation.getContact(kp1.a);
+		final ContactInformation contact1 = contactBook.contactsContainer.getContact(kp1.a);
 
-		final ContactInformation contact2 = node.contactBook.contactsInformation.getContact(kp2.a);
+		final ContactInformation contact2 = contactBook.contactsContainer.getContact(kp2.a);
 
 		Assert.assertTrue(contact1.getFullNick().equals(name));
 		System.out.println(contact2.getFullNick());
@@ -34,20 +36,26 @@ public class ContactBookTest {
 
 	@Test
 	public void persistenceTest() throws Exception {
-		final TrNode node = TrUtils.makeTestNode(8004, false, false, false, false, 0, 0);
+		final TrNode node = TrUtils.makeTestNode(8004, false, false, false, true, 0, 0);
+		ContactBook contactBook = node.mbManager.contactBook;
 
-		final String name = "name";
+		final String name = "persistence_test_name";
 
 		final Tuple2<RSAPublicKey, RSAPrivateKey> kp1 = TrCrypto.createRsaKeyPair();
 
-		node.contactBook.addContact(name, kp1.a);
-		final ContactInformation contact = node.contactBook.contactsInformation.getContact(kp1.a);
+		contactBook.addContact(name, kp1.a);
+		final ContactInformation contact = contactBook.contactsContainer.getContact(kp1.a);
 
-		node.contactBook = null;
-		node.contactBook = new ContactBook(node);
+		// remove references to contact book so we can test persistence
+		node.mbManager.contactBook = null;
+		contactBook = null;
 
-		final ContactInformation loadedContact = node.contactBook.contactsInformation.getContact(kp1.a);
+		node.mbManager.contactBook = new ContactBook(node.mbManager, new File(node.rootDirectory, node.config.contacts));
+		contactBook = node.mbManager.contactBook;
 
-		Assert.assertTrue(contact.getFullNick().equals(loadedContact.getFullNick()));
+		final ContactInformation loadedContact = contactBook.contactsContainer.getContact(kp1.a);
+		final String loadedNick = loadedContact.getFullNick();
+
+		Assert.assertTrue(contact.getFullNick().equals(loadedNick));
 	}
 }

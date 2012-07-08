@@ -5,7 +5,7 @@ import org.testng.annotations.*;
 
 import tahrir.TrNode;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
-import tahrir.io.net.microblogging.MicroblogHandler;
+import tahrir.io.net.microblogging.MicrobloggingManger;
 import tahrir.tools.TrUtils;
 
 public class MicroblogBroadcastTest {
@@ -26,37 +26,37 @@ public class MicroblogBroadcastTest {
 
 	@Test
 	public void simpleTest() throws Exception {
-		final MicroblogHandler.Microblog testMb = new MicroblogHandler.Microblog(sendingNode, "Hello world");
-		sendingNode.mbHandler.getMbQueue().insert(testMb);
+		final MicrobloggingManger.Microblog testMb = new MicrobloggingManger.Microblog(sendingNode, "Hello world");
+		sendingNode.mbManager.getMicroblogContainer().insert(testMb);
 
 		// don't want initial wait
-		sendingNode.mbHandler.setupForNextMicroblog();
+		sendingNode.mbManager.setupForNextMicroblog();
 
 		for (int x=0; x<50; x++) {
 			Thread.sleep(200);
-			if (receivingNode.mbHandler.getMbQueue().contains(testMb)) {
+			if (receivingNode.mbManager.getMicroblogContainer().contains(testMb)) {
 				break;
 			}
 		}
 
-		Assert.assertTrue(receivingNode.mbHandler.getMbQueue().contains(testMb), "Should contain the microblog");
+		Assert.assertTrue(receivingNode.mbManager.getMicroblogContainer().contains(testMb), "Should contain the microblog");
 	}
 
 	@Test
 	public void priorityTest() throws Exception {
-		final MicroblogHandler.Microblog testMb0 = new MicroblogHandler.Microblog(sendingNode, "You SHOULD have this microblog!", 0);
-		final MicroblogHandler.Microblog testMb1 = new MicroblogHandler.Microblog(sendingNode, "You should NOT have this microblog!", Integer.MAX_VALUE);
-		sendingNode.mbHandler.getMbQueue().insert(testMb0);
-		sendingNode.mbHandler.getMbQueue().insert(testMb1);
+		final MicrobloggingManger.Microblog testMb0 = new MicrobloggingManger.Microblog(sendingNode, "You SHOULD have this microblog!", 0);
+		final MicrobloggingManger.Microblog testMb1 = new MicrobloggingManger.Microblog(sendingNode, "You should NOT have this microblog!", Integer.MAX_VALUE);
+		sendingNode.mbManager.getMicroblogContainer().insert(testMb0);
+		sendingNode.mbManager.getMicroblogContainer().insert(testMb1);
 
 		// don't want initial wait
-		sendingNode.mbHandler.setupForNextMicroblog();
+		sendingNode.mbManager.setupForNextMicroblog();
 
 		for (int x=0; x<50; x++) {
 			Thread.sleep(200);
 		}
 
-		Assert.assertTrue(receivingNode.mbHandler.getMbQueue().contains(testMb0), "Should contain the microblog with low priority");
-		Assert.assertTrue(!receivingNode.mbHandler.getMbQueue().contains(testMb1), "Should not contain the microblog with high priority.");
+		Assert.assertTrue(receivingNode.mbManager.getMicroblogContainer().contains(testMb0), "Should contain the microblog with low priority");
+		Assert.assertTrue(!receivingNode.mbManager.getMicroblogContainer().contains(testMb1), "Should not contain the microblog with high priority.");
 	}
 }
