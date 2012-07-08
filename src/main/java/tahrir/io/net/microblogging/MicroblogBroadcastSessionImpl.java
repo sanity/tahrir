@@ -4,7 +4,7 @@ import org.slf4j.*;
 
 import tahrir.TrNode;
 import tahrir.io.net.*;
-import tahrir.io.net.microblogging.MicroblogHandler.Microblog;
+import tahrir.io.net.microblogging.MicrobloggingManger.Microblog;
 
 /**
  * Responsible for creating sessions for sending a single microblog between this node
@@ -37,7 +37,7 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Mico
 	public void areYouInterested(final int mbHash) {
 		initiatorSess = remoteSession(MicoblogBroadcastSession.class, connection(sender()));
 
-		initiatorSess.interestIs(!node.mbHandler.getMbQueue().isLikelyToContain(mbHash));
+		initiatorSess.interestIs(!node.mbManager.getMicroblogContainer().isLikelyToContain(mbHash));
 	}
 
 	public void interestIs(final boolean interest) {
@@ -49,7 +49,7 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Mico
 	}
 
 	public void insertMicroblog(final Microblog mb) {
-		node.mbHandler.getMbQueue().insert(mb);
+		node.mbManager.getMicroblogContainer().insert(mb);
 		// TODO: this is a workaround until we have a registerSuccessListener
 		initiatorSess.sessionFinished();
 	}
@@ -61,7 +61,7 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Mico
 	private synchronized void startBroadcastToNextPeer() {
 		if (!nextBroadcastStarted) {
 			nextBroadcastStarted = true;
-			node.mbHandler.startBroadcastToPeer();
+			node.mbManager.startBroadcastToPeer();
 		}
 	}
 

@@ -2,33 +2,27 @@ package tahrir.io.net.microblogging;
 
 import java.io.*;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
+import java.util.*;
 
 import org.slf4j.*;
 
-import tahrir.TrNode;
-import tahrir.io.serialization.TrSerializer;
-import tahrir.tools.*;
+import tahrir.tools.TrUtils;
 
 import com.google.gson.JsonParseException;
-import com.google.inject.internal.MapMaker;
 
 public class ContactBook {
 	public static Logger logger = LoggerFactory.getLogger(ContactBook.class);
 
-	public ContactsContainer contactsInformation = new ContactsContainer();
-
-	private int[] intsToUse = new int[4];
+	public ContactsContainer contactsContainer = new ContactsContainer();
 
 	private final File contactsFile;
-	private final File publicKeyCharsFile;
 
-	public ContactBook(final TrNode node) {
-		contactsFile = new File(node.rootDirectory, node.config.contacts);
-		publicKeyCharsFile = new File(node.rootDirectory, node.config.publicKeyChars);
+	private final MicrobloggingManger microbloggingManager;
+
+	public ContactBook(final MicrobloggingManger microbloggingManager, final File contactsFile) {
+		this.contactsFile = contactsFile;
+		this.microbloggingManager = microbloggingManager;
 		tryLoadContactsFromFile();
-		tryLoadPublicKeyCharsFile();
 	}
 
 	/**
@@ -37,19 +31,14 @@ public class ContactBook {
 	 */
 	public boolean addContact(final String preferedNick, final RSAPublicKey publicKey) {
 		boolean gotPreferedNick;
-		if (!contactsHasNickName(preferedNick)) {
-			contactsInformation.add(publicKey, new ContactInformation(preferedNick));
+		if (!contactsContainer.hasNickName(preferedNick)) {
+			contactsContainer.addContact(publicKey, new ContactInformation(preferedNick));
 			gotPreferedNick = true;
 		} else {
-			// we need to append something to the end
-			final StringBuilder builder = new StringBuilder();
-			final String publicKeyString = publicKey.toString();
-			for (final int intToUse : intsToUse) {
-				builder.append(publicKeyString.charAt(intToUse));
-			}
-			final String toAppend = builder.toString();
-			// TODO: does not check if the appended nick name with appended already exists
-			contactsInformation.add(publicKey, new ContactInformation(preferedNick, toAppend));
+			// need to append something to end to make it unique
+			final String toAppend = microbloggingManager.duplicateNameAppender.getIntsToAppend(publicKey);
+			// TODO: very unlikely but does not check if the appended nick name with appended already exists
+			contactsContainer.addContact(publicKey, new ContactInformation(preferedNick, toAppend));
 			gotPreferedNick = false;
 		}
 
@@ -57,72 +46,54 @@ public class ContactBook {
 		return gotPreferedNick;
 	}
 
-	private boolean contactsHasNickName(final String nickName) {
-		for (final ContactInformation contact : contactsInformation.getContacts()) {
-			if (contact.getFullNick().equals(nickName))
-				return true;
-		}
-		return false;
-	}
-
-	/*
-	 * If they are duplicates of a nick name then we need something to append to the end of it
-	 * these ints are chosen by this method.
-	 */
-	private void setPublicKeyIntsToUse() {
-		final int publicKeySize = 350;
-		for (int i = 0; i < intsToUse.length; i++) {
-			intsToUse[i] = TrUtils.rand.nextInt(publicKeySize);
-		}
-	}
-
 	private void addContactsToFile() {
-		Persistence.save(contactsFile, contactsInformation);
+		logger.info("Adding contact to file");
+		try {
+			final FileWriter contactsWriter = new FileWriter(contactsFile);
+			contactsWriter.write(TrUtils.gson.toJson(contactsContainer));
+			contactsWriter.close();
+		} catch (final IOException ioException) {
+			logger.error("Error writing to contacts file");
+			throw new RuntimeException(ioException);
+		}
 	}
 
 	private void tryLoadContactsFromFile() {
 		if (contactsFile.exists()) {
 			logger.info("Loading contacts from file");
 			try {
-				final DataInputStream dis = new DataInputStream(new FileInputStream(contactsFile));
-				contactsInformation = TrSerializer.deserializeFrom(ContactsContainer.class, dis);
-			} catch (final Exception e) {
-				throw new RuntimeException(e);
+				final BufferedReader br = new BufferedReader(new FileReader(contactsFile));
+				final StringBuilder builder = new StringBuilder();
+				String line = null;
+				while ((line = br.readLine()) != null) {
+					builder.append(line);
+				}
+
+				final String json = builder.toString();
+				contactsContainer = TrUtils.gson.fromJson(json, ContactsContainer.class);
+
+				br.close();
+			} catch (final JsonParseException jsonException) {
+				logger.error("Json exception when parsing contacts file");
+				throw new RuntimeException(jsonException);
+			} catch (final IOException ioException) {
+				logger.error("Error reading public key chars file");
+				throw new RuntimeException(ioException);
 			}
 		} else {
 			logger.info("Making new contacts container");
-			contactsInformation = new ContactsContainer();
+			contactsContainer = new ContactsContainer();
 		}
 	}
 
-	private void tryLoadPublicKeyCharsFile() {
-		if (publicKeyCharsFile.exists()) {
-			logger.info("Loading public key chars file");
-			try {
-				intsToUse = TrUtils.parseJson(publicKeyCharsFile, intsToUse.getClass());
-			} catch (final JsonParseException jsonException) {
-				logger.error("Error parsing public key chars Json");
-			} catch (final IOException ioException) {
-				logger.error("Error reading public key chars file");
-			}
-		} else {
-			logger.info("Creating new public key ints to use");
-			setPublicKeyIntsToUse();
-			try {
-				final FileWriter intsToUseWriter = new FileWriter(publicKeyCharsFile);
-				intsToUseWriter.write(TrUtils.gson.toJson(intsToUse));
-				intsToUseWriter.close();
-			} catch (final IOException ioException) {
-				ioException.printStackTrace();
-				logger.error("Error writing public key chars file");
-			}
-		}
-	}
+	public static class ContactInformation {
+		private String nickName;
+		private String appendedToNick;
 
-	@SuppressWarnings("serial")
-	public static class ContactInformation implements Serializable {
-		private final String nickName;
-		private final String appendedToNick;
+		// For serialization
+		public ContactInformation() {
+
+		}
 
 		public ContactInformation(final String nickName, final String appenedToNick) {
 			this.nickName = nickName;
@@ -142,24 +113,32 @@ public class ContactBook {
 		}
 	}
 
-	@SuppressWarnings("serial")
-	public static class ContactsContainer implements Serializable {
-		private final ConcurrentMap<RSAPublicKey, ContactInformation> contacts;
+	public static class ContactsContainer {
+		private final LinkedHashMap<RSAPublicKey, ContactInformation> contacts;
 
 		public ContactsContainer() {
-			contacts = new MapMaker().makeMap();
+			contacts = new LinkedHashMap<RSAPublicKey, ContactInformation>();
 		}
 
-		public void add(final RSAPublicKey publicKey, final ContactInformation contact) {
-			contacts.put(publicKey, contact);
+		public synchronized void addContact(final RSAPublicKey publicKey, final ContactInformation contactInfo) {
+			contacts.put(publicKey, contactInfo);
 		}
 
-		public ContactInformation getContact(final RSAPublicKey publicKey) {
+		public synchronized ContactInformation getContact(final RSAPublicKey publicKey) {
 			return contacts.get(publicKey);
 		}
 
-		public Collection<ContactInformation> getContacts() {
-			return contacts.values();
+		public synchronized Collection<ContactInformation> getContacts() {
+			final ArrayList<ContactInformation> contactsSnapShot = new ArrayList<ContactInformation>(contacts.values());
+			return contactsSnapShot;
+		}
+
+		public synchronized boolean hasNickName(final String nickName) {
+			for (final ContactInformation contact : contacts.values()) {
+				if (contact.getFullNick().equals(nickName))
+					return true;
+			}
+			return false;
 		}
 	}
 }
