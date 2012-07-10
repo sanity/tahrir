@@ -163,5 +163,10 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+	      <groupId>com.vaadin</groupId>
+	      <artifactId>vaadin</artifactId>
+	      <version>6.5.0</version>
+	    </dependency>
 	</dependencies>
 </project>
