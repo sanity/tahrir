@@ -11,8 +11,6 @@ import tahrir.io.net.*;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.tools.TrUtils;
 
-import com.google.inject.internal.Sets;
-
 /**
  * Handles scheduling of a microblog broadcast and storing of microblogs.
  * 
@@ -92,7 +90,7 @@ public class MicrobloggingManger {
 
 	public class MicroblogContainer {
 		private final PriorityQueue<Microblog> microblogBroadcastQueue = new PriorityQueue<Microblog>(11, new MicroblogPriorityComparator());
-		private final Set<Integer> seen = Sets.newLinkedHashSet();
+		private final Set<Integer> seen = com.google.common.collect.Sets.newLinkedHashSet();
 
 		private final MicroblogsForViewing microblogsForViewing = new MicroblogsForViewing();
 
@@ -169,19 +167,22 @@ public class MicrobloggingManger {
 
 		}
 
-		public Microblog(final TrNode creatingNode, final String message) throws Exception {
+		public Microblog(final TrNode creatingNode, final String message) {
 			this(creatingNode, message, TrConstants.BROADCAST_INIT_PRIORITY);
 		}
 
-		// messy to have constructor throwing exception?
-		public Microblog(final TrNode creatingNode, final String message, final int priority) throws Exception {
+		public Microblog(final TrNode creatingNode, final String message, final int priority) {
 			this.priority = priority;
 			timeCreated = System.currentTimeMillis();
 			this.message = message;
 			languageCode = ""; // TODO: get language code from config?
 			authorNick = ""; // TODO: get nick from config?
 			publicKey = creatingNode.getRemoteNodeAddress().publicKey;
-			signature = TrCrypto.sign(message, creatingNode.getPrivateNodeId().privateKey);
+			try {
+				signature = TrCrypto.sign(message, creatingNode.getPrivateNodeId().privateKey);
+			} catch (final Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		@Override

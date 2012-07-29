@@ -8,11 +8,11 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import tahrir.io.crypto.TrCrypto;
-import tahrir.io.net.RemoteNodeAddress;
+import tahrir.io.net.*;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.io.net.udpV1.UdpNetworkLocation;
 
-import com.google.inject.internal.*;
+import com.google.common.collect.*;
 
 public class SerializationTest {
 

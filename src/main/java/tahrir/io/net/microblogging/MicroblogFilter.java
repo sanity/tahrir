@@ -39,4 +39,13 @@ public class MicroblogFilter {
 		}
 		return microblogsFromUser;
 	}
+
+	public LinkedList<Microblog> getAllMicroblogs() {
+		final LinkedList<Microblog> microblogs = Lists.newLinkedList();
+
+		for (final Microblog microblog : microbloggingContainer.getMicroblogsForViewing()) {
+			microblogs.add(microblog);
+		}
+		return microblogs;
+	}
 }

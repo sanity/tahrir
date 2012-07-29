@@ -1,117 +1,78 @@
 package tahrir.ui;
 
-import java.awt.EventQueue;
-import java.awt.event.*;
-
 import javax.swing.*;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.event.*;
 
-public class TrMainWindow {
+import net.miginfocom.swing.MigLayout;
+import tahrir.TrNode;
 
-	private JFrame frmTahrir;
+public class TrMainWindow extends JFrame {
+	public TrNode node;
+	private final TahrirMenu menu;
+	private JScrollPane selectedPanel;
+	//private final JTabbedPane pageTabbedPane;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(final String[] args) {
-		try {
-			UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
-		} catch (final Throwable e) {
-			e.printStackTrace();
+	public TrMainWindow(final TrNode node) {
+		this.node = node;
+
+		setTitle("Tahrir");
+		setSize(500, 700);
+		setLayout(new MigLayout());
+
+		/*pageTabbedPane = new JTabbedPane();
+		pageTabbedPane.setTabPlacement(JTabbedPane.LEFT);
+
+		final JScrollPane scroller = new JScrollPane(new FeedPage(this));
+		scroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+		pageTabbedPane.addTab( "Feed", scroller);
+		pageTabbedPane.addTab( "Contacts", new JPanel());
+		pageTabbedPane.addTab( "Configure", new JPanel());
+
+		getContentPane().add(pageTabbedPane);
+		 */
+
+		menu = new TahrirMenu();
+		getContentPane().add(menu, "cell 0 0");
+	}
+
+
+	private class MenuSelectionHandler implements ListSelectionListener {
+		@Override
+		public void valueChanged(final ListSelectionEvent event) {
+			final TrMainWindow parent = TrMainWindow.this;
+			final int selected = parent.menu.menuList.getSelectedIndex();
+			if (selectedPanel != null) {
+				getContentPane().remove(selectedPanel);
+			}
+			if (selected == 0) {
+				final JScrollPane scroller = new JScrollPane(new FeedPage(TrMainWindow.this));
+				scroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+				scroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+				selectedPanel = scroller;
+				getContentPane().add(scroller, "cell 1 0");
+			} else {
+				selectedPanel = new JScrollPane();
+				selectedPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+				selectedPanel.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+				getContentPane().add(selectedPanel, "cell 1 0");
+			}
 		}
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					final TrMainWindow window = new TrMainWindow();
-					window.frmTahrir.setVisible(true);
-				} catch (final Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
 	}
 
-	/**
-	 * Create the application.
-	 */
-	public TrMainWindow() {
-		initialize();
-	}
+	private class TahrirMenu extends JPanel {
+		public final JList<String> menuList;
 
-	/**
-	 * Initialize the contents of the frame.
-	 */
-	private void initialize() {
-		frmTahrir = new JFrame();
-		frmTahrir.setResizable(false);
-		frmTahrir.setTitle("Tahrir");
-		frmTahrir.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		final JButton btnSend = new JButton("Send");
-		btnSend.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent arg0) {
-			}
-		});
-
-		final JScrollPane scrollPane = new JScrollPane();
-
-		final JPanel panel = new JPanel();
-
-		final JTextArea textArea = new JTextArea();
-		textArea.setRows(3);
-		final GroupLayout groupLayout = new GroupLayout(frmTahrir.getContentPane());
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING).addGroup(
-				groupLayout
-				.createSequentialGroup()
-				.addContainerGap()
-				.addGroup(
-						groupLayout
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								groupLayout
-								.createSequentialGroup()
-								.addComponent(textArea, GroupLayout.DEFAULT_SIZE, 386,
-										Short.MAX_VALUE)
-										.addPreferredGap(ComponentPlacement.RELATED)
-										.addComponent(btnSend, GroupLayout.PREFERRED_SIZE, 56,
-												GroupLayout.PREFERRED_SIZE))
-												.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 448, Short.MAX_VALUE))
-												.addPreferredGap(ComponentPlacement.RELATED)
-												.addComponent(panel, GroupLayout.PREFERRED_SIZE, 58, Short.MAX_VALUE).addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(Alignment.TRAILING).addGroup(
-				groupLayout
-				.createSequentialGroup()
-				.addContainerGap()
-				.addGroup(
-						groupLayout
-						.createParallelGroup(Alignment.TRAILING)
-						.addComponent(panel, GroupLayout.DEFAULT_SIZE, 339, Short.MAX_VALUE)
-						.addGroup(
-								Alignment.LEADING,
-								groupLayout
-								.createSequentialGroup()
-								.addGroup(
-										groupLayout
-										.createParallelGroup(Alignment.LEADING)
-										.addComponent(textArea,
-												GroupLayout.PREFERRED_SIZE,
-												GroupLayout.DEFAULT_SIZE,
-												GroupLayout.PREFERRED_SIZE)
-												.addGroup(
-														groupLayout.createSequentialGroup()
-														.addGap(13)
-														.addComponent(btnSend)))
-														.addPreferredGap(ComponentPlacement.RELATED)
-														.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 276,
-																Short.MAX_VALUE))).addContainerGap()));
-
-		final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		scrollPane.setViewportView(tabbedPane);
-
-		final JLabel lblInspector = new JLabel("Inspector");
-		panel.add(lblInspector);
-		frmTahrir.getContentPane().setLayout(groupLayout);
-
+		public TahrirMenu() {
+			setLayout(new MigLayout());
+			final String[] data = {"Feed", "Contacts", "Configure"};
+			menuList = new JList<String>(data);
+			menuList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			menuList.addListSelectionListener(new MenuSelectionHandler());
+			//menuList.setSelectedIndex(0);
+			add(menuList, "wrap");
+			add(new JButton("New post"));
+		}
 	}
 }
