@@ -164,9 +164,14 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-	      <groupId>com.vaadin</groupId>
-	      <artifactId>vaadin</artifactId>
-	      <version>6.5.0</version>
-	    </dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+			<version>3.0</version>
+		</dependency>
+		<dependency>
+        <groupId>com.seaglasslookandfeel</groupId>
+        <artifactId>seaglasslookandfeel</artifactId>
+        <version>0.2</version>
+    </dependency>
 	</dependencies>
 </project>
