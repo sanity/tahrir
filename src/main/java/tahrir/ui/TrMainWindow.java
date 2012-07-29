@@ -39,10 +39,15 @@ public class TrMainWindow extends JFrame {
 
 
 	private class MenuSelectionHandler implements ListSelectionListener {
+		TahrirMenu menu;
+
+		public MenuSelectionHandler(final TahrirMenu menu) {
+			this.menu = menu;
+		}
+
 		@Override
 		public void valueChanged(final ListSelectionEvent event) {
-			final TrMainWindow parent = TrMainWindow.this;
-			final int selected = parent.menu.menuList.getSelectedIndex();
+			final int selected = menu.menuList.getSelectedIndex();
 			if (selectedPanel != null) {
 				getContentPane().remove(selectedPanel);
 			}
@@ -69,8 +74,8 @@ public class TrMainWindow extends JFrame {
 			final String[] data = {"Feed", "Contacts", "Configure"};
 			menuList = new JList<String>(data);
 			menuList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			menuList.addListSelectionListener(new MenuSelectionHandler());
-			//menuList.setSelectedIndex(0);
+			menuList.addListSelectionListener(new MenuSelectionHandler(this));
+			menuList.setSelectedIndex(0);
 			add(menuList, "wrap");
 			add(new JButton("New post"));
 		}
