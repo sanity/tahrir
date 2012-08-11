@@ -4,7 +4,6 @@ import org.slf4j.*;
 
 import tahrir.TrNode;
 import tahrir.io.net.*;
-import tahrir.io.net.microblogging.MicrobloggingManger.Microblog;
 
 /**
  * Responsible for creating sessions for sending a single microblog between this node

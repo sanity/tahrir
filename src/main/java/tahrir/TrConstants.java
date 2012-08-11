@@ -34,4 +34,10 @@ public class TrConstants {
 	public static final int MAINTENANCE_FREQUENCY_MIN = 1;
 
 	public static final int MAX_MICROBLOGS_FOR_VIEWING = 200;
+
+	public static final int GUI_WIDTH_PX = 500;
+
+	public static final int GUI_HEIGHT_PX = 700;
+
+	public static final String MAIN_WINDOW_ARTWORK_PATH = "artwork/";
 }
