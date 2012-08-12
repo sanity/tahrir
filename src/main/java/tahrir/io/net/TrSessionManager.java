@@ -18,6 +18,7 @@ import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
 import com.google.common.base.*;
+import com.google.common.cache.*;
 import com.google.common.collect.*;
 
 public class TrSessionManager {
@@ -37,14 +38,16 @@ public class TrSessionManager {
 
 	private final Map<Integer, MethodPair> methodsById = Maps.newHashMap();
 
-	public final Map<Tuple2<String, Integer>, TrSessionImpl> sessions = new MapMaker()
-	.expiration(30, TimeUnit.MINUTES)
-	.evictionListener(new MapEvictionListener<Tuple2<String, Integer>, TrSessionImpl>() {
+	public final Map<Tuple2<String, Integer>, TrSessionImpl> sessions = CacheBuilder.newBuilder()
+			.expireAfterWrite(30, TimeUnit.MINUTES)
+			.removalListener(new RemovalListener<Tuple2<String, Integer>, TrSessionImpl>() {
 
-		public void onEviction(final Tuple2<String, Integer> sessionInfo, final TrSessionImpl session) {
-			session.terminate();
-		}
-	}).makeMap();
+				@Override
+				public void onRemoval(final RemovalNotification<Tuple2<String, Integer>, TrSessionImpl> sessionInfo) {
+					sessionInfo.getValue().terminate();
+				}
+
+			}).build().asMap();
 
 	private final TrNode trNode;
 

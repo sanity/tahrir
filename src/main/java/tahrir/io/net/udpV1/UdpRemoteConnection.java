@@ -19,6 +19,7 @@ import tahrir.tools.*;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
 import com.google.common.base.Function;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.*;
 
 public class UdpRemoteConnection extends TrRemoteConnection {
@@ -32,11 +33,11 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 	private final org.slf4j.Logger logger;
 	private TrSymKey outboundSymKey;
 
-	private final Map<Integer, PendingLongMessage> pendingReceivedLongMessages = new MapMaker()
-	.expiration(20, TimeUnit.MINUTES).makeMap();
+	private final Map<Integer, PendingLongMessage> pendingReceivedLongMessages = CacheBuilder.newBuilder()
+			.expireAfterWrite(20, TimeUnit.MINUTES).<Integer, PendingLongMessage> build().asMap();
 
-	private final Set<Integer> recentlyReceivedShortMessages = Collections.newSetFromMap(new MapMaker().expiration(20,
-			TimeUnit.MINUTES).<Integer, Boolean> makeMap());
+	private final Set<Integer> recentlyReceivedShortMessages = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(20,
+			TimeUnit.MINUTES).<Integer, Boolean> build().asMap());
 
 	private boolean remoteHasCachedOurOutboundSymKey = false;
 
