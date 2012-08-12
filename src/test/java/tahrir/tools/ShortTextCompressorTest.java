@@ -1,12 +1,9 @@
 package tahrir.tools;
 
-import static org.junit.Assert.assertEquals;
+import java.util.*;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import tahrir.tools.ShortTextCompressor.FrequencyTable;
 
@@ -64,7 +61,7 @@ public class ShortTextCompressorTest {
 
 		final String deCompress = compressor.deCompress(bytes);
 
-		assertEquals(text, deCompress);
+		Assert.assertEquals(text, deCompress);
 	}
 
 	interface FreqTableFactory {
