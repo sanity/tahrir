@@ -15,7 +15,7 @@ public class MicroblogContainer {
 
 	private final ContactBook contactBook;
 
-	private final EventBus eventBus = new EventBus("microblogs");
+	public final EventBus eventBus = new EventBus();
 
 	public MicroblogContainer(final ContactBook contactBook) {
 		this.contactBook = contactBook;
@@ -50,8 +50,8 @@ public class MicroblogContainer {
 		}
 	}
 
-	public MicroblogsForViewing getMicroblogsForViewing() {
-		return microblogsForViewing;
+	public Iterator<Microblog> getMicroblogsViewingIter() {
+		return microblogsForViewing.iterator();
 	}
 
 

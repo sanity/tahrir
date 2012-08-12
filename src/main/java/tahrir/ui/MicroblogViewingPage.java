@@ -21,12 +21,14 @@ public class MicroblogViewingPage {
 	private final JPanel content;
 	private final JScrollPane scroller;
 
-	private final LinkedList<Microblog> microblogsNotShown;
-
 	private final LoadNewPostsButton loadNewPostsButton;
 
-	public MicroblogViewingPage(final TrNode node, final MicroblogFilter filter) {
+	private final TrMainWindow mainWindow;
+
+	public MicroblogViewingPage(final TrNode node, final MicroblogFilter filter, final TrMainWindow mainWindow) {
 		this.filter = filter;
+		this.mainWindow = mainWindow;
+
 		microblogContainer = node.mbManager.getMicroblogContainer();
 
 		content = new JPanel(new MigLayout());
@@ -37,21 +39,21 @@ public class MicroblogViewingPage {
 		//scroller.setPreferredSize(new Dimension(TrContants))
 		scroller.setViewportView(content);
 
-		microblogsNotShown = Lists.newLinkedList();
-
 		loadNewPostsButton = new LoadNewPostsButton();
 
-		addInitialMicroblogs();
+		addMicroblogs();
+
+		microblogContainer.eventBus.register(this);
 	}
 
 	@Subscribe
 	public void listenForNewMicroblog(final Microblog mb) {
 		if (filter.passesFilter(mb)) {
-			microblogsNotShown.add(mb);
-			loadNewPostsButton.setText(String.valueOf(microblogsNotShown.size()));
 			if (!loadNewPostsButton.presentInGUI) {
-				content.add(loadNewPostsButton, "cell 0 0, wrap, span");
+				content.removeAll();
+				content.add(loadNewPostsButton, "wrap, span");
 				loadNewPostsButton.presentInGUI = true;
+				addMicroblogs();
 			}
 		}
 	}
@@ -63,7 +65,9 @@ public class MicroblogViewingPage {
 	private LinkedList<Microblog> getFilteredMicroblogs() {
 		final LinkedList<Microblog> microblogs = Lists.newLinkedList();
 
-		for (final Microblog mb : microblogContainer.getMicroblogsForViewing()) {
+		final Iterator<Microblog> iter = microblogContainer.getMicroblogsViewingIter();
+		while (iter.hasNext()) {
+			final Microblog mb = iter.next();
 			if (filter.passesFilter(mb)) {
 				microblogs.add(mb);
 			}
@@ -72,12 +76,12 @@ public class MicroblogViewingPage {
 		return microblogs;
 	}
 
-	private void addInitialMicroblogs() {
+	private void addMicroblogs() {
 		final LinkedList<Microblog> microblogs = getFilteredMicroblogs();
 
 		if (microblogs.size() > 0) {
 			for (final Microblog mb : microblogs) {
-				final MicroblogPost microblogPost = new MicroblogPost(mb);
+				final MicroblogPost microblogPost = new MicroblogPost(mb, mainWindow);
 				content.add(microblogPost.getContentPanel(), "wrap, span");
 			}
 		} else {
@@ -85,14 +89,9 @@ public class MicroblogViewingPage {
 		}
 	}
 
-	private void addNewMicroblogs() {
-		// move backwards through list so time order is preserved
-		final Iterator<Microblog> iter = microblogsNotShown.descendingIterator();
-		while (iter.hasNext()) {
-			final Microblog mb = iter.next();
-			final MicroblogPost microblogPost = new MicroblogPost(mb);
-			content.add(microblogPost.getContentPanel(), "cell 0 0, wrap, span");
-		}
+	private void readdMicroblogs() {
+		scroller.revalidate();
+		addMicroblogs();
 	}
 
 	@SuppressWarnings("serial")
@@ -100,19 +99,15 @@ public class MicroblogViewingPage {
 		public boolean presentInGUI = false;
 
 		public LoadNewPostsButton() {
+			setText("Load new posts...");
 			addActionListener(this);
 		}
 
 		@Override
 		public void actionPerformed(final ActionEvent event) {
-			removeFromGUI();
-			addNewMicroblogs();
-		}
-
-		private void removeFromGUI() {
 			presentInGUI = false;
-			content.remove(this);
-			addNewMicroblogs();
+			content.removeAll();
+			readdMicroblogs();
 		}
 	}
 }

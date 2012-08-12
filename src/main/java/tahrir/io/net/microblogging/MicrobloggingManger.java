@@ -20,8 +20,6 @@ public class MicrobloggingManger {
 	public ContactBook contactBook;
 	public DuplicateNameAppender duplicateNameAppender;
 
-	public MicroblogFilter microblogFilter;
-
 	private TrNode node;
 
 	private Microblog currentlyBroadcasting;
@@ -35,7 +33,6 @@ public class MicrobloggingManger {
 			contactBook = new ContactBook(this, new File(node.rootDirectory, node.config.contacts));
 			duplicateNameAppender = new DuplicateNameAppender(new File(node.rootDirectory, node.config.publicKeyChars));
 			mbContainer = new MicroblogContainer(contactBook);
-			microblogFilter = new MicroblogFilter(mbContainer, contactBook);
 		}
 	}
 

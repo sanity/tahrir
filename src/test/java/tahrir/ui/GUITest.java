@@ -9,12 +9,13 @@ import tahrir.tools.TrUtils;
 public class GUITest {
 	public static void main(final String[] args) {
 		try {
-			final TrNode testNode = TrUtils.makeTestNode(9002, false, false, false, true, 0, 0);
+			final TrNode testNode = TrUtils.makeTestNode(9004, false, false, false, true, 0, 0);
 			GUITest.addDummyMicroblogs(testNode);
 
 			UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
 
 			final TrMainWindow mainWindow = new TrMainWindow(testNode);
+
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
