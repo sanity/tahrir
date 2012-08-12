@@ -2,10 +2,10 @@ package tahrir.io.net.microblogging;
 
 import java.util.*;
 
-import tahrir.TrConstants;
-
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
+
+import tahrir.TrConstants;
 
 public class MicroblogContainer {
 	private final PriorityQueue<Microblog> microblogBroadcastQueue = new PriorityQueue<Microblog>(11, new MicroblogPriorityComparator());
@@ -50,7 +50,7 @@ public class MicroblogContainer {
 		}
 	}
 
-	public MicroblogsForViewing getMicroblogsForViewing() {
+	public Iterable<Microblog> getMicroblogsForViewing() {
 		return microblogsForViewing;
 	}
 
