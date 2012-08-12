@@ -3,8 +3,6 @@ package tahrir.io.net.microblogging;
 import java.security.interfaces.RSAPublicKey;
 import java.util.LinkedList;
 
-import tahrir.io.net.microblogging.MicrobloggingManger.Microblog;
-import tahrir.io.net.microblogging.MicrobloggingManger.MicroblogContainer;
 
 import com.google.common.collect.Lists;
 

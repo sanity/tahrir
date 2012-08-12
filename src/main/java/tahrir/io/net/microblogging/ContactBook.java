@@ -140,5 +140,12 @@ public class ContactBook {
 			}
 			return false;
 		}
+
+		public synchronized boolean hasContact(final RSAPublicKey publicKey) {
+			if (getContact(publicKey) != null)
+				return true;
+			else
+				return false;
+		}
 	}
 }
