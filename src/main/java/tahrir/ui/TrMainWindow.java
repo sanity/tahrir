@@ -69,14 +69,6 @@ public class TrMainWindow {
 
 	private Icon createTabIcon(final String name) {
 		final ImageIcon icon = new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + name);
-		/*
-		try {
-			icon = new ImageIcon(ImageIO.read(TrMainWindow.class.getResourceAsStream(TrConstants.MAIN_WINDOW_ARTWORK_PATH + name)));
-		} catch (final IOException e) {
-			e.printStackTrace();
-			logger.error("Error loading main tab icon.");
-		}
-		 */
 		return icon;
 	}
 
@@ -88,14 +80,17 @@ public class TrMainWindow {
 
 			add(label);
 
-			final JButton button = new CloseTabButton();
+			final JButton button = new CloseTabButton(this);
 			add(button);
 		}
 	}
 
 	private class CloseTabButton extends JButton implements ActionListener {
-		public CloseTabButton() {
-			super(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "close-tab.png"));
+		ClosableTabComponent parent;
+
+		public CloseTabButton(final ClosableTabComponent parent) {
+			super(createTabIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "close-tab.png"));
+			this.parent = parent;
 			//setRolloverEnabled(true);
 			//setRolloverIcon(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "close-tab-hover.png"));
 
@@ -111,7 +106,7 @@ public class TrMainWindow {
 
 		@Override
 		public void actionPerformed(final ActionEvent e) {
-			final int i = tabbedPane.indexOfTabComponent(this);
+			final int i = tabbedPane.indexOfTabComponent(parent);
 			if (i != -1) {
 				tabbedPane.remove(i);
 			}
