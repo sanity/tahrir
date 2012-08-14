@@ -2,9 +2,9 @@ package tahrir.ui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.security.interfaces.RSAPublicKey;
 
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicButtonUI;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -25,23 +25,34 @@ public class TrMainWindow {
 	public TrMainWindow(final TrNode node) {
 		this.node = node;
 
+		contentPanel = new JPanel(new MigLayout());
+
 		tabbedPane = new JTabbedPane();
-		tabbedPane.setPreferredSize(new Dimension(TrConstants.GUI_WIDTH_PX, TrConstants.GUI_HEIGHT_PX));
+		tabbedPane.setPreferredSize(new Dimension(TrConstants.GUI_WIDTH_PX, TrConstants.GUI_HEIGHT_PX - 120));
 		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		addTabs();
+		contentPanel.add(tabbedPane, "wrap");
 
-		contentPanel = new JPanel();
-		contentPanel.add(tabbedPane);
+		final JTextPane newPostPane = new JTextPane();
+		newPostPane.setBackground(Color.WHITE);
+		newPostPane.setBorder(BorderFactory.createLineBorder(TrConstants.SEAGLASS_BLUE));
+		newPostPane.setPreferredSize(new Dimension(TrConstants.GUI_WIDTH_PX - 50, 110));
+		// the text pane and the button will go into the same cell
+		contentPanel.add(newPostPane, "split 2");
+
+		final JButton newPostButton = new JButton("Post");
+		contentPanel.add(newPostButton, "align center");
 
 		frame = new JFrame();
 		frame.setTitle("Tahrir");
 		frame.getContentPane().add(contentPanel, BorderLayout.CENTER);
 		frame.setSize(TrConstants.GUI_WIDTH_PX, TrConstants.GUI_HEIGHT_PX);
+		frame.setResizable(false);
 		frame.setVisible(true);
 	}
 
-	public void createClosableTab(final String tabName) {
-		tabbedPane.insertTab(null, null, null, null, tabbedPane.getTabCount());
+	public void createClosableTab(final String tabName, final RSAPublicKey userToFilter) {
+		tabbedPane.insertTab(null, null, new MicroblogViewingPage(node, new UserFilter(userToFilter), this).getContentPane(), null, tabbedPane.getTabCount());
 		final int newTabIndex = tabbedPane.getTabCount() - 1;
 		tabbedPane.setSelectedIndex(newTabIndex);
 		tabbedPane.setTabComponentAt(newTabIndex, new ClosableTabComponent(tabName));
@@ -59,10 +70,10 @@ public class TrMainWindow {
 		contactBook.add(new JLabel("This is the contact book page"));
 		settings.add(new JLabel("This is the settings page"));
 
-		tabbedPane.addTab(null, createTabIcon("unfiltered.png"), unfilteredPostPage.getContentPane(), "All posts");
+		tabbedPane.addTab(null, createTabIcon("feed.png"), unfilteredPostPage.getContentPane(), "All posts");
 		tabbedPane.addTab(null, createTabIcon("following.png"), followingPostPage.getContentPane(), "Following posts");
 		tabbedPane.addTab(null, createTabIcon("mentions.png"), mentions, "Mentions");
-		tabbedPane.addTab(null, createTabIcon("my-posts.png"), myPostsPage.getContentPane(), "My posts");
+		tabbedPane.addTab(null, createTabIcon("user-home.png"), myPostsPage.getContentPane(), "My posts");
 		tabbedPane.addTab(null, createTabIcon("contact-book.png"), contactBook, "Contact book");
 		tabbedPane.addTab(null, createTabIcon("settings.png"), settings, "Settings");
 	}
@@ -77,7 +88,8 @@ public class TrMainWindow {
 			super(new MigLayout());
 
 			final JLabel label = new JLabel(tabName);
-
+			label.setFont(new Font("tab", Font.PLAIN, label.getFont().getSize() - 1));
+			setForeground(Color.DARK_GRAY);
 			add(label);
 
 			final JButton button = new CloseTabButton(this);
@@ -85,21 +97,14 @@ public class TrMainWindow {
 		}
 	}
 
-	private class CloseTabButton extends JButton implements ActionListener {
+	private class CloseTabButton extends TransparentButton implements ActionListener {
 		ClosableTabComponent parent;
 
 		public CloseTabButton(final ClosableTabComponent parent) {
-			super(createTabIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "close-tab.png"));
+			super(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "close-tab.png"), "close this tab");
 			this.parent = parent;
 			//setRolloverEnabled(true);
 			//setRolloverIcon(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "close-tab-hover.png"));
-
-			setToolTipText("close this tab");
-
-			//Make the button looks the same for all Laf's
-			setUI(new BasicButtonUI());
-			//Make it transparent
-			setContentAreaFilled(false);
 
 			addActionListener(this);
 		}

@@ -3,13 +3,14 @@ package tahrir.ui;
 import javax.swing.UIManager;
 
 import tahrir.TrNode;
+import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.microblogging.Microblog;
 import tahrir.tools.TrUtils;
 
 public class GUITest {
 	public static void main(final String[] args) {
 		try {
-			final TrNode testNode = TrUtils.makeTestNode(9004, false, false, false, true, 0, 0);
+			final TrNode testNode = TrUtils.makeTestNode(9003, false, false, false, true, 0, 0);
 			GUITest.addDummyMicroblogs(testNode);
 
 			UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
@@ -31,6 +32,7 @@ public class GUITest {
 		testMb1.authorNick = "sanity";
 		testMb2.authorNick = "nomel";
 		testMb3.authorNick = "bubbles";
+		testMb3.publicKey = TrCrypto.createRsaKeyPair().a;
 
 		node.mbManager.getMicroblogContainer().insert(testMb0);
 		node.mbManager.getMicroblogContainer().insert(testMb1);

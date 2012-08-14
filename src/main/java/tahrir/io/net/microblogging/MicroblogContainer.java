@@ -94,10 +94,9 @@ public class MicroblogContainer {
 	}
 
 	private class MicroblogTimeComparator implements Comparator<Microblog> {
-		// not sure how good this is a way of comparing them
 		@Override
 		public int compare(final Microblog mb1, final Microblog mb2) {
-			return Double.compare(mb1.timeCreated, mb2.timeCreated);
+			return Double.compare(mb2.timeCreated, mb1.timeCreated);
 		}
 	}
 }

@@ -1,5 +1,7 @@
 package tahrir;
 
+import java.awt.Color;
+
 public class TrConstants {
 	public static final int MAX_UDP_PACKET_SIZE = 1400; // old value was 1450
 
@@ -35,9 +37,11 @@ public class TrConstants {
 
 	public static final int MAX_MICROBLOGS_FOR_VIEWING = 200;
 
-	public static final int GUI_WIDTH_PX = 500;
+	public static final int GUI_WIDTH_PX = 600;
 
-	public static final int GUI_HEIGHT_PX = 700;
+	public static final int GUI_HEIGHT_PX = 600;
 
 	public static final String MAIN_WINDOW_ARTWORK_PATH = "artwork/";
+
+	public static final Color SEAGLASS_BLUE = new Color(112, 154, 208);
 }

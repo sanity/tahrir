@@ -17,13 +17,10 @@ public class MicroblogPost {
 	public MicroblogPost(final Microblog mb, final TrMainWindow mainWindow) {
 		contentPanel = new JPanel(new MigLayout());
 		contentPanel.setBackground(Color.WHITE);
-		contentPanel.setBorder(BorderFactory.createLineBorder(Color.BLUE));
+		contentPanel.setBorder(BorderFactory.createRaisedSoftBevelBorder());
 
-		final TabCreateButton authorNick = new TabCreateButton(mb.authorNick, mb.authorNick, mainWindow);
+		final TabCreateButton authorNick = new TabCreateButton(mb.authorNick, mb.authorNick, mainWindow, mb.publicKey);
 		authorNick.setFont(new Font("bold", Font.BOLD, authorNick.getFont().getSize() + 2));
-		authorNick.setContentAreaFilled(false);
-		authorNick.setText(mb.authorNick);
-
 		contentPanel.add(authorNick, "align left");
 
 		final JLabel postTime = new JLabel(DateParser.parseTime(mb.timeCreated));
@@ -42,8 +39,14 @@ public class MicroblogPost {
 		} catch (final BadLocationException e) {
 			throw new RuntimeException(e);
 		}
-		contentPanel.setPreferredSize(new Dimension(TrConstants.GUI_WIDTH_PX - 40, messageTextPane.getHeight()));
+		contentPanel.setPreferredSize(new Dimension(TrConstants.GUI_WIDTH_PX - 50, messageTextPane.getHeight()));
+		messageTextPane.setPreferredSize(contentPanel.getPreferredSize());
 		contentPanel.add(messageTextPane, "wrap, span");
+
+		final JButton upvoteButton = new TransparentButton(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "upvote.png"), "upvote");
+		contentPanel.add(upvoteButton, "split 2, span, align right");
+		final JButton downvoteButton = new TransparentButton(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "downvote.png"), "downvote");
+		contentPanel.add(downvoteButton);
 	}
 
 	public JPanel getContentPanel() {
