@@ -35,7 +35,7 @@ public class TrConstants {
 
 	public static final int MAINTENANCE_FREQUENCY_MIN = 1;
 
-	public static final int MAX_MICROBLOGS_FOR_VIEWING = 200;
+	public static final int MAX_MICROBLOGS_FOR_VIEWING = 300;
 
 	public static final int GUI_WIDTH_PX = 600;
 

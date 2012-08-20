@@ -8,7 +8,9 @@ import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import tahrir.TrNode;
 import tahrir.io.net.microblogging.*;
+import tahrir.io.net.microblogging.containers.MicroblogsForBroadcast;
 import tahrir.io.net.microblogging.filters.MicroblogFilter;
+import tahrir.io.net.microblogging.microblogs.MicroblogForBroadcast;
 
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
@@ -16,7 +18,7 @@ import com.google.common.eventbus.Subscribe;
 public class MicroblogViewingPage {
 	private final MicroblogFilter filter;
 
-	private final MicroblogContainer microblogContainer;
+	private final MicroblogsForBroadcast microblogContainer;
 
 	private final JPanel content;
 	private final JScrollPane scroller;
@@ -47,7 +49,7 @@ public class MicroblogViewingPage {
 	}
 
 	@Subscribe
-	public void listenForNewMicroblog(final Microblog mb) {
+	public void listenForNewMicroblog(final MicroblogForBroadcast mb) {
 		if (filter.passesFilter(mb)) {
 			if (!loadNewPostsButton.presentInGUI) {
 				content.removeAll();
@@ -62,12 +64,12 @@ public class MicroblogViewingPage {
 		return scroller;
 	}
 
-	private LinkedList<Microblog> getFilteredMicroblogs() {
-		final LinkedList<Microblog> microblogs = Lists.newLinkedList();
+	private LinkedList<MicroblogForBroadcast> getFilteredMicroblogs() {
+		final LinkedList<MicroblogForBroadcast> microblogs = Lists.newLinkedList();
 
-		final Iterator<Microblog> iter = microblogContainer.getMicroblogsViewingIter();
+		final Iterator<MicroblogForBroadcast> iter = microblogContainer.getMicroblogsViewingIter();
 		while (iter.hasNext()) {
-			final Microblog mb = iter.next();
+			final MicroblogForBroadcast mb = iter.next();
 			if (filter.passesFilter(mb)) {
 				microblogs.add(mb);
 			}
@@ -77,10 +79,10 @@ public class MicroblogViewingPage {
 	}
 
 	private void addMicroblogs() {
-		final LinkedList<Microblog> microblogs = getFilteredMicroblogs();
+		final LinkedList<MicroblogForBroadcast> microblogs = getFilteredMicroblogs();
 
 		if (microblogs.size() > 0) {
-			for (final Microblog mb : microblogs) {
+			for (final MicroblogForBroadcast mb : microblogs) {
 				final MicroblogPost microblogPost = new MicroblogPost(mb, mainWindow);
 				content.add(microblogPost.getContentPanel(), "wrap, span");
 			}

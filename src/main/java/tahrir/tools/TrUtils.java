@@ -4,12 +4,17 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.security.*;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Random;
 import java.util.concurrent.*;
 
 import net.sf.doodleproject.numerics4j.random.RandomRNG;
+
+import org.apache.commons.codec.binary.Base64;
+
 import tahrir.*;
 
+import com.google.common.eventbus.EventBus;
 import com.google.gson.*;
 
 public class TrUtils {
@@ -26,6 +31,8 @@ public class TrUtils {
 	};
 
 	public static final Gson gson;
+
+	public static final EventBus eventBus = new EventBus();
 
 	static {
 		final GsonBuilder builder = new GsonBuilder();
@@ -69,6 +76,15 @@ public class TrUtils {
 		int numRead = 0;
 		while (read < buffer.length && (numRead = dis.read(buffer, read, buffer.length - read)) >= 0) {
 			read = read + numRead;
+		}
+	}
+
+	public static RSAPublicKey getPublicKey(final String pubKeyString) {
+		final byte[] bytes = Base64.decodeBase64(pubKeyString);
+		try {
+			return (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(bytes));
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 

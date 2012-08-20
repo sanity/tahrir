@@ -6,44 +6,53 @@ import java.util.*;
 
 import org.slf4j.*;
 
+import tahrir.TrNode;
 import tahrir.tools.TrUtils;
 
 import com.google.gson.JsonParseException;
 
 public class ContactBook {
-	public static Logger logger = LoggerFactory.getLogger(ContactBook.class);
+	private static Logger logger = LoggerFactory.getLogger(ContactBook.class);
 
-	public ContactsContainer contactsContainer = new ContactsContainer();
+	private ContactsContainer contactsContainer = new ContactsContainer();
 
 	private final File contactsFile;
 
-	private final MicrobloggingManger microbloggingManager;
+	private final TrNode node;
 
-	public ContactBook(final MicrobloggingManger microbloggingManager, final File contactsFile) {
+	public ContactBook(final TrNode node, final File contactsFile) {
 		this.contactsFile = contactsFile;
-		this.microbloggingManager = microbloggingManager;
+		this.node = node;
 		tryLoadContactsFromFile();
 	}
 
-	/**
-	 * Adds a contact to the contact book
-	 * @return If the preferred nickname was given
-	 */
 	public boolean addContact(final String preferedNick, final RSAPublicKey publicKey) {
 		boolean gotPreferedNick;
 		if (!contactsContainer.hasNickName(preferedNick)) {
-			contactsContainer.addContact(publicKey, new ContactInformation(preferedNick));
+			contactsContainer.add(publicKey, new ContactInformation(preferedNick));
 			gotPreferedNick = true;
 		} else {
 			// need to append something to end to make it unique
-			final String toAppend = microbloggingManager.duplicateNameAppender.getIntsToAppend(publicKey);
+			final String toAppend = node.mbClasses.duplicateNameAppender.getIntsToAppend(publicKey);
 			// TODO: very unlikely but does not check if the appended nick name with appended already exists
-			contactsContainer.addContact(publicKey, new ContactInformation(preferedNick, toAppend));
+			contactsContainer.add(publicKey, new ContactInformation(preferedNick, toAppend));
 			gotPreferedNick = false;
 		}
 
 		addContactsToFile();
 		return gotPreferedNick;
+	}
+
+	public ContactInformation getContact(final RSAPublicKey publicKey) {
+		return contactsContainer.getContact(publicKey);
+	}
+
+	public boolean hasContact(final RSAPublicKey publicKey) {
+		return contactsContainer.hasContact(publicKey);
+	}
+
+	public List<ContactInformation> getContacts() {
+		return contactsContainer.getContacts();
 	}
 
 	private void addContactsToFile() {
@@ -116,24 +125,24 @@ public class ContactBook {
 	public static class ContactsContainer {
 		private final LinkedHashMap<RSAPublicKey, ContactInformation> contacts;
 
-		public ContactsContainer() {
+		private ContactsContainer() {
 			contacts = new LinkedHashMap<RSAPublicKey, ContactInformation>();
 		}
 
-		public synchronized void addContact(final RSAPublicKey publicKey, final ContactInformation contactInfo) {
+		private synchronized void add(final RSAPublicKey publicKey, final ContactInformation contactInfo) {
 			contacts.put(publicKey, contactInfo);
 		}
 
-		public synchronized ContactInformation getContact(final RSAPublicKey publicKey) {
+		private synchronized ContactInformation getContact(final RSAPublicKey publicKey) {
 			return contacts.get(publicKey);
 		}
 
-		public synchronized Collection<ContactInformation> getContacts() {
+		private synchronized List<ContactInformation> getContacts() {
 			final ArrayList<ContactInformation> contactsSnapShot = new ArrayList<ContactInformation>(contacts.values());
 			return contactsSnapShot;
 		}
 
-		public synchronized boolean hasNickName(final String nickName) {
+		private synchronized boolean hasNickName(final String nickName) {
 			for (final ContactInformation contact : contacts.values()) {
 				if (contact.getFullNick().equals(nickName))
 					return true;

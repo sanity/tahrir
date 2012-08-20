@@ -2,7 +2,6 @@ package tahrir.ui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.security.interfaces.RSAPublicKey;
 
 import javax.swing.*;
 
@@ -26,7 +25,6 @@ public class TrMainWindow {
 		this.node = node;
 
 		contentPanel = new JPanel(new MigLayout());
-
 		tabbedPane = new JTabbedPane();
 		tabbedPane.setPreferredSize(new Dimension(TrConstants.GUI_WIDTH_PX, TrConstants.GUI_HEIGHT_PX - 120));
 		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -51,8 +49,8 @@ public class TrMainWindow {
 		frame.setVisible(true);
 	}
 
-	public void createClosableTab(final String tabName, final RSAPublicKey userToFilter) {
-		tabbedPane.insertTab(null, null, new MicroblogViewingPage(node, new UserFilter(userToFilter), this).getContentPane(), null, tabbedPane.getTabCount());
+	public void createClosableTab(final String tabName, final Component tabContents) {
+		tabbedPane.insertTab(tabName, null, tabContents, null, tabbedPane.getTabCount());
 		final int newTabIndex = tabbedPane.getTabCount() - 1;
 		tabbedPane.setSelectedIndex(newTabIndex);
 		tabbedPane.setTabComponentAt(newTabIndex, new ClosableTabComponent(tabName));
@@ -101,7 +99,7 @@ public class TrMainWindow {
 		ClosableTabComponent parent;
 
 		public CloseTabButton(final ClosableTabComponent parent) {
-			super(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "close-tab.png"), "close this tab");
+			super(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "close-tab.png"), "Close this tab");
 			this.parent = parent;
 			//setRolloverEnabled(true);
 			//setRolloverIcon(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "close-tab-hover.png"));

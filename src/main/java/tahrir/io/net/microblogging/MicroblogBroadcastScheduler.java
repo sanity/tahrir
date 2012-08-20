@@ -1,38 +1,34 @@
 package tahrir.io.net.microblogging;
 
-import java.io.File;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import tahrir.TrNode;
 import tahrir.io.net.*;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
+import tahrir.io.net.microblogging.containers.MicroblogsForBroadcast;
+import tahrir.io.net.microblogging.microblogs.MicroblogForBroadcast;
 import tahrir.tools.TrUtils;
 
 /**
- * Handles general microblogging tasks such as scheduling broadcast
+ * Schedules a single microblog for broadcast.
  * 
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
-public class MicrobloggingManger {
-	private MicroblogContainer mbContainer;
-
-	public ContactBook contactBook;
-	public DuplicateNameAppender duplicateNameAppender;
-
+public class MicroblogBroadcastScheduler {
+	private MicroblogsForBroadcast mbsForBroadcast;
 	private TrNode node;
 
-	private Microblog currentlyBroadcasting;
+	private MicroblogForBroadcast currentlyBroadcasting;
 	private Iterator<PhysicalNetworkLocation> peerIter;
 
-	public MicrobloggingManger(final TrNode node) {
+	public MicroblogBroadcastScheduler(final TrNode node) {
 		// some nodes i.e seed nodes won't be running microblogging broadcast
 		if (node.config.peers.runBroadcast) {
 			this.node = node;
 			scheduleForLater();
-			contactBook = new ContactBook(this, new File(node.rootDirectory, node.config.contacts));
-			duplicateNameAppender = new DuplicateNameAppender(new File(node.rootDirectory, node.config.publicKeyChars));
-			mbContainer = new MicroblogContainer(contactBook);
+
+			mbsForBroadcast = new MicroblogsForBroadcast();
 		}
 	}
 
@@ -53,7 +49,7 @@ public class MicrobloggingManger {
 		if (snapShot.size() >= node.peerManager.config.minPeers) {
 			peerIter = snapShot.iterator();
 
-			currentlyBroadcasting = mbContainer.getMicroblogForBroadcast();
+			currentlyBroadcasting = mbsForBroadcast.getMicroblogForBroadcast();
 
 			startBroadcastToPeer();
 		} else {
@@ -71,8 +67,8 @@ public class MicrobloggingManger {
 		}
 	}
 
-	public MicroblogContainer getMicroblogContainer() {
-		return mbContainer;
+	public MicroblogsForBroadcast getMicroblogContainer() {
+		return mbsForBroadcast;
 	}
 
 	private void scheduleForLater() {

@@ -5,6 +5,7 @@ import org.testng.annotations.*;
 
 import tahrir.TrNode;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
+import tahrir.io.net.microblogging.microblogs.MicroblogForBroadcast;
 import tahrir.tools.TrUtils;
 
 public class MicroblogBroadcastTest {
@@ -25,7 +26,7 @@ public class MicroblogBroadcastTest {
 
 	@Test
 	public void simpleTest() throws Exception {
-		final Microblog testMb = new Microblog(sendingNode, "Hello world");
+		final MicroblogForBroadcast testMb = new MicroblogForBroadcast(sendingNode, "Hello world");
 		sendingNode.mbManager.getMicroblogContainer().insert(testMb);
 
 		// don't want initial wait
@@ -43,8 +44,8 @@ public class MicroblogBroadcastTest {
 
 	@Test
 	public void priorityTest() throws Exception {
-		final Microblog testMb0 = new Microblog(sendingNode, "You SHOULD have this microblog!", 0);
-		final Microblog testMb1 = new Microblog(sendingNode, "You should NOT have this microblog!", Integer.MAX_VALUE);
+		final MicroblogForBroadcast testMb0 = new MicroblogForBroadcast(sendingNode, "You SHOULD have this microblog!", 0);
+		final MicroblogForBroadcast testMb1 = new MicroblogForBroadcast(sendingNode, "You should NOT have this microblog!", Integer.MAX_VALUE);
 		sendingNode.mbManager.getMicroblogContainer().insert(testMb0);
 		sendingNode.mbManager.getMicroblogContainer().insert(testMb1);
 

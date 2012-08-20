@@ -9,17 +9,20 @@ import javax.swing.text.*;
 
 import net.miginfocom.swing.MigLayout;
 import tahrir.TrConstants;
-import tahrir.io.net.microblogging.Microblog;
+import tahrir.io.net.microblogging.filters.UserFilter;
+import tahrir.io.net.microblogging.microblogs.MicroblogForBroadcast;
 
 public class MicroblogPost {
 	private final JPanel contentPanel;
 
-	public MicroblogPost(final Microblog mb, final TrMainWindow mainWindow) {
+	public MicroblogPost(final MicroblogForBroadcast mb, final TrMainWindow mainWindow) {
 		contentPanel = new JPanel(new MigLayout());
 		contentPanel.setBackground(Color.WHITE);
 		contentPanel.setBorder(BorderFactory.createRaisedSoftBevelBorder());
 
-		final TabCreateButton authorNick = new TabCreateButton(mb.authorNick, mb.authorNick, mainWindow, mb.publicKey);
+		// create a button which bring up tab with author's microblogs when clicked
+		final MicroblogViewingPage authorViewingPage = new MicroblogViewingPage(null, new UserFilter(mb.publicKey), mainWindow);
+		final TabCreateButton authorNick = new TabCreateButton(mainWindow, mb.authorNick, authorViewingPage.getContentPane());
 		authorNick.setFont(new Font("bold", Font.BOLD, authorNick.getFont().getSize() + 2));
 		contentPanel.add(authorNick, "align left");
 

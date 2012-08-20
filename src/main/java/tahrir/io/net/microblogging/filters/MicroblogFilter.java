@@ -1,7 +1,7 @@
 package tahrir.io.net.microblogging.filters;
 
-import tahrir.io.net.microblogging.Microblog;
+import tahrir.io.net.microblogging.microblogs.MicroblogForBroadcast;
 
 public interface MicroblogFilter {
-	public boolean passesFilter(Microblog mb);
+	public boolean passesFilter(MicroblogForBroadcast mb);
 }

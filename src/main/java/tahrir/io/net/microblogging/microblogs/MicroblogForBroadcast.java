@@ -1,11 +1,11 @@
-package tahrir.io.net.microblogging;
+package tahrir.io.net.microblogging.microblogs;
 
 import java.security.interfaces.RSAPublicKey;
 
 import tahrir.*;
 import tahrir.io.crypto.*;
 
-public class Microblog {
+public class MicroblogForBroadcast {
 	public int priority;
 	public TrSignature signature;
 	public String languageCode;
@@ -15,15 +15,15 @@ public class Microblog {
 	public long timeCreated;
 
 	// for serialization
-	public Microblog() {
+	public MicroblogForBroadcast() {
 
 	}
 
-	public Microblog(final TrNode creatingNode, final String message) {
+	public MicroblogForBroadcast(final TrNode creatingNode, final String message) {
 		this(creatingNode, message, TrConstants.BROADCAST_INIT_PRIORITY);
 	}
 
-	public Microblog(final TrNode creatingNode, final String message, final int priority) {
+	public MicroblogForBroadcast(final TrNode creatingNode, final String message, final int priority) {
 		this.priority = priority;
 		timeCreated = System.currentTimeMillis();
 		this.message = message;
@@ -53,7 +53,7 @@ public class Microblog {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		final Microblog other = (Microblog) obj;
+		final MicroblogForBroadcast other = (MicroblogForBroadcast) obj;
 		if (signature == null) {
 			if (other.signature != null)
 				return false;

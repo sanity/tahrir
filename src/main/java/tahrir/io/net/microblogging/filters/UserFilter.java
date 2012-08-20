@@ -2,7 +2,7 @@ package tahrir.io.net.microblogging.filters;
 
 import java.security.interfaces.RSAPublicKey;
 
-import tahrir.io.net.microblogging.Microblog;
+import tahrir.io.net.microblogging.microblogs.MicroblogForBroadcast;
 
 public class UserFilter implements MicroblogFilter {
 	private final RSAPublicKey userPubKey;
@@ -12,7 +12,7 @@ public class UserFilter implements MicroblogFilter {
 	}
 
 	@Override
-	public boolean passesFilter(final Microblog mb) {
+	public boolean passesFilter(final MicroblogForBroadcast mb) {
 		if (mb.publicKey.equals(userPubKey))
 			return true;
 		else

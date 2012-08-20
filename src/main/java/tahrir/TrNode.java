@@ -38,7 +38,7 @@ public class TrNode {
 
 	public final TrPeerManager peerManager;
 
-	public MicrobloggingManger mbManager;
+	public MicrobloggingClasses mbClasses;
 
 	public TrSessionManager sessionMgr;
 
@@ -81,9 +81,9 @@ public class TrNode {
 		logger.info("Set up peer manager");
 		peerManager = new TrPeerManager(config.peers, this);
 
-		registerSessions();
+		mbClasses = new MicrobloggingClasses(this);
 
-		mbManager = new MicrobloggingManger(this);
+		registerSessions();
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class TrNode {
 	private void registerSessions() {
 		sessionMgr.registerSessionClass(TopologyMaintenanceSession.class, TopologyMaintenanceSessionImpl.class);
 		sessionMgr.registerSessionClass(AssimilateSession.class, AssimilateSessionImpl.class);
-		sessionMgr.registerSessionClass(MicoblogBroadcastSession.class, MicroblogBroadcastSessionImpl.class);
+		sessionMgr.registerSessionClass(MicroblogBroadcastSession.class, MicroblogBroadcastSessionImpl.class);
 	}
 
 	public ArrayList<File> getPublicNodeIdFiles() {
@@ -118,6 +118,19 @@ public class TrNode {
 
 	public void modifyPublicNodeId(final ModifyBlock<RemoteNodeAddress> mb) {
 		Persistence.loadAndModify(RemoteNodeAddress.class, pubNodeIdFile, mb);
+	}
+
+	public static class MicrobloggingClasses {
+		public MicroblogBroadcastScheduler mbScheduler;
+		public ContactBook contactBook;
+		public DuplicateNameAppender duplicateNameAppender;
+
+
+		public MicrobloggingClasses(final TrNode node) {
+			mbScheduler = new MicroblogBroadcastScheduler(node);
+			contactBook = new ContactBook(node, new File(node.rootDirectory, node.config.contacts));
+			duplicateNameAppender = new DuplicateNameAppender(new File(node.rootDirectory, node.config.publicKeyChars));
+		}
 	}
 
 	public static class PrivateNodeId {
