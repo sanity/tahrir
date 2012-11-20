@@ -4,31 +4,31 @@ import org.slf4j.*;
 
 import tahrir.TrNode;
 import tahrir.io.net.*;
-import tahrir.io.net.microblogging.microblogs.MicroblogForBroadcast;
+import tahrir.io.net.microblogging.microblogs.Microblog;
 
 /**
- * Responsible for creating sessions for sending a single microblog between this node
- * and another if probabilistic conditions met.
+ * A session for broadcasting a microblog to a node.
+ * 
+ * The microblog will be broadcast if a node expresses interest based
+ * on a probalistic condition otherwise the session will end.
  * 
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements MicroblogBroadcastSession {
 	private static final Logger logger = LoggerFactory.getLogger(MicroblogBroadcastSessionImpl.class.getName());
 
-	private MicroblogForBroadcast beingSent;
+	private Microblog beingSent;
 
 	private MicroblogBroadcastSession receiverSess;
 	private MicroblogBroadcastSession initiatorSess;
 
 	private boolean nextBroadcastStarted;
 
-	private IncomingMicroblogHandler incomingMbHandler;
-
 	public MicroblogBroadcastSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager sessionMgr) {
 		super(sessionId, node, sessionMgr);
 	}
 
-	public void startSingleBroadcast(final MicroblogForBroadcast mbToBroadcast, final PhysicalNetworkLocation peerPhysicalLoc) {
+	public void startSingleBroadcast(final Microblog mbToBroadcast, final PhysicalNetworkLocation peerPhysicalLoc) {
 		nextBroadcastStarted = false;
 		beingSent = mbToBroadcast;
 		receiverSess = remoteSession(MicroblogBroadcastSession.class, connection(peerPhysicalLoc));
@@ -39,7 +39,7 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Micr
 	public void areYouInterested(final int mbHash) {
 		initiatorSess = remoteSession(MicroblogBroadcastSession.class, connection(sender()));
 
-		initiatorSess.interestIs(!node.mbManager.getMicroblogContainer().isLikelyToContain(mbHash));
+		initiatorSess.interestIs(!node.mbClasses.mbsForBroadcast.isLikelyToContain(mbHash));
 	}
 
 	public void interestIs(final boolean interest) {
@@ -50,9 +50,8 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Micr
 		}
 	}
 
-	public void insertMicroblog(final MicroblogForBroadcast mb) {
-		incomingMbHandler.handleInsertion(mb);
-		//node.mbManager.getMicroblogContainer().insert(mb);
+	public void insertMicroblog(final Microblog mb) {
+		node.mbClasses.incomingMbHandler.handleInsertion(mb);
 		// TODO: this is a workaround until we have a registerSuccessListener()
 		initiatorSess.sessionFinished();
 	}
@@ -64,7 +63,7 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Micr
 	private synchronized void startBroadcastToNextPeer() {
 		if (!nextBroadcastStarted) {
 			nextBroadcastStarted = true;
-			node.mbManager.startBroadcastToPeer();
+			node.mbClasses.mbScheduler.startBroadcastToPeer();
 		}
 	}
 

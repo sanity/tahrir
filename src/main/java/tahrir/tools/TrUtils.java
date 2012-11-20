@@ -2,16 +2,13 @@ package tahrir.tools;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.security.*;
+import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Random;
 import java.util.concurrent.*;
 
 import net.sf.doodleproject.numerics4j.random.RandomRNG;
-
-import org.apache.commons.codec.binary.Base64;
-
 import tahrir.*;
 
 import com.google.common.eventbus.EventBus;
@@ -36,8 +33,8 @@ public class TrUtils {
 
 	static {
 		final GsonBuilder builder = new GsonBuilder();
-		builder.registerTypeAdapter(RSAPublicKey.class, new PublicKeyInstanceCreator());
-		//builder.registerTypeAdapter(RSAPublicKey.class, new RSAPublicKeySerializer());
+		builder.registerTypeAdapter(RSAPublicKey.class, new GsonSerializers.RSAPublicKeySerializer());
+		builder.registerTypeAdapter(RSAPublicKey.class, new GsonSerializers.RSAPublicKeyDeserializer());
 		gson = builder.create();
 	}
 
@@ -79,10 +76,9 @@ public class TrUtils {
 		}
 	}
 
-	public static RSAPublicKey getPublicKey(final String pubKeyString) {
-		final byte[] bytes = Base64.decodeBase64(pubKeyString);
+	public static RSAPublicKey getPublicKey(final byte[] encodedBytes) {
 		try {
-			return (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(bytes));
+			return (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(encodedBytes));
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -120,21 +116,5 @@ public class TrUtils {
 	public static void createTestBidirectionalConnection(final TrNode node1, final TrNode node2) {
 		node1.peerManager.addNewPeer(node2.getRemoteNodeAddress(), node2.config.capabilities, node2.peerManager.locInfo.getLocation());
 		node2.peerManager.addNewPeer(node1.getRemoteNodeAddress(), node1.config.capabilities, node1.peerManager.locInfo.getLocation());
-	}
-
-	/*
-	 * This allows deserialzing of RSAPublicKey with gson as a no-arg constructor is needed
-	 */
-	public static class PublicKeyInstanceCreator implements InstanceCreator<RSAPublicKey> {
-		public RSAPublicKey createInstance(final Type type) {
-			try {
-				final KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-				keyGen.initialize(2048);
-				final KeyPair key = keyGen.generateKeyPair();
-				return (RSAPublicKey) key.getPublic();
-			} catch (final NoSuchAlgorithmException e) {
-				throw new RuntimeException(e);
-			}
-		}
 	}
 }

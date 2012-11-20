@@ -2,38 +2,38 @@ package tahrir.io.net.microblogging.containers;
 
 import java.util.*;
 
-import tahrir.io.net.microblogging.microblogs.MicroblogForBroadcast;
+import tahrir.io.net.microblogging.microblogs.Microblog;
 
 import com.google.common.collect.Sets;
 
 public class MicroblogsForBroadcast {
-	private final PriorityQueue<MicroblogForBroadcast> microblogBroadcastQueue;
+	private final PriorityQueue<Microblog> microblogBroadcastQueue;
 	private final Set<Integer> seen;
 
 	public MicroblogsForBroadcast() {
-		microblogBroadcastQueue = new PriorityQueue<MicroblogForBroadcast>(11, new MicroblogPriorityComparator());
+		microblogBroadcastQueue = new PriorityQueue<Microblog>(100, new MicroblogPriorityComparator());
 		seen =  Sets.newLinkedHashSet();
 	}
 
-	public MicroblogForBroadcast getMicroblogForBroadcast() {
+	public synchronized Microblog getMicroblogForBroadcast() {
 		return microblogBroadcastQueue.poll();
 	}
 
-	public void changeBroadcastPriority(final MicroblogForBroadcast mb, final int priority) {
+	public synchronized void changeBroadcastPriority(final Microblog mb, final int priority) {
 		microblogBroadcastQueue.remove(mb);
 		mb.priority = priority;
 		microblogBroadcastQueue.add(mb);
 	}
 
-	public boolean isLikelyToContain(final int microblogHash) {
+	public synchronized boolean isLikelyToContain(final int microblogHash) {
 		return seen.contains(microblogHash);
 	}
 
-	public boolean contains(final MicroblogForBroadcast mb) {
+	public synchronized boolean contains(final Microblog mb) {
 		return microblogBroadcastQueue.contains(mb);
 	}
 
-	public boolean insert(final MicroblogForBroadcast mb) {
+	public synchronized boolean insert(final Microblog mb) {
 		final boolean inserted = false;
 
 		seen.add(mb.hashCode());
@@ -45,13 +45,13 @@ public class MicroblogsForBroadcast {
 		return inserted;
 	}
 
-	public boolean remove(final MicroblogForBroadcast mb) {
+	public synchronized boolean remove(final Microblog mb) {
 		return microblogBroadcastQueue.remove(mb);
 	}
 
-	private class MicroblogPriorityComparator implements Comparator<MicroblogForBroadcast> {
+	private class MicroblogPriorityComparator implements Comparator<Microblog> {
 		@Override
-		public int compare(final MicroblogForBroadcast mb1, final MicroblogForBroadcast mb2) {
+		public int compare(final Microblog mb1, final Microblog mb2) {
 			return Double.compare(mb1.priority, mb2.priority);
 		}
 	}

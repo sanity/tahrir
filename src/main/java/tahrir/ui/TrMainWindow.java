@@ -2,6 +2,7 @@ package tahrir.ui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.SortedSet;
 
 import javax.swing.*;
 
@@ -11,6 +12,7 @@ import org.slf4j.*;
 
 import tahrir.*;
 import tahrir.io.net.microblogging.filters.*;
+import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
 public class TrMainWindow {
 	public static Logger logger = LoggerFactory.getLogger(TrMainWindow.class.getName());
@@ -21,6 +23,8 @@ public class TrMainWindow {
 	private final JPanel contentPanel;
 	private final JTabbedPane tabbedPane;
 
+	private static int TAB_NOT_FOUND = -1;
+
 	public TrMainWindow(final TrNode node) {
 		this.node = node;
 
@@ -28,7 +32,7 @@ public class TrMainWindow {
 		tabbedPane = new JTabbedPane();
 		tabbedPane.setPreferredSize(new Dimension(TrConstants.GUI_WIDTH_PX, TrConstants.GUI_HEIGHT_PX - 120));
 		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-		addTabs();
+		addTabs(node.mbClasses.mbsForViewing.getMicroblogSet());
 		contentPanel.add(tabbedPane, "wrap");
 
 		final JTextPane newPostPane = new JTextPane();
@@ -56,11 +60,11 @@ public class TrMainWindow {
 		tabbedPane.setTabComponentAt(newTabIndex, new ClosableTabComponent(tabName));
 	}
 
-	private void addTabs() {
-		final MicroblogViewingPage unfilteredPostPage = new MicroblogViewingPage(node, new Unfiltered(), this);
-		final MicroblogViewingPage followingPostPage = new MicroblogViewingPage(node, new ContactsFilter(node.mbManager.contactBook), this);
+	private void addTabs(final SortedSet<ParsedMicroblog> sourceForFilters) {
+		final MicroblogDisplayPage unfilteredPostPage = new MicroblogDisplayPage(new Unfiltered(sourceForFilters), this);
+		final MicroblogDisplayPage followingPostPage = new MicroblogDisplayPage(new ContactsFilter(sourceForFilters, node.mbClasses.contactBook), this);
 		final JPanel mentions = new JPanel();
-		final MicroblogViewingPage myPostsPage = new MicroblogViewingPage(node, new UserFilter(node.getRemoteNodeAddress().publicKey), this);
+		final MicroblogDisplayPage myPostsPage = new MicroblogDisplayPage(new AuthorFilter(sourceForFilters, node.getRemoteNodeAddress().publicKey), this);
 		final JPanel contactBook = new JPanel();
 		final JPanel settings = new JPanel();
 
@@ -68,10 +72,10 @@ public class TrMainWindow {
 		contactBook.add(new JLabel("This is the contact book page"));
 		settings.add(new JLabel("This is the settings page"));
 
-		tabbedPane.addTab(null, createTabIcon("feed.png"), unfilteredPostPage.getContentPane(), "All posts");
-		tabbedPane.addTab(null, createTabIcon("following.png"), followingPostPage.getContentPane(), "Following posts");
+		tabbedPane.addTab(null, createTabIcon("unfiltered.png"), unfilteredPostPage.getContent(), "All posts");
+		tabbedPane.addTab(null, createTabIcon("following.png"), followingPostPage.getContent(), "Following posts");
 		tabbedPane.addTab(null, createTabIcon("mentions.png"), mentions, "Mentions");
-		tabbedPane.addTab(null, createTabIcon("user-home.png"), myPostsPage.getContentPane(), "My posts");
+		tabbedPane.addTab(null, createTabIcon("my-posts.png"), myPostsPage.getContent(), "My posts");
 		tabbedPane.addTab(null, createTabIcon("contact-book.png"), contactBook, "Contact book");
 		tabbedPane.addTab(null, createTabIcon("settings.png"), settings, "Settings");
 	}
@@ -95,23 +99,26 @@ public class TrMainWindow {
 		}
 	}
 
-	private class CloseTabButton extends TransparentButton implements ActionListener {
+	private class CloseTabButton extends JButton implements ActionListener {
 		ClosableTabComponent parent;
 
 		public CloseTabButton(final ClosableTabComponent parent) {
-			super(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "close-tab.png"), "Close this tab");
+			super(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "close-tab.png"));
 			this.parent = parent;
 			//setRolloverEnabled(true);
 			//setRolloverIcon(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "close-tab-hover.png"));
+			setFocusable(false);
+			setContentAreaFilled(false);
+			setToolTipText("Close this tab");
 
 			addActionListener(this);
 		}
 
 		@Override
 		public void actionPerformed(final ActionEvent e) {
-			final int i = tabbedPane.indexOfTabComponent(parent);
-			if (i != -1) {
-				tabbedPane.remove(i);
+			final int tabIndex = tabbedPane.indexOfTabComponent(parent);
+			if (tabIndex != TAB_NOT_FOUND) {
+				tabbedPane.remove(tabIndex);
 			}
 		}
 	}

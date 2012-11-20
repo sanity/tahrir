@@ -5,7 +5,7 @@ import org.testng.annotations.*;
 
 import tahrir.TrNode;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
-import tahrir.io.net.microblogging.microblogs.MicroblogForBroadcast;
+import tahrir.io.net.microblogging.microblogs.Microblog;
 import tahrir.tools.TrUtils;
 
 public class MicroblogBroadcastTest {
@@ -17,7 +17,7 @@ public class MicroblogBroadcastTest {
 	@BeforeTest
 	public void setUpNodes() throws Exception {
 		sendingNode = TrUtils.makeTestNode(port++, false, false, false, true, 1, 1);
-		receivingNode = TrUtils.makeTestNode(port++, false, false, false, false, 1 , 1);
+		receivingNode = TrUtils.makeTestNode(port++, false, false, false, true, 1 , 1);
 		TrUtils.createTestBidirectionalConnection(sendingNode, receivingNode);
 		for (final TrPeerInfo pi :sendingNode.peerManager.peers.values()) {
 			pi.capabilities.receivesMessageBroadcasts = true;
@@ -26,37 +26,50 @@ public class MicroblogBroadcastTest {
 
 	@Test
 	public void simpleTest() throws Exception {
-		final MicroblogForBroadcast testMb = new MicroblogForBroadcast(sendingNode, "Hello world");
-		sendingNode.mbManager.getMicroblogContainer().insert(testMb);
+		final Microblog testMb = new Microblog(sendingNode, "Hello world");
+		sendingNode.mbClasses.mbsForBroadcast.insert(testMb);
+
+		// stop the receiver from broadcasting
+		receivingNode.mbClasses.mbScheduler = null;
 
 		// don't want initial wait
-		sendingNode.mbManager.setupForNextMicroblog();
+		sendingNode.mbClasses.mbScheduler.setupForNextMicroblog();
+		// stop any more broadcasts
+		sendingNode.mbClasses.mbScheduler = null;
 
 		for (int x=0; x<50; x++) {
-			Thread.sleep(200);
-			if (receivingNode.mbManager.getMicroblogContainer().contains(testMb)) {
+			Thread.sleep(20);
+			if (receivingNode.mbClasses.mbsForBroadcast.contains(testMb)) {
 				break;
 			}
 		}
 
-		Assert.assertTrue(receivingNode.mbManager.getMicroblogContainer().contains(testMb), "Should contain the microblog");
+		Assert.assertTrue(receivingNode.mbClasses.mbsForBroadcast.contains(testMb), "Should contain the microblog");
 	}
 
 	@Test
 	public void priorityTest() throws Exception {
-		final MicroblogForBroadcast testMb0 = new MicroblogForBroadcast(sendingNode, "You SHOULD have this microblog!", 0);
-		final MicroblogForBroadcast testMb1 = new MicroblogForBroadcast(sendingNode, "You should NOT have this microblog!", Integer.MAX_VALUE);
-		sendingNode.mbManager.getMicroblogContainer().insert(testMb0);
-		sendingNode.mbManager.getMicroblogContainer().insert(testMb1);
+		final Microblog testMb0 = new Microblog(sendingNode, "You SHOULD have this microblog!", 0);
+		final Microblog testMb1 = new Microblog(sendingNode, "You should NOT have this microblog!", Integer.MAX_VALUE);
+		sendingNode.mbClasses.mbsForBroadcast.insert(testMb1);
+		sendingNode.mbClasses.mbsForBroadcast.insert(testMb0);
+
+		// stop the receiver from broadcasting
+		receivingNode.mbClasses.mbScheduler = null;
 
 		// don't want initial wait
-		sendingNode.mbManager.setupForNextMicroblog();
+		sendingNode.mbClasses.mbScheduler.setupForNextMicroblog();
+		// stop any more broadcasts
+		sendingNode.mbClasses.mbScheduler = null;
 
-		for (int x=0; x<50; x++) {
-			Thread.sleep(200);
+		for (int x=0; x<75; x++) {
+			Thread.sleep(50);
+			if (receivingNode.mbClasses.mbsForBroadcast.contains(testMb0)) {
+				break;
+			}
 		}
 
-		Assert.assertTrue(receivingNode.mbManager.getMicroblogContainer().contains(testMb0), "Should contain the microblog with low priority");
-		Assert.assertTrue(!receivingNode.mbManager.getMicroblogContainer().contains(testMb1), "Should not contain the microblog with high priority.");
+		Assert.assertTrue(receivingNode.mbClasses.mbsForBroadcast.contains(testMb0), "Should contain the microblog with low priority");
+		Assert.assertTrue(!receivingNode.mbClasses.mbsForBroadcast.contains(testMb1), "Should not contain the microblog with high priority.");
 	}
 }

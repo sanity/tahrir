@@ -2,7 +2,7 @@ package tahrir.io.net.microblogging;
 
 import tahrir.TrConstants;
 import tahrir.io.net.TrSession;
-import tahrir.io.net.microblogging.microblogs.MicroblogForBroadcast;
+import tahrir.io.net.microblogging.microblogs.Microblog;
 import tahrir.io.net.sessions.*;
 
 public interface MicroblogBroadcastSession extends TrSession {
@@ -10,7 +10,7 @@ public interface MicroblogBroadcastSession extends TrSession {
 	public void areYouInterested(final int mbHash);
 
 	@Priority(TrConstants.MICROBLOG_BROADCAST_PRIORITY)
-	public void insertMicroblog(final MicroblogForBroadcast mb);
+	public void insertMicroblog(final Microblog mb);
 
 	@Priority(TrConstants.MICROBLOG_BROADCAST_PRIORITY)
 	public void interestIs(boolean interest);

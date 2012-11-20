@@ -37,6 +37,10 @@ public class TrConstants {
 
 	public static final int MAX_MICROBLOGS_FOR_VIEWING = 300;
 
+	public static final int FILTER_CACHE_SIZE = 30;
+
+	public static final int CONTACT_PRIORITY_INCREASE = 5;
+
 	public static final int GUI_WIDTH_PX = 600;
 
 	public static final int GUI_HEIGHT_PX = 600;

@@ -10,6 +10,8 @@ import org.slf4j.*;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.*;
 import tahrir.io.net.microblogging.*;
+import tahrir.io.net.microblogging.containers.*;
+import tahrir.io.net.microblogging.filters.VolatileFilterStore;
 import tahrir.io.net.sessions.*;
 import tahrir.io.net.udpV1.*;
 import tahrir.tools.*;
@@ -81,9 +83,11 @@ public class TrNode {
 		logger.info("Set up peer manager");
 		peerManager = new TrPeerManager(config.peers, this);
 
-		mbClasses = new MicrobloggingClasses(this);
-
 		registerSessions();
+
+		if (config.peers.runBroadcast) {
+			mbClasses = new MicrobloggingClasses(this);
+		}
 	}
 
 	/**
@@ -92,7 +96,10 @@ public class TrNode {
 	private void registerSessions() {
 		sessionMgr.registerSessionClass(TopologyMaintenanceSession.class, TopologyMaintenanceSessionImpl.class);
 		sessionMgr.registerSessionClass(AssimilateSession.class, AssimilateSessionImpl.class);
-		sessionMgr.registerSessionClass(MicroblogBroadcastSession.class, MicroblogBroadcastSessionImpl.class);
+		// don't want to be able to call broadcast methods on a seed node
+		if (config.peers.runBroadcast) {
+			sessionMgr.registerSessionClass(MicroblogBroadcastSession.class, MicroblogBroadcastSessionImpl.class);
+		}
 	}
 
 	public ArrayList<File> getPublicNodeIdFiles() {
@@ -123,13 +130,19 @@ public class TrNode {
 	public static class MicrobloggingClasses {
 		public MicroblogBroadcastScheduler mbScheduler;
 		public ContactBook contactBook;
-		public DuplicateNameAppender duplicateNameAppender;
-
+		public ShortenedPublicKeyFinder duplicateNameAppender;
+		public IncomingMicroblogHandler incomingMbHandler;
+		public MicroblogsForBroadcast mbsForBroadcast;
+		public MicroblogsForViewing mbsForViewing;
+		public VolatileFilterStore volotileFilterStore;
 
 		public MicrobloggingClasses(final TrNode node) {
+			contactBook = new ContactBook(new File(node.rootDirectory, node.config.contacts));
+			duplicateNameAppender = new ShortenedPublicKeyFinder(new File(node.rootDirectory, node.config.publicKeyChars));
+			mbsForBroadcast = new MicroblogsForBroadcast();
+			mbsForViewing = new MicroblogsForViewing(contactBook, mbsForBroadcast);
+			incomingMbHandler = new IncomingMicroblogHandler(mbsForViewing, mbsForBroadcast, contactBook);
 			mbScheduler = new MicroblogBroadcastScheduler(node);
-			contactBook = new ContactBook(node, new File(node.rootDirectory, node.config.contacts));
-			duplicateNameAppender = new DuplicateNameAppender(new File(node.rootDirectory, node.config.publicKeyChars));
 		}
 	}
 

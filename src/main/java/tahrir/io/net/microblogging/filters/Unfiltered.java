@@ -1,10 +1,22 @@
 package tahrir.io.net.microblogging.filters;
 
-import tahrir.io.net.microblogging.microblogs.MicroblogForBroadcast;
+import java.util.SortedSet;
 
-public class Unfiltered implements MicroblogFilter {
+import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
+
+/**
+ * A "filter" which lets all microblogs through.
+ *
+ * @author Kieran Donegan <kdonegan.92@gmail.com>
+ */
+public class Unfiltered extends MicroblogFilter {
+	public Unfiltered(final SortedSet<ParsedMicroblog> initMicroblogs) {
+		super();
+		initMicroblogStorage(initMicroblogs);
+	}
+
 	@Override
-	public boolean passesFilter(final MicroblogForBroadcast mb) {
+	public boolean passesFilter(final ParsedMicroblog mb) {
 		return true;
 	}
 }

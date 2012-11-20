@@ -6,30 +6,23 @@ import java.util.concurrent.TimeUnit;
 import tahrir.TrNode;
 import tahrir.io.net.*;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
-import tahrir.io.net.microblogging.containers.MicroblogsForBroadcast;
-import tahrir.io.net.microblogging.microblogs.MicroblogForBroadcast;
+import tahrir.io.net.microblogging.microblogs.Microblog;
 import tahrir.tools.TrUtils;
 
 /**
- * Schedules a single microblog for broadcast.
+ * Schedules a single microblog for broadcast to each peer one at a time.
  * 
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 public class MicroblogBroadcastScheduler {
-	private MicroblogsForBroadcast mbsForBroadcast;
-	private TrNode node;
+	private final TrNode node;
 
-	private MicroblogForBroadcast currentlyBroadcasting;
+	private Microblog currentlyBroadcasting;
 	private Iterator<PhysicalNetworkLocation> peerIter;
 
 	public MicroblogBroadcastScheduler(final TrNode node) {
-		// some nodes i.e seed nodes won't be running microblogging broadcast
-		if (node.config.peers.runBroadcast) {
-			this.node = node;
-			scheduleForLater();
-
-			mbsForBroadcast = new MicroblogsForBroadcast();
-		}
+		this.node = node;
+		scheduleForLater();
 	}
 
 	protected void setupForNextMicroblog() {
@@ -48,9 +41,7 @@ public class MicroblogBroadcastScheduler {
 		// don't want to clog up network if we don't have minimum peers
 		if (snapShot.size() >= node.peerManager.config.minPeers) {
 			peerIter = snapShot.iterator();
-
-			currentlyBroadcasting = mbsForBroadcast.getMicroblogForBroadcast();
-
+			currentlyBroadcasting = node.mbClasses.mbsForBroadcast.getMicroblogForBroadcast();
 			startBroadcastToPeer();
 		} else {
 			scheduleForLater();
@@ -65,10 +56,6 @@ public class MicroblogBroadcastScheduler {
 		} else {
 			setupForNextMicroblog();
 		}
-	}
-
-	public MicroblogsForBroadcast getMicroblogContainer() {
-		return mbsForBroadcast;
 	}
 
 	private void scheduleForLater() {

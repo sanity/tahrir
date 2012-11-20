@@ -6,60 +6,62 @@ import java.util.*;
 
 import org.slf4j.*;
 
-import tahrir.TrNode;
 import tahrir.tools.TrUtils;
 
 import com.google.gson.JsonParseException;
 
+/**
+ * For persistent management of user's contacts.
+ * 
+ * @author Kieran Donegan <kdonegan.92@gmail.com>
+ *
+ */
 public class ContactBook {
 	private static Logger logger = LoggerFactory.getLogger(ContactBook.class);
 
-	private ContactsContainer contactsContainer = new ContactsContainer();
+	private ContactsContainer contacts = new ContactsContainer();
 
-	private final File contactsFile;
+	private File contactsFile;
 
-	private final TrNode node;
+	private final boolean persistingContacts;
 
-	public ContactBook(final TrNode node, final File contactsFile) {
+	/**
+	 * Create a ContactBook which loads previous contacts recorded.
+	 * @param contactsFile File which contains the contacts previously recorded.
+	 */
+	public ContactBook(final File contactsFile) {
 		this.contactsFile = contactsFile;
-		this.node = node;
+		persistingContacts = true;
 		tryLoadContactsFromFile();
 	}
 
-	public boolean addContact(final String preferedNick, final RSAPublicKey publicKey) {
-		boolean gotPreferedNick;
-		if (!contactsContainer.hasNickName(preferedNick)) {
-			contactsContainer.add(publicKey, new ContactInformation(preferedNick));
-			gotPreferedNick = true;
-		} else {
-			// need to append something to end to make it unique
-			final String toAppend = node.mbClasses.duplicateNameAppender.getIntsToAppend(publicKey);
-			// TODO: very unlikely but does not check if the appended nick name with appended already exists
-			contactsContainer.add(publicKey, new ContactInformation(preferedNick, toAppend));
-			gotPreferedNick = false;
-		}
+	/**
+	 * Create a ContactBook which doesn't try load contacts previously recored.
+	 */
+	public ContactBook() {
+		persistingContacts = false;
+	}
 
-		addContactsToFile();
-		return gotPreferedNick;
+	public void addContact(final String nickName, final RSAPublicKey publicKey) {
+		contacts.add(publicKey, new ContactInformation(nickName, publicKey));
+		if (persistingContacts) {
+			addContactsToFile();
+		}
 	}
 
 	public ContactInformation getContact(final RSAPublicKey publicKey) {
-		return contactsContainer.getContact(publicKey);
+		return contacts.getContact(publicKey);
 	}
 
 	public boolean hasContact(final RSAPublicKey publicKey) {
-		return contactsContainer.hasContact(publicKey);
-	}
-
-	public List<ContactInformation> getContacts() {
-		return contactsContainer.getContacts();
+		return contacts.hasContact(publicKey);
 	}
 
 	private void addContactsToFile() {
 		logger.info("Adding contact to file");
 		try {
 			final FileWriter contactsWriter = new FileWriter(contactsFile);
-			contactsWriter.write(TrUtils.gson.toJson(contactsContainer));
+			contactsWriter.write(TrUtils.gson.toJson(contacts));
 			contactsWriter.close();
 		} catch (final IOException ioException) {
 			logger.error("Error writing to contacts file");
@@ -79,7 +81,7 @@ public class ContactBook {
 				}
 
 				final String json = builder.toString();
-				contactsContainer = TrUtils.gson.fromJson(json, ContactsContainer.class);
+				contacts = TrUtils.gson.fromJson(json, ContactsContainer.class);
 
 				br.close();
 			} catch (final JsonParseException jsonException) {
@@ -91,63 +93,54 @@ public class ContactBook {
 			}
 		} else {
 			logger.info("Making new contacts container");
-			contactsContainer = new ContactsContainer();
+			contacts = new ContactsContainer();
 		}
 	}
 
 	public static class ContactInformation {
 		private String nickName;
-		private String appendedToNick;
+		// this may be redundant as we are already storing public key in the map
+		private RSAPublicKey pubKey;
 
 		// For serialization
 		public ContactInformation() {
 
 		}
 
-		public ContactInformation(final String nickName, final String appenedToNick) {
+		public ContactInformation(final String nickName, final RSAPublicKey pubKey) {
 			this.nickName = nickName;
-			appendedToNick = appenedToNick;
+			this.pubKey = pubKey;
 		}
 
-		public ContactInformation(final String nickName) {
-			this(nickName, null);
-		}
-
-		public String getFullNick() {
-			String fullNick = nickName;
-			if (appendedToNick != null) {
-				fullNick += appendedToNick;
-			}
-			return fullNick;
+		public String getNickName() {
+			return nickName;
 		}
 	}
 
 	public static class ContactsContainer {
 		private final LinkedHashMap<RSAPublicKey, ContactInformation> contacts;
 
-		private ContactsContainer() {
+		public ContactsContainer() {
 			contacts = new LinkedHashMap<RSAPublicKey, ContactInformation>();
 		}
 
-		private synchronized void add(final RSAPublicKey publicKey, final ContactInformation contactInfo) {
+		/**
+		 * This method is only public for serialization purposes. Do NOT call it to add a contact normally
+		 * as persistence will FAIL. This is no doubt a bad way to do things and should be refactored eventually.
+		 * @param publicKey
+		 * @param contactInfo
+		 */
+		public synchronized void add(final RSAPublicKey publicKey, final ContactInformation contactInfo) {
 			contacts.put(publicKey, contactInfo);
 		}
 
-		private synchronized ContactInformation getContact(final RSAPublicKey publicKey) {
+		public synchronized ContactInformation getContact(final RSAPublicKey publicKey) {
 			return contacts.get(publicKey);
 		}
 
-		private synchronized List<ContactInformation> getContacts() {
+		public synchronized List<ContactInformation> getContacts() {
 			final ArrayList<ContactInformation> contactsSnapShot = new ArrayList<ContactInformation>(contacts.values());
 			return contactsSnapShot;
-		}
-
-		private synchronized boolean hasNickName(final String nickName) {
-			for (final ContactInformation contact : contacts.values()) {
-				if (contact.getFullNick().equals(nickName))
-					return true;
-			}
-			return false;
 		}
 
 		public synchronized boolean hasContact(final RSAPublicKey publicKey) {

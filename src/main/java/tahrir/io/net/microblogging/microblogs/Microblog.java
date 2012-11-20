@@ -5,7 +5,7 @@ import java.security.interfaces.RSAPublicKey;
 import tahrir.*;
 import tahrir.io.crypto.*;
 
-public class MicroblogForBroadcast {
+public class Microblog {
 	public int priority;
 	public TrSignature signature;
 	public String languageCode;
@@ -15,15 +15,15 @@ public class MicroblogForBroadcast {
 	public long timeCreated;
 
 	// for serialization
-	public MicroblogForBroadcast() {
+	public Microblog() {
 
 	}
 
-	public MicroblogForBroadcast(final TrNode creatingNode, final String message) {
+	public Microblog(final TrNode creatingNode, final String message) {
 		this(creatingNode, message, TrConstants.BROADCAST_INIT_PRIORITY);
 	}
 
-	public MicroblogForBroadcast(final TrNode creatingNode, final String message, final int priority) {
+	public Microblog(final TrNode creatingNode, final String message, final int priority) {
 		this.priority = priority;
 		timeCreated = System.currentTimeMillis();
 		this.message = message;
@@ -32,6 +32,19 @@ public class MicroblogForBroadcast {
 		publicKey = creatingNode.getRemoteNodeAddress().publicKey;
 		try {
 			signature = TrCrypto.sign(message, creatingNode.getPrivateNodeId().privateKey);
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public Microblog(final int priority, final String authorNick, final RSAPublicKey publicKey, final String message, final long timeCreated) {
+		this.priority = priority;
+		this.authorNick = authorNick;
+		this.publicKey = publicKey;
+		this.message = message;
+		this.timeCreated = timeCreated;
+		try {
+			signature = TrCrypto.sign(message, TrCrypto.createRsaKeyPair().b);
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -53,7 +66,7 @@ public class MicroblogForBroadcast {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		final MicroblogForBroadcast other = (MicroblogForBroadcast) obj;
+		final Microblog other = (Microblog) obj;
 		if (signature == null) {
 			if (other.signature != null)
 				return false;
