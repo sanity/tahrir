@@ -1,24 +1,31 @@
 package tahrir;
 
-import java.io.File;
-import java.net.*;
-import java.security.interfaces.*;
-import java.util.ArrayList;
-
-import org.slf4j.*;
-
+import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.*;
 import tahrir.io.net.microblogging.*;
-import tahrir.io.net.microblogging.containers.*;
-import tahrir.io.net.microblogging.filters.VolatileFilterStore;
-import tahrir.io.net.sessions.*;
-import tahrir.io.net.udpV1.*;
-import tahrir.tools.*;
+import tahrir.io.net.microblogging.containers.MicroblogsForBroadcast;
+import tahrir.io.net.microblogging.containers.MicroblogsForViewing;
+import tahrir.io.net.sessions.AssimilateSession;
+import tahrir.io.net.sessions.AssimilateSessionImpl;
+import tahrir.io.net.sessions.TopologyMaintenanceSession;
+import tahrir.io.net.sessions.TopologyMaintenanceSessionImpl;
+import tahrir.io.net.udpV1.UdpNetworkInterface;
+import tahrir.io.net.udpV1.UdpNetworkLocation;
+import tahrir.tools.Persistence;
 import tahrir.tools.Persistence.Modified;
 import tahrir.tools.Persistence.ModifyBlock;
+import tahrir.tools.Tuple2;
 
-import com.google.common.collect.Lists;
+import java.io.File;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.ArrayList;
 
 
 
@@ -134,7 +141,6 @@ public class TrNode {
 		public IncomingMicroblogHandler incomingMbHandler;
 		public MicroblogsForBroadcast mbsForBroadcast;
 		public MicroblogsForViewing mbsForViewing;
-		public VolatileFilterStore volotileFilterStore;
 
 		public MicrobloggingClasses(final TrNode node) {
 			contactBook = new ContactBook(new File(node.rootDirectory, node.config.contacts));

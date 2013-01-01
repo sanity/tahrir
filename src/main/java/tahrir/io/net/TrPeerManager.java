@@ -1,22 +1,25 @@
 package tahrir.io.net;
 
-import java.io.File;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.*;
-
-import net.sf.doodleproject.numerics4j.random.BetaRandomVariable;
-
-import org.slf4j.*;
-
-import tahrir.*;
-import tahrir.io.net.TrPeerManager.TrPeerInfo.Assimilation;
-import tahrir.io.net.sessions.*;
-import tahrir.tools.*;
-import tahrir.tools.Persistence.Modified;
-
 import com.google.common.base.Function;
 import com.google.common.collect.MapMaker;
+import org.apache.commons.math3.distribution.BetaDistribution;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tahrir.TrConstants;
+import tahrir.TrNode;
+import tahrir.io.net.TrPeerManager.TrPeerInfo.Assimilation;
+import tahrir.io.net.sessions.AssimilateSessionImpl;
+import tahrir.io.net.sessions.TopologyMaintenanceSessionImpl;
+import tahrir.tools.Persistence;
+import tahrir.tools.Persistence.Modified;
+import tahrir.tools.TrUtils;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 public class TrPeerManager {
 	public static final double RECENTLY_ATTEMPTED_PENALTY = 1.3;
@@ -321,7 +324,7 @@ public class TrPeerManager {
 		}
 
 		public double getBetaRandom() {
-			return BetaRandomVariable.nextRandomVariable(1 + sum, 1 + total - sum, TrUtils.rng);
+            return new BetaDistribution(1 + sum, 1 + total - sum).sample();
 		}
 
 		public void sample(final boolean value) {

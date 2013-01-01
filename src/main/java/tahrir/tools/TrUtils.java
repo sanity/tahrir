@@ -1,26 +1,28 @@
 package tahrir.tools;
 
-import java.io.*;
+import com.google.common.eventbus.EventBus;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
+import tahrir.TrConfig;
+import tahrir.TrNode;
+
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Random;
-import java.util.concurrent.*;
-
-import net.sf.doodleproject.numerics4j.random.RandomRNG;
-import tahrir.*;
-
-import com.google.common.eventbus.EventBus;
-import com.google.gson.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class TrUtils {
 	public static final ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
 
 	public static final Random rand = new Random();
-
-	public static final RandomRNG rng = new RandomRNG();
-
 	public static final Runnable noopRunnable = new Runnable() {
 
 		public void run() {
