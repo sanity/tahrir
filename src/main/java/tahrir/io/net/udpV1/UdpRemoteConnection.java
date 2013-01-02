@@ -214,7 +214,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 		if (!remoteHasCachedOurOutboundSymKey) {
 			estimatedPacketSize += 256;
 		}
-		estimatedPacketSize += 5;
+		estimatedPacketSize += 6;
 		estimatedPacketSize += message.length;
 		if (estimatedPacketSize > TrConstants.MAX_UDP_PACKET_SIZE) {
 			sendLongMessage(message, priority, sentListener);
