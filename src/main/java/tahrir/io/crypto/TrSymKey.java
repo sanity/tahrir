@@ -26,6 +26,10 @@ public class TrSymKey {
 		}
 	}
 
+	public static int getOverhead() {
+		return BLOCK_SIZE;
+	}
+
 	private static final SecureRandom rng = new SecureRandom();
 
 	private final SecretKeySpec skey;

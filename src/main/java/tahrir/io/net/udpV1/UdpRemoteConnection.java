@@ -215,6 +215,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 			estimatedPacketSize += 256;
 		}
 		estimatedPacketSize += 6;
+		estimatedPacketSize += TrSymKey.getOverhead();
 		estimatedPacketSize += message.length;
 		if (estimatedPacketSize > TrConstants.MAX_UDP_PACKET_SIZE) {
 			sendLongMessage(message, priority, sentListener);
@@ -288,7 +289,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 
 	private void sendLongMessage(final ByteArraySegment message, final double priority,
 			final TrSentReceivedListener sentListener) throws IOException {
-		final int packetSize = TrConstants.MAX_UDP_PACKET_SIZE - (remoteHasCachedOurOutboundSymKey ? 60 : 316);
+		final int packetSize = TrConstants.MAX_UDP_PACKET_SIZE - (remoteHasCachedOurOutboundSymKey ? 60 : 316) - TrSymKey.getOverhead();
 		final List<ByteArraySegment> segments = Lists.newArrayList();
 		int startPos = 0;
 		while (startPos < message.length) {
