@@ -16,6 +16,6 @@ public class ContactsFilter extends MicroblogFilter {
 
 	@Override
 	public boolean passesFilter(final ParsedMicroblog parsedMb) {
-		return contactBook.hasContact(parsedMb.sourceMb.publicKey);
+		return contactBook.hasContact(parsedMb.mbData.authorPubKey);
 	}
 }

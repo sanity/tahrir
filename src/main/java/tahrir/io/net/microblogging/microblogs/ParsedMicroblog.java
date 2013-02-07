@@ -3,19 +3,26 @@ package tahrir.io.net.microblogging.microblogs;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
 
-import nu.xom.*;
+import nu.xom.Attribute;
+import nu.xom.Builder;
+import nu.xom.Document;
+import nu.xom.Element;
+import nu.xom.Elements;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import tahrir.io.net.microblogging.FormatInfo;
+import tahrir.io.net.microblogging.IdentityMap.NewIdentityEvent;
 import tahrir.tools.TrUtils;
 
 import com.google.common.collect.MapMaker;
 
 /**
- * Represents a microblog whose message (a String in XML format) has been parsed.
+ * A microblog which has been created from parsing a XML based message.
  * 
- * TODO: move all the parsing stuff to a separate class.
+ * Moving all the parsing stuff to a separate class would probably be a good idea
  * 
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
@@ -23,15 +30,15 @@ import com.google.common.collect.MapMaker;
 public class ParsedMicroblog {
 	private static final Logger logger = LoggerFactory.getLogger(ParsedMicroblog.class);
 
-	public final Microblog sourceMb;
+	public GeneralMicroblogInfo mbData;
 
-	// Integers represent where they appeared in document
+	// Integers represent where they appeared in message
 	private final Map<RSAPublicKey, Integer> mentions = new MapMaker().makeMap();
 	private final Map<String, Integer> text = new MapMaker().makeMap();
 
-	public ParsedMicroblog(final Microblog parsedFrom) throws Exception {
-		sourceMb = parsedFrom;
-		parseMessage();
+	public ParsedMicroblog(final GeneralMicroblogInfo mbData, final String unparsedMessage) throws Exception {
+		this.mbData = mbData;
+		parseMessage(unparsedMessage);
 	}
 
 	public boolean hasMention(final RSAPublicKey userKey) {
@@ -46,11 +53,17 @@ public class ParsedMicroblog {
 		return text;
 	}
 
+	public int getElementCount() {
+		return mentions.size() + text.size();
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((sourceMb == null) ? 0 : sourceMb.hashCode());
+		result = prime * result + ((mbData == null) ? 0 : mbData.hashCode());
+		result = prime * result + ((mentions == null) ? 0 : mentions.hashCode());
+		result = prime * result + ((text == null) ? 0 : text.hashCode());
 		return result;
 	}
 
@@ -60,13 +73,23 @@ public class ParsedMicroblog {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof ParsedMicroblog))
 			return false;
 		final ParsedMicroblog other = (ParsedMicroblog) obj;
-		if (sourceMb == null) {
-			if (other.sourceMb != null)
+		if (mbData == null) {
+			if (other.mbData != null)
 				return false;
-		} else if (!sourceMb.equals(other.sourceMb))
+		} else if (!mbData.equals(other.mbData))
+			return false;
+		if (mentions == null) {
+			if (other.mentions != null)
+				return false;
+		} else if (!mentions.equals(other.mentions))
+			return false;
+		if (text == null) {
+			if (other.text != null)
+				return false;
+		} else if (!text.equals(other.text))
 			return false;
 		return true;
 	}
@@ -92,14 +115,13 @@ public class ParsedMicroblog {
 		return builder.toString();
 	}
 
-	private void parseMessage() throws Exception {
+	private void parseMessage(final String unparsedMessage) throws Exception {
 		final Builder parser = new Builder();
-		final Document doc = parser.build(sourceMb.message, null);
+		final Document doc = parser.build(unparsedMessage, null);
 		final Element root = doc.getRootElement();
 		processFromRoot(root);
 	}
 
-	// TODO: this is messy... maybe use command pattern?
 	private void processFromRoot(final Element root) throws Exception {
 		final Elements elements = root.getChildElements();
 		for (int i = 0; i < elements.size(); i++) {
@@ -130,5 +152,10 @@ public class ParsedMicroblog {
 
 		final RSAPublicKey pubKey = TrUtils.getPublicKey(ArrayUtils.toPrimitive(bytes));
 		mentions.put(pubKey, position);
+
+		final Attribute nickNameAtt = element.getAttribute(FormatInfo.NICK_NAME_ATTRIBUTE_INDEX);
+		final String nickName = nickNameAtt.getValue();
+		// notify the identity with the new identity discovered from parsing
+		TrUtils.eventBus.post(new NewIdentityEvent(nickName, pubKey));
 	}
 }

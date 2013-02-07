@@ -4,7 +4,7 @@ import org.slf4j.*;
 
 import tahrir.TrNode;
 import tahrir.io.net.*;
-import tahrir.io.net.microblogging.microblogs.Microblog;
+import tahrir.io.net.microblogging.microblogs.BroadcastMicroblog;
 
 /**
  * A session for broadcasting a microblog to a node.
@@ -17,7 +17,7 @@ import tahrir.io.net.microblogging.microblogs.Microblog;
 public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements MicroblogBroadcastSession {
 	private static final Logger logger = LoggerFactory.getLogger(MicroblogBroadcastSessionImpl.class.getName());
 
-	private Microblog beingSent;
+	private BroadcastMicroblog beingSent;
 
 	private MicroblogBroadcastSession receiverSess;
 	private MicroblogBroadcastSession initiatorSess;
@@ -28,7 +28,7 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Micr
 		super(sessionId, node, sessionMgr);
 	}
 
-	public void startSingleBroadcast(final Microblog mbToBroadcast, final PhysicalNetworkLocation peerPhysicalLoc) {
+	public void startSingleBroadcast(final BroadcastMicroblog mbToBroadcast, final PhysicalNetworkLocation peerPhysicalLoc) {
 		nextBroadcastStarted = false;
 		beingSent = mbToBroadcast;
 		receiverSess = remoteSession(MicroblogBroadcastSession.class, connection(peerPhysicalLoc));
@@ -50,7 +50,7 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Micr
 		}
 	}
 
-	public void insertMicroblog(final Microblog mb) {
+	public void insertMicroblog(final BroadcastMicroblog mb) {
 		node.mbClasses.incomingMbHandler.handleInsertion(mb);
 		// TODO: this is a workaround until we have a registerSuccessListener()
 		initiatorSess.sessionFinished();

@@ -2,8 +2,11 @@ package tahrir.ui;
 
 import java.awt.event.ActionEvent;
 import java.security.interfaces.RSAPublicKey;
+import java.util.SortedSet;
 
-import tahrir.io.net.microblogging.filters.*;
+import tahrir.io.net.microblogging.filters.AuthorFilter;
+import tahrir.io.net.microblogging.filters.MicroblogFilter;
+import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
 /**
  * Represents a button that, when clicked, will create a tab which display a specified user's
@@ -22,14 +25,24 @@ public class CreateAuthorPageButton extends TabCreateButton {
 		super(mainWindow, authorName);
 		this.authorKey = authorKey;
 		this.mainWindow = mainWindow;
+		addActionListener(this);
+		makeTransparent();
 	}
 
 	@Override
 	public void actionPerformed(final ActionEvent arg0) {
-		// creating the filter here instead of at construction to consume memory
-		final MicroblogFilter userFilter = new AuthorFilter(mainWindow.node.mbClasses.mbsForViewing.getMicroblogSet(), authorKey);
+		final SortedSet<ParsedMicroblog> mbSet = mainWindow.node.mbClasses.mbsForViewing.getMicroblogSet();
+		// lazy creation of filter
+		final MicroblogFilter userFilter = new AuthorFilter(mbSet, authorKey);
 		final MicroblogDisplayPage mbDisplayPage = new MicroblogDisplayPage(userFilter, mainWindow);
 		setContents(mbDisplayPage.getContent());
 		super.actionPerformed(arg0);
+	}
+
+	public void makeTransparent() {
+		setOpaque(false);
+		setFocusable(false);
+		setContentAreaFilled(false);
+		setBorderPainted(false);
 	}
 }

@@ -2,39 +2,52 @@ package tahrir.ui;
 
 import java.util.ArrayList;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
-import tahrir.io.net.microblogging.filters.*;
+import tahrir.io.net.microblogging.filters.FilterChangeListener;
+import tahrir.io.net.microblogging.filters.MicroblogFilter;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
 import com.google.common.collect.Lists;
 
 public class MicroblogDisplayPage implements FilterChangeListener {
-	private final JScrollPane content;
-	private MicroblogTableModel tableModel;
-	private final TrMainWindow mainWindow;
+	private final JComponent content;
+	private final MicroblogTableModel tableModel;
 
 	public MicroblogDisplayPage(final MicroblogFilter filter, final TrMainWindow mainWindow) {
-		this.mainWindow = mainWindow;
-		synchronized(this) {
-			final ArrayList<ParsedMicroblog> initialMicroblogs = filter.amInterestedInMicroblogs(this);
-			tableModel = new MicroblogTableModel();
-			for (final ParsedMicroblog parsedMb : initialMicroblogs) {
-				tableModel.addNewMicroblog(new MicroblogPost(parsedMb, mainWindow));
-			}
+		// TODO: a microblog may be received while this is being done and hence be lost we
+		// need a more advanced notification system. Google's event bus may handle this.F
+		final ArrayList<ParsedMicroblog> initialMicroblogs = filter.amInterestedInMicroblogs(this);
+		tableModel = new MicroblogTableModel();
+		for (final ParsedMicroblog parsedMb : initialMicroblogs) {
+			tableModel.addNewMicroblog(parsedMb);
 		}
 		final JTable table = new JTable(tableModel);
-		content = new JScrollPane(table);
+		final MicroblogRenderer renderer = new MicroblogRenderer(mainWindow);
+		// will allow it to fill entire scroll pane
+		table.setFillsViewportHeight(true);
+		// TODO: change the size as needed
+		table.setRowHeight(150);
+		table.setDefaultRenderer(ParsedMicroblog.class, renderer);
+		table.setDefaultEditor(ParsedMicroblog.class, renderer);
+
+		final JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		scrollPane.setViewportView(table);
+		content = scrollPane;
 	}
 
 	@Override
-	public synchronized void filterChange(final FilterChangeEvent event) {
+	public void filterChange(final FilterChangeEvent event) {
 		final ParsedMicroblog parsedMb = event.mb;
 		if (event.removal) {
-			tableModel.removeMicroblog(new MicroblogPost(parsedMb, mainWindow));
+			tableModel.removeMicroblog(parsedMb);
 		} else { // i.e added
-			tableModel.addNewMicroblog(new MicroblogPost(parsedMb, mainWindow));
+			tableModel.addNewMicroblog(parsedMb);
 		}
 	}
 
@@ -44,7 +57,7 @@ public class MicroblogDisplayPage implements FilterChangeListener {
 
 	@SuppressWarnings("serial")
 	private class MicroblogTableModel extends AbstractTableModel {
-		private final ArrayList<MicroblogPost> microblogs;
+		private final ArrayList<ParsedMicroblog> microblogs;
 
 		public MicroblogTableModel() {
 			microblogs = Lists.newArrayList();
@@ -52,7 +65,7 @@ public class MicroblogDisplayPage implements FilterChangeListener {
 
 		@Override
 		public int getColumnCount() {
-			return 0;
+			return 1;
 		}
 
 		@Override
@@ -65,21 +78,34 @@ public class MicroblogDisplayPage implements FilterChangeListener {
 			return microblogs.get(row);
 		}
 
-		@Override
-		public void setValueAt(final Object value, final int row, int col) {
-			col = 0;
-			microblogs.add(row, (MicroblogPost) value);
-			fireTableCellUpdated(row, col);
+		public void addNewMicroblog(final ParsedMicroblog mb) {
+			microblogs.add(0, mb);
+			// This is what updates the GUI with new microblogs.
+			// Firing about the entire table here. It seems to be necessary.
+			fireTableDataChanged();
 		}
 
-		public void addNewMicroblog(final MicroblogPost mb) {
-			setValueAt(mb, 0, 0);
-		}
-
-		public void removeMicroblog(final MicroblogPost mb) {
+		public void removeMicroblog(final ParsedMicroblog mb) {
 			final int mbIndex = microblogs.indexOf(mb);
 			microblogs.remove(mbIndex);
-			fireTableCellUpdated(mbIndex, 0);
+			// should we fire a cell updated?
+			//fireTableCellUpdated(mbIndex, 0);
+		}
+
+		@Override
+		public Class<?> getColumnClass(final int columnIndex) {
+			return ParsedMicroblog.class;
+		}
+
+		@Override
+		public String getColumnName(final int columnIndex) {
+			return null;
+		}
+
+		@Override
+		public boolean isCellEditable(final int rowIndex, final int columnIndex) {
+			// this allows clicking of buttons etc. in the table
+			return true;
 		}
 	}
 }

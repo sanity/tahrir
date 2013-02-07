@@ -1,62 +1,58 @@
 package tahrir.io.net.microblogging.containers;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.SortedSet;
 
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import tahrir.TrConstants;
 import tahrir.io.net.microblogging.ContactBook;
-import tahrir.io.net.microblogging.microblogs.*;
+import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.TrUtils;
 
+import com.google.common.collect.Sets;
+
 /**
- * Stores a collection of microblogs for viewing purposes i.e to display in the GUI.
+ * Stores a collection of microblogs for viewing purposes, normally to display in the GUI.
  * 
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 public class MicroblogsForViewing {
 	private static Logger logger = LoggerFactory.getLogger(MicroblogsForViewing.class);
 
-	private final SortedSet<ParsedMicroblog> parsedMicroblogs = new TreeSet<ParsedMicroblog>(new ParsedMicroblogTimeComparator());
-	private final ContactBook contactBook;
-	private final UnparsedMicroblogTimeComparator unparsedComparator;
-	private final MicroblogsForBroadcast mbsForBroadcast;
+	private final SortedSet<ParsedMicroblog> parsedMicroblogs;
+	private final ParsedMicroblogTimeComparator comparator;
 
-	public MicroblogsForViewing(final ContactBook contactBook, final MicroblogsForBroadcast mbsForBroadcast) {
+	private final ContactBook contactBook;
+
+	public MicroblogsForViewing(final ContactBook contactBook) {
 		this.contactBook = contactBook;
-		this.mbsForBroadcast = mbsForBroadcast;
-		unparsedComparator = new UnparsedMicroblogTimeComparator();
+		comparator = new ParsedMicroblogTimeComparator();
+		parsedMicroblogs = Collections.synchronizedSortedSet(Sets.newTreeSet(comparator));
 	}
 
-	public synchronized boolean insert(final Microblog mb) {
-		boolean added = false;
-		try {
-			added = tryAdd(mb);
-		} catch (final Exception e) {
-			logger.info("Error with added microblog");
-			// something is wrong with the microblog - it should not be rebroadcast
-			mbsForBroadcast.remove(mb);
+	// synchronised to ensure that size of set is checked properly
+	public synchronized boolean insert(final ParsedMicroblog mb) {
+		// the microblog might not be added
+		boolean inserted = false;
+
+		if (!isFull()) {
+			addToParsed(mb);
+			inserted = true;
+		} else if (shouldAddByReplacement(mb)) {
+			// make room
+			removeFromParsed(parsedMicroblogs.last());
+			addToParsed(mb);
+			inserted = true;
+			logger.info("Adding a microblog for viewing by replacement");
 		}
-		return added;
+		return inserted;
 	}
 
 	public SortedSet<ParsedMicroblog> getMicroblogSet() {
 		return parsedMicroblogs;
-	}
-
-	private boolean tryAdd(final Microblog mb) throws Exception {
-		boolean inserted = false;
-		// TODO: may want to increase priority if added
-		if (!isFull() || shouldAddByReplacement(mb)) {
-			final ParsedMicroblog parsedMb = new ParsedMicroblog(mb);
-			addToParsed(parsedMb);
-			inserted = true;
-			if (isFull()) {
-				removeFromParsed(parsedMicroblogs.last());
-			}
-		}
-
-		return inserted;
 	}
 
 	private void removeFromParsed(final ParsedMicroblog mb) {
@@ -71,12 +67,12 @@ public class MicroblogsForViewing {
 		TrUtils.eventBus.post(new MicroblogAddedEvent(mb));
 	}
 
-	private boolean shouldAddByReplacement(final Microblog mb) {
-		return contactBook.hasContact(mb.publicKey) || isNewerThanLast(mb);
+	private boolean shouldAddByReplacement(final ParsedMicroblog mb) {
+		return contactBook.hasContact(mb.mbData.authorPubKey) || isNewerThanLast(mb);
 	}
 
-	private boolean isNewerThanLast(final Microblog mb) {
-		return unparsedComparator.compare(mb, parsedMicroblogs.last().sourceMb) < 0;
+	private boolean isNewerThanLast(final ParsedMicroblog mb) {
+		return comparator.compare(mb, parsedMicroblogs.last()) < 0;
 	}
 
 	private boolean isFull() {
@@ -86,14 +82,7 @@ public class MicroblogsForViewing {
 	public static class ParsedMicroblogTimeComparator implements Comparator<ParsedMicroblog> {
 		@Override
 		public int compare(final ParsedMicroblog mb1, final ParsedMicroblog mb2) {
-			return Double.compare(mb2.sourceMb.timeCreated, mb1.sourceMb.timeCreated);
-		}
-	}
-
-	public static class UnparsedMicroblogTimeComparator implements Comparator<Microblog> {
-		@Override
-		public int compare(final Microblog mb1, final Microblog mb2) {
-			return Double.compare(mb2.timeCreated, mb1.timeCreated);
+			return Double.compare(mb2.mbData.timeCreated, mb1.mbData.timeCreated);
 		}
 	}
 

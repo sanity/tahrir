@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import tahrir.TrNode;
 import tahrir.io.net.*;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
-import tahrir.io.net.microblogging.microblogs.Microblog;
+import tahrir.io.net.microblogging.microblogs.BroadcastMicroblog;
 import tahrir.tools.TrUtils;
 
 /**
@@ -17,7 +17,7 @@ import tahrir.tools.TrUtils;
 public class MicroblogBroadcastScheduler {
 	private final TrNode node;
 
-	private Microblog currentlyBroadcasting;
+	private BroadcastMicroblog currentlyBroadcasting;
 	private Iterator<PhysicalNetworkLocation> peerIter;
 
 	public MicroblogBroadcastScheduler(final TrNode node) {

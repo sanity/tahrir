@@ -1,16 +1,24 @@
 package tahrir.io.net.microblogging;
 
 import java.security.interfaces.RSAPublicKey;
-import java.util.*;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.*;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.microblogging.containers.MicroblogsForViewing.ParsedMicroblogTimeComparator;
-import tahrir.io.net.microblogging.filters.*;
-import tahrir.io.net.microblogging.microblogs.*;
+import tahrir.io.net.microblogging.filters.AuthorFilter;
+import tahrir.io.net.microblogging.filters.ContactsFilter;
+import tahrir.io.net.microblogging.filters.MentionFilter;
+import tahrir.io.net.microblogging.filters.Unfiltered;
+import tahrir.io.net.microblogging.microblogs.BroadcastMicroblog;
+import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
 public class FilterTest {
 	private static final Logger logger = LoggerFactory.getLogger(FilterTest.class);
@@ -99,7 +107,7 @@ public class FilterTest {
 	}
 
 	private ParsedMicroblog createParsedMicroblog(final String authorNick, final RSAPublicKey pubKey, final String msg) {
-		final Microblog sourceMb = new Microblog(0, authorNick, pubKey, msg, System.currentTimeMillis());
+		final BroadcastMicroblog sourceMb = new BroadcastMicroblog(0, authorNick, pubKey, msg, System.currentTimeMillis());
 		try {
 			return new ParsedMicroblog(sourceMb);
 		} catch(final Exception e) {

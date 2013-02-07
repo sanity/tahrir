@@ -1,29 +1,32 @@
 package tahrir.io.net.microblogging;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
-import java.util.*;
+import java.util.Map;
 
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import tahrir.tools.TrUtils;
 
+import com.google.common.collect.Maps;
 import com.google.gson.JsonParseException;
 
 /**
- * For persistent management of user's contacts.
+ * Manages a user's contacts. The contacts are persisted.
  * 
  * @author Kieran Donegan <kdonegan.92@gmail.com>
- *
  */
 public class ContactBook {
 	private static Logger logger = LoggerFactory.getLogger(ContactBook.class);
 
-	private ContactsContainer contacts = new ContactsContainer();
+	private Map<RSAPublicKey, String> contacts = Maps.newConcurrentMap();
 
-	private File contactsFile;
-
-	private final boolean persistingContacts;
+	private final File contactsFile;
 
 	/**
 	 * Create a ContactBook which loads previous contacts recorded.
@@ -31,33 +34,27 @@ public class ContactBook {
 	 */
 	public ContactBook(final File contactsFile) {
 		this.contactsFile = contactsFile;
-		persistingContacts = true;
 		tryLoadContactsFromFile();
 	}
 
-	/**
-	 * Create a ContactBook which doesn't try load contacts previously recored.
-	 */
-	public ContactBook() {
-		persistingContacts = false;
-	}
-
 	public void addContact(final String nickName, final RSAPublicKey publicKey) {
-		contacts.add(publicKey, new ContactInformation(nickName, publicKey));
-		if (persistingContacts) {
-			addContactsToFile();
-		}
+		contacts.put(publicKey, nickName);
+		addToFile();
 	}
 
-	public ContactInformation getContact(final RSAPublicKey publicKey) {
-		return contacts.getContact(publicKey);
+	public String getContact(final RSAPublicKey publicKey) {
+		return contacts.get(publicKey);
 	}
 
 	public boolean hasContact(final RSAPublicKey publicKey) {
-		return contacts.hasContact(publicKey);
+		return contacts.containsKey(publicKey);
 	}
 
-	private void addContactsToFile() {
+	/*
+	 * This method is messy because it rewrites the entire map everytime, it would
+	 * be better if it only wrote the new contact.
+	 */
+	private void addToFile() {
 		logger.info("Adding contact to file");
 		try {
 			final FileWriter contactsWriter = new FileWriter(contactsFile);
@@ -94,60 +91,6 @@ public class ContactBook {
 		} else {
 			logger.info("Making new contacts container");
 			contacts = new ContactsContainer();
-		}
-	}
-
-	public static class ContactInformation {
-		private String nickName;
-		// this may be redundant as we are already storing public key in the map
-		private RSAPublicKey pubKey;
-
-		// For serialization
-		public ContactInformation() {
-
-		}
-
-		public ContactInformation(final String nickName, final RSAPublicKey pubKey) {
-			this.nickName = nickName;
-			this.pubKey = pubKey;
-		}
-
-		public String getNickName() {
-			return nickName;
-		}
-	}
-
-	public static class ContactsContainer {
-		private final LinkedHashMap<RSAPublicKey, ContactInformation> contacts;
-
-		public ContactsContainer() {
-			contacts = new LinkedHashMap<RSAPublicKey, ContactInformation>();
-		}
-
-		/**
-		 * This method is only public for serialization purposes. Do NOT call it to add a contact normally
-		 * as persistence will FAIL. This is no doubt a bad way to do things and should be refactored eventually.
-		 * @param publicKey
-		 * @param contactInfo
-		 */
-		public synchronized void add(final RSAPublicKey publicKey, final ContactInformation contactInfo) {
-			contacts.put(publicKey, contactInfo);
-		}
-
-		public synchronized ContactInformation getContact(final RSAPublicKey publicKey) {
-			return contacts.get(publicKey);
-		}
-
-		public synchronized List<ContactInformation> getContacts() {
-			final ArrayList<ContactInformation> contactsSnapShot = new ArrayList<ContactInformation>(contacts.values());
-			return contactsSnapShot;
-		}
-
-		public synchronized boolean hasContact(final RSAPublicKey publicKey) {
-			if (getContact(publicKey) != null)
-				return true;
-			else
-				return false;
 		}
 	}
 }

@@ -23,7 +23,7 @@ public class ParsedMicroblogTest {
 	public void simpleMentionTest() throws Exception {
 		final RSAPublicKey key = TrCrypto.createRsaKeyPair().a;
 		final String message = "<mb><txt>Just a mention to </txt><mention>" + ParsedMicroblog.convertToMentionBytesString(key) + "</mention><txt>.</txt></mb>";
-		final Microblog sourceMb = new Microblog(node, message);
+		final BroadcastMicroblog sourceMb = new BroadcastMicroblog(node, message);
 
 		final ParsedMicroblog parsedMb = new ParsedMicroblog(sourceMb);
 		Assert.assertTrue(parsedMb.hasMention(key));
@@ -40,7 +40,7 @@ public class ParsedMicroblogTest {
 		final String message = "<mb><txt>" + firstString + "</txt><mention>" + ParsedMicroblog.convertToMentionBytesString(key1) + "</mention><mention>"
 				+ ParsedMicroblog.convertToMentionBytesString(key2)
 				+ "</mention><txt>" + secondString + "</txt></mb>";
-		final Microblog sourceMb = new Microblog(node, message);
+		final BroadcastMicroblog sourceMb = new BroadcastMicroblog(node, message);
 		final ParsedMicroblog parsedMb = new ParsedMicroblog(sourceMb);
 		final Map<String, Integer> textMap = parsedMb.getText();
 		final Map<RSAPublicKey, Integer> mentionsMap = parsedMb.getMentions();

@@ -21,7 +21,7 @@ public class AuthorFilter extends MicroblogFilter {
 
 	@Override
 	public boolean passesFilter(final ParsedMicroblog mb) {
-		return mb.sourceMb.publicKey.equals(authorsKey);
+		return mb.mbData.authorPubKey.equals(authorsKey);
 	}
 
 	@Override

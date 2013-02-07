@@ -1,6 +1,9 @@
 package tahrir.io.net.microblogging.filters;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import tahrir.io.net.microblogging.containers.MicroblogsForViewing.MicroblogAddedEvent;
 import tahrir.io.net.microblogging.containers.MicroblogsForViewing.MicroblogRemovalEvent;
@@ -46,14 +49,14 @@ public abstract class MicroblogFilter {
 	public synchronized void receiveMicroblog(final MicroblogAddedEvent event) {
 		if (passesFilter(event.mb)) {
 			microblogs.add(event.mb);
+			postToListeners(new FilterChangeEvent(event.mb, false));
 		}
-		postToListeners(new FilterChangeEvent(event.mb, false) );
 	}
 
 	@Subscribe
 	public synchronized void removeMicroblog(final MicroblogRemovalEvent event) {
 		microblogs.remove(event.mb);
-		postToListeners(new FilterChangeEvent(event.mb, true) );
+		postToListeners(new FilterChangeEvent(event.mb, true));
 	}
 
 	public synchronized void registerListener(final FilterChangeListener listener) {

@@ -1,17 +1,34 @@
 package tahrir.ui;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.SortedSet;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextPane;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import tahrir.*;
-import tahrir.io.net.microblogging.filters.*;
+import tahrir.TrConstants;
+import tahrir.TrNode;
+import tahrir.io.net.microblogging.filters.AuthorFilter;
+import tahrir.io.net.microblogging.filters.ContactsFilter;
+import tahrir.io.net.microblogging.filters.Unfiltered;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
 public class TrMainWindow {
@@ -61,10 +78,13 @@ public class TrMainWindow {
 	}
 
 	private void addTabs(final SortedSet<ParsedMicroblog> sourceForFilters) {
-		final MicroblogDisplayPage unfilteredPostPage = new MicroblogDisplayPage(new Unfiltered(sourceForFilters), this);
-		final MicroblogDisplayPage followingPostPage = new MicroblogDisplayPage(new ContactsFilter(sourceForFilters, node.mbClasses.contactBook), this);
+		final MicroblogDisplayPage unfilteredPostPage = new MicroblogDisplayPage(
+				new Unfiltered(sourceForFilters), this);
+		final MicroblogDisplayPage followingPostPage = new MicroblogDisplayPage(
+				new ContactsFilter(sourceForFilters, node.mbClasses.contactBook), this);
 		final JPanel mentions = new JPanel();
-		final MicroblogDisplayPage myPostsPage = new MicroblogDisplayPage(new AuthorFilter(sourceForFilters, node.getRemoteNodeAddress().publicKey), this);
+		final MicroblogDisplayPage myPostsPage = new MicroblogDisplayPage(
+				new AuthorFilter(sourceForFilters, node.getRemoteNodeAddress().publicKey), this);
 		final JPanel contactBook = new JPanel();
 		final JPanel settings = new JPanel();
 
@@ -78,6 +98,10 @@ public class TrMainWindow {
 		tabbedPane.addTab(null, createTabIcon("my-posts.png"), myPostsPage.getContent(), "My posts");
 		tabbedPane.addTab(null, createTabIcon("contact-book.png"), contactBook, "Contact book");
 		tabbedPane.addTab(null, createTabIcon("settings.png"), settings, "Settings");
+	}
+
+	public JPanel getContent() {
+		return contentPanel;
 	}
 
 	private Icon createTabIcon(final String name) {

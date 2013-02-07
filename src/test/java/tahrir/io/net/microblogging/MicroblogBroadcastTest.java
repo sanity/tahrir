@@ -5,7 +5,7 @@ import org.testng.annotations.*;
 
 import tahrir.TrNode;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
-import tahrir.io.net.microblogging.microblogs.Microblog;
+import tahrir.io.net.microblogging.microblogs.BroadcastMicroblog;
 import tahrir.tools.TrUtils;
 
 public class MicroblogBroadcastTest {
@@ -26,7 +26,7 @@ public class MicroblogBroadcastTest {
 
 	@Test
 	public void simpleTest() throws Exception {
-		final Microblog testMb = new Microblog(sendingNode, "Hello world");
+		final BroadcastMicroblog testMb = new BroadcastMicroblog(sendingNode, "Hello world");
 		sendingNode.mbClasses.mbsForBroadcast.insert(testMb);
 
 		// stop the receiver from broadcasting
@@ -49,8 +49,8 @@ public class MicroblogBroadcastTest {
 
 	@Test
 	public void priorityTest() throws Exception {
-		final Microblog testMb0 = new Microblog(sendingNode, "You SHOULD have this microblog!", 0);
-		final Microblog testMb1 = new Microblog(sendingNode, "You should NOT have this microblog!", Integer.MAX_VALUE);
+		final BroadcastMicroblog testMb0 = new BroadcastMicroblog(sendingNode, "You SHOULD have this microblog!", 0);
+		final BroadcastMicroblog testMb1 = new BroadcastMicroblog(sendingNode, "You should NOT have this microblog!", Integer.MAX_VALUE);
 		sendingNode.mbClasses.mbsForBroadcast.insert(testMb1);
 		sendingNode.mbClasses.mbsForBroadcast.insert(testMb0);
 
