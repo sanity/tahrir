@@ -11,8 +11,15 @@ import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.*;
 import tahrir.io.net.TrNetworkInterface.TrMessageListener;
 import tahrir.io.net.TrNetworkInterface.TrSentReceivedListener;
+<<<<<<< HEAD:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 import tahrir.io.net.udpV1.UdpNetworkInterface.UNIConfig;
 import tahrir.tools.*;
+=======
+import tahrir.io.net.TrRemoteAddress;
+import tahrir.io.net.TrRemoteConnection;
+import tahrir.io.net.udpV1.UdpNetworkInterface.UNIConfig;
+import tahrir.tools.ByteArraySegment;
+>>>>>>> 9f42dcd20c2409838af935d18e5e07b550848f9d:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
 import com.google.common.base.Function;
@@ -166,12 +173,20 @@ public class UdpNetworkInterfaceTest {
 	}
 
 	@Test
+<<<<<<< HEAD:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 	public void unreliableSimpleMessageSend() throws Exception {
+=======
+	public void unreliableSimpleMessagesSend() throws Exception {
+>>>>>>> 9f42dcd20c2409838af935d18e5e07b550848f9d:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 		i1.setSimPercentageLoss(.2);
 
 		final ByteArraySegmentBuilder msgBuilder = ByteArraySegment.builder();
 
+<<<<<<< HEAD:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 		for (int x = 0; x < 10; x++) {
+=======
+		for (int x = 0; x < 100; x++) {
+>>>>>>> 9f42dcd20c2409838af935d18e5e07b550848f9d:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 			msgBuilder.writeByte(33);
 		}
 
@@ -190,6 +205,7 @@ public class UdpNetworkInterfaceTest {
 		Assert.assertTrue(receivedSuccessfully.called);
 	}
 
+<<<<<<< HEAD:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 	@Test
 	public void longUnreliableMessageSend() throws Exception {
 		i1.setSimPercentageLoss(.2);
@@ -215,6 +231,8 @@ public class UdpNetworkInterfaceTest {
 		Assert.assertTrue(receivedSuccessfully.called);
 	}
 
+=======
+>>>>>>> 9f42dcd20c2409838af935d18e5e07b550848f9d:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 	public class TrSentReceivedListenerBasicImpl implements TrSentReceivedListener {
 		public void sent() {
 			System.out.println("Sent successfully");
