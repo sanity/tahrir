@@ -1,35 +1,20 @@
 package tahrir.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.SortedSet;
-
-import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextPane;
-
 import net.miginfocom.swing.MigLayout;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.io.net.microblogging.filters.AuthorFilter;
 import tahrir.io.net.microblogging.filters.ContactsFilter;
 import tahrir.io.net.microblogging.filters.Unfiltered;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.SortedSet;
 
 public class TrMainWindow {
 	public static Logger logger = LoggerFactory.getLogger(TrMainWindow.class.getName());
@@ -54,7 +39,7 @@ public class TrMainWindow {
 
 		final JTextPane newPostPane = new JTextPane();
 		newPostPane.setBackground(Color.WHITE);
-		newPostPane.setBorder(BorderFactory.createLineBorder(TrConstants.SEAGLASS_BLUE));
+		newPostPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		newPostPane.setPreferredSize(new Dimension(TrConstants.GUI_WIDTH_PX - 50, 110));
 		// the text pane and the button will go into the same cell
 		contentPanel.add(newPostPane, "split 2");

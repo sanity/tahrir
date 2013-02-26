@@ -1,17 +1,25 @@
 package tahrir.io.crypto;
 
-import java.io.*;
-import java.security.*;
-import java.security.interfaces.*;
-
-import javax.crypto.*;
-
+import com.google.common.io.BaseEncoding;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import tahrir.TrConstants;
-import tahrir.io.serialization.*;
-import tahrir.tools.*;
+import tahrir.io.serialization.TrSerializableException;
+import tahrir.io.serialization.TrSerializer;
+import tahrir.tools.ByteArraySegment;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
+import tahrir.tools.Tuple2;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.security.*;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.X509EncodedKeySpec;
 
 /**
  * A simple implementation of the RSA algorithm
@@ -56,6 +64,19 @@ public class TrCrypto {
 		} catch (final NoSuchProviderException e) {
 			throw new RuntimeException(e);
 		} catch (final NoSuchPaddingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static String toBase64(RSAPublicKey pubKey) {
+		return BaseEncoding.base64().encode(pubKey.getEncoded());
+	}
+
+	public static RSAPublicKey decodeBase64(String base64String) {
+		byte[] bytes = BaseEncoding.base64().decode(base64String);
+		try {
+			return (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(bytes));
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}

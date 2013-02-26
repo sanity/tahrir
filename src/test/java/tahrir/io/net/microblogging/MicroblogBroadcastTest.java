@@ -16,9 +16,9 @@ public class MicroblogBroadcastTest {
 
 	@BeforeTest
 	public void setUpNodes() throws Exception {
-		sendingNode = TrUtils.makeTestNode(port++, false, false, false, true, 1, 1);
-		receivingNode = TrUtils.makeTestNode(port++, false, false, false, true, 1 , 1);
-		TrUtils.createTestBidirectionalConnection(sendingNode, receivingNode);
+		sendingNode = TrUtils.TestUtils.makeNode(port++, false, false, false, true, 1, 1);
+		receivingNode = TrUtils.TestUtils.makeNode(port++, false, false, false, true, 1, 1);
+		TrUtils.TestUtils.createBidirectionalConnection(sendingNode, receivingNode);
 		for (final TrPeerInfo pi :sendingNode.peerManager.peers.values()) {
 			pi.capabilities.receivesMessageBroadcasts = true;
 		}

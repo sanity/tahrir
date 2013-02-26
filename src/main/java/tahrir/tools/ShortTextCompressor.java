@@ -66,7 +66,7 @@ public class ShortTextCompressor {
 	}
 
 	public String deCompress(final byte[] toDeCompress) {
-		checkArgument(toDeCompress != null, "toDeCompress data can't be null.");
+		checkArgument(toDeCompress != null, "toDeCompress otherData can't be null.");
 
 		// The total number of characters to be decompress
 		final int charNum = tree.leafFrequencySum();
@@ -75,7 +75,7 @@ public class ShortTextCompressor {
 			if (toDeCompress.length == 0)
 				return "";
 			else
-				throw new IllegalStateException("The toDecompress data isn't encoded correctly.");
+				throw new IllegalStateException("The toDecompress otherData isn't encoded correctly.");
 		}
 
 		// The total number of character categories
@@ -120,7 +120,7 @@ public class ShortTextCompressor {
 		}
 
 		if (result.length() != charNum)
-			throw new IllegalStateException("The toDecompress data isn't encoded correctly.");
+			throw new IllegalStateException("The toDecompress otherData isn't encoded correctly.");
 
 		return result.toString();
 	}

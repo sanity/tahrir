@@ -1,10 +1,7 @@
 package tahrir.io.net.microblogging.filters;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
+import com.google.common.collect.Lists;
+import com.google.common.eventbus.Subscribe;
 import tahrir.io.net.microblogging.containers.MicroblogsForViewing.MicroblogAddedEvent;
 import tahrir.io.net.microblogging.containers.MicroblogsForViewing.MicroblogRemovalEvent;
 import tahrir.io.net.microblogging.containers.MicroblogsForViewing.ParsedMicroblogTimeComparator;
@@ -12,8 +9,10 @@ import tahrir.io.net.microblogging.filters.FilterChangeListener.FilterChangeEven
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.TrUtils;
 
-import com.google.common.collect.Lists;
-import com.google.common.eventbus.Subscribe;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * An abstract class for filters, which are a subset of the microblogs available for viewing.

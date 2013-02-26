@@ -1,51 +1,37 @@
 package tahrir.io.net.microblogging.microblogs;
 
+import com.google.common.collect.ImmutableMap;
+import tahrir.tools.Tuple2;
+
 import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
 
-import nu.xom.Attribute;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Element;
-import nu.xom.Elements;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import tahrir.io.net.microblogging.FormatInfo;
-import tahrir.io.net.microblogging.IdentityMap.NewIdentityEvent;
-import tahrir.tools.TrUtils;
-
-import com.google.common.collect.MapMaker;
-
 /**
- * A microblog which has been created from parsing a XML based message.
- * 
- * Moving all the parsing stuff to a separate class would probably be a good idea
+ * A microblog which has been parsed.
  * 
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 
 public class ParsedMicroblog {
-	private static final Logger logger = LoggerFactory.getLogger(ParsedMicroblog.class);
-
 	public GeneralMicroblogInfo mbData;
 
 	// Integers represent where they appeared in message
-	private final Map<RSAPublicKey, Integer> mentions = new MapMaker().makeMap();
-	private final Map<String, Integer> text = new MapMaker().makeMap();
+	private ImmutableMap<Tuple2<RSAPublicKey, String>, Integer> mentions;
+	private ImmutableMap<String, Integer> text;
 
-	public ParsedMicroblog(final GeneralMicroblogInfo mbData, final String unparsedMessage) throws Exception {
+	public ParsedMicroblog(final GeneralMicroblogInfo mbData,
+				ImmutableMap<Tuple2<RSAPublicKey, String>, Integer> mentions,
+				ImmutableMap<String, Integer> text) {
 		this.mbData = mbData;
-		parseMessage(unparsedMessage);
+		this.mentions = mentions;
+		this.text = text;
 	}
 
 	public boolean hasMention(final RSAPublicKey userKey) {
 		return mentions.containsKey(userKey);
 	}
 
-	public Map<RSAPublicKey, Integer> getMentions() {
+	public Map<Tuple2<RSAPublicKey, String>, Integer> getMentions() {
 		return mentions;
 	}
 
@@ -97,65 +83,5 @@ public class ParsedMicroblog {
 	@Override
 	public String toString() {
 		return "ParsedMicroblog [text=" + text + "]";
-	}
-
-	/**
-	 * A method for converting a public key into a String which represents a mention
-	 * for the user with the particular public key.
-	 * @param pubKey The public key of the user who will be mentioned
-	 * @return The public key encoded as bytes ready for markup.
-	 */
-	public static String convertToMentionBytesString(final RSAPublicKey pubKey) {
-		final StringBuilder builder = new StringBuilder();
-		for (final Byte encodedByte: pubKey.getEncoded()) {
-			builder.append(encodedByte);
-			builder.append(" ");
-		}
-
-		return builder.toString();
-	}
-
-	private void parseMessage(final String unparsedMessage) throws Exception {
-		final Builder parser = new Builder();
-		final Document doc = parser.build(unparsedMessage, null);
-		final Element root = doc.getRootElement();
-		processFromRoot(root);
-	}
-
-	private void processFromRoot(final Element root) throws Exception {
-		final Elements elements = root.getChildElements();
-		for (int i = 0; i < elements.size(); i++) {
-			final Element element = elements.get(i);
-			if (element.getQualifiedName().equals("txt")) {
-				handleTxtElement(element, i);
-			} else if (element.getQualifiedName().equals("mention")) {
-				handleMention(element, i);
-			} else {
-				logger.error("Unrecoginsed element");
-				throw new Exception();
-			}
-		}
-	}
-
-	private void handleTxtElement(final Element element, final int position) {
-		text.put(element.getValue(), position);
-	}
-
-	private void handleMention(final Element element, final int position) {
-		// turn from string into individual bytes
-		final String bytesString = element.getValue();
-		final String[] bytesStringArray = bytesString.split(" ");
-		final Byte[] bytes = new Byte[bytesStringArray.length];
-		for (int i = 0; i < bytesStringArray.length; i++) {
-			bytes[i] = Byte.parseByte(bytesStringArray[i]);
-		}
-
-		final RSAPublicKey pubKey = TrUtils.getPublicKey(ArrayUtils.toPrimitive(bytes));
-		mentions.put(pubKey, position);
-
-		final Attribute nickNameAtt = element.getAttribute(FormatInfo.NICK_NAME_ATTRIBUTE_INDEX);
-		final String nickName = nickNameAtt.getValue();
-		// notify the identity with the new identity discovered from parsing
-		TrUtils.eventBus.post(new NewIdentityEvent(nickName, pubKey));
 	}
 }

@@ -1,31 +1,19 @@
 package tahrir.io.serialization;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import tahrir.io.crypto.TrCrypto;
+import tahrir.io.net.RemoteNodeAddress;
+import tahrir.io.net.TrPeerManager.TrPeerInfo;
+import tahrir.io.net.udpV1.UdpNetworkLocation;
+
+import java.io.*;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import tahrir.io.crypto.TrCrypto;
-import tahrir.io.net.*;
-import tahrir.io.net.TrPeerManager.TrPeerInfo;
-import tahrir.io.net.udpV1.UdpNetworkLocation;
-
-<<<<<<< HEAD
-import com.google.common.collect.*;
-=======
-import com.google.inject.internal.Maps;
-import com.google.inject.internal.Sets;
->>>>>>> 9f42dcd20c2409838af935d18e5e07b550848f9d
 
 public class SerializationTest {
 

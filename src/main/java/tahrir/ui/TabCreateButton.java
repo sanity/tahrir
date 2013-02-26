@@ -1,11 +1,8 @@
 package tahrir.ui;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JComponent;
 
 /**
  * Represents a button which, when clicked, will open a new tab in the Tahrir interface.
@@ -40,5 +37,12 @@ public class TabCreateButton extends JButton implements ActionListener {
 	@Override
 	public void actionPerformed(final ActionEvent arg0) {
 		mainWindow.createClosableTab(tabName, tabContents);
+	}
+
+	public void makeTransparent() {
+		setOpaque(false);
+		setFocusable(false);
+		setContentAreaFilled(false);
+		setBorderPainted(false);
 	}
 }

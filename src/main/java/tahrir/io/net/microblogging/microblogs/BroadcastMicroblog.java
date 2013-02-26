@@ -14,7 +14,7 @@ import tahrir.io.crypto.TrSignature;
  */
 public class BroadcastMicroblog {
 	public int priority;
-	public GeneralMicroblogInfo data;
+	public GeneralMicroblogInfo otherData;
 	public String message;
 	public TrSignature signature;
 
@@ -29,15 +29,26 @@ public class BroadcastMicroblog {
 
 	public BroadcastMicroblog(final TrNode creatingNode, final String message, final int priority) {
 		// TODO: get info from config
-		data = new GeneralMicroblogInfo("", "", creatingNode.getRemoteNodeAddress().publicKey, System.currentTimeMillis());
+		otherData = new GeneralMicroblogInfo("", "", creatingNode.getRemoteNodeAddress().publicKey, System.currentTimeMillis());
 		this.priority = priority;
 		this.message = message;
-		data.authorPubKey = creatingNode.getRemoteNodeAddress().publicKey;
+		otherData.authorPubKey = creatingNode.getRemoteNodeAddress().publicKey;
 		try {
 			signature = TrCrypto.sign(message, creatingNode.getPrivateNodeId().privateKey);
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	/**
+	 * For tests.
+	 * @param message
+	 * @param otherData
+	 */
+	public BroadcastMicroblog(String message, GeneralMicroblogInfo otherData) {
+		this.message = message;
+		this.otherData = otherData;
+		this.signature = null;
 	}
 
 	@Override

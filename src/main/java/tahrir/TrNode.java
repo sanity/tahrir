@@ -146,8 +146,8 @@ public class TrNode {
 			contactBook = new ContactBook(new File(node.rootDirectory, node.config.contacts));
 			duplicateNameAppender = new ShortenedPublicKeyFinder(new File(node.rootDirectory, node.config.publicKeyChars));
 			mbsForBroadcast = new MicroblogsForBroadcast();
-			mbsForViewing = new MicroblogsForViewing(contactBook, mbsForBroadcast);
-			incomingMbHandler = new IncomingMicroblogHandler(mbsForViewing, mbsForBroadcast, contactBook);
+			//mbsForViewing = new MicroblogsForViewing(contactBook, mbsForBroadcast);
+			//incomingMbHandler = new IncomingMicroblogHandler(mbsForViewing, mbsForBroadcast, contactBook);
 			mbScheduler = new MicroblogBroadcastScheduler(node);
 		}
 	}

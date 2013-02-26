@@ -1,28 +1,25 @@
 package tahrir.io.net.udpV1;
 
-import java.net.InetAddress;
-import java.security.interfaces.*;
-
-import org.slf4j.*;
+import com.google.common.base.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.*;
-
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 import tahrir.io.crypto.TrCrypto;
-import tahrir.io.net.*;
+import tahrir.io.net.PhysicalNetworkLocation;
+import tahrir.io.net.TrNetworkInterface;
 import tahrir.io.net.TrNetworkInterface.TrMessageListener;
 import tahrir.io.net.TrNetworkInterface.TrSentReceivedListener;
-<<<<<<< HEAD:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
-import tahrir.io.net.udpV1.UdpNetworkInterface.UNIConfig;
-import tahrir.tools.*;
-=======
-import tahrir.io.net.TrRemoteAddress;
 import tahrir.io.net.TrRemoteConnection;
 import tahrir.io.net.udpV1.UdpNetworkInterface.UNIConfig;
 import tahrir.tools.ByteArraySegment;
->>>>>>> 9f42dcd20c2409838af935d18e5e07b550848f9d:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
+import tahrir.tools.Tuple2;
 
-import com.google.common.base.Function;
+import java.net.InetAddress;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 
 public class UdpNetworkInterfaceTest {
 	private static final Logger logger = LoggerFactory.getLogger(UdpNetworkInterfaceTest.class);
@@ -66,7 +63,7 @@ public class UdpNetworkInterfaceTest {
 		final TrMessageListener noopListener = new TrMessageListener() {
 
 			public void received(final TrNetworkInterface iFace, final PhysicalNetworkLocation sender,
-					final ByteArraySegment message) {
+								 final ByteArraySegment message) {
 			}
 
 		};
@@ -74,7 +71,7 @@ public class UdpNetworkInterfaceTest {
 		listener = new TrMessageListener() {
 
 			public void received(final TrNetworkInterface iFace, final PhysicalNetworkLocation sender,
-					final ByteArraySegment message) {
+								 final ByteArraySegment message) {
 				Assert.assertEquals(message, sentMessage);
 				receivedSuccessfully.called = true;
 			}
@@ -173,20 +170,12 @@ public class UdpNetworkInterfaceTest {
 	}
 
 	@Test
-<<<<<<< HEAD:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 	public void unreliableSimpleMessageSend() throws Exception {
-=======
-	public void unreliableSimpleMessagesSend() throws Exception {
->>>>>>> 9f42dcd20c2409838af935d18e5e07b550848f9d:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 		i1.setSimPercentageLoss(.2);
 
 		final ByteArraySegmentBuilder msgBuilder = ByteArraySegment.builder();
 
-<<<<<<< HEAD:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 		for (int x = 0; x < 10; x++) {
-=======
-		for (int x = 0; x < 100; x++) {
->>>>>>> 9f42dcd20c2409838af935d18e5e07b550848f9d:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 			msgBuilder.writeByte(33);
 		}
 
@@ -205,7 +194,6 @@ public class UdpNetworkInterfaceTest {
 		Assert.assertTrue(receivedSuccessfully.called);
 	}
 
-<<<<<<< HEAD:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 	@Test
 	public void longUnreliableMessageSend() throws Exception {
 		i1.setSimPercentageLoss(.2);
@@ -231,8 +219,6 @@ public class UdpNetworkInterfaceTest {
 		Assert.assertTrue(receivedSuccessfully.called);
 	}
 
-=======
->>>>>>> 9f42dcd20c2409838af935d18e5e07b550848f9d:src/test/java/tahrir/io/net/udpV1/UdpNetworkInterfaceTest.java
 	public class TrSentReceivedListenerBasicImpl implements TrSentReceivedListener {
 		public void sent() {
 			System.out.println("Sent successfully");

@@ -1,13 +1,10 @@
 package tahrir.io.net.microblogging;
 
-import java.security.interfaces.RSAPublicKey;
-import java.util.Map;
-
+import com.google.common.cache.CacheBuilder;
 import tahrir.TrConstants;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.eventbus.Subscribe;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Map;
 
 /**
  * This is used for mapping nick names, public keys and shortened public keys
@@ -16,41 +13,48 @@ import com.google.common.eventbus.Subscribe;
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 public class IdentityMap {
-	private final Map<RSAPublicKey, HumanReadableIdentity> idMap;
+	private final Map<HumanReadableIdentity, RSAPublicKey> idMap;
 	private final ShortenedPublicKeyFinder abbrPubKeyFinder;
 
 	public IdentityMap(final ShortenedPublicKeyFinder abbrPublicKeyFinder, final ContactBook contactBook) {
-		final Cache<RSAPublicKey, HumanReadableIdentity> cache = CacheBuilder.newBuilder()
+		/*
+		TODO: we could use a database here for the cache loader so that we have all identities
+		ever seen recorded
+		*/
+		idMap = CacheBuilder.newBuilder()
 				.maximumSize(TrConstants.ID_MAP_SIZE)
-				.build();
-		idMap = cache.asMap();
+				.<HumanReadableIdentity, RSAPublicKey>build() // no cache loader
+				.asMap();
 		abbrPubKeyFinder = abbrPublicKeyFinder;
-		// we will initialise with the contacts (which were persisted) because the user will probably want to
-		// talk to them
+		// contacts are the people user is likely to mention first
+		moveContactsIntoCache(contactBook);
 	}
 
 	public void addNewIdentity(final RSAPublicKey pubKey, final String nick) {
 		final String abbrPubKey = abbrPubKeyFinder.getShortenedKey(pubKey);
 		final HumanReadableIdentity readableId = new HumanReadableIdentity(nick, abbrPubKey);
-		idMap.put(pubKey, readableId);
+		idMap.put(readableId, pubKey);
 	}
 
-	@Subscribe
-	public void recordIdentityEvent(final NewIdentityEvent event) {
-		addNewIdentity(event.publicKey, event.nick);
-	}
-
-	public static class NewIdentityEvent {
-		public String nick;
-		public RSAPublicKey publicKey;
-
-		public NewIdentityEvent(final String nick, final RSAPublicKey publicKey) {
-			this.nick = nick;
-			this.publicKey = publicKey;
+	public void addNewIdentities(Map<RSAPublicKey, String> identities) {
+		for (Map.Entry<RSAPublicKey, String> identity : identities.entrySet()) {
+			addNewIdentity(identity.getKey(), identity.getValue());
 		}
 	}
 
-	public static class HumanReadableIdentity {
+	public RSAPublicKey getFullPublicKey(String alias, String abbrPubKey) {
+		HumanReadableIdentity readableIdentity = new HumanReadableIdentity(alias, abbrPubKey);
+		return idMap.get(readableIdentity);
+	}
+
+	private void moveContactsIntoCache(ContactBook cb) {
+		for (Map.Entry<RSAPublicKey, String> entry : cb.getContacts().entrySet()) {
+			addNewIdentity(entry.getKey(), entry.getValue());
+		}
+	}
+
+	// dumb otherData object for hashing / mapping
+	private static class HumanReadableIdentity {
 		public String abbrPubKey;
 		public String nickName;
 

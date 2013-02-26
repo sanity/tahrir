@@ -1,13 +1,18 @@
 package tahrir.io.net.microblogging;
 
+import nu.xom.ParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import tahrir.TrConstants;
 import tahrir.io.net.microblogging.containers.MicroblogsForBroadcast;
 import tahrir.io.net.microblogging.containers.MicroblogsForViewing;
 import tahrir.io.net.microblogging.microblogs.BroadcastMicroblog;
+import tahrir.io.net.microblogging.microblogs.GeneralMicroblogInfo;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
+import tahrir.tools.Tuple2;
+
+import java.security.interfaces.RSAPublicKey;
+import java.util.Map;
 
 /**
  * Handles things to do with newly incoming microblogs.
@@ -33,31 +38,36 @@ public class IncomingMicroblogHandler {
 	}
 
 	public void handleInsertion(final BroadcastMicroblog mbForBroadcast) {
-		if (!MicroblogIntegrityChecks.isValidMicroblog(mbForBroadcast)) {
-			logger.info("A microblog is being ignored because it didn't match required data requirements");
+		GeneralMicroblogInfo generalMbData = mbForBroadcast.otherData;
+		String unparsedMessage = mbForBroadcast.message;
+		if (!MicroblogIntegrityChecks.isValidMicroblog(generalMbData, unparsedMessage)) {
+			logger.info("A microblog is being ignored because it didn't match required otherData requirements");
 			return;
 		}
-
-		// a better priority if they're one of your contacts
-		if (contactBook.hasContact(mbForBroadcast.data.authorPubKey)) {
-			mbForBroadcast.priority -= TrConstants.CONTACT_PRIORITY_INCREASE;
-		}
-
+		// try parse the message
+		MicroblogParser parser = null;
 		try {
-			final ParsedMicroblog parsedMb = new ParsedMicroblog(mbForBroadcast.data, mbForBroadcast.message);
-			// it's passed the requirements, time to add it to the queues
-			mbsForBroadcast.insert(mbForBroadcast);
-			mbsForViewing.insert(parsedMb);
-			addDataToAddressMap(parsedMb);
-		} catch (final Exception e) {
+			parser = new MicroblogParser(unparsedMessage);
+			parser.parseMessage();
+		} catch (final ParsingException e) {
 			logger.info("A microblog is being ignored because it failed to be parsed");
 			return;
 		}
+		// the microblog has now passed all the requirements with parsing and otherData constraints
+		if (contactBook.hasContact(generalMbData.authorPubKey)) {
+			// a better priority if they're one of your contacts
+			mbForBroadcast.priority -= TrConstants.CONTACT_PRIORITY_INCREASE;
+		}
+		ParsedMicroblog parsedMb = new ParsedMicroblog(generalMbData, parser.getMentions(), parser.getText());
+		addDiscoveredIdentities(parser.getIdentitiesDiscovered(),
+				new Tuple2<RSAPublicKey, String>(generalMbData.authorPubKey, generalMbData.authorNick));
+		mbsForViewing.insert(parsedMb);
+		mbsForBroadcast.insert(mbForBroadcast);
 	}
 
-	private void addDataToAddressMap(final ParsedMicroblog parsedMicroblog) {
-		// Some data from the microblog mentions have already been added to the
-		// address map via. an event in ParsedMicroblog.
-		idMap.addNewIdentity(parsedMicroblog.mbData.authorPubKey, parsedMicroblog.mbData.authorNick);
+	private void addDiscoveredIdentities(Map<RSAPublicKey, String> fromParsing,
+										 Tuple2<RSAPublicKey, String> fromGeneralData) {
+		idMap.addNewIdentity(fromGeneralData.a, fromGeneralData.b);
+		idMap.addNewIdentities(fromParsing);
 	}
 }

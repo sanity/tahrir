@@ -1,13 +1,11 @@
 package tahrir.ui;
 
-import java.awt.Component;
+import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
-import javax.swing.AbstractCellEditor;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-
-import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
+import java.awt.*;
 
 /**
  * Renderer for rendering parsed microblogs in a JTable.
@@ -29,7 +27,7 @@ public class MicroblogRenderer extends AbstractCellEditor implements TableCellRe
 			final boolean isSelected, final boolean hasFocus, final int row, final int column) {
 		final ParsedMicroblog parsedMb = (ParsedMicroblog) value;
 		final MicroblogPostPanel panel = new MicroblogPostPanel(parsedMb, mainWindow);
-		return panel.content;
+		return panel.getContent();
 	}
 
 	@Override
@@ -42,6 +40,6 @@ public class MicroblogRenderer extends AbstractCellEditor implements TableCellRe
 			final boolean isSelected, final int row, final int column) {
 		final ParsedMicroblog parsedMb = (ParsedMicroblog) value;
 		final MicroblogPostPanel panel = new MicroblogPostPanel(parsedMb, mainWindow);
-		return panel.content;
+		return panel.getContent();
 	}
 }

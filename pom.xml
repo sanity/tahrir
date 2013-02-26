@@ -125,7 +125,8 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>13.0</version>
+            <!-- This is the same as 14.0 release -->
+			<version>14.0-rc3</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
