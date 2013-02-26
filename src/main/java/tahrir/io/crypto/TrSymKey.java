@@ -8,33 +8,29 @@ import javax.crypto.spec.*;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import tahrir.tools.ByteArraySegment;
+import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 
 public class TrSymKey {
 
-	private static IvParameterSpec ivSpec;
+	private static final String CIPHER_NAME = "AES/CBC/PKCS7Padding";
+
+	private static final int BLOCK_SIZE;
 
 	static {
 		Security.addProvider(new BouncyCastleProvider());
-		Cipher cipher;
-		try {
-			cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
-			final byte[] iv = new byte[cipher.getBlockSize()];
-			for (int i = 0; i < iv.length; i++) {
-				iv[i] = 0;
-			}
-			ivSpec = new IvParameterSpec(iv);
-		} catch (final NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (final NoSuchProviderException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (final NoSuchPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
+		try {
+			BLOCK_SIZE = Cipher.getInstance(CIPHER_NAME).getBlockSize();
+		} catch(Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
+
+	public static int getOverhead() {
+		return BLOCK_SIZE;
+	}
+
+	private static final SecureRandom rng = new SecureRandom();
 
 	private final SecretKeySpec skey;
 
@@ -48,9 +44,10 @@ public class TrSymKey {
 
 	public ByteArraySegment decrypt(final ByteArraySegment toDecrypt) {
 		try {
-			final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
+			final Cipher cipher = Cipher.getInstance(CIPHER_NAME);
+			final IvParameterSpec ivSpec = new IvParameterSpec(toDecrypt.array, toDecrypt.offset, BLOCK_SIZE);
 			cipher.init(Cipher.DECRYPT_MODE, skey, ivSpec);
-			return new ByteArraySegment(cipher.doFinal(toDecrypt.array, toDecrypt.offset, toDecrypt.length));
+			return new ByteArraySegment(cipher.doFinal(toDecrypt.array, toDecrypt.offset+BLOCK_SIZE, toDecrypt.length-BLOCK_SIZE));
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -58,9 +55,17 @@ public class TrSymKey {
 
 	public ByteArraySegment encrypt(final ByteArraySegment toEncrypt) {
 		try {
-			final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
-			cipher.init(Cipher.ENCRYPT_MODE, skey, ivSpec);
-			return new ByteArraySegment(cipher.doFinal(toEncrypt.array, toEncrypt.offset, toEncrypt.length));
+			final byte[] iv = new byte[BLOCK_SIZE];
+			synchronized (rng) {
+				rng.nextBytes(iv);
+			}
+			final Cipher cipher = Cipher.getInstance(CIPHER_NAME);
+			cipher.init(Cipher.ENCRYPT_MODE, skey, new IvParameterSpec(iv));
+			final byte[] ciphertext = cipher.doFinal(toEncrypt.array, toEncrypt.offset, toEncrypt.length);
+			final ByteArraySegmentBuilder basb = new ByteArraySegmentBuilder();
+			basb.write(iv);
+			basb.write(ciphertext);
+			return basb.build();
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
