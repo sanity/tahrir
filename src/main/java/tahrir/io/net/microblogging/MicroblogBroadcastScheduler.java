@@ -1,17 +1,20 @@
 package tahrir.io.net.microblogging;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
 import tahrir.TrNode;
-import tahrir.io.net.*;
+import tahrir.io.net.PhysicalNetworkLocation;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.io.net.microblogging.microblogs.BroadcastMicroblog;
 import tahrir.tools.TrUtils;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Schedules a single microblog for broadcast to each peer one at a time.
- * 
+ *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 public class MicroblogBroadcastScheduler {

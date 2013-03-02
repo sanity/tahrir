@@ -16,7 +16,7 @@ import java.util.Map;
 
 /**
  * Handles things to do with newly incoming microblogs.
- * 
+ *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 public class IncomingMicroblogHandler {
@@ -29,8 +29,8 @@ public class IncomingMicroblogHandler {
 	private final IdentityMap idMap;
 
 	public IncomingMicroblogHandler(final MicroblogsForViewing mbsForViewing,
-			final MicroblogsForBroadcast mbsForBroadcast,
-			final ContactBook contactBook, final IdentityMap identityMap) {
+									final MicroblogsForBroadcast mbsForBroadcast,
+									final ContactBook contactBook, final IdentityMap identityMap) {
 		this.mbsForBroadcast = mbsForBroadcast;
 		this.mbsForViewing = mbsForViewing;
 		this.contactBook = contactBook;
@@ -54,13 +54,14 @@ public class IncomingMicroblogHandler {
 			return;
 		}
 		// the microblog has now passed all the requirements with parsing and otherData constraints
-		if (contactBook.hasContact(generalMbData.authorPubKey)) {
+		if (contactBook.hasContact(generalMbData.getAuthorPubKey())) {
 			// a better priority if they're one of your contacts
 			mbForBroadcast.priority -= TrConstants.CONTACT_PRIORITY_INCREASE;
 		}
-		ParsedMicroblog parsedMb = new ParsedMicroblog(generalMbData, parser.getMentions(), parser.getText());
-		addDiscoveredIdentities(parser.getIdentitiesDiscovered(),
-				new Tuple2<RSAPublicKey, String>(generalMbData.authorPubKey, generalMbData.authorNick));
+		ParsedMicroblog parsedMb = new ParsedMicroblog(generalMbData, parser.getMentionsFound().keySet(),
+				parser.getParsedParts());
+		addDiscoveredIdentities(parser.getMentionsFound(),
+				new Tuple2<RSAPublicKey, String>(generalMbData.getAuthorPubKey(), generalMbData.getAuthorNick()));
 		mbsForViewing.insert(parsedMb);
 		mbsForBroadcast.insert(mbForBroadcast);
 	}

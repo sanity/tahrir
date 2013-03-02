@@ -1,21 +1,22 @@
 package tahrir.io.net.microblogging;
 
-import java.io.*;
-import java.security.interfaces.RSAPublicKey;
-
-import org.slf4j.*;
-
+import com.google.gson.JsonParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tahrir.tools.TrUtils;
 
-import com.google.gson.JsonParseException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.security.interfaces.RSAPublicKey;
 
 /**
  * For finding what the shortened public key is.
- * 
+ * <p/>
  * The shortened public key is a human readable sequence of ints derived from the public key (4 ints) useful for user to distinguish
  * two different users with the same nick name. Each node choices a different index to get the ints from for security reasons. The
  * indices to use are persisted for consistency.
- * 
+ *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 

@@ -1,15 +1,17 @@
 package tahrir.io.net.microblogging;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import nu.xom.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.io.crypto.TrCrypto;
-import tahrir.tools.Tuple2;
+import tahrir.ui.AuthorDisplayPageButton;
+import tahrir.ui.TrMainWindow;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Comparator;
 import java.util.Map;
 
 import static tahrir.TrConstants.FormatInfo.*;
@@ -22,61 +24,56 @@ import static tahrir.TrConstants.FormatInfo.*;
 public class MicroblogParser {
 	private static final Logger logger = LoggerFactory.getLogger(MicroblogParser.class);
 
+	private final SortedMultiset<ParsedPart> parsedParts = TreeMultiset.create(new PositionComparator());
 	/**
-	 * Records mentions and text discovered while parsing. Integer represents relative location in the message.
+	 * Records public keys mapped to aliases.
 	 */
-	private Map<Tuple2<RSAPublicKey, String>, Integer> mentions = Maps.newHashMap();
-	private Map<String, Integer> text = Maps.newHashMap();
-	/**
-	 * Records identities discovered while parsing.
-	 */
-	private Map<RSAPublicKey, String> identitiesDiscovered = Maps.newHashMap();
-
-	private String messageToParse;
+	private final Map<RSAPublicKey, String> mentionsFound = Maps.newHashMap();
+	private final String messageToParse;
 	private boolean parsed;
 
 	public MicroblogParser(String messageToParse) throws ParsingException {
 		this.messageToParse = messageToParse;
 	}
 
-	public ImmutableMap<Tuple2<RSAPublicKey, String>, Integer> getMentions() {
-		if (!parsed) {
-			logger.error("The message wasn't parsed yet.");
-			return null;
-		}
-		return ImmutableMap.copyOf(mentions);
-	}
-
-	public ImmutableMap<String, Integer> getText() {
-		if (!parsed) {
-			logger.error("The message wasn't parsed yet.");
-			return null;
-		}
-		return ImmutableMap.copyOf(text);
-	}
-
-	public ImmutableMap<RSAPublicKey, String> getIdentitiesDiscovered() {
-		if (!parsed) {
-			logger.error("The message wasn't parsed yet.");
-			return null;
-		}
-		return ImmutableMap.copyOf(identitiesDiscovered);
-	}
-
 	/**
-	 * A method for converting a public key into a String which represents a mention
-	 * for the user with the particular public key.
-	 * @param pubKey The public key of the user who will be mentioned
-	 * @return The public key encoded as bytes ready for markup.
+	 * Convert parsed parts to their XML representation i.e the opposite of what we do when parsing.
 	 */
-	public static String convertToMentionBytesString(final RSAPublicKey pubKey) {
-		final StringBuilder builder = new StringBuilder();
-		for (final Byte encodedByte: pubKey.getEncoded()) {
-			builder.append(encodedByte);
-			builder.append(" ");
+	public static String getXML(SortedMultiset<ParsedPart> parsedParts) {
+		Element root = new Element(ROOT);
+		for (ParsedPart parsedPart : parsedParts) {
+			if (parsedPart instanceof TextPart) {
+				TextPart asTextPart = (TextPart) parsedPart;
+				Element textElement = new Element(PLAIN_TEXT);
+				textElement.appendChild(asTextPart.toText());
+			} else if (parsedPart instanceof MentionPart) {
+				MentionPart asMentionPart = (MentionPart) parsedPart;
+				Element mentionElement = new Element(MENTION);
+				// add the encoded public key
+				String pubKeyAsString = TrCrypto.toBase64(asMentionPart.getPubKeyOfMentioned());
+				mentionElement.appendChild(pubKeyAsString);
+				// add the attribute i.e the alias
+				mentionElement.addAttribute(new Attribute(ALIAS_ATTRIBUTE, asMentionPart.getAliasOfMentioned()));
+			} else {
+				throw new RuntimeException("Could not get XML for given multiset.");
+			}
 		}
+		Document doc = new Document(root);
+		return doc.toXML();
+	}
 
-		return builder.toString();
+	public ImmutableSortedMultiset<ParsedPart> getParsedParts() {
+		if (!parsed) {
+			throw new RuntimeException("Message hasn't been parsed.");
+		}
+		return ImmutableSortedMultiset.copyOfSorted(parsedParts);
+	}
+
+	public ImmutableMap<RSAPublicKey, String> getMentionsFound() {
+		if (!parsed) {
+			throw new RuntimeException("Message hasn't been parsed.");
+		}
+		return ImmutableMap.copyOf(mentionsFound);
 	}
 
 	public void parseMessage() throws ParsingException {
@@ -85,45 +82,10 @@ public class MicroblogParser {
 		try {
 			doc = builder.build(messageToParse, null);
 		} catch (IOException e) {
-			logger.error("Error getting builder for parsing");
-			throw new RuntimeException(e);
+			throw new RuntimeException("Error getting builder for parsing");
 		}
-		final Element root = doc.getRootElement();
-		processFromRoot(root);
+		processFromRoot(doc.getRootElement());
 		parsed = true;
-	}
-
-	/**
-	 * Utility method for converting maps to Tahrir formatted XML.
-	 *
-	 * @param mentions A for mention -> location in document
-	 * @param text A map for plain text -> location in document
-	 * @return The XML as a String.
-	 */
-	public static String getXML(Map<Tuple2<RSAPublicKey, String>, Integer> mentions, Map<String, Integer> text) {
-		Element[] elements = new Element[mentions.size() + text.size()];
-		for (Map.Entry<Tuple2<RSAPublicKey, String>, Integer> mentionEntry : mentions.entrySet()) {
-			Integer docPosition = mentionEntry.getValue();
-
-			Element mentionElement = new Element(MENTION);
-			String pubKeyAsString = TrCrypto.toBase64(mentionEntry.getKey().a);
-			mentionElement.appendChild(pubKeyAsString);
-
-			Attribute aliasAttribute = new Attribute(ALIAS_ATTRIBUTE, mentionEntry.getKey().b);
-			mentionElement.addAttribute(aliasAttribute);
-
-			elements[docPosition] = mentionElement;
-		}
-		for (Map.Entry<String, Integer> textEntry : text.entrySet()) {
-			Element textElement = new Element(PLAIN_TEXT);
-			textElement.appendChild(textEntry.getKey());
-		}
-		Element root = new Element(ROOT);
-		for (Element e : elements) {
-			root.appendChild(e);
-		}
-		Document doc = new Document(root);
-		return doc.toXML();
 	}
 
 	private void processFromRoot(final Element root) throws ParsingException {
@@ -131,10 +93,8 @@ public class MicroblogParser {
 		for (int position = 0; position < elements.size(); position++) {
 			final Element element = elements.get(position);
 			if (element.getQualifiedName().equals(PLAIN_TEXT)) {
-				// plain text element
-				text.put(element.getValue(), position);
+				handleText(element, position);
 			} else if (element.getQualifiedName().equals(MENTION)) {
-				// mention element
 				handleMention(element, position);
 			} else {
 				logger.error("Unrecognised element when parsing a microblog.");
@@ -143,13 +103,142 @@ public class MicroblogParser {
 		}
 	}
 
+	private void handleText(Element element, int position) {
+		parsedParts.add(new TextPart(position, element.getValue()));
+	}
+
 	private void handleMention(final Element element, final int position) {
 		String mentionString = element.getValue();
 		RSAPublicKey pubKey = TrCrypto.decodeBase64(mentionString);
 		final Attribute nickNameAtt = element.getAttribute(ALIAS_ATTRIBUTE_INDEX);
 		final String nickName = nickNameAtt.getValue();
 
-		mentions.put(new Tuple2<RSAPublicKey, String>(pubKey, nickName), position);
-		identitiesDiscovered.put(pubKey, nickName);
+		parsedParts.add(new MentionPart(position, pubKey, nickName));
+		mentionsFound.put(pubKey, nickName);
+	}
+
+	/**
+	 * Represents a part of a microblog that has been parsed and can now be read directly. A position is kept to record
+	 * where it was found in the microblog.
+	 */
+	public static abstract class ParsedPart {
+		private final int positionInMicroblog;
+
+		public ParsedPart(int positionInMicroblog) {
+			this.positionInMicroblog = positionInMicroblog;
+		}
+
+		public int getPositionInMicroblog() {
+			return positionInMicroblog;
+		}
+
+		/**
+		 * Get the textual representation of the ParesedPart. Different to a toString() in that it's intended for
+		 * display to the end user.
+		 *
+		 * @return The textual representation.
+		 */
+		public abstract String toText();
+
+		/**
+		 * Get the part as a Swing component.
+		 *
+		 * @return The Swing part representing the part. Null if there is no Swing representation.
+		 */
+		public abstract JComponent toSwingComponent(TrMainWindow mainWindow);
+	}
+
+	public static class TextPart extends ParsedPart {
+		private final String text;
+
+		public TextPart(int positionInMicroblog, String text) {
+			super(positionInMicroblog);
+			this.text = text;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			TextPart textPart = (TextPart) o;
+
+			if (!text.equals(textPart.text)) return false;
+
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			return text.hashCode();
+		}
+
+		@Override
+		public String toText() {
+			return text;
+		}
+
+		@Override
+		public JComponent toSwingComponent(TrMainWindow mainWindow) {
+			return null;
+		}
+	}
+
+	public static class MentionPart extends ParsedPart {
+		private final RSAPublicKey pubKeyOfMentioned;
+		private final String aliasOfMentioned;
+
+		public MentionPart(int positionInMicroblog, RSAPublicKey pubKeyOfMentioned,
+						   String aliasOfMentioned) {
+			super(positionInMicroblog);
+			this.pubKeyOfMentioned = pubKeyOfMentioned;
+			this.aliasOfMentioned = aliasOfMentioned;
+		}
+
+		public RSAPublicKey getPubKeyOfMentioned() {
+			return pubKeyOfMentioned;
+		}
+
+		public String getAliasOfMentioned() {
+			return aliasOfMentioned;
+		}
+
+		@Override
+		public String toText() {
+			return "";
+		}
+
+		@Override
+		public JComponent toSwingComponent(TrMainWindow mainWindow) {
+			return new AuthorDisplayPageButton(mainWindow, pubKeyOfMentioned, aliasOfMentioned);
+		}
+
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			MentionPart that = (MentionPart) o;
+
+			if (!aliasOfMentioned.equals(that.aliasOfMentioned)) return false;
+			if (!pubKeyOfMentioned.equals(that.pubKeyOfMentioned)) return false;
+
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			int result = pubKeyOfMentioned.hashCode();
+			result = 31 * result + aliasOfMentioned.hashCode();
+			return result;
+		}
+	}
+
+	public static class PositionComparator implements Comparator<ParsedPart> {
+		@Override
+		public int compare(ParsedPart o1, ParsedPart o2) {
+			return Integer.compare(o1.getPositionInMicroblog(), o2.getPositionInMicroblog());
+		}
 	}
 }

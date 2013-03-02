@@ -120,7 +120,7 @@ public final class ByteArraySegment implements Iterable<Byte> {
 	@Override
 	public String toString() {
 		final StringBuffer ret = new StringBuffer();
-		ret.append("ByteArraySegment[length="+length+" otherData=[");
+		ret.append("ByteArraySegment[length="+length+" data=[");
 		ret.append(Joiner.on(',').join(this));
 		ret.append("]");
 		return ret.toString();

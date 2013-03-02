@@ -9,18 +9,8 @@ import java.security.interfaces.RSAPublicKey;
 
 public class ContactBookTest {
 	@Test
-	public void simpleTest() {
-		ContactBook cb = new ContactBook(null);
-		RSAPublicKey userKey = TrCrypto.createRsaKeyPair().a;
-		String name = "name";
-		cb.addContact(name, userKey);
-		Assert.assertTrue(cb.hasContact(userKey));
-		Assert.assertTrue(cb.getContact(userKey).equals(name));
-	}
-
-	@Test
 	public void persistenceTest() throws Exception {
-		File contactsFile = File.createTempFile("temp", "contacts");
+		File contactsFile = File.createTempFile("tahrir", "contacts_persistence_test");
 		ContactBook cb = new ContactBook(contactsFile);
 
 		RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
@@ -36,8 +26,8 @@ public class ContactBookTest {
 		cb = new ContactBook(contactsFile);
 
 		Assert.assertTrue(cb.hasContact(user1Key));
-		Assert.assertTrue(cb.getContact(user1Key).equals(name1));
+		Assert.assertTrue(cb.getAlias(user1Key).equals(name1));
 		Assert.assertTrue(cb.hasContact(user2Key));
-		Assert.assertTrue(cb.getContact(user2Key).equals(name2));
+		Assert.assertTrue(cb.getAlias(user2Key).equals(name2));
 	}
 }

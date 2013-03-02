@@ -1,10 +1,11 @@
 package tahrir.io.net.microblogging.containers;
 
-import java.util.*;
-
+import com.google.common.collect.Sets;
 import tahrir.io.net.microblogging.microblogs.BroadcastMicroblog;
 
-import com.google.common.collect.Sets;
+import java.util.Comparator;
+import java.util.PriorityQueue;
+import java.util.Set;
 
 public class MicroblogsForBroadcast {
 	private final PriorityQueue<BroadcastMicroblog> microblogBroadcastQueue;
@@ -12,7 +13,7 @@ public class MicroblogsForBroadcast {
 
 	public MicroblogsForBroadcast() {
 		microblogBroadcastQueue = new PriorityQueue<BroadcastMicroblog>(100, new MicroblogPriorityComparator());
-		seen =  Sets.newLinkedHashSet();
+		seen = Sets.newLinkedHashSet();
 	}
 
 	public synchronized BroadcastMicroblog getMicroblogForBroadcast() {

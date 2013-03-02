@@ -7,14 +7,15 @@ import tahrir.io.crypto.TrSignature;
 
 /**
  * A microblog for broadcast.
- * 
- * The message is in a XML format.
- * 
+ *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 public class BroadcastMicroblog {
 	public int priority;
 	public GeneralMicroblogInfo otherData;
+	/**
+	 * Message is the microblog in an XML format.
+	 */
 	public String message;
 	public TrSignature signature;
 
@@ -32,7 +33,6 @@ public class BroadcastMicroblog {
 		otherData = new GeneralMicroblogInfo("", "", creatingNode.getRemoteNodeAddress().publicKey, System.currentTimeMillis());
 		this.priority = priority;
 		this.message = message;
-		otherData.authorPubKey = creatingNode.getRemoteNodeAddress().publicKey;
 		try {
 			signature = TrCrypto.sign(message, creatingNode.getPrivateNodeId().privateKey);
 		} catch (final Exception e) {
@@ -42,6 +42,7 @@ public class BroadcastMicroblog {
 
 	/**
 	 * For tests.
+	 *
 	 * @param message
 	 * @param otherData
 	 */
