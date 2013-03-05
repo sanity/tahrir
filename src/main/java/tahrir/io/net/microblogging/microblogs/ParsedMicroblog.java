@@ -1,87 +1,82 @@
 package tahrir.io.net.microblogging.microblogs;
 
-import com.google.common.collect.ImmutableMap;
-import tahrir.tools.Tuple2;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedMultiset;
+import com.google.common.collect.Sets;
+import tahrir.io.net.microblogging.MicroblogParser.MentionPart;
+import tahrir.io.net.microblogging.MicroblogParser.ParsedPart;
 
 import java.security.interfaces.RSAPublicKey;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * A microblog which has been parsed.
- * 
+ *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 
 public class ParsedMicroblog {
-	public GeneralMicroblogInfo mbData;
+	private final GeneralMicroblogInfo mbData;
+	private final ImmutableSortedMultiset<ParsedPart> parsedParts;
+	/**
+	 * Fast lookup of mentions for filtering.
+	 */
+	private final ImmutableSet<RSAPublicKey> mentions;
 
-	// Integers represent where they appeared in message
-	private ImmutableMap<Tuple2<RSAPublicKey, String>, Integer> mentions;
-	private ImmutableMap<String, Integer> text;
 
-	public ParsedMicroblog(final GeneralMicroblogInfo mbData,
-				ImmutableMap<Tuple2<RSAPublicKey, String>, Integer> mentions,
-				ImmutableMap<String, Integer> text) {
+	public ParsedMicroblog(final GeneralMicroblogInfo mbData, ImmutableSet<RSAPublicKey> mentions,
+			ImmutableSortedMultiset<ParsedPart> parsedParts) {
 		this.mbData = mbData;
 		this.mentions = mentions;
-		this.text = text;
+		this.parsedParts = parsedParts;
+	}
+
+	/**
+	 * Easy constructor for testing purposes. Not for normal usage as it makes constructor unnecessarily slow.
+	 */
+	public ParsedMicroblog(GeneralMicroblogInfo mbData, ImmutableSortedMultiset<ParsedPart> parsedParts) {
+		this.mbData = mbData;
+		this.parsedParts = parsedParts;
+		// extract the mentions from the parsedParts
+		Set<RSAPublicKey> tempMentions = Sets.newHashSet();
+		for (ParsedPart parsedPart : parsedParts) {
+			if (parsedPart instanceof MentionPart) {
+				MentionPart asMentionPart = (MentionPart) parsedPart;
+				tempMentions.add(asMentionPart.getPubKeyOfMentioned());
+			}
+		}
+		mentions = ImmutableSet.copyOf(tempMentions);
 	}
 
 	public boolean hasMention(final RSAPublicKey userKey) {
-		return mentions.containsKey(userKey);
+		return mentions.contains(userKey);
 	}
 
-	public Map<Tuple2<RSAPublicKey, String>, Integer> getMentions() {
-		return mentions;
+	public ImmutableSortedMultiset<ParsedPart> getParsedParts() {
+		return parsedParts;
 	}
 
-	public Map<String, Integer> getText() {
-		return text;
-	}
-
-	public int getElementCount() {
-		return mentions.size() + text.size();
+	public GeneralMicroblogInfo getMbData() {
+		return mbData;
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((mbData == null) ? 0 : mbData.hashCode());
-		result = prime * result + ((mentions == null) ? 0 : mentions.hashCode());
-		result = prime * result + ((text == null) ? 0 : text.hashCode());
-		return result;
-	}
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (!(obj instanceof ParsedMicroblog))
-			return false;
-		final ParsedMicroblog other = (ParsedMicroblog) obj;
-		if (mbData == null) {
-			if (other.mbData != null)
-				return false;
-		} else if (!mbData.equals(other.mbData))
-			return false;
-		if (mentions == null) {
-			if (other.mentions != null)
-				return false;
-		} else if (!mentions.equals(other.mentions))
-			return false;
-		if (text == null) {
-			if (other.text != null)
-				return false;
-		} else if (!text.equals(other.text))
-			return false;
+		ParsedMicroblog that = (ParsedMicroblog) o;
+
+		if (!mbData.equals(that.mbData)) return false;
+		if (!parsedParts.equals(that.parsedParts)) return false;
+
 		return true;
 	}
 
 	@Override
-	public String toString() {
-		return "ParsedMicroblog [text=" + text + "]";
+	public int hashCode() {
+		int result = mbData.hashCode();
+		result = 31 * result + parsedParts.hashCode();
+		return result;
 	}
 }

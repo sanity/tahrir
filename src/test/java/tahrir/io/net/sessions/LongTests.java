@@ -9,6 +9,7 @@ import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.tools.*;
 
 import com.google.common.collect.Lists;
+import tahrir.tools.TrUtils.TestUtils;
 
 public class LongTests {
 	public static void main(final String[] args) throws Exception {
@@ -27,7 +28,7 @@ public class LongTests {
 		seedConfig.peers.minPeers = 4;
 		seedConfig.localHostName = "127.0.0.1";
 		seedConfig.udp.listenPort = 20648;
-		final File seedDir = TrUtils.createTempDirectory();
+		final File seedDir = TestUtils.createTempDirectory();
 		final TrNode seedNode = new TrNode(seedDir, seedConfig);
 		final RemoteNodeAddress seedPublicNodeId = seedNode.getRemoteNodeAddress();
 
@@ -35,7 +36,7 @@ public class LongTests {
 
 		for (int x=0; x<200; x++) {
 			Thread.sleep(500);
-			final File joinerDir = TrUtils.createTempDirectory();
+			final File joinerDir = TestUtils.createTempDirectory();
 
 			final TrConfig joinerConfig = new TrConfig();
 

@@ -1,22 +1,20 @@
 package tahrir.io.net.microblogging.containers;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.SortedSet;
-
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import tahrir.TrConstants;
 import tahrir.io.net.microblogging.ContactBook;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.TrUtils;
 
-import com.google.common.collect.Sets;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.SortedSet;
 
 /**
  * Stores a collection of microblogs for viewing purposes, normally to display in the GUI.
- * 
+ *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 public class MicroblogsForViewing {
@@ -68,7 +66,7 @@ public class MicroblogsForViewing {
 	}
 
 	private boolean shouldAddByReplacement(final ParsedMicroblog mb) {
-		return contactBook.hasContact(mb.mbData.authorPubKey) || isNewerThanLast(mb);
+		return contactBook.hasContact(mb.getMbData().getAuthorPubKey()) || isNewerThanLast(mb);
 	}
 
 	private boolean isNewerThanLast(final ParsedMicroblog mb) {
@@ -82,7 +80,7 @@ public class MicroblogsForViewing {
 	public static class ParsedMicroblogTimeComparator implements Comparator<ParsedMicroblog> {
 		@Override
 		public int compare(final ParsedMicroblog mb1, final ParsedMicroblog mb2) {
-			return Double.compare(mb2.mbData.timeCreated, mb1.mbData.timeCreated);
+			return Double.compare(mb2.getMbData().getTimeCreated(), mb1.getMbData().getTimeCreated());
 		}
 	}
 

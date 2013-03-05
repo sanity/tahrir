@@ -48,8 +48,8 @@ public class GUITest {
 		parsedMbs.add(fromUser2);
 
 		for (ParsedMicroblog parsedMicroblog : parsedMbs) {
-			String xmlMessage = MicroblogParser.getXML(parsedMicroblog.getMentions(), parsedMicroblog.getText());
-			BroadcastMicroblog broadcastMicroblog = new BroadcastMicroblog(xmlMessage, parsedMicroblog.mbData);
+			String xmlMessage = MicroblogParser.getXML(parsedMicroblog.getParsedParts());
+			BroadcastMicroblog broadcastMicroblog = new BroadcastMicroblog(xmlMessage, parsedMicroblog.getMbData());
 			node.mbClasses.incomingMbHandler.handleInsertion(broadcastMicroblog);
 		}
 	}

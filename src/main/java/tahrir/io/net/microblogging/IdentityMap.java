@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * This is used for mapping nick names, public keys and shortened public keys
  * to each other.
- * 
+ *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 public class IdentityMap {
@@ -53,7 +53,7 @@ public class IdentityMap {
 		}
 	}
 
-	// dumb otherData object for hashing / mapping
+	// dumb data object for hashing / mapping
 	private static class HumanReadableIdentity {
 		public String abbrPubKey;
 		public String nickName;

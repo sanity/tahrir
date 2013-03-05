@@ -1,8 +1,8 @@
 package tahrir.io.net.microblogging.filters;
 
-import java.util.SortedSet;
-
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
+
+import java.util.SortedSet;
 
 /**
  * A "filter" which lets all microblogs through.

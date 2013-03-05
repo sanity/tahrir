@@ -1,9 +1,9 @@
 package tahrir.io.net.microblogging.filters;
 
+import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
+
 import java.security.interfaces.RSAPublicKey;
 import java.util.SortedSet;
-
-import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
 /**
  * For filtering microblogs which mentions a certain user.

@@ -3,16 +3,17 @@ package tahrir.ui;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tahrir.io.net.microblogging.MicroblogParser.ParsedPart;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
-import tahrir.tools.Tuple2;
 
 import javax.swing.*;
-import javax.swing.text.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.Style;
+import javax.swing.text.StyleContext;
 import java.awt.*;
-import java.security.interfaces.RSAPublicKey;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * Represents a microblog in a panel for rendering by the table renderer.
@@ -40,7 +41,7 @@ public class MicroblogPostPanel {
 	}
 
 	private void addPostTime(final ParsedMicroblog mb) {
-		final JLabel postTime = new JLabel(DateParser.parseTime(mb.mbData.timeCreated));
+		final JLabel postTime = new JLabel(DateParser.parseTime(mb.getMbData().getTimeCreated()));
 		postTime.setForeground(Color.GRAY);
 		postTime.setFont(new Font("time", Font.PLAIN, postTime.getFont().getSize() - 2));
 		content.add(postTime, "wrap, align right, span");
@@ -48,7 +49,7 @@ public class MicroblogPostPanel {
 
 	private void addAuthorButton(final ParsedMicroblog mb, final TrMainWindow mainWindow) {
 		final AuthorDisplayPageButton authorNick = new AuthorDisplayPageButton(mainWindow,
-				mb.mbData.authorPubKey, mb.mbData.authorNick);
+				mb.getMbData().getAuthorPubKey(), mb.getMbData().getAuthorNick());
 		authorNick.setFont(new Font("bold", Font.BOLD, authorNick.getFont().getSize() + 2));
 		content.add(authorNick, "align left");
 	}
@@ -58,34 +59,25 @@ public class MicroblogPostPanel {
 		messageTextPane.setBackground(Color.WHITE);
 		messageTextPane.setEditable(false);
 
-		// insert text into text pane
-		final StyledDocument doc = messageTextPane.getStyledDocument();
-		doc.addStyle("base", StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE));
-		// first add all the parts to an array so that we can easily add, based on their location, to the JTextPane
-		TextPanelContentsPart[] textPaneParts = new TextPanelContentsPart[mb.getElementCount()];
-		// prepare the mentions
-		for (Map.Entry<Tuple2<RSAPublicKey, String>, Integer> entry : mb.getMentions().entrySet()) {
-			Integer location = entry.getValue();
-			String alias = entry.getKey().b;
-			RSAPublicKey key = entry.getKey().a;
-			TextPanelContentsPart part = new MentionPart(location.toString(), alias, key, doc, mainWindow);
-			textPaneParts[location] = part;
-		}
-		// prepare the plain text
-		for (Map.Entry<String, Integer> entry: mb.getText().entrySet()) {
-			Integer location = entry.getValue();
-			textPaneParts[location] = new TextPanelContentsPart(entry.getKey());
-		}
-		// now add the actual information to the text pane
-		try {
-			// parts were inserted in array in order
-			for (TextPanelContentsPart part : textPaneParts) {
-				doc.insertString(doc.getLength(), part.getText(), doc.getStyle(part.getStyleName()));
+		Document doc = messageTextPane.getDocument();
+		Style textStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
+		for (ParsedPart parsedPart : mb.getParsedParts()) {
+			JComponent asComponent = parsedPart.toSwingComponent(mainWindow);
+			// if it doesn't have a swing component representation then just use a text representation
+			if (asComponent != null) {
+				// make the component level with the text
+				asComponent.setAlignmentY(0.85f);
+				messageTextPane.insertComponent(asComponent);
+			} else {
+				// insert as text
+				try {
+					doc.insertString(doc.getLength(), parsedPart.toText(), textStyle);
+				} catch (BadLocationException e) {
+					throw new RuntimeException("Bad location in message text pane.");
+				}
 			}
-		} catch (final BadLocationException e) {
-			logger.error("Problem with inserting text into the text pane");
-			throw new RuntimeException(e);
 		}
+
 		content.add(messageTextPane, "wrap, span");
 	}
 
@@ -113,46 +105,6 @@ public class MicroblogPostPanel {
 		public static String parseTime(final long time) {
 			final Date date = new Date(time);
 			return dateFormater.format(date);
-		}
-	}
-
-	private class TextPanelContentsPart {
-		private String text;
-
-		public TextPanelContentsPart(String text) {
-			this.text = text;
-		}
-
-		public String getStyleName() {
-			return "base";
-		}
-
-		public String getText() {
-			return text;
-		}
-		
-		/*
-		 This class could be made implement a comparator to avoid messiness of putting into an array in addTextPane()
-		 */
-	}
-
-	private class MentionPart extends TextPanelContentsPart {
-		private String styleName;
-
-		public MentionPart(String toAppendToStyleName, String aliasOfMentioned, RSAPublicKey publicKeyOfMentioned,
-				StyledDocument doc, TrMainWindow mainWindow) {
-			// just a blank space as text, the other text is on the button
-			super(" ");
-			AuthorDisplayPageButton button = new AuthorDisplayPageButton(mainWindow, publicKeyOfMentioned,
-					aliasOfMentioned);
-			styleName = new String("mention" + toAppendToStyleName);
-			Style s = doc.addStyle(styleName, doc.getStyle("default"));
-			StyleConstants.setComponent(s, button);
-		}
-
-		@Override
-		public String getStyleName() {
-			return styleName;
 		}
 	}
 }

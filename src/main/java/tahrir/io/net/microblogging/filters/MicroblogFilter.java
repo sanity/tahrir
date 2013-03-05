@@ -29,10 +29,8 @@ public abstract class MicroblogFilter {
 
 	/**
 	 * Adds all the current microblogs that pass the filter to this Filter.
-	 * 
-	 * A messy way of getting around the fact you can't call an abstract method in a constructor.
-	 * 
-	 * SHOULD BE CALLED IN CONSTRUCTOR OF EVERY SUBCLASS OF MicroblogFilter.
+	 * A messy way of getting around the fact you can't call an abstract method in a constructor. Should be called in
+	 * all in all constructors of implementing classes of {@code MicroblogFilter}.
 	 */
 	public synchronized void initMicroblogStorage(final SortedSet<ParsedMicroblog> initFrom) {
 		microblogs = new TreeSet<ParsedMicroblog>(new ParsedMicroblogTimeComparator());

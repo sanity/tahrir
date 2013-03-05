@@ -1,17 +1,19 @@
 package tahrir.io.net.microblogging;
 
-import org.slf4j.*;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tahrir.TrNode;
-import tahrir.io.net.*;
+import tahrir.io.net.PhysicalNetworkLocation;
+import tahrir.io.net.TrSessionImpl;
+import tahrir.io.net.TrSessionManager;
 import tahrir.io.net.microblogging.microblogs.BroadcastMicroblog;
 
 /**
  * A session for broadcasting a microblog to a node.
- * 
+ * <p/>
  * The microblog will be broadcast if a node expresses interest based
  * on a probalistic condition otherwise the session will end.
- * 
+ *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements MicroblogBroadcastSession {

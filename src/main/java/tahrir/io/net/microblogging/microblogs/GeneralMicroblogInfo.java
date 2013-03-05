@@ -4,15 +4,15 @@ import java.security.interfaces.RSAPublicKey;
 
 /**
  * Holds common state for broadcast and parsed microblogs.
- * 
+ *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 
 public class GeneralMicroblogInfo {
-	public String languageCode;
-	public String authorNick;
-	public RSAPublicKey authorPubKey;
-	public long timeCreated;
+	private final String languageCode;
+	private final String authorNick;
+	private final RSAPublicKey authorPubKey;
+	private final long timeCreated;
 
 	public GeneralMicroblogInfo(final String languageCode, final String authorNick,
 			final RSAPublicKey authorPubKey, final long timeCreated) {
@@ -62,5 +62,19 @@ public class GeneralMicroblogInfo {
 		return true;
 	}
 
+	public String getLanguageCode() {
+		return languageCode;
+	}
 
+	public String getAuthorNick() {
+		return authorNick;
+	}
+
+	public RSAPublicKey getAuthorPubKey() {
+		return authorPubKey;
+	}
+
+	public long getTimeCreated() {
+		return timeCreated;
+	}
 }

@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 import tahrir.*;
 import tahrir.io.net.*;
 import tahrir.tools.*;
+import tahrir.tools.TrUtils.TestUtils;
 
 public class AssimilateTest {
 	@Test(enabled=true)
@@ -21,11 +22,11 @@ public class AssimilateTest {
 		seedConfig.peers.runBroadcast = false;
 		seedConfig.localHostName = "localhost";
 		seedConfig.udp.listenPort = 7643;
-		final File seedDir = TrUtils.createTempDirectory();
+		final File seedDir = TestUtils.createTempDirectory();
 		final TrNode seedNode = new TrNode(seedDir, seedConfig);
 		final RemoteNodeAddress seedPublicNodeId = seedNode.getRemoteNodeAddress();
 
-		final File joinerDir = TrUtils.createTempDirectory();
+		final File joinerDir = TestUtils.createTempDirectory();
 
 		final TrConfig joinerConfig = new TrConfig();
 

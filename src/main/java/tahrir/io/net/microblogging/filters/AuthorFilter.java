@@ -1,9 +1,9 @@
 package tahrir.io.net.microblogging.filters;
 
+import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
+
 import java.security.interfaces.RSAPublicKey;
 import java.util.SortedSet;
-
-import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
 /**
  * For filtering microblogs by a particular author.
@@ -21,7 +21,7 @@ public class AuthorFilter extends MicroblogFilter {
 
 	@Override
 	public boolean passesFilter(final ParsedMicroblog mb) {
-		return mb.mbData.authorPubKey.equals(authorsKey);
+		return mb.getMbData().getAuthorPubKey().equals(authorsKey);
 	}
 
 	@Override
