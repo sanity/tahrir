@@ -118,10 +118,12 @@ public class MicroblogParser {
 	}
 
 	/**
-	 * Represents a part of a microblog that has been parsed and can now be read directly. A position is kept to record
-	 * where it was found in the microblog.
+	 * Represents a part of a microblog that has been parsed and can now be read directly and quickly.
 	 */
 	public static abstract class ParsedPart {
+		/**
+		 * Records the relative location it was found in the microblog.
+		 */
 		private final int positionInMicroblog;
 
 		public ParsedPart(int positionInMicroblog) {
