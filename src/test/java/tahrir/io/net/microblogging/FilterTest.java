@@ -28,16 +28,13 @@ public class FilterTest {
 	private ParsedMicroblog mbFromUserB;
 	private SortedSet<ParsedMicroblog> microblogs;
 
-	private RSAPublicKey userAKey;
-	private RSAPublicKey userBKey;
+	private Tuple2<RSAPublicKey, String> userA;
+	private Tuple2<RSAPublicKey, String> userB;
 
 	@BeforeClass
 	public void setup() {
-		userAKey = TrCrypto.createRsaKeyPair().a;
-		userBKey = TrCrypto.createRsaKeyPair().a;
-
-		Tuple2<RSAPublicKey, String> userA = new Tuple2<RSAPublicKey, String>(userAKey, "UserA");
-		Tuple2<RSAPublicKey, String> userB = new Tuple2<RSAPublicKey, String>(userBKey, "UserB");
+		userA = new Tuple2<RSAPublicKey, String>(TrCrypto.createRsaKeyPair().a, "UserA");
+		userB = new Tuple2<RSAPublicKey, String>(TrCrypto.createRsaKeyPair().a, "UserB");
 
 		mbForUnfilteredOnly = TrUtils.TestUtils.getParsedMicroblog();
 		mbFromUserAMentionsB = TrUtils.TestUtils.getParsedMicroblog(userA, userB);
@@ -59,8 +56,8 @@ public class FilterTest {
 	public void contactsFilterTest() {
 		// in this test we add both user A and B to contacts
 		final ContactBook cb = new ContactBook(null);
-		cb.addContact("userA", userAKey);
-		cb.addContact("userB", userBKey);
+		cb.addContact(userA.b, userA.a);
+		cb.addContact(userB.b, userB.a);
 
 		final ContactsFilter filter = new ContactsFilter(microblogs, cb);
 		final List<ParsedMicroblog> filterMbs = filter.getMicroblogs();
@@ -73,7 +70,7 @@ public class FilterTest {
 	@Test
 	public void authorFilterTest() {
 		// in this test we test to see if we can filter microblogs by user A only
-		final AuthorFilter filter = new AuthorFilter(microblogs, userAKey);
+		final AuthorFilter filter = new AuthorFilter(microblogs, userA.a);
 		final List<ParsedMicroblog> filterMbs = filter.getMicroblogs();
 
 		Assert.assertTrue(filterMbs.contains(mbFromUserAMentionsB));
@@ -84,7 +81,7 @@ public class FilterTest {
 	@Test
 	public void mentionFilterTest() {
 		// in this test we see if we can filter messages that mention user B only
-		final MentionFilter filter = new MentionFilter(microblogs, userBKey);
+		final MentionFilter filter = new MentionFilter(microblogs, userB.a);
 		final List<ParsedMicroblog> filterMbs = filter.getMicroblogs();
 
 		Assert.assertTrue(filterMbs.contains(mbFromUserAMentionsB));
