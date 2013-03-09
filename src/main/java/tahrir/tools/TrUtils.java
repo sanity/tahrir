@@ -29,8 +29,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class TrUtils {
-	private static Logger log = LoggerFactory.getLogger(TrUtils.class);
-
 	public static final ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
 
 	public static final Random rand = new Random();
