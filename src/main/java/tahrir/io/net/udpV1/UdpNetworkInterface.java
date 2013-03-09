@@ -124,6 +124,9 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 		simPercentageLoss = percentage;
 	}
 
+	/**
+	 * Config for unicast transmission.
+	 */
 	public static class UNIConfig {
 		public int listenPort = TrUtils.rand.nextInt(10000)+10000;
 

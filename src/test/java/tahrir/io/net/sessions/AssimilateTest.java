@@ -11,7 +11,7 @@ import tahrir.tools.*;
 import tahrir.tools.TrUtils.TestUtils;
 
 public class AssimilateTest {
-	@Test(enabled=true)
+	@Test
 	public void twoPeerTest() throws Exception {
 		System.out.println("Joiner (7644) will assimilate to seed (7643)");
 

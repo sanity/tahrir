@@ -52,12 +52,11 @@ public class TrNetTest {
 		final TrNetworkInterface iface2 = new UdpNetworkInterface(udpNetIfaceConf2, kp2);
 
 		final TrConfig trCfg1 = new TrConfig();
-		trCfg1.peers.assimilate = false;
-		trCfg1.peers.runMaintainance = false;
+		setTrConfig(trCfg1);
 
 		final TrConfig trCfg2 = new TrConfig();
-		trCfg2.peers.assimilate = false;
-		trCfg2.peers.runMaintainance = false;
+		setTrConfig(trCfg2);
+
 		final TrNode node1 = new TrNode(TestUtils.createTempDirectory(), trCfg1);
 		final TrSessionManager sessionMgr1 = new TrSessionManager(node1, iface1, false);
 
@@ -141,6 +140,13 @@ public class TrNetTest {
 		}
 
 		Assert.assertTrue(testDone);
+	}
+
+	private void setTrConfig(TrConfig config) {
+		// we are testing basic networking features, not higher level p2p stuff
+		config.peers.assimilate = false;
+		config.peers.runMaintainance = false;
+		config.peers.runBroadcast = false;
 	}
 
 	public static interface TestSession extends TrSession {

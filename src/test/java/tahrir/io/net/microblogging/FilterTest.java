@@ -16,6 +16,8 @@ import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.TrUtils;
 import tahrir.tools.Tuple2;
 
+import java.io.File;
+import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 import java.util.SortedSet;
@@ -54,8 +56,14 @@ public class FilterTest {
 
 	@Test
 	public void contactsFilterTest() {
+		File testFile = null;
+		try {
+			testFile = TrUtils.TestUtils.createTempDirectory();
+		} catch (IOException e) {
+			throw new RuntimeException("Coudn't create temp file", e);
+		}
 		// in this test we add both user A and B to contacts
-		final ContactBook cb = new ContactBook(null);
+		final ContactBook cb = new ContactBook(testFile);
 		cb.addContact(userA.b, userA.a);
 		cb.addContact(userB.b, userB.a);
 

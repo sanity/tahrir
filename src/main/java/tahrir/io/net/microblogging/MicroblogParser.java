@@ -29,54 +29,53 @@ public class MicroblogParser {
 	 * Records public keys mapped to aliases.
 	 */
 	private final Map<RSAPublicKey, String> mentionsFound = Maps.newHashMap();
-	private final String messageToParse;
-	private boolean parsed;
 
 	public MicroblogParser(String messageToParse) throws ParsingException {
-		this.messageToParse = messageToParse;
+		parseMessage(messageToParse);
 	}
 
 	/**
 	 * Convert parsed parts to their XML representation i.e the opposite of what we do when parsing.
 	 */
 	public static String getXML(SortedMultiset<ParsedPart> parsedParts) {
-		Element root = new Element(ROOT);
+		Element rootElement = new Element(ROOT);
+
 		for (ParsedPart parsedPart : parsedParts) {
+			Element elementCreated;
 			if (parsedPart instanceof TextPart) {
 				TextPart asTextPart = (TextPart) parsedPart;
-				Element textElement = new Element(PLAIN_TEXT);
-				textElement.appendChild(asTextPart.toText());
+
+				elementCreated = new Element(PLAIN_TEXT);
+				elementCreated.appendChild(asTextPart.toText());
 			} else if (parsedPart instanceof MentionPart) {
 				MentionPart asMentionPart = (MentionPart) parsedPart;
-				Element mentionElement = new Element(MENTION);
+
+				elementCreated = new Element(MENTION);
+
 				// add the encoded public key
 				String pubKeyAsString = TrCrypto.toBase64(asMentionPart.getPubKeyOfMentioned());
-				mentionElement.appendChild(pubKeyAsString);
+				elementCreated.appendChild(pubKeyAsString);
+
 				// add the attribute i.e the alias
-				mentionElement.addAttribute(new Attribute(ALIAS_ATTRIBUTE, asMentionPart.getAliasOfMentioned()));
+				elementCreated.addAttribute(new Attribute(ALIAS_ATTRIBUTE, asMentionPart.getAliasOfMentioned()));
 			} else {
 				throw new RuntimeException("Could not get XML for given multiset.");
 			}
+			rootElement.appendChild(elementCreated);
 		}
-		Document doc = new Document(root);
+		Document doc = new Document(rootElement);
 		return doc.toXML();
 	}
 
 	public ImmutableSortedMultiset<ParsedPart> getParsedParts() {
-		if (!parsed) {
-			throw new RuntimeException("Message hasn't been parsed.");
-		}
 		return ImmutableSortedMultiset.copyOfSorted(parsedParts);
 	}
 
 	public ImmutableMap<RSAPublicKey, String> getMentionsFound() {
-		if (!parsed) {
-			throw new RuntimeException("Message hasn't been parsed.");
-		}
 		return ImmutableMap.copyOf(mentionsFound);
 	}
 
-	public void parseMessage() throws ParsingException {
+	private void parseMessage(String messageToParse) throws ParsingException {
 		final Builder builder = new Builder();
 		final Document doc;
 		try {
@@ -85,17 +84,20 @@ public class MicroblogParser {
 			throw new RuntimeException("Error getting builder for parsing");
 		}
 		processFromRoot(doc.getRootElement());
-		parsed = true;
 	}
 
 	private void processFromRoot(final Element root) throws ParsingException {
 		final Elements elements = root.getChildElements();
-		for (int position = 0; position < elements.size(); position++) {
-			final Element element = elements.get(position);
+		int positionInMb = 0; // the position in microblog might be different to element index
+
+		// iterate through the document
+		for (int elementIndex = 0; elementIndex < elements.size(); elementIndex++) {
+			final Element element = elements.get(elementIndex);
+
 			if (element.getQualifiedName().equals(PLAIN_TEXT)) {
-				handleText(element, position);
+				handleText(element, positionInMb++);
 			} else if (element.getQualifiedName().equals(MENTION)) {
-				handleMention(element, position);
+				handleMention(element, positionInMb++);
 			} else {
 				logger.error("Unrecognised element when parsing a microblog.");
 				throw new ParsingException("Unrecognised element");
@@ -191,7 +193,7 @@ public class MicroblogParser {
 		private final String aliasOfMentioned;
 
 		public MentionPart(int positionInMicroblog, RSAPublicKey pubKeyOfMentioned,
-						   String aliasOfMentioned) {
+				String aliasOfMentioned) {
 			super(positionInMicroblog);
 			this.pubKeyOfMentioned = pubKeyOfMentioned;
 			this.aliasOfMentioned = aliasOfMentioned;
@@ -214,7 +216,6 @@ public class MicroblogParser {
 		public JComponent toSwingComponent(TrMainWindow mainWindow) {
 			return new AuthorDisplayPageButton(mainWindow, pubKeyOfMentioned, aliasOfMentioned);
 		}
-
 
 		@Override
 		public boolean equals(Object o) {

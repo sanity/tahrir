@@ -105,7 +105,7 @@ public class TrPeerManager {
 			final TrPeerInfo pnii = Persistence.loadReadOnly(TrPeerInfo.class, pubPeerFile);
 			return pnii;
 		} else {
-			/**
+			/*
 			 * Here we use a trick to pick peers in proportion to the
 			 * probability that they will be the fastest peer
 			 */

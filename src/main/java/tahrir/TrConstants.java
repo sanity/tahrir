@@ -35,6 +35,8 @@ public class TrConstants {
 
 	public static final int MAX_MICROBLOGS_FOR_VIEWING = 300;
 
+	public static final int SHORTENED_PUBLIC_KEY_SIZE = 4;
+
 	public static final int ID_MAP_SIZE = 500;
 
 	public static final int CONTACT_PRIORITY_INCREASE = 5;

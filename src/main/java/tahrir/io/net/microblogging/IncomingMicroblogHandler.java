@@ -48,7 +48,6 @@ public class IncomingMicroblogHandler {
 		MicroblogParser parser = null;
 		try {
 			parser = new MicroblogParser(unparsedMessage);
-			parser.parseMessage();
 		} catch (final ParsingException e) {
 			logger.info("A microblog is being ignored because it failed to be parsed");
 			return;

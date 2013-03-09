@@ -7,6 +7,8 @@ import com.google.common.eventbus.EventBus;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tahrir.TrConfig;
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
@@ -19,10 +21,7 @@ import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.GsonSerializers.RSAPublicKeyDeserializer;
 import tahrir.tools.GsonSerializers.RSAPublicKeySerializer;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Random;
@@ -30,6 +29,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class TrUtils {
+	private static Logger log = LoggerFactory.getLogger(TrUtils.class);
+
 	public static final ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
 
 	public static final Random rand = new Random();
@@ -64,6 +65,12 @@ public class TrUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> T parseJson(final String json, final Type type) throws JsonParseException {
 		return (T) gson.<Object>fromJson(json, type);
+	}
+
+	public static <T> void writeJson(T objectToWrite, File writeTo) throws IOException {
+		final FileWriter configWriter = new FileWriter(writeTo);
+		configWriter.append(TrUtils.gson.toJson(objectToWrite));
+		configWriter.close();
 	}
 
 	public static void readAllBytes(final byte[] buffer, final DataInputStream dis) throws IOException {
@@ -127,7 +134,8 @@ public class TrUtils {
 
 			GeneralMicroblogInfo mbData = new GeneralMicroblogInfo(null, "aAuthor", TrCrypto.createRsaKeyPair().a,
 					System.currentTimeMillis());
-			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOfSorted(parsedParts));
+			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(),
+					parsedParts));
 		}
 
 		/**
@@ -148,7 +156,7 @@ public class TrUtils {
 			parsedParts.add(anotherTextPart);
 
 			GeneralMicroblogInfo mbData = new GeneralMicroblogInfo(null, from.b, from.a, System.currentTimeMillis());
-			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOf(parsedParts));
+			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(), parsedParts));
 		}
 
 		/**
@@ -162,7 +170,7 @@ public class TrUtils {
 			parsedParts.add(textPart);
 
 			GeneralMicroblogInfo mbData = new GeneralMicroblogInfo(null, from.b, from.a, System.currentTimeMillis());
-			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOf(parsedParts));
+			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(), parsedParts);
 		}
 
 		public static File createTempDirectory() throws IOException {

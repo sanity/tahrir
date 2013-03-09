@@ -65,14 +65,14 @@ public class TrMain {
 				logger.error("Couldn't read configuration file: " + file, e);
 				System.exit(-1);
 			}
+		} else { // write a new config
+			try {
+				TrUtils.writeJson(config, file);
+			} catch (IOException e) {
+				throw new RuntimeException("Couldn't create config file", e);
+			}
 		}
-		try {
-			final FileWriter configWriter = new FileWriter(file);
-			configWriter.append(TrUtils.gson.toJson(config));
-			configWriter.close();
-		} catch (final IOException e) {
-			logger.warn("Failed to create config file", e);
-		}
+
 		return config;
 	}
 }

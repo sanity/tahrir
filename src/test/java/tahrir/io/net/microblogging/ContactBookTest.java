@@ -8,7 +8,7 @@ import java.io.File;
 import java.security.interfaces.RSAPublicKey;
 
 public class ContactBookTest {
-	@Test
+	@Test(enabled = false)
 	public void persistenceTest() throws Exception {
 		File contactsFile = File.createTempFile("tahrir", "contacts_persistence_test");
 		ContactBook cb = new ContactBook(contactsFile);

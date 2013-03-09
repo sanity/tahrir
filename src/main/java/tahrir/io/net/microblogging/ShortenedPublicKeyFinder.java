@@ -3,79 +3,75 @@ package tahrir.io.net.microblogging;
 import com.google.gson.JsonParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tahrir.TrConstants;
+import tahrir.io.crypto.TrCrypto;
 import tahrir.tools.TrUtils;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.security.interfaces.RSAPublicKey;
 
 /**
  * For finding what the shortened public key is.
- * <p/>
- * The shortened public key is a human readable sequence of ints derived from the public key (4 ints) useful for user to distinguish
- * two different users with the same nick name. Each node choices a different index to get the ints from for security reasons. The
- * indices to use are persisted for consistency.
+ *
+ * The shortened public key (spk) is an abbreviated version of a public key in base64 format. It is useful, in
+ * combination with an alias, for making public keys human readable, as the key would be too long otherwise. The indexes
+ * used to create the spk are different for every node to prevent easy spoofing.
  *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 
 public class ShortenedPublicKeyFinder {
-	public static Logger logger = LoggerFactory.getLogger(ShortenedPublicKeyFinder.class);
+	private static final Logger logger = LoggerFactory.getLogger(ShortenedPublicKeyFinder.class);
+	private static final int PUBLIC_KEY_SIZE_IN_BASE64 = 392;
 
-	private static int LENGTH_TO_CHECK = 617;
+	/**
+	 * The offsets which this node is using for finding a spk.
+	 */
+	private int[] indexes;
 
-	private final File indicesToUseFile;
-
-	private int[] indicesToUse = new int[4];
-
-	public ShortenedPublicKeyFinder(final File publicKeyCharsFile) {
-		indicesToUseFile = publicKeyCharsFile;
-		tryLoadIndicesToUse();
+	/**
+	 * Create a spk finder.
+	 * @param fileToUse A valid file, in json format, which specifies what indexes this node is using for a spk or
+	 * an empty valid file if node is being setup.
+	 */
+	public ShortenedPublicKeyFinder(final File fileToUse) {
+		FileReader fr = null;
+		try {
+			fr = new FileReader(fileToUse);
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException("Invalid file given.", e);
+		}
+		indexes = TrUtils.gson.fromJson(fr, int[].class);
+		// if gson loaded nothing node we need settings up
+		if (indexes == null || indexes.length != TrConstants.SHORTENED_PUBLIC_KEY_SIZE) {
+			logger.info("Creating new indexes to use");
+			initIndexes(fileToUse);
+		} else {
+			logger.info("Successfully loaded previous indexes");
+		}
 	}
 
+	/**
+	 * Get a spk.
+	 * @return The spk in base64 format.
+	 */
 	public String getShortenedKey(final RSAPublicKey publicKey) {
-		// we need to append something to the end
-		final StringBuilder builder = new StringBuilder();
-		final String publicKeyString = publicKey.getModulus().toString();
-		for (final int intToUse : indicesToUse) {
-			builder.append(publicKeyString.charAt(intToUse));
+		String asBase64 = TrCrypto.toBase64(publicKey);
+		StringBuilder builder = new StringBuilder();
+		for (int offset : indexes) {
+			builder.append(asBase64.charAt(offset));
 		}
 		return builder.toString();
 	}
 
-	private void tryLoadIndicesToUse() {
-		if (indicesToUseFile.exists()) {
-			logger.info("Loading public key chars file");
-			try {
-				indicesToUse = TrUtils.parseJson(indicesToUseFile, indicesToUse.getClass());
-			} catch (final JsonParseException jsonException) {
-				logger.error("Error parsing public key chars Json");
-			} catch (final IOException ioException) {
-				logger.error("Error reading public key chars file");
-			}
-		} else {
-			createNewIndicesToUseFile();
+	private void initIndexes(File persistTo) {
+		for (int i = 0; i < indexes.length; i++) {
+			indexes[i] = TrUtils.rand.nextInt(PUBLIC_KEY_SIZE_IN_BASE64 + 1);
 		}
-	}
-
-	private void createNewIndicesToUseFile() {
-		logger.info("Creating new public key ints to use");
-		setPublicKeyIntsToUse();
 		try {
-			final FileWriter intsToUseWriter = new FileWriter(indicesToUseFile);
-			intsToUseWriter.write(TrUtils.gson.toJson(indicesToUse));
-			intsToUseWriter.close();
-		} catch (final IOException ioException) {
-			logger.error("Error writing public key chars file");
-			throw new RuntimeException(ioException);
-		}
-	}
-
-
-	private void setPublicKeyIntsToUse() {
-		for (int i = 0; i < indicesToUse.length; i++) {
-			indicesToUse[i] = TrUtils.rand.nextInt(LENGTH_TO_CHECK);
+			TrUtils.writeJson(indexes, persistTo);
+		} catch (IOException e) {
+			logger.warn("Couldn't write indexes.");
 		}
 	}
 }

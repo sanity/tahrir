@@ -76,6 +76,7 @@ public class ContactBook {
 	private void loadContacts(Reader reader) {
 		Type contactsType = new TypeToken<Map<RSAPublicKey, String>>() {}.getType();
 		contacts = TrUtils.gson.fromJson(reader, contactsType);
+		// if the json wasn't loaded successfully
 		if (contacts == null) {
 			logger.info("Failed to load any contacts. Creating new contacts book.");
 			contacts = Maps.newConcurrentMap();
