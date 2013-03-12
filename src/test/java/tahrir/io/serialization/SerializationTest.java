@@ -121,7 +121,7 @@ public class SerializationTest {
 		final DataOutputStream dos2 = new DataOutputStream(baos2);
 		TrSerializer.serializeTo(listNoDuplicate, dos2);
 
-		Assert.assertEquals(baos1.size(), baos2.size());
+		Assert.assertEquals(baos2.size(), baos1.size());
 	}
 
 	@SuppressWarnings("serial")
