@@ -148,7 +148,7 @@ public class MicroblogParser {
 		/**
 		 * Get the part as a Swing component.
 		 *
-		 * @return The opitional Swing representation of the part.
+		 * @return The optional Swing representation of the part.
 		 */
 		public abstract Optional<? extends JComponent> toSwingComponent(TrMainWindow mainWindow);
 	}
@@ -210,7 +210,7 @@ public class MicroblogParser {
 
 		@Override
 		public String toText() {
-			return "";
+			return getAliasOfMentioned();
 		}
 
 		@Override
