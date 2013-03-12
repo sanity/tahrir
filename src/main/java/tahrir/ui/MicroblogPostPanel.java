@@ -62,9 +62,8 @@ public class MicroblogPostPanel {
 		Document doc = messageTextPane.getDocument();
 		Style textStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
 		for (ParsedPart parsedPart : mb.getParsedParts()) {
-			JComponent asComponent = parsedPart.toSwingComponent(mainWindow);
-			// if it doesn't have a swing component representation then just use a text representation
-			if (asComponent != null) {
+			if (parsedPart.toSwingComponent(mainWindow).isPresent()) {
+				JComponent asComponent = parsedPart.toSwingComponent(mainWindow).get();
 				// make the component level with the text
 				asComponent.setAlignmentY(0.85f);
 				messageTextPane.insertComponent(asComponent);

@@ -168,7 +168,7 @@ public class TrUtils {
 			parsedParts.add(textPart);
 
 			GeneralMicroblogInfo mbData = new GeneralMicroblogInfo(null, from.b, from.a, System.currentTimeMillis());
-			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(), parsedParts);
+			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(), parsedParts));
 		}
 
 		public static File createTempDirectory() throws IOException {

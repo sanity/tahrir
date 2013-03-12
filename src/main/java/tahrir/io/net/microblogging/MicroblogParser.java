@@ -1,5 +1,6 @@
 package tahrir.io.net.microblogging;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.*;
 import nu.xom.*;
 import org.slf4j.Logger;
@@ -147,9 +148,9 @@ public class MicroblogParser {
 		/**
 		 * Get the part as a Swing component.
 		 *
-		 * @return The Swing part representing the part. Null if there is no Swing representation.
+		 * @return The opitional Swing representation of the part.
 		 */
-		public abstract JComponent toSwingComponent(TrMainWindow mainWindow);
+		public abstract Optional<? extends JComponent> toSwingComponent(TrMainWindow mainWindow);
 	}
 
 	public static class TextPart extends ParsedPart {
@@ -183,7 +184,7 @@ public class MicroblogParser {
 		}
 
 		@Override
-		public JComponent toSwingComponent(TrMainWindow mainWindow) {
+		public Optional<? extends JComponent> toSwingComponent(TrMainWindow mainWindow) {
 			return null;
 		}
 	}
@@ -213,8 +214,8 @@ public class MicroblogParser {
 		}
 
 		@Override
-		public JComponent toSwingComponent(TrMainWindow mainWindow) {
-			return new AuthorDisplayPageButton(mainWindow, pubKeyOfMentioned, aliasOfMentioned);
+		public Optional<? extends JComponent> toSwingComponent(TrMainWindow mainWindow) {
+			return Optional.of(new AuthorDisplayPageButton(mainWindow, pubKeyOfMentioned, aliasOfMentioned));
 		}
 
 		@Override
