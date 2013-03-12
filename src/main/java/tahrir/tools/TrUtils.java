@@ -7,8 +7,6 @@ import com.google.common.eventbus.EventBus;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tahrir.TrConfig;
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;

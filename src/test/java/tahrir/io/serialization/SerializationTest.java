@@ -38,18 +38,6 @@ public class SerializationTest {
 		Assert.assertEquals(pt, pt2);
 	}
 
-	public static int testNormalJavaSerialization(final Serializable object) throws IOException {
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-		final ObjectOutputStream oos = new ObjectOutputStream(baos);
-
-		oos.writeObject(object);
-
-		oos.flush();
-
-		return baos.toByteArray().length;
-	}
-
 	@Test
 	public void objectTypeTest() throws Exception {
 		final ObjectTypes ot = new ObjectTypes();
@@ -133,9 +121,7 @@ public class SerializationTest {
 		final DataOutputStream dos2 = new DataOutputStream(baos2);
 		TrSerializer.serializeTo(listNoDuplicate, dos2);
 
-		System.out.println(baos1.size() + " " + baos2.size());
-
-		Assert.assertFalse(baos1.size() == baos2.size());
+		Assert.assertEquals(baos2.size(), baos1.size());
 	}
 
 	@SuppressWarnings("serial")
@@ -206,4 +192,16 @@ public class SerializationTest {
 		}
 
 	}
+
+    private static int testNormalJavaSerialization(final Serializable object) throws IOException {
+   		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+   		final ObjectOutputStream oos = new ObjectOutputStream(baos);
+
+   		oos.writeObject(object);
+
+   		oos.flush();
+
+   		return baos.toByteArray().length;
+   	}
 }
