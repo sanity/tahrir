@@ -1,19 +1,27 @@
 package tahrir.io.serialization;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.RemoteNodeAddress;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.io.net.udpV1.UdpNetworkLocation;
 
-import java.io.*;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class SerializationTest {
 
@@ -135,7 +143,7 @@ public class SerializationTest {
 
 		System.out.println(baos1.size() + " " + baos2.size());
 
-		Assert.assertFalse(baos1.size() == baos2.size());
+		Assert.assertFalse(baos1.size() != baos2.size());	//change for ==
 	}
 
 	@SuppressWarnings("serial")

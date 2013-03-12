@@ -21,4 +21,11 @@ public class TrSymKeyTest {
 		final ByteArraySegment decryptedCypherText = key.decrypt(cypherText);
 		Assert.assertEquals(decryptedCypherText, plainText);
 	}
+
+	@Test
+	public void testSymKeySize(){
+		final TrSymKey key = TrCrypto.createAesKey();
+		Assert.assertEquals(key.toBytes().length, 16);
+
+	}
 }
