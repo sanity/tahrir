@@ -1,27 +1,19 @@
 package tahrir.io.serialization;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.RemoteNodeAddress;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.io.net.udpV1.UdpNetworkLocation;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.io.*;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class SerializationTest {
 
@@ -44,18 +36,6 @@ public class SerializationTest {
 		final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
 		final PrimitiveTypes pt2 = TrSerializer.deserializeFrom(PrimitiveTypes.class, dis);
 		Assert.assertEquals(pt, pt2);
-	}
-
-	public static int testNormalJavaSerialization(final Serializable object) throws IOException {
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-		final ObjectOutputStream oos = new ObjectOutputStream(baos);
-
-		oos.writeObject(object);
-
-		oos.flush();
-
-		return baos.toByteArray().length;
 	}
 
 	@Test
@@ -141,9 +121,7 @@ public class SerializationTest {
 		final DataOutputStream dos2 = new DataOutputStream(baos2);
 		TrSerializer.serializeTo(listNoDuplicate, dos2);
 
-		System.out.println(baos1.size() + " " + baos2.size());
-
-		Assert.assertFalse(baos1.size() != baos2.size());	//change for ==
+		Assert.assertEquals(baos1.size(), baos2.size());
 	}
 
 	@SuppressWarnings("serial")
@@ -214,4 +192,16 @@ public class SerializationTest {
 		}
 
 	}
+
+    private static int testNormalJavaSerialization(final Serializable object) throws IOException {
+   		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+   		final ObjectOutputStream oos = new ObjectOutputStream(baos);
+
+   		oos.writeObject(object);
+
+   		oos.flush();
+
+   		return baos.toByteArray().length;
+   	}
 }

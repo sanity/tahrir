@@ -7,8 +7,6 @@ import com.google.common.eventbus.EventBus;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tahrir.TrConfig;
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
@@ -168,7 +166,7 @@ public class TrUtils {
 			parsedParts.add(textPart);
 
 			GeneralMicroblogInfo mbData = new GeneralMicroblogInfo(null, from.b, from.a, System.currentTimeMillis());
-			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(), parsedParts);
+			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(), parsedParts));
 		}
 
 		public static File createTempDirectory() throws IOException {
