@@ -185,7 +185,7 @@ public class MicroblogParser {
 
 		@Override
 		public Optional<? extends JComponent> toSwingComponent(TrMainWindow mainWindow) {
-			return null;
+			return Optional.absent();
 		}
 	}
 
