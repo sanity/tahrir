@@ -1,6 +1,7 @@
 package tahrir.io.net.sessions;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
@@ -12,7 +13,9 @@ import tahrir.io.net.TrSessionImpl;
 import tahrir.io.net.TrSessionManager;
 import tahrir.tools.TrUtils;
 
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * Class for carrying out maintenance on topology in hopes of forming a small world network.
@@ -27,7 +30,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 
 	private PhysicalNetworkLocation receivedProbeFrom;
 
-	private LinkedList<RemoteNodeAddress> willConnectTo;
+	private Set<RemoteNodeAddress> willConnectTo;
 
 	/**
 	 * A acceptor is the node where the search for a location ends, they will try accept as many
@@ -47,13 +50,13 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		}
 
 		initator = true;
-		final LinkedList<RemoteNodeAddress> forwarders = Lists.newLinkedList();
+		final HashSet<RemoteNodeAddress> forwarders = Sets.newHashSet();
 		final int hopsToLive = TrConstants.MAINTENANCE_HOPS_TO_LIVE;
 
 		probeForLocation(locationToFind, hopsToLive, forwarders);
 	}
 
-	public void probeForLocation(final int locationToFind, int hopsToLive, final LinkedList<RemoteNodeAddress> forwarders) {
+	public void probeForLocation(final int locationToFind, int hopsToLive, final Set<RemoteNodeAddress> forwarders) {
 		if (!initator) {
 			receivedProbeFrom = sender();
 			hopsToLive--;
@@ -85,15 +88,17 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		}
 	}
 
-	public void sendResponses(final LinkedList<RemoteNodeAddress> forwarders) {
+	public void sendResponses(final Set<RemoteNodeAddress> forwarders) {
 		int peersToAccept = getNumPeerToAccept(forwarders);
 
-		willConnectTo = Lists.newLinkedList();
+		willConnectTo = Sets.newHashSet();
+
+        LinkedList<RemoteNodeAddress> forwardersList = Lists.newLinkedList(forwarders);
 
 		// get nodes we're going to connect to
 		while (peersToAccept > 0 && forwarders.size() > 0) {
 			final int randomNum = TrUtils.rand.nextInt(forwarders.size());
-			final RemoteNodeAddress randomForwarder = forwarders.remove(randomNum);
+			final RemoteNodeAddress randomForwarder = forwardersList.remove(randomNum);
 
 			// check to see if connected
 			if (!node.peerManager.peers.containsKey(randomForwarder.physicalLocation)) {
@@ -115,7 +120,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		}
 	}
 
-	public void sendAcceptInfo(final RemoteNodeAddress acceptor, final LinkedList<RemoteNodeAddress> willConnectTo) {
+	public void sendAcceptInfo(final RemoteNodeAddress acceptor, final Set<RemoteNodeAddress> willConnectTo) {
 		if (willConnectTo.contains(node.getRemoteNodeAddress())) {
 			final TopologyMaintenanceSession acceptorSess = this.remoteSession(TopologyMaintenanceSession.class, connection(acceptor));
 			acceptorAddress = acceptor;
@@ -144,7 +149,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		}
 	}
 
-	private int getNumPeerToAccept(final LinkedList<RemoteNodeAddress> forwarders) {
+	private int getNumPeerToAccept(final Set<RemoteNodeAddress> forwarders) {
 		return forwarders.size() <= node.peerManager.getNumFreePeerSlots()
 				? forwarders.size()
 						: TrConstants.TOPOLOGY_MAINTENANCE_PEERS_TO_REPLACE;
