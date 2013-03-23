@@ -1,15 +1,18 @@
 package tahrir.io.net.sessions;
 
-import java.util.LinkedList;
-
-import org.slf4j.*;
-
-import tahrir.*;
-import tahrir.io.net.*;
+import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tahrir.TrConstants;
+import tahrir.TrNode;
+import tahrir.io.net.PhysicalNetworkLocation;
+import tahrir.io.net.RemoteNodeAddress;
 import tahrir.io.net.TrPeerManager.Capabilities;
+import tahrir.io.net.TrSessionImpl;
+import tahrir.io.net.TrSessionManager;
 import tahrir.tools.TrUtils;
 
-import com.google.common.collect.Lists;
+import java.util.LinkedList;
 
 /**
  * Class for carrying out maintenance on topology in hopes of forming a small world network.
@@ -131,8 +134,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		} else {
 			RemoteNodeAddress forwarderAddress = null;
 			// find the remote address corresponding to sender()
-			for (int i = 0; i < willConnectTo.size(); i++) {
-				final RemoteNodeAddress address = willConnectTo.get(i);
+			for (RemoteNodeAddress address : willConnectTo) {
 				if (address.physicalLocation.equals(sender())) {
 					forwarderAddress = address;
 					break;
