@@ -65,7 +65,7 @@ public class MicroblogPostPanel {
 			if (parsedPart.toSwingComponent(mainWindow).isPresent()) {
 				JComponent asComponent = parsedPart.toSwingComponent(mainWindow).get();
 				// make the component level with the text
-				asComponent.setAlignmentY(0.85f);
+				//asComponent.setAlignmentY(0.65f);
 				messageTextPane.insertComponent(asComponent);
 			} else {
 				// insert as text

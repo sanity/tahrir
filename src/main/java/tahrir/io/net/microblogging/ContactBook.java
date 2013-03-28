@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tahrir.tools.Persistence;
 import tahrir.tools.TrUtils;
 
 import java.io.*;
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * Manages a user's contacts which is analogous to who you are "following" on Twitter.
- * <p/>
+ *
  * The contacts are persisted.
  *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
@@ -23,22 +24,32 @@ public class ContactBook {
 	private static Logger logger = LoggerFactory.getLogger(ContactBook.class);
 
 	private ConcurrentMap<RSAPublicKey, String> contacts;
-	private final File contactsFile;
+	private File contactsFile;
 
 	/**
 	 * Create a ContactBook which loads previous contacts recorded.
 	 *
 	 * @param contactsFile File which contains the contacts previously recorded.
 	 */
-	public ContactBook(final File contactsFile) {
-		this.contactsFile = contactsFile;
+	public ContactBook(File contactsFile) {
+		FileReader reader = null;
 		try {
-			Reader reader = new FileReader(contactsFile);
+			this.contactsFile = contactsFile;
+			reader = new FileReader(contactsFile);
 			logger.info("Trying to load contacts.");
-			loadContacts(reader);
 		} catch (FileNotFoundException e) {
-			logger.error("Couldn't find contacts file");
-			e.printStackTrace();
+			throw new RuntimeException("Invalid file given to contact book");
+		}
+
+		// see if the file has any json for previous contacts saved
+		Type contactsType = new TypeToken<Map<RSAPublicKey, String>>() {}.getType();
+		contacts = TrUtils.gson.fromJson(reader, contactsType);
+		// if the json was loaded empty contacts need to be created
+		if (contacts == null) {
+			logger.info("Failed to load any contacts. Creating new contacts book.");
+			contacts = Maps.newConcurrentMap();
+		} else {
+			logger.info("Contacts loaded from file.");
 		}
 	}
 
@@ -70,18 +81,6 @@ public class ContactBook {
 		} catch (final IOException ioException) {
 			logger.error("Problem writting contacts to file: the contacts weren't saved.");
 			ioException.printStackTrace();
-		}
-	}
-
-	private void loadContacts(Reader reader) {
-		Type contactsType = new TypeToken<Map<RSAPublicKey, String>>() {}.getType();
-		contacts = TrUtils.gson.fromJson(reader, contactsType);
-		// if the json wasn't loaded successfully
-		if (contacts == null) {
-			logger.info("Failed to load any contacts. Creating new contacts book.");
-			contacts = Maps.newConcurrentMap();
-		} else {
-			logger.info("Contacts loaded from file.");
 		}
 	}
 }
