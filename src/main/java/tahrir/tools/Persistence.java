@@ -4,12 +4,17 @@ import java.io.*;
 import java.util.Map;
 import java.util.zip.*;
 
-import com.google.common.collect.MapMaker;
-
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import tahrir.TrConstants;
 import tahrir.io.serialization.*;
 
 public class Persistence {
-	private static final Map<File, Tuple2<Long, Object>> cache = new MapMaker().makeMap();
+	private static final Cache<File, Tuple2<Long, Object>> cache =
+			CacheBuilder
+			.newBuilder()
+			.maximumSize(TrConstants.PERSISTENCE_CACHE_SIZE)
+			.build();
 
 	public static <T> void loadAndModify(final Class<T> cls, final File f, final ModifyBlock<T> mb) {
 		synchronized (f) {
@@ -38,10 +43,11 @@ public class Persistence {
 	@SuppressWarnings("unchecked")
 	public static <T> T loadReadOnly(final Class<T> cls, final File f) {
 		try {
-			final Tuple2<Long, Object> cached = cache.get(f);
+			final Tuple2<Long, Object> cached = cache.getIfPresent(f);
 			if (cached != null && cached.a > f.lastModified())
 				return (T) cached.b;
 			else {
+				// This code could perhaps be implemented as a cache loader.
 				final DataInputStream dis = new DataInputStream(new GZIPInputStream(new FileInputStream(f)));
 				final T object = TrSerializer.deserializeFrom(cls, dis);
 				dis.close();

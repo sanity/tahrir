@@ -1,6 +1,8 @@
 package tahrir;
 
 public class TrConstants {
+	public static final int PERSISTENCE_CACHE_SIZE = 25;
+
 	public static final int MAX_UDP_PACKET_SIZE = 1400; // old value was 1450
 
 	public static final int UDP_CONN_INIT_INTERVAL_SECONDS = 2;
