@@ -1,6 +1,8 @@
 package tahrir.ui;
 
-import com.google.common.collect.Sets;
+import java.security.interfaces.RSAPublicKey;
+import java.util.SortedSet;
+
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.microblogging.MicroblogParser;
@@ -10,15 +12,15 @@ import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.TrUtils;
 import tahrir.tools.Tuple2;
 
-import java.security.interfaces.RSAPublicKey;
-import java.util.SortedSet;
+import com.alee.laf.WebLookAndFeel;
+import com.google.common.collect.Sets;
 
 public class GUITest {
 	public static void main(final String[] args) {
 		try {
 			final TrNode testNode = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
 
-			//UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
+			WebLookAndFeel.install();
 
 			final TrMainWindow mainWindow = new TrMainWindow(testNode);
 			mainWindow.getContent().revalidate();
@@ -34,22 +36,22 @@ public class GUITest {
 		  This is pretty silly: creating parsed microblogs and then, using their information, turn them into
 		  their unparsed form and later insert them as if they were from broadcast.
 		 */
-		Tuple2<RSAPublicKey, String> user1 = new Tuple2<RSAPublicKey, String>(TrCrypto.createRsaKeyPair().a, "user1");
-		Tuple2<RSAPublicKey, String> user2 = new Tuple2<RSAPublicKey, String>(TrCrypto.createRsaKeyPair().a, "user2");
+		final Tuple2<RSAPublicKey, String> user1 = new Tuple2<RSAPublicKey, String>(TrCrypto.createRsaKeyPair().a, "user1");
+		final Tuple2<RSAPublicKey, String> user2 = new Tuple2<RSAPublicKey, String>(TrCrypto.createRsaKeyPair().a, "user2");
 
 		node.mbClasses.contactBook.addContact(user1.b, user1.a);
 
-		ParsedMicroblog fromRand = TrUtils.TestUtils.getParsedMicroblog();
-		ParsedMicroblog fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);
-		ParsedMicroblog fromUser2 = TrUtils.TestUtils.getParsedMicroblog(user2, user1);
-		SortedSet<ParsedMicroblog> parsedMbs = Sets.newTreeSet(new MicroblogsForViewing.ParsedMicroblogTimeComparator());
+		final ParsedMicroblog fromRand = TrUtils.TestUtils.getParsedMicroblog();
+		final ParsedMicroblog fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);
+		final ParsedMicroblog fromUser2 = TrUtils.TestUtils.getParsedMicroblog(user2, user1);
+		final SortedSet<ParsedMicroblog> parsedMbs = Sets.newTreeSet(new MicroblogsForViewing.ParsedMicroblogTimeComparator());
 		parsedMbs.add(fromRand);
 		parsedMbs.add(fromUser1);
 		parsedMbs.add(fromUser2);
 
-		for (ParsedMicroblog parsedMicroblog : parsedMbs) {
-			String xmlMessage = MicroblogParser.getXML(parsedMicroblog.getParsedParts());
-			BroadcastMicroblog broadcastMicroblog = new BroadcastMicroblog(xmlMessage, parsedMicroblog.getMbData());
+		for (final ParsedMicroblog parsedMicroblog : parsedMbs) {
+			final String xmlMessage = MicroblogParser.getXML(parsedMicroblog.getParsedParts());
+			final BroadcastMicroblog broadcastMicroblog = new BroadcastMicroblog(xmlMessage, parsedMicroblog.getMbData());
 			node.mbClasses.incomingMbHandler.handleInsertion(broadcastMicroblog);
 		}
 	}
