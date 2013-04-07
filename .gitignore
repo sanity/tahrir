@@ -4,3 +4,4 @@ test-output/
 sproutcore
 src/main/resources/web-interface/tahrir/tmp
 logback*.xml
+*.iml

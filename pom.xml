@@ -177,7 +177,7 @@
 		<dependency>
 			<groupId>com.github</groupId>
 			<artifactId>weblookandfeel</artifactId>
-			<version>1.3</version>
+			<version>1.4pre</version>
 		</dependency>
 	</dependencies>
 </project>
