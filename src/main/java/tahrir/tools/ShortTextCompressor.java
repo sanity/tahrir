@@ -135,7 +135,7 @@ public class ShortTextCompressor {
 	}
 
 	private static class HuffmanTree {
-		private final TreeNode root;
+		private TreeNode root;
 		// the total number of all nodes.
 		private int size = 0;
 		// the total number of all leaf nodes.
