@@ -28,7 +28,8 @@ public class MicroblogsForViewing {
 	public MicroblogsForViewing(final ContactBook contactBook) {
 		this.contactBook = contactBook;
 		comparator = new ParsedMicroblogTimeComparator();
-		parsedMicroblogs = Collections.synchronizedSortedSet(Sets.newTreeSet(comparator));
+        SortedSet<ParsedMicroblog> tmpSet = Sets.newTreeSet(comparator);
+		parsedMicroblogs = Collections.synchronizedSortedSet(tmpSet);
 	}
 
 	// synchronised to ensure that size of set is checked properly

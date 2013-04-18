@@ -47,7 +47,7 @@ public class TrSessionManager {
 					sessionInfo.getValue().terminate();
 				}
 
-			}).build().asMap();
+			}).<Tuple2<String, Integer>, TrSessionImpl> build().asMap();
 
 	private final TrNode trNode;
 
