@@ -138,7 +138,7 @@ public class MicroblogParser {
 		}
 
 		/**
-		 * Get the textual representation of the ParesedPart. Different to a toString() in that it's intended for
+		 * Get the textual representation of the ParsedPart. Different to a toString() in that it's intended for
 		 * display to the end user.
 		 *
 		 * @return The textual representation.
@@ -150,7 +150,9 @@ public class MicroblogParser {
 		 *
 		 * @return The optional Swing representation of the part.
 		 */
-		public abstract Optional<? extends JComponent> toSwingComponent(TrMainWindow mainWindow);
+		public Optional<? extends JComponent> toSwingComponent(TrMainWindow mainWindow) {
+			return Optional.absent();
+		}
 	}
 
 	public static class TextPart extends ParsedPart {
@@ -181,11 +183,6 @@ public class MicroblogParser {
 		@Override
 		public String toText() {
 			return text;
-		}
-
-		@Override
-		public Optional<? extends JComponent> toSwingComponent(TrMainWindow mainWindow) {
-			return Optional.absent();
 		}
 	}
 
@@ -242,7 +239,7 @@ public class MicroblogParser {
 	public static class PositionComparator implements Comparator<ParsedPart> {
 		@Override
 		public int compare(ParsedPart o1, ParsedPart o2) {
-			return Integer.compare(o1.getPositionInMicroblog(), o2.getPositionInMicroblog());
+			return Double.compare(o1.getPositionInMicroblog(), o2.getPositionInMicroblog());
 		}
 	}
 }

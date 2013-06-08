@@ -30,12 +30,12 @@ public class MicroblogBroadcastTest {
 		sendingNode.mbClasses.mbsForBroadcast.insert(testMb);
 
 		// stop the receiver from broadcasting
-		receivingNode.mbClasses.mbScheduler = null;
+		receivingNode.mbClasses.mbScheduler.disable();
 
 		// don't want initial wait
 		sendingNode.mbClasses.mbScheduler.setupForNextMicroblog();
 		// stop any more broadcasts
-		sendingNode.mbClasses.mbScheduler = null;
+		sendingNode.mbClasses.mbScheduler.disable();
 
 		for (int x=0; x<50; x++) {
 			Thread.sleep(20);
@@ -55,12 +55,12 @@ public class MicroblogBroadcastTest {
 		sendingNode.mbClasses.mbsForBroadcast.insert(testMb0);
 
 		// stop the receiver from broadcasting
-		receivingNode.mbClasses.mbScheduler = null;
+		receivingNode.mbClasses.mbScheduler.disable();
 
 		// don't want initial wait
 		sendingNode.mbClasses.mbScheduler.setupForNextMicroblog();
 		// stop any more broadcasts
-		sendingNode.mbClasses.mbScheduler = null;
+		sendingNode.mbClasses.mbScheduler.disable();
 
 		for (int x=0; x<75; x++) {
 			Thread.sleep(50);

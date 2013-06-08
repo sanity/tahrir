@@ -62,7 +62,7 @@ public class TrSessionManager {
                     }
 				}
 
-			}).build().asMap();
+			}).<Tuple2<String, Integer>, TrSessionImpl> build().asMap();
 
 	private final TrNode trNode;
 

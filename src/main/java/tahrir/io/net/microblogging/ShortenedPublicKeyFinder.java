@@ -22,7 +22,8 @@ import java.security.interfaces.RSAPublicKey;
 
 public class ShortenedPublicKeyFinder {
 	private static final Logger logger = LoggerFactory.getLogger(ShortenedPublicKeyFinder.class);
-	private static final int PUBLIC_KEY_SIZE_IN_BASE64 = 392;
+	// this could be changed to pragmatically calculate the size but 250 is fine
+	private static final int PUBLIC_KEY_SIZE_IN_BASE64 = 250;
 
 	/**
 	 * The offsets which this node is using for finding a spk.
@@ -35,11 +36,11 @@ public class ShortenedPublicKeyFinder {
 	 * an empty valid file if node is being setup.
 	 */
 	public ShortenedPublicKeyFinder(final File fileToUse) {
-		FileReader fr = null;
+		FileReader fr;
 		try {
 			fr = new FileReader(fileToUse);
 		} catch (FileNotFoundException e) {
-			throw new RuntimeException("Invalid file given.", e);
+			throw new RuntimeException("File given to ShortenedPublicKeyFinder was not valid");
 		}
 		indexes = TrUtils.gson.fromJson(fr, int[].class);
 		// if gson loaded nothing node we need settings up
@@ -65,6 +66,7 @@ public class ShortenedPublicKeyFinder {
 	}
 
 	private void initIndexes(File persistTo) {
+		indexes = new int[TrConstants.SHORTENED_PUBLIC_KEY_SIZE];
 		for (int i = 0; i < indexes.length; i++) {
 			indexes[i] = TrUtils.rand.nextInt(PUBLIC_KEY_SIZE_IN_BASE64 + 1);
 		}

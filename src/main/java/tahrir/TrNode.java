@@ -20,6 +20,7 @@ import tahrir.tools.Persistence.ModifyBlock;
 import tahrir.tools.Tuple2;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -135,20 +136,36 @@ public class TrNode {
 	}
 
 	public static class MicrobloggingClasses {
-		public MicroblogBroadcastScheduler mbScheduler;
-		public ContactBook contactBook;
-		public ShortenedPublicKeyFinder duplicateNameAppender;
-		public IncomingMicroblogHandler incomingMbHandler;
-		public MicroblogsForBroadcast mbsForBroadcast;
-		public MicroblogsForViewing mbsForViewing;
+		public final MicroblogBroadcastScheduler mbScheduler;
+		public final ContactBook contactBook;
+		public final ShortenedPublicKeyFinder spkFinder;
+		public final IncomingMicroblogHandler incomingMbHandler;
+		public final MicroblogsForBroadcast mbsForBroadcast;
+		public final MicroblogsForViewing mbsForViewing;
+		public final IdentityMap idMap;
 
 		public MicrobloggingClasses(final TrNode node) {
-			contactBook = new ContactBook(new File(node.rootDirectory, node.config.contacts));
-			duplicateNameAppender = new ShortenedPublicKeyFinder(new File(node.rootDirectory, node.config.publicKeyChars));
+			contactBook = new ContactBook(
+					getOrCreateFile(new File(node.rootDirectory, node.config.contacts)));
+			spkFinder = new ShortenedPublicKeyFinder(
+					getOrCreateFile(new File(node.rootDirectory, node.config.publicKeyChars)));
+			idMap = new IdentityMap(spkFinder, contactBook);
 			mbsForBroadcast = new MicroblogsForBroadcast();
-			//mbsForViewing = new MicroblogsForViewing(contactBook, mbsForBroadcast);
-			//incomingMbHandler = new IncomingMicroblogHandler(mbsForViewing, mbsForBroadcast, contactBook);
+			mbsForViewing = new MicroblogsForViewing(contactBook);
+			incomingMbHandler = new IncomingMicroblogHandler(mbsForViewing, mbsForBroadcast, contactBook, idMap);
 			mbScheduler = new MicroblogBroadcastScheduler(node);
+		}
+
+		// move this somewhere else
+		private File getOrCreateFile(File f) {
+			if (!f.exists()) {
+				try {
+					f.createNewFile();
+				} catch (IOException e) {
+					throw new RuntimeException("Could not create file " + f);
+				}
+			}
+			return f;
 		}
 	}
 
