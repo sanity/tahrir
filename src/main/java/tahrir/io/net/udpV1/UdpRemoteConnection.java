@@ -1,26 +1,34 @@
 package tahrir.io.net.udpV1;
 
-import java.io.*;
-import java.security.interfaces.RSAPublicKey;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import com.google.common.base.Function;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Maps;
 import org.slf4j.LoggerFactory;
-
 import tahrir.TrConstants;
-import tahrir.io.crypto.*;
-import tahrir.io.net.*;
+import tahrir.io.crypto.TrCrypto;
+import tahrir.io.crypto.TrSymKey;
+import tahrir.io.net.PhysicalNetworkLocation;
+import tahrir.io.net.TrNetworkInterface;
 import tahrir.io.net.TrNetworkInterface.TrMessageListener;
 import tahrir.io.net.TrNetworkInterface.TrSentListener;
 import tahrir.io.net.TrNetworkInterface.TrSentReceivedListener;
-import tahrir.io.serialization.*;
-import tahrir.tools.*;
+import tahrir.io.net.TrRemoteConnection;
+import tahrir.io.serialization.TrSerializableException;
+import tahrir.io.serialization.TrSerializer;
+import tahrir.tools.ByteArraySegment;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
+import tahrir.tools.TrUtils;
 
-import com.google.common.base.Function;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.security.interfaces.RSAPublicKey;
+import java.util.*;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class UdpRemoteConnection extends TrRemoteConnection {
 	private volatile boolean disconnectedCallbackCalled = false;
@@ -57,7 +65,7 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 			final boolean unilateralOutbound) {
 		super(remoteAddr, remotePubKey, listener, connectedCallback, disconnectedCallback, unilateralOutbound);
 		this.iface = iface;
-		logger = LoggerFactory.getLogger(UdpRemoteConnection.class.getName()+" ("+iface.config.listenPort+">"+remoteAddr.port+")");
+		logger = LoggerFactory.getLogger(UdpRemoteConnection.class.getName()+" ["+iface.config.listenPort+">"+remoteAddr.port+"]");
 		logger.debug("Created");
 
 		if (remotePubKey != null) {
@@ -135,6 +143,10 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 		final UdpNetworkLocation sender = (UdpNetworkLocation) sender_;
 		if (inboundSymKey == null) {
 			logger.debug("We don't know the inboundSymKey yet, looking for it to be pre-pended to message");
+            if (message.length <= 256) {
+                logger.error("Received a message from "+sender+" when we have no inboundSymKey but it is too short to possibly contain one (length: "+message.length+")");
+                return;
+            }
 			inboundSymKeyEncoded = message.subsegment(0, 256);
 			inboundSymKey = new TrSymKey(TrCrypto.decryptRaw(inboundSymKeyEncoded, iface.myPrivateKey));
 			logger.debug("decoded inboundSymKey");
@@ -227,8 +239,9 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 			builder.writeInt(messageId);
 			ShortMessageType.SIMPLE.write(builder);
 			builder.write(message);
-			final Resender resender = new Resender(messageId, TrConstants.UDP_SHORT_MESSAGE_RETRY_ATTEMPTS, sentListener,
-					encryptOutbound(builder.build()), this, priority);
+            ByteArraySegment basMessage = encryptOutbound(builder.build());
+            final Resender resender = new Resender(messageId, TrConstants.UDP_SHORT_MESSAGE_RETRY_ATTEMPTS, sentListener,
+                    basMessage, this, priority);
 			resenders.put(messageId, resender);
 			resender.run();
 		}
@@ -241,7 +254,8 @@ public class UdpRemoteConnection extends TrRemoteConnection {
 			toSend.write(TrCrypto.encryptRaw(outboundSymKey.toByteArraySegment(), remotePubKey));
 		}
 		toSend.write(outboundSymKey.encrypt(rawMessage));
-		return toSend.build();
+        ByteArraySegment bas = toSend.build();
+        return bas;
 	}
 
 	private void handleShortMessage(final DataInputStream dis, final int maxLength) throws IOException,

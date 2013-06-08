@@ -1,19 +1,19 @@
 package tahrir.io.net.sessions;
 
-import java.security.interfaces.RSAPublicKey;
-import java.util.concurrent.*;
-
-import org.slf4j.*;
-
+import com.google.common.base.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tahrir.TrNode;
 import tahrir.io.net.*;
 import tahrir.io.net.TrPeerManager.Capabilities;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.tools.Persistence.Modified;
 import tahrir.tools.Persistence.ModifyBlock;
-import tahrir.tools.*;
+import tahrir.tools.TrUtils;
 
-import com.google.common.base.Function;
+import java.security.interfaces.RSAPublicKey;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSession {
 
@@ -35,7 +35,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 
 	public AssimilateSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager sessionMgr) {
 		super(sessionId, node, sessionMgr);
-		logger = LoggerFactory.getLogger(AssimilateSessionImpl.class.getName()+" ("+sessionId+")");
+		logger = LoggerFactory.getLogger(AssimilateSessionImpl.class.getName()+" [sesId: "+sessionId+"]");
 	}
 
 	public void startAssimilation(final Runnable onFailure, final TrPeerInfo assimilateVia) {
@@ -98,7 +98,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 		}
 		if (node.peerManager.peers.size() < node.peerManager.config.maxPeers) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Accepting {} as new peer", joinerAddress);
+				logger.debug("Accepting joiner {} as a peer", joinerAddress);
 			}
 			// We're going to accept them
 			final RemoteNodeAddress remoteNodeAddress = node.getRemoteNodeAddress();
@@ -159,19 +159,19 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 
 		if (!locallyInitiated) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Forwarding acceptance back to {}", joinerPhysicalLocation);
+				logger.debug("{} is accepting assimilation request, forwarding acceptance back to {}", joinerPhysicalLocation);
 			}
 			receivedRequestFrom.acceptNewConnection(acceptorAddress);
 		} else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("We initiated this assimiliation, add a new connection to {}", acceptorPhysicalLocation);
+				logger.debug("{} accepted our assimiliation request, add a new connection to them", acceptorPhysicalLocation);
 			}
 
 			// We now need to allow other methods to use the acceptor information
 			this.acceptorPhysicalLocation = acceptorPhysicalLocation;
 			this.acceptorPubkey = acceptorPubkey;
 
-			logger.debug("Inform acceptor {} of our capabilities", acceptorPhysicalLocation);
+			logger.debug("Connect to {} and inform them of our capabilities", acceptorPhysicalLocation);
 			final AssimilateSession acceptorSession = remoteSession(AssimilateSession.class,
 					connectionWithUserLabel(acceptorAddress, false, "topology"));
 			acceptorSession.myCapabilitiesAre(node.config.capabilities, node.peerManager.locInfo.getLocation());

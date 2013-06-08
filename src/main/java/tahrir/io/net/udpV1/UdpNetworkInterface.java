@@ -50,7 +50,7 @@ public class UdpNetworkInterface extends TrNetworkInterface {
 		myPublicKey = keyPair.a;
 		myPrivateKey = keyPair.b;
 
-		logger = LoggerFactory.getLogger(UdpNetworkInterface.class.getName()+" ("+config.listenPort+")");
+		logger = LoggerFactory.getLogger(UdpNetworkInterface.class.getName()+" ["+config.listenPort+"]");
 		datagramSocket = new DatagramSocket(config.listenPort);
 		datagramSocket.setSoTimeout(500);
 		sender = new Sender(this);

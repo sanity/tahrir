@@ -1,25 +1,38 @@
 package tahrir.io.net;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.security.interfaces.RSAPublicKey;
-import java.util.*;
-import java.util.concurrent.*;
-
-import org.slf4j.*;
-
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalCause;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tahrir.TrNode;
 import tahrir.io.net.TrNetworkInterface.TrMessageListener;
 import tahrir.io.net.TrNetworkInterface.TrSentReceivedListener;
 import tahrir.io.net.sessions.Priority;
 import tahrir.io.net.udpV1.UdpNetworkLocation;
 import tahrir.io.serialization.TrSerializer;
-import tahrir.tools.*;
+import tahrir.tools.ByteArraySegment;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
+import tahrir.tools.TrUtils;
+import tahrir.tools.Tuple2;
 
-import com.google.common.base.*;
-import com.google.common.cache.*;
-import com.google.common.collect.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.lang.reflect.*;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 public class TrSessionManager {
 
@@ -44,7 +57,9 @@ public class TrSessionManager {
 
 				@Override
 				public void onRemoval(final RemovalNotification<Tuple2<String, Integer>, TrSessionImpl> sessionInfo) {
-					sessionInfo.getValue().terminate();
+                    if (!sessionInfo.getCause().equals(RemovalCause.REPLACED)) {
+					    sessionInfo.getValue().terminate();
+                    }
 				}
 
 			}).build().asMap();
@@ -349,6 +364,7 @@ public class TrSessionManager {
 		}
 
 		public void noLongerNeeded(final PhysicalNetworkLocation physicalLocation, final String userLabel) {
+            logger.debug("Connection to {} is no longer needed by {}", physicalLocation, userLabel);
 			final ConnectionInfo ci = connections.get(physicalLocation);
 			ci.interests.remove(userLabel);
 			if (ci.interests.isEmpty()) {
