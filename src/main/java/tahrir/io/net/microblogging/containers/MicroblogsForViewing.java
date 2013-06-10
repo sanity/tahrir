@@ -87,7 +87,6 @@ public class MicroblogsForViewing {
 
 	public static class MicroblogAddedEvent {
 		public ParsedMicroblog mb;
-
 		public MicroblogAddedEvent(final ParsedMicroblog mb) {
 			this.mb = mb;
 		}
@@ -95,7 +94,6 @@ public class MicroblogsForViewing {
 
 	public static class MicroblogRemovalEvent {
 		public ParsedMicroblog mb;
-
 		public MicroblogRemovalEvent(final ParsedMicroblog mb) {
 			this.mb = mb;
 		}

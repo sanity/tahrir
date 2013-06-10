@@ -3,7 +3,10 @@ package tahrir.ui;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tahrir.TrNode;
+import tahrir.io.net.microblogging.MicroblogParser;
 import tahrir.io.net.microblogging.MicroblogParser.ParsedPart;
+import tahrir.io.net.microblogging.microblogs.BroadcastMicroblog;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
 import javax.swing.*;
@@ -12,6 +15,8 @@ import javax.swing.text.Document;
 import javax.swing.text.Style;
 import javax.swing.text.StyleContext;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -22,18 +27,16 @@ import java.util.Date;
  */
 public class MicroblogPostPanel {
 	private static final Logger logger = LoggerFactory.getLogger(MicroblogPostPanel.class);
-
 	private final JPanel content;
 	private final TrMainWindow mainWindow;
 
 	public MicroblogPostPanel(final ParsedMicroblog mb, final TrMainWindow mainWindow) {
 		this.mainWindow = mainWindow;
 		content = new JPanel(new MigLayout());
-
 		addAuthorButton(mb, mainWindow);
 		addPostTime(mb);
 		addTextPane(mb, mainWindow);
-		addVotingButtons();
+		addReBroadcastButtons(mainWindow.node, mb);
 	}
 
 	public JComponent getContent() {
@@ -80,17 +83,14 @@ public class MicroblogPostPanel {
 		content.add(messageTextPane, "wrap, span");
 	}
 
-	private void addVotingButtons() {
-		//final JButton upvoteButton = new JButton(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "upvote.png"));
-		final JButton upvoteButton = new JButton("up");
-		setVotingButtonConfigs(upvoteButton, "upvote");
-		content.add(upvoteButton, "split 2, span, align right");
+    private void addReBroadcastButtons(final TrNode node, final ParsedMicroblog pmb){
 
-		//final JButton downvoteButton = new JButton(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "downvote.png"));
-		final JButton downvoteButton = new JButton("down");
-		setVotingButtonConfigs(downvoteButton, "downvote");
-		content.add(downvoteButton);
-	}
+        final JButton reBroadcastButton = new JButton("reBroadcast");
+        setVotingButtonConfigs(reBroadcastButton, "reBroadcast");
+        content.add(reBroadcastButton, "split 2, span, align right");
+        reBroadcast action=new reBroadcast(node, pmb);
+        reBroadcastButton.addActionListener(action);
+    }
 
 	private void setVotingButtonConfigs(final JButton button, final String tooltip) {
 		button.setToolTipText(tooltip);
@@ -106,4 +106,31 @@ public class MicroblogPostPanel {
 			return dateFormater.format(date);
 		}
 	}
+
+
+    /*  Auth: Ravi Tejasvi
+    *   ReBroadcast button copies the message and then broadcasts the same with high priority.
+    *   May have to mention the original broadcaster's alias, which is yet to be done.
+    *   Also the rebroadcast misses the name of the author.
+    */
+    private class reBroadcast implements ActionListener
+    {
+        TrNode node=null;
+        ParsedMicroblog pmb=null;
+
+        public reBroadcast(final TrNode node, final ParsedMicroblog pmb) {
+            this.node = node;
+            this.pmb = pmb;
+        }
+
+        public void actionPerformed(ActionEvent actionEvent) {
+                String message="";
+                BroadcastMicroblog broadcastMicroblogForNode = new BroadcastMicroblog(node, message);
+                String xmlMessage = MicroblogParser.getXML(pmb.getParsedParts());
+                BroadcastMicroblog broadcastMicroblog = new BroadcastMicroblog(xmlMessage, broadcastMicroblogForNode.otherData);
+                node.mbClasses.incomingMbHandler.handleInsertion(broadcastMicroblog);
+        }
+
+
+    }
 }
