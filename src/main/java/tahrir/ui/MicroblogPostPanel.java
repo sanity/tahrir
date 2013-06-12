@@ -123,19 +123,16 @@ public class MicroblogPostPanel {
     {
         private final TrNode node;
         private final ParsedMicroblog pmb;
-        public reBroadcast(final TrNode node1, final ParsedMicroblog pmb1) {
-            node = node1;
-            pmb = pmb1;
+        public reBroadcast(final TrNode node, final ParsedMicroblog pmb) {
+            this.node = node;
+            this.pmb = pmb;
         }
 
         public void actionPerformed(ActionEvent actionEvent) {
-
                 String message="";
-                BroadcastMicroblog broadcastMicroblogForNode = new BroadcastMicroblog(node, message);
-                //used for getting the current node's info.
-
+                BroadcastMicroblog currentNodeInfo = new BroadcastMicroblog(node, message);
                 String xmlMessage = MicroblogParser.getXML(pmb.getParsedParts());
-                BroadcastMicroblog broadcastMicroblog = new BroadcastMicroblog(xmlMessage, broadcastMicroblogForNode.otherData);
+                BroadcastMicroblog broadcastMicroblog = new BroadcastMicroblog(xmlMessage, currentNodeInfo.otherData);
                 node.mbClasses.incomingMbHandler.handleInsertion(broadcastMicroblog);
         }
 
