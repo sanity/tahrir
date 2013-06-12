@@ -57,13 +57,19 @@ public class MicroblogPostPanel {
 		content.add(authorNick, "align left");
 	}
 
-	private void addTextPane(final ParsedMicroblog mb, TrMainWindow mainWindow) {
-		final JTextPane messageTextPane = new JTextPane();
-		messageTextPane.setBackground(Color.WHITE);
-		messageTextPane.setEditable(false);
+    private JTextPane setTextPane(final JTextPane messageTextPane)
+    {
 
-		Document doc = messageTextPane.getDocument();
-		Style textStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
+        messageTextPane.setBackground(Color.WHITE);
+        messageTextPane.setEditable(false);
+        return messageTextPane;
+
+    }
+	private void addTextPane(final ParsedMicroblog mb, TrMainWindow mainWindow) {
+        final JTextPane messageTextPane = new JTextPane();
+        setTextPane(messageTextPane);
+        Document doc = messageTextPane.getDocument();
+        Style textStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
 		for (ParsedPart parsedPart : mb.getParsedParts()) {
 			if (parsedPart.toSwingComponent(mainWindow).isPresent()) {
 				JComponent asComponent = parsedPart.toSwingComponent(mainWindow).get();
@@ -113,19 +119,21 @@ public class MicroblogPostPanel {
     *   May have to mention the original broadcaster's alias, which is yet to be done.
     *   Also the rebroadcast misses the name of the author.
     */
-    private class reBroadcast implements ActionListener
+    private final class reBroadcast implements ActionListener
     {
-        TrNode node=null;
-        ParsedMicroblog pmb=null;
-
-        public reBroadcast(final TrNode node, final ParsedMicroblog pmb) {
-            this.node = node;
-            this.pmb = pmb;
+        private final TrNode node;
+        private final ParsedMicroblog pmb;
+        public reBroadcast(final TrNode node1, final ParsedMicroblog pmb1) {
+            node = node1;
+            pmb = pmb1;
         }
 
         public void actionPerformed(ActionEvent actionEvent) {
+
                 String message="";
                 BroadcastMicroblog broadcastMicroblogForNode = new BroadcastMicroblog(node, message);
+                //used for getting the current node's info.
+
                 String xmlMessage = MicroblogParser.getXML(pmb.getParsedParts());
                 BroadcastMicroblog broadcastMicroblog = new BroadcastMicroblog(xmlMessage, broadcastMicroblogForNode.otherData);
                 node.mbClasses.incomingMbHandler.handleInsertion(broadcastMicroblog);
