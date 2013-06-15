@@ -91,8 +91,8 @@ public class MicroblogPostPanel {
 
     private void addReBroadcastButtons(final TrNode node, final ParsedMicroblog pmb){
 
-        final JButton reBroadcastButton = new JButton("reBroadcast");
-        setVotingButtonConfigs(reBroadcastButton, "reBroadcast");
+        final JButton reBroadcastButton = new JButton("Boost");
+        setVotingButtonConfigs(reBroadcastButton, "Re-broadcast this");
         content.add(reBroadcastButton, "split 2, span, align right");
         reBroadcast action=new reBroadcast(node, pmb);
         reBroadcastButton.addActionListener(action);
@@ -116,8 +116,7 @@ public class MicroblogPostPanel {
 
     /*  Auth: Ravi Tejasvi
     *   ReBroadcast button copies the message and then broadcasts the same with high priority.
-    *   May have to mention the original broadcaster's alias, which is yet to be done.
-    *   Also the rebroadcast misses the name of the author.
+    *   TODO: May have to mention the original broadcaster's alias, which is yet to be done. Also the rebroadcast misses the name of the author.
     */
     private final class reBroadcast implements ActionListener
     {

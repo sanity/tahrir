@@ -39,7 +39,7 @@ public class TrMainWindow {
 
 		final JTextPane newPostPane = new JTextPane();
 		newPostPane.setBackground(Color.WHITE);
-		newPostPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		newPostPane.setBorder(BorderFactory.createLineBorder(Color.gray));
 		newPostPane.setPreferredSize(new Dimension(TrConstants.GUI_WIDTH_PX - 50, 110));
 		// the text pane and the button will go into the same cell
 		contentPanel.add(newPostPane, "split 2");
@@ -77,12 +77,21 @@ public class TrMainWindow {
 		contactBook.add(new JLabel("This is the contact book page"));
 		settings.add(new JLabel("This is the settings page"));
 
+        tabbedPane.addTab("All", unfilteredPostPage.getContent());
+        tabbedPane.addTab("Following", followingPostPage.getContent());
+        tabbedPane.addTab("Mentions", mentions);
+        tabbedPane.addTab("My posts", myPostsPage.getContent());
+        tabbedPane.addTab("Contacts", contactBook);
+        tabbedPane.addTab("Settings", settings);
+		/*
+		TODO: Decide icon or text
 		tabbedPane.addTab(null, createTabIcon("unfiltered.png"), unfilteredPostPage.getContent(), "All posts");
 		tabbedPane.addTab(null, createTabIcon("following.png"), followingPostPage.getContent(), "Following posts");
 		tabbedPane.addTab(null, createTabIcon("mentions.png"), mentions, "Mentions");
 		tabbedPane.addTab(null, createTabIcon("my-posts.png"), myPostsPage.getContent(), "My posts");
 		tabbedPane.addTab(null, createTabIcon("contact-book.png"), contactBook, "Contact book");
 		tabbedPane.addTab(null, createTabIcon("settings.png"), settings, "Settings");
+		*/
 	}
 
 	public JPanel getContent() {
