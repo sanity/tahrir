@@ -53,11 +53,7 @@ public class MicroblogPostPanel {
 		final JLabel postTime = new JLabel(DateParser.parseTime(mb.getMbData().getTimeCreated()));
 		postTime.setForeground(Color.GRAY);
 		postTime.setFont(new Font("time", Font.PLAIN, postTime.getFont().getSize() - 2));
-       // content.setAlignmentX(TrConstants.POST_HGAP_PX);
-        //postTime.setHorizontalAlignment(TrConstants.GUI_WIDTH_PX-30);
-        //content.add(postTime);
-        content.add(postTime, "gap push, wrap");  // "cell column row width height"
-        //content.add(postTime, "wrap, align right, gapleft 300");
+        content.add(postTime, "gap push, wrap");
 	}
 
 	private void addAuthorButton(final ParsedMicroblog mb, final TrMainWindow mainWindow) {
@@ -107,7 +103,6 @@ public class MicroblogPostPanel {
         reBroadcastButton.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent evt) {
                 reBroadcastButton.setBackground(Color.BLUE);
-                //reBroadcastButton.setBorder(new Bo);
             }
 
             public void mouseExited(MouseEvent evt) {
