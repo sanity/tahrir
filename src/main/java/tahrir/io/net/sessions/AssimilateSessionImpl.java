@@ -1,6 +1,7 @@
 package tahrir.io.net.sessions;
 
 import com.google.common.base.Function;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrNode;
@@ -12,6 +13,8 @@ import tahrir.tools.Persistence.ModifyBlock;
 import tahrir.tools.TrUtils;
 
 import java.security.interfaces.RSAPublicKey;
+import java.util.Random;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +35,12 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 	private int acceptorLocation;
 
 	private RSAPublicKey joinerPublicKey;
+    private int UId;
+
+    //states whether the request should be accepted or not.
+    private boolean requestResult=true;
+
+    Random rand=new Random();
 
 	public AssimilateSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager sessionMgr) {
 		super(sessionId, node, sessionMgr);
@@ -72,16 +81,36 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 		});
 	}
 
-
+    public int generateUId()
+    {
+        return rand.nextInt()  ;
+    }
 	public void requestNewConnection(final RSAPublicKey requestorPubkey) {
-		requestNewConnection(new RemoteNodeAddress(sender(), requestorPubkey));
+        UId = generateUId();
+		requestNewConnection(new RemoteNodeAddress(sender(), requestorPubkey), UId);
 	}
 
-	public void requestNewConnection(final RemoteNodeAddress joinerAddress) {
+	public void requestNewConnection(final RemoteNodeAddress joinerAddress, int UId) {
 		joinerPhysicalLocation = joinerAddress.physicalLocation;
 		joinerPublicKey = joinerAddress.publicKey;
+        DateTime assimilationRequestTime;
+        try {
+            if((assimilationRequestTime=node.peerManager.cache.get(UId))!=null)
+            {
+                logger.debug("Request already occurred at " +assimilationRequestTime +", going to reject it to prevent loops");
+                requestResult =false;
+            }
+            else
+            {
+                assimilationRequestTime=new DateTime();
+                node.peerManager.cache.asMap().put(UId, assimilationRequestTime);
+                logger.debug("New request. Added to cache");
+            }
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 
-		final PhysicalNetworkLocation senderFV = sender();
+        final PhysicalNetworkLocation senderFV = sender();
 		if (locallyInitiated) {
 			logger.warn("Received requestNewConnection() from {}, but the session was locally initiated, ignoring",
 					senderFV);
@@ -96,7 +125,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 			receivedRequestFrom.yourAddressIs(senderFV);
 			joinerPhysicalLocation = senderFV;
 		}
-		if (node.peerManager.peers.size() < node.peerManager.config.maxPeers) {
+		if ((node.peerManager.peers.size() < node.peerManager.config.maxPeers)&&(requestResult)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Accepting joiner {} as a peer", joinerAddress);
 			}
@@ -129,11 +158,11 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 					node.peerManager.reportAssimilationFailure(relay.remoteNodeAddress.physicalLocation);
 					// Note: Important to use requestAddress field rather than
 					// the parameter because the parameter may be null
-					AssimilateSessionImpl.this.requestNewConnection(new RemoteNodeAddress(finalRequestorPhysicalAddress, joinerPublicKey));
+					AssimilateSessionImpl.this.requestNewConnection(new RemoteNodeAddress(finalRequestorPhysicalAddress, joinerPublicKey), generateUId());
 				}
 			});
 
-			relaySession.requestNewConnection(new RemoteNodeAddress(joinerPhysicalLocation, joinerPublicKey));
+			relaySession.requestNewConnection(new RemoteNodeAddress(joinerPhysicalLocation, joinerPublicKey), generateUId());
 		}
 	}
 

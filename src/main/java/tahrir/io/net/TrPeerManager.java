@@ -4,11 +4,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.cache.*;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.BetaDistributionImpl;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +26,7 @@ import tahrir.tools.TrUtils;
 
 import com.google.common.base.Function;
 import com.google.common.collect.MapMaker;
+import tahrir.tools.Tuple2;
 
 public class TrPeerManager {
 	public static final double RECENTLY_ATTEMPTED_PENALTY = 1.3;
@@ -34,6 +38,17 @@ public class TrPeerManager {
 
 	public Map<PhysicalNetworkLocation, TrPeerInfo> peers = new MapMaker().makeMap();
 	public final String sessionMgrLabel;
+
+    public final CacheLoader<Integer, DateTime> seenUId= new CacheLoader<Integer, DateTime>() {
+        @Override
+        public DateTime load(Integer integer) throws Exception {
+            return null;
+        }
+    };
+
+    public final LoadingCache<Integer, DateTime> cache= CacheBuilder.newBuilder()
+            .expireAfterWrite(5, TimeUnit.MINUTES).build(seenUId);
+
 
 	public final TopologyLocationInfo locInfo;
 	public boolean hasForwardedRecenlty = false;
