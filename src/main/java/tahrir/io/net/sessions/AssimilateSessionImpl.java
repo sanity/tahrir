@@ -1,6 +1,7 @@
 package tahrir.io.net.sessions;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 	private int acceptorLocation;
 
 	private RSAPublicKey joinerPublicKey;
-    private int UId;
+    private int uId;
 
     //states whether the request should be accepted or not.
     private boolean requestResult=true;
@@ -86,8 +87,8 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
         return rand.nextInt()  ;
     }
 	public void requestNewConnection(final RSAPublicKey requestorPubkey) {
-        UId = generateUId();
-		requestNewConnection(new RemoteNodeAddress(sender(), requestorPubkey), UId);
+        uId = generateUId();
+		requestNewConnection(new RemoteNodeAddress(sender(), requestorPubkey), uId);
 	}
 
 	public void requestNewConnection(final RemoteNodeAddress joinerAddress, int UId) {
@@ -95,8 +96,10 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 		joinerPublicKey = joinerAddress.publicKey;
         DateTime assimilationRequestTime;
         try {
-            if((assimilationRequestTime=node.peerManager.cache.get(UId))!=null)
+            Optional assimilationRequest = Optional.fromNullable(node.peerManager.cache.get(uId));
+            if (assimilationRequest.isPresent())
             {
+                assimilationRequestTime=node.peerManager.cache.get(uId);
                 logger.debug("Request already occurred at " +assimilationRequestTime +", going to reject it to prevent loops");
                 requestResult =false;
             }
