@@ -47,6 +47,8 @@ public class TrConstants {
 
 	public static final int GUI_HEIGHT_PX = 600;
 
+    public static final int POST_HGAP_PX=50;
+
 	public static final String MAIN_WINDOW_ARTWORK_PATH = "artwork/";
 
 	/**

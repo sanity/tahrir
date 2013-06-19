@@ -1,5 +1,6 @@
 package tahrir.ui;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 import javax.swing.JComponent;
@@ -30,7 +31,8 @@ public class MicroblogDisplayPage implements FilterChangeListener {
 		// will allow it to fill entire scroll pane
 		table.setFillsViewportHeight(true);
 		// TODO: change the size as needed
-		table.setRowHeight(150);
+		table.setRowHeight(110);
+        table.setGridColor(new Color(244,242,242));
 		table.setDefaultRenderer(ParsedMicroblog.class, renderer);
 		table.setDefaultEditor(ParsedMicroblog.class, renderer);
 

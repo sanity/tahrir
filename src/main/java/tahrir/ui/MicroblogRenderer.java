@@ -27,6 +27,7 @@ public class MicroblogRenderer extends AbstractCellEditor implements TableCellRe
 			final boolean isSelected, final boolean hasFocus, final int row, final int column) {
 		final ParsedMicroblog parsedMb = (ParsedMicroblog) value;
 		final MicroblogPostPanel panel = new MicroblogPostPanel(parsedMb, mainWindow);
+
 		return panel.getContent();
 	}
 

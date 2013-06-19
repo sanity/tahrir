@@ -3,6 +3,7 @@ package tahrir.ui;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.io.net.microblogging.MicroblogParser;
 import tahrir.io.net.microblogging.MicroblogParser.ParsedPart;
@@ -17,6 +18,8 @@ import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -33,6 +36,9 @@ public class MicroblogPostPanel {
 	public MicroblogPostPanel(final ParsedMicroblog mb, final TrMainWindow mainWindow) {
 		this.mainWindow = mainWindow;
 		content = new JPanel(new MigLayout());
+        content.setBackground(Color.WHITE);
+
+
 		addAuthorButton(mb, mainWindow);
 		addPostTime(mb);
 		addTextPane(mb, mainWindow);
@@ -47,13 +53,18 @@ public class MicroblogPostPanel {
 		final JLabel postTime = new JLabel(DateParser.parseTime(mb.getMbData().getTimeCreated()));
 		postTime.setForeground(Color.GRAY);
 		postTime.setFont(new Font("time", Font.PLAIN, postTime.getFont().getSize() - 2));
-		content.add(postTime, "wrap, align right, span");
+       // content.setAlignmentX(TrConstants.POST_HGAP_PX);
+        //postTime.setHorizontalAlignment(TrConstants.GUI_WIDTH_PX-30);
+        //content.add(postTime);
+        content.add(postTime, "gap push, wrap");  // "cell column row width height"
+        //content.add(postTime, "wrap, align right, gapleft 300");
 	}
 
 	private void addAuthorButton(final ParsedMicroblog mb, final TrMainWindow mainWindow) {
 		final AuthorDisplayPageButton authorNick = new AuthorDisplayPageButton(mainWindow,
 				mb.getMbData().getAuthorPubKey(), mb.getMbData().getAuthorNick());
 		authorNick.setFont(new Font("bold", Font.BOLD, authorNick.getFont().getSize() + 2));
+        authorNick.setForeground(new Color(65,131,196));     //SteelBlue color
 		content.add(authorNick, "align left");
 	}
 
@@ -68,6 +79,7 @@ public class MicroblogPostPanel {
 	private void addTextPane(final ParsedMicroblog mb, TrMainWindow mainWindow) {
         final JTextPane messageTextPane = new JTextPane();
         setTextPane(messageTextPane);
+
         Document doc = messageTextPane.getDocument();
         Style textStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
 		for (ParsedPart parsedPart : mb.getParsedParts()) {
@@ -86,12 +98,22 @@ public class MicroblogPostPanel {
 			}
 		}
 
-		content.add(messageTextPane, "wrap, span");
+		content.add(messageTextPane, "wrap, width min:"+(TrConstants.GUI_WIDTH_PX-7));
 	}
 
     private void addReBroadcastButtons(final TrNode node, final ParsedMicroblog pmb){
 
         final JButton reBroadcastButton = new JButton("Boost");
+        reBroadcastButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent evt) {
+                reBroadcastButton.setBackground(Color.BLUE);
+                //reBroadcastButton.setBorder(new Bo);
+            }
+
+            public void mouseExited(MouseEvent evt) {
+                reBroadcastButton.setBackground(UIManager.getColor("control"));
+            }
+        });
         setVotingButtonConfigs(reBroadcastButton, "Re-broadcast this");
         content.add(reBroadcastButton, "split 2, span, align right");
         reBroadcast action=new reBroadcast(node, pmb);

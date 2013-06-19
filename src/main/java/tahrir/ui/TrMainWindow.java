@@ -39,7 +39,7 @@ public class TrMainWindow {
 
 		final JTextPane newPostPane = new JTextPane();
 		newPostPane.setBackground(Color.WHITE);
-		newPostPane.setBorder(BorderFactory.createLineBorder(Color.gray));
+		newPostPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 		newPostPane.setPreferredSize(new Dimension(TrConstants.GUI_WIDTH_PX - 50, 110));
 		// the text pane and the button will go into the same cell
 		contentPanel.add(newPostPane, "split 2");
@@ -109,7 +109,7 @@ public class TrMainWindow {
 
 			final JLabel label = new JLabel(tabName);
 			label.setFont(new Font("tab", Font.PLAIN, label.getFont().getSize() - 1));
-			setForeground(Color.DARK_GRAY);
+			setForeground(Color.LIGHT_GRAY);
 			add(label);
 
 			final JButton button = new CloseTabButton(this);
