@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +25,7 @@ import tahrir.tools.TrUtils;
 
 import com.google.common.base.Function;
 import com.google.common.collect.MapMaker;
-import tahrir.tools.Tuple2;
+
 
 public class TrPeerManager {
 	public static final double RECENTLY_ATTEMPTED_PENALTY = 1.3;
