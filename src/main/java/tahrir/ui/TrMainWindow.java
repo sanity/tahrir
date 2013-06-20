@@ -83,15 +83,6 @@ public class TrMainWindow {
         tabbedPane.addTab("My posts", myPostsPage.getContent());
         tabbedPane.addTab("Contacts", contactBook);
         tabbedPane.addTab("Settings", settings);
-		/*
-		TODO: Decide icon or text
-		tabbedPane.addTab(null, createTabIcon("unfiltered.png"), unfilteredPostPage.getContent(), "All posts");
-		tabbedPane.addTab(null, createTabIcon("following.png"), followingPostPage.getContent(), "Following posts");
-		tabbedPane.addTab(null, createTabIcon("mentions.png"), mentions, "Mentions");
-		tabbedPane.addTab(null, createTabIcon("my-posts.png"), myPostsPage.getContent(), "My posts");
-		tabbedPane.addTab(null, createTabIcon("contact-book.png"), contactBook, "Contact book");
-		tabbedPane.addTab(null, createTabIcon("settings.png"), settings, "Settings");
-		*/
 	}
 
 	public JPanel getContent() {
@@ -123,8 +114,6 @@ public class TrMainWindow {
 		public CloseTabButton(final ClosableTabComponent parent) {
 			super(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "close-tab.png"));
 			this.parent = parent;
-			//setRolloverEnabled(true);
-			//setRolloverIcon(new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + "close-tab-hover.png"));
 			setFocusable(false);
 			setContentAreaFilled(false);
 			setToolTipText("Close this tab");

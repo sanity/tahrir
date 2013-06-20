@@ -95,22 +95,18 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 		joinerPhysicalLocation = joinerAddress.physicalLocation;
 		joinerPublicKey = joinerAddress.publicKey;
         DateTime assimilationRequestTime;
-        try {
-            Optional assimilationRequest = Optional.fromNullable(node.peerManager.cache.get(uId_param));
-            if (assimilationRequest.isPresent())
-            {
-                assimilationRequestTime=node.peerManager.cache.get(uId_param);
-                logger.debug("Request already occurred at " +assimilationRequestTime +", going to reject it to prevent loops");
-                requestResult =false;
-            }
-            else
-            {
-                assimilationRequestTime=new DateTime();
-                node.peerManager.cache.asMap().put(uId_param, assimilationRequestTime);
-                logger.debug("New request. Added to cache");
-            }
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+        Optional assimilationRequest = Optional.fromNullable(node.peerManager.seenUID.getIfPresent(uId_param));
+        if (assimilationRequest.isPresent())
+        {
+            assimilationRequestTime=node.peerManager.seenUID.getIfPresent(uId_param);
+            logger.debug("Request already occurred at " +assimilationRequestTime +", going to reject it to prevent loops");
+            requestResult =false;
+        }
+        else
+        {
+            assimilationRequestTime=new DateTime();
+            node.peerManager.seenUID.asMap().put(uId_param, assimilationRequestTime);
+            logger.debug("New request. Added to cache");
         }
 
         final PhysicalNetworkLocation senderFV = sender();

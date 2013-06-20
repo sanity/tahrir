@@ -8,11 +8,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
+import tahrir.TrConstants;
 import tahrir.io.net.microblogging.filters.FilterChangeListener;
 import tahrir.io.net.microblogging.filters.MicroblogFilter;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
 import com.google.common.collect.Lists;
+
+import static java.lang.Math.max;
 
 public class MicroblogDisplayPage implements FilterChangeListener {
 	private final JComponent content;
@@ -31,9 +34,21 @@ public class MicroblogDisplayPage implements FilterChangeListener {
 		// will allow it to fill entire scroll pane
 		table.setFillsViewportHeight(true);
 		// TODO: change the size as needed
-		table.setRowHeight(110);
+		//table.setRowHeight(110);
         table.setGridColor(new Color(244,242,242));
 		table.setDefaultRenderer(ParsedMicroblog.class, renderer);
+        try {
+            for (int row=0; row<table.getRowCount(); row++) {
+                int rowHeight = table.getRowHeight();
+
+                for (int column=0; column<table.getColumnCount(); column++) {
+                    Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
+                    rowHeight = max(rowHeight, comp.getPreferredSize().height);
+                }
+
+                table.setRowHeight(row, rowHeight);
+            }
+        } catch(ClassCastException e) { }
 		table.setDefaultEditor(ParsedMicroblog.class, renderer);
 
 		final JScrollPane scrollPane = new JScrollPane();

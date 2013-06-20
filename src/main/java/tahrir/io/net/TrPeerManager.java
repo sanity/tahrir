@@ -38,16 +38,7 @@ public class TrPeerManager {
 	public Map<PhysicalNetworkLocation, TrPeerInfo> peers = new MapMaker().makeMap();
 	public final String sessionMgrLabel;
 
-    public final CacheLoader<Integer, DateTime> seenUId= new CacheLoader<Integer, DateTime>() {
-        @Override
-        public DateTime load(Integer integer) throws Exception {
-            return null;
-        }
-    };
-
-    public final LoadingCache<Integer, DateTime> cache= CacheBuilder.newBuilder()
-            .expireAfterWrite(5, TimeUnit.MINUTES).build(seenUId);
-
+    public Cache<Integer, DateTime> seenUID= CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
 
 	public final TopologyLocationInfo locInfo;
 	public boolean hasForwardedRecently = false;

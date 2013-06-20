@@ -160,7 +160,8 @@ public class TrUtils {
 		 */
 		public static ParsedMicroblog getParsedMicroblog(Tuple2<RSAPublicKey, String> from) {
 			int mbPosition = 0;
-			ParsedPart textPart = new TextPart(mbPosition++, "This is just a plain text microblog.");
+			ParsedPart textPart = new TextPart(mbPosition++, "This is just a plain text microblog. \n which has two lines\n" +
+                    "now three\n oh no it has 4\n5");
 
 			SortedMultiset<ParsedPart> parsedParts = TreeMultiset.create(new PositionComparator());
 			parsedParts.add(textPart);
