@@ -35,4 +35,7 @@ public interface AssimilateSession extends TrSession {
 
 	@Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
 	public void myCapabilitiesAre(Capabilities myCapabilities, int topologyLocation);
+
+    @Priority(TrNetworkInterface.ASSIMILATION_PRIORITY)
+    public void rejectAlreadySeen(int uId);
 }

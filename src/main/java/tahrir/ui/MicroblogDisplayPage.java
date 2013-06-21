@@ -34,14 +34,20 @@ public class MicroblogDisplayPage implements FilterChangeListener {
 		// will allow it to fill entire scroll pane
 		table.setFillsViewportHeight(true);
 		// TODO: change the size as needed
-		//table.setRowHeight(110);
+
+
         table.setGridColor(new Color(244,242,242));
 		table.setDefaultRenderer(ParsedMicroblog.class, renderer);
+        table.setRowHeight(140);
         try {
+            table.setSize(new Dimension(TrConstants.GUI_WIDTH_PX, 1000));
             for (int row=0; row<table.getRowCount(); row++) {
+
                 int rowHeight = table.getRowHeight();
 
                 for (int column=0; column<table.getColumnCount(); column++) {
+
+
                     Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
                     rowHeight = max(rowHeight, comp.getPreferredSize().height);
                 }
@@ -79,6 +85,8 @@ public class MicroblogDisplayPage implements FilterChangeListener {
 		public MicroblogTableModel() {
 			microblogs = Lists.newArrayList();
 		}
+
+
 
 		@Override
 		public int getColumnCount() {

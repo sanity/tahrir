@@ -19,10 +19,10 @@ import tahrir.io.net.microblogging.microblogs.BroadcastMicroblog;
 public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements MicroblogBroadcastSession {
 	private static final Logger logger = LoggerFactory.getLogger(MicroblogBroadcastSessionImpl.class.getName());
 
-	private BroadcastMicroblog beingSent;
+	private BroadcastMicroblog microblogToBroadcast;
 
-	private MicroblogBroadcastSession receiverSess;
-	private MicroblogBroadcastSession initiatorSess;
+	private MicroblogBroadcastSession recipientSession;
+	private MicroblogBroadcastSession senderSession;
 
 	private boolean nextBroadcastStarted;
 
@@ -30,32 +30,32 @@ public class MicroblogBroadcastSessionImpl extends TrSessionImpl implements Micr
 		super(sessionId, node, sessionMgr);
 	}
 
-	public void startSingleBroadcast(final BroadcastMicroblog mbToBroadcast, final PhysicalNetworkLocation peerPhysicalLoc) {
+	public void startSingleBroadcast(final BroadcastMicroblog mbToBroadcast, final PhysicalNetworkLocation recipientOfBroadcast) {
 		nextBroadcastStarted = false;
-		beingSent = mbToBroadcast;
-		receiverSess = remoteSession(MicroblogBroadcastSession.class, connection(peerPhysicalLoc));
-		receiverSess.registerFailureListener(new OnFailureRun());
-		receiverSess.areYouInterested(beingSent.hashCode());
+		microblogToBroadcast = mbToBroadcast;
+		recipientSession = remoteSession(MicroblogBroadcastSession.class, connection(recipientOfBroadcast));
+		recipientSession.registerFailureListener(new OnFailureRun());
+		recipientSession.areYouInterested(microblogToBroadcast.hashCode());
 	}
 
 	public void areYouInterested(final int mbHash) {
-		initiatorSess = remoteSession(MicroblogBroadcastSession.class, connection(sender()));
+		senderSession = remoteSession(MicroblogBroadcastSession.class, connection(sender()));
 
-		initiatorSess.interestIs(!node.mbClasses.mbsForBroadcast.isLikelyToContain(mbHash));
+		senderSession.interestIs(!node.mbClasses.mbsForBroadcast.isLikelyToContain(mbHash));
 	}
 
 	public void interestIs(final boolean interest) {
 		if (interest) {
-			receiverSess.insertMicroblog(beingSent);
+			recipientSession.sendMicroblog(microblogToBroadcast);
 		} else {
 			sessionFinished();
 		}
 	}
 
-	public void insertMicroblog(final BroadcastMicroblog mb) {
+	public void sendMicroblog(final BroadcastMicroblog mb) {
 		node.mbClasses.incomingMbHandler.handleInsertion(mb);
 		// TODO: this is a workaround until we have a registerSuccessListener()
-		initiatorSess.sessionFinished();
+		senderSession.sessionFinished();
 	}
 
 	public void sessionFinished() {
