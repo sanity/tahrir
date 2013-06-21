@@ -133,7 +133,6 @@ public class MicroblogPostPanel {
 
     /*  Auth: Ravi Tejasvi
     *   ReBroadcast button copies the message and then broadcasts the same with high priority.
-    *   TODO: May have to mention the original broadcaster's alias, which is yet to be done. Also the rebroadcast misses the name of the author.
     */
     private final class reBroadcast implements ActionListener
     {
@@ -145,10 +144,8 @@ public class MicroblogPostPanel {
         }
 
         public void actionPerformed(ActionEvent actionEvent) {
-                String message="";
-                BroadcastMicroblog currentNodeInfo = new BroadcastMicroblog(node, message);
                 String xmlMessage = MicroblogParser.getXML(pmb.getParsedParts());
-                BroadcastMicroblog broadcastMicroblog = new BroadcastMicroblog(xmlMessage, currentNodeInfo.otherData);
+                BroadcastMicroblog broadcastMicroblog = new BroadcastMicroblog(xmlMessage, pmb.getMbData());
                 node.mbClasses.incomingMbHandler.handleInsertion(broadcastMicroblog);
         }
 
