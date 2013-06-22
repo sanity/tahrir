@@ -4,10 +4,10 @@ import nu.xom.ParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
-import tahrir.io.net.microblogging.containers.MicroblogsForBroadcast;
+import tahrir.io.net.microblogging.containers.MicroblogOutbox;
 import tahrir.io.net.microblogging.containers.MicroblogsForViewing;
-import tahrir.io.net.microblogging.microblogs.BroadcastMicroblog;
 import tahrir.io.net.microblogging.microblogs.GeneralMicroblogInfo;
+import tahrir.io.net.microblogging.microblogs.Microblog;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.Tuple2;
 
@@ -23,13 +23,13 @@ public class IncomingMicroblogHandler {
 	private static final Logger logger = LoggerFactory.getLogger(ParsedMicroblog.class);
 
 	private final MicroblogsForViewing mbsForViewing;
-	private final MicroblogsForBroadcast mbsForBroadcast;
+	private final MicroblogOutbox mbsForBroadcast;
 
 	private final ContactBook contactBook;
 	private final IdentityMap idMap;
 
 	public IncomingMicroblogHandler(final MicroblogsForViewing mbsForViewing,
-									final MicroblogsForBroadcast mbsForBroadcast,
+									final MicroblogOutbox mbsForBroadcast,
 									final ContactBook contactBook, final IdentityMap identityMap) {
 		this.mbsForBroadcast = mbsForBroadcast;
 		this.mbsForViewing = mbsForViewing;
@@ -37,7 +37,7 @@ public class IncomingMicroblogHandler {
 		idMap = identityMap;
 	}
 
-	public void handleInsertion(final BroadcastMicroblog mbForBroadcast) {
+	public void handleInsertion(final Microblog mbForBroadcast) {
 		GeneralMicroblogInfo generalMbData = mbForBroadcast.otherData;
 		String unparsedMessage = mbForBroadcast.message;
 		if (!MicroblogIntegrityChecks.isValidMicroblog(generalMbData, unparsedMessage)) {

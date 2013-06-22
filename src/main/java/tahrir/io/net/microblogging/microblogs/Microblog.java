@@ -10,7 +10,7 @@ import tahrir.io.crypto.TrSignature;
  *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
-public class BroadcastMicroblog {
+public class Microblog {
 	public int priority;
 	public GeneralMicroblogInfo otherData;
 	/**
@@ -20,15 +20,15 @@ public class BroadcastMicroblog {
 	public TrSignature signature;
 
 	// for serialization
-	public BroadcastMicroblog() {
+	public Microblog() {
 
 	}
 
-	public BroadcastMicroblog(final TrNode creatingNode, final String message) {
+	public Microblog(final TrNode creatingNode, final String message) {
 		this(creatingNode, message, TrConstants.BROADCAST_INIT_PRIORITY);
 	}
 
-	public BroadcastMicroblog(final TrNode creatingNode, final String message, final int priority) {
+	public Microblog(final TrNode creatingNode, final String message, final int priority) {
 		// TODO: get info from config
 		otherData = new GeneralMicroblogInfo("", "", creatingNode.getRemoteNodeAddress().publicKey, System.currentTimeMillis());
 		this.priority = priority;
@@ -46,34 +46,33 @@ public class BroadcastMicroblog {
 	 * @param message
 	 * @param otherData
 	 */
-	public BroadcastMicroblog(String message, GeneralMicroblogInfo otherData) {
+	public Microblog(String message, GeneralMicroblogInfo otherData) {
 		this.message = message;
 		this.otherData = otherData;
 		this.signature = null;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((signature == null) ? 0 : signature.hashCode());
-		return result;
-	}
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		final BroadcastMicroblog other = (BroadcastMicroblog) obj;
-		if (signature == null) {
-			if (signature != null)
-				return false;
-		} else if (!signature.equals(signature))
-			return false;
-		return true;
-	}
+        final Microblog microblog = (Microblog) o;
+
+        if (priority != microblog.priority) return false;
+        if (!message.equals(microblog.message)) return false;
+        if (!otherData.equals(microblog.otherData)) return false;
+        if (!signature.equals(microblog.signature)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = priority;
+        result = 31 * result + otherData.hashCode();
+        result = 31 * result + message.hashCode();
+        result = 31 * result + signature.hashCode();
+        return result;
+    }
 }

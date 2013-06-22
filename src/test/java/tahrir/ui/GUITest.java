@@ -5,7 +5,8 @@ import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.microblogging.MicroblogParser;
 import tahrir.io.net.microblogging.containers.MicroblogsForViewing;
-import tahrir.io.net.microblogging.microblogs.BroadcastMicroblog;
+import tahrir.io.net.microblogging.microblogs.Microblog;
+import tahrir.io.net.microblogging.microblogs.Microblog;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.TrUtils;
 import tahrir.tools.Tuple2;
@@ -49,8 +50,8 @@ public class GUITest {
 
 		for (ParsedMicroblog parsedMicroblog : parsedMbs) {
 			String xmlMessage = MicroblogParser.getXML(parsedMicroblog.getParsedParts());
-			BroadcastMicroblog broadcastMicroblog = new BroadcastMicroblog(xmlMessage, parsedMicroblog.getMbData());
-			node.mbClasses.incomingMbHandler.handleInsertion(broadcastMicroblog);
+			Microblog microblog = new Microblog(xmlMessage, parsedMicroblog.getMbData());
+			node.mbClasses.incomingMbHandler.handleInsertion(microblog);
 		}
 	}
 }

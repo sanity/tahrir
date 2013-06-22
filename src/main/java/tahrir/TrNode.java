@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.*;
 import tahrir.io.net.microblogging.*;
-import tahrir.io.net.microblogging.containers.MicroblogsForBroadcast;
+import tahrir.io.net.microblogging.containers.MicroblogOutbox;
 import tahrir.io.net.microblogging.containers.MicroblogsForViewing;
 import tahrir.io.net.sessions.AssimilateSession;
 import tahrir.io.net.sessions.AssimilateSessionImpl;
@@ -17,6 +17,7 @@ import tahrir.io.net.udpV1.UdpNetworkLocation;
 import tahrir.tools.Persistence;
 import tahrir.tools.Persistence.Modified;
 import tahrir.tools.Persistence.ModifyBlock;
+import tahrir.tools.TrUtils;
 import tahrir.tools.Tuple2;
 
 import java.io.File;
@@ -27,7 +28,7 @@ import java.net.UnknownHostException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
-
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -106,7 +107,7 @@ public class TrNode {
 		sessionMgr.registerSessionClass(AssimilateSession.class, AssimilateSessionImpl.class);
 		// don't want to be able to call broadcast methods on a seed node
 		if (config.peers.runBroadcast) {
-			sessionMgr.registerSessionClass(MicroblogBroadcastSession.class, MicroblogBroadcastSessionImpl.class);
+			sessionMgr.registerSessionClass(TransmitMicroblogSession.class, TransmitMicroblogSessionImpl.class);
 		}
 	}
 
@@ -136,11 +137,11 @@ public class TrNode {
 	}
 
 	public static class MicrobloggingClasses {
-		public final MicroblogBroadcastScheduler mbScheduler;
+		public final MicroblogBroadcaster mbScheduler;
 		public final ContactBook contactBook;
 		public final ShortenedPublicKeyFinder spkFinder;
 		public final IncomingMicroblogHandler incomingMbHandler;
-		public final MicroblogsForBroadcast mbsForBroadcast;
+		public final MicroblogOutbox mbsForBroadcast;
 		public final MicroblogsForViewing mbsForViewing;
 		public final IdentityMap idMap;
 
@@ -150,10 +151,11 @@ public class TrNode {
 			spkFinder = new ShortenedPublicKeyFinder(
 					getOrCreateFile(new File(node.rootDirectory, node.config.publicKeyChars)));
 			idMap = new IdentityMap(spkFinder, contactBook);
-			mbsForBroadcast = new MicroblogsForBroadcast();
+			mbsForBroadcast = new MicroblogOutbox();
 			mbsForViewing = new MicroblogsForViewing(contactBook);
 			incomingMbHandler = new IncomingMicroblogHandler(mbsForViewing, mbsForBroadcast, contactBook, idMap);
-			mbScheduler = new MicroblogBroadcastScheduler(node);
+			mbScheduler = new MicroblogBroadcaster(node);
+            TrUtils.executor.scheduleAtFixedRate(mbScheduler, 1, 1, TimeUnit.MINUTES);
 		}
 
 		// move this somewhere else

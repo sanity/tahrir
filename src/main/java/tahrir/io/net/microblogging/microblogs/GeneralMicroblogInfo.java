@@ -9,10 +9,15 @@ import java.security.interfaces.RSAPublicKey;
  */
 
 public class GeneralMicroblogInfo {
-	private final String languageCode;
-	private final String authorNick;
-	private final RSAPublicKey authorPubKey;
-	private final long timeCreated;
+	private String languageCode;
+	private String authorNick;
+	private RSAPublicKey authorPubKey;
+	private long timeCreated;
+
+    // For serialization
+    public GeneralMicroblogInfo() {
+
+    }
 
 	public GeneralMicroblogInfo(final String languageCode, final String authorNick,
 			final RSAPublicKey authorPubKey, final long timeCreated) {
