@@ -2,13 +2,18 @@ package tahrir.io.net;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.BetaDistributionImpl;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +44,7 @@ public class TrPeerManager {
 	public boolean hasForwardedRecenlty = false;
 
 	private final TrNode node;
+    public Cache<Integer, DateTime> seenUID = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
 
 	public TrPeerManager(final Config config, final TrNode node) {
 		this.config = config;
@@ -97,14 +103,22 @@ public class TrPeerManager {
 		}
 	}
 
-	public TrPeerInfo getPeerForAssimilation() {
-		if (peers.isEmpty()) {
-			// We need to use a public peer
-			final ArrayList<File> publicNodeIdFiles = node.getPublicNodeIdFiles();
-			final File pubPeerFile = publicNodeIdFiles.get(TrUtils.rand.nextInt(publicNodeIdFiles.size()));
-			final TrPeerInfo pnii = Persistence.loadReadOnly(TrPeerInfo.class, pubPeerFile);
-			return pnii;
-		} else {
+    public TrPeerInfo getPeerForAssimilation(Set<PhysicalNetworkLocation> excludeFromConsideration) {
+        if (peers.isEmpty()) {
+
+            // We need to use a public peer
+            final ArrayList<File> publicNodeIdFiles = node.getPublicNodeIdFiles();
+            for (int attempts = 0; attempts < 10; attempts++) {
+                final File pubPeerFile = publicNodeIdFiles.get(TrUtils.rand.nextInt(publicNodeIdFiles.size()));
+                final TrPeerInfo pnii = Persistence.loadReadOnly(TrPeerInfo.class, pubPeerFile);
+                if (excludeFromConsideration.contains(pnii.remoteNodeAddress.physicalLocation))
+                    continue;
+
+                return pnii;
+            }
+            return null;
+        } else {
+
 			/*
 			 * Here we use a trick to pick peers in proportion to the
 			 * probability that they will be the fastest peer
@@ -158,7 +172,7 @@ public class TrPeerManager {
 		// in the event that we are well below minPeers to speed this up
 		if (config.assimilate && peers.size() < config.minPeers) {
 			final AssimilateSessionImpl as = node.sessionMgr.getOrCreateLocalSession(AssimilateSessionImpl.class);
-			final TrPeerInfo ap = getPeerForAssimilation();
+			final TrPeerInfo ap = getPeerForAssimilation(Collections.EMPTY_SET);
 
 			as.startAssimilation(TrUtils.noopRunnable, ap);
 
