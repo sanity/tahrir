@@ -1,4 +1,4 @@
-package tahrir.io.net.microblogging.microblogs;
+package tahrir.io.net.microblogging;
 
 import tahrir.io.crypto.TrCrypto;
 
@@ -16,6 +16,11 @@ public class UserIdentity {
     public UserIdentity(String nickName, RSAPublicKey pubKey) {
         this.nickName = nickName;
         this.pubKey=pubKey;
+    }
+
+    public UserIdentity(){
+        this.nickName=null;
+        this.pubKey=null;
     }
 
     public String getNick(){
