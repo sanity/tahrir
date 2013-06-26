@@ -17,7 +17,6 @@ public class UserIdentity {
         this.nickName = nickName;
         this.pubKey=pubKey;
     }
-
     public UserIdentity(){
         this.nickName=null;
         this.pubKey=null;
