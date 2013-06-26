@@ -10,18 +10,17 @@ import java.security.interfaces.RSAPublicKey;
  */
 public class UserIdentity {
 
-    private final String nickName;
-    private final RSAPublicKey pubKey;
+    protected String nickName;
+    protected RSAPublicKey pubKey;
 
     public UserIdentity(String nickName, RSAPublicKey pubKey) {
         this.nickName = nickName;
         this.pubKey=pubKey;
     }
-    public UserIdentity(){
-        this.nickName=null;
-        this.pubKey=null;
-    }
 
+    public UserIdentity(){
+
+    }
     public String getNick(){
         return this.nickName;
     }
