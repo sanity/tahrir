@@ -3,10 +3,7 @@ package tahrir.io.net.microblogging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Author   : Ravisvi <ravitejasvi@gmail.com>
@@ -120,7 +117,7 @@ public class IdentityStore {
             return usersInLabels.get(label);
         }
         else{
-            return null;
+            return Collections.emptySet();
         }
     }
 
@@ -140,25 +137,26 @@ public class IdentityStore {
             return labelsOfUser.get(identity);
         }
         else{
-            return null;
+            return Collections.emptySet();
         }
     }
 
     public SortedMap<String, Set<UserIdentity>> getUserIdentitiesStartingWith(String nick){
 
-        //Set<UserIdentity> setOfIdentitesHavingGivenNick=new HashSet();
-        //creating tempNick to give the to point for the submap method
         int indexOfLastChar=nick.length()-1;
-        String tempNick= nick.substring(0, indexOfLastChar);
-        tempNick+=(nick.charAt(indexOfLastChar)+1);
-        return usersWithNickname.subMap(nick, tempNick);
+        String upperBoundNick= nick.substring(0, indexOfLastChar);
+        upperBoundNick+=(nick.charAt(indexOfLastChar)+1);
+        return usersWithNickname.subMap(nick, upperBoundNick);
 
-        //if only the nicks were required
-        //return usersWithGivenNick.keySet();
     }
 
     public Set<UserIdentity> getIdentitiesWithNick(String nick){
-        return usersWithNickname.get(nick);
+        if(usersWithNickname.containsKey(nick)){
+            return usersWithNickname.get(nick);
+        }
+        else{
+            return Collections.emptySet();
+        }
     }
 
 }
