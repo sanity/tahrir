@@ -1,20 +1,11 @@
 package tahrir.io.net.microblogging;
 
-import com.google.common.collect.Maps;
-import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tahrir.tools.TrUtils;
 
-import java.io.*;
-import java.lang.reflect.Type;
-import java.security.interfaces.RSAPublicKey;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * Author   : Ravisvi <ravitejasvi@gmail.com>
@@ -49,6 +40,8 @@ public class IdentityStore {
 
     private TreeMap<UserIdentity, Set<String>> labelsOfUser =new TreeMap();
 
+    private TreeMap<String, Set<UserIdentity>> usersWithNickname =new TreeMap();
+
 
     public void addLabelToIdentity(String label, UserIdentity identity){
         //checks whether the identity exists, if not, adds the identity first and then adds label.
@@ -57,6 +50,7 @@ public class IdentityStore {
             labels.add(label);
             labelsOfUser.put(identity, labels);
             logger.debug("New identity created and label added.");
+            addIdentityToNick(identity);
             addIdentityToLabel(identity, label);
         }
         else{
@@ -84,6 +78,19 @@ public class IdentityStore {
         }
     }
 
+    public void addIdentityToNick(UserIdentity identity){
+        if(usersWithNickname.containsKey(identity.getNick())){
+            usersWithNickname.get(identity.getNick()).add(identity);
+            logger.debug("Nick was already present, added identity to it.");
+        }
+        else{
+            Set<UserIdentity> identitySet=new HashSet();
+            identitySet.add(identity);
+            usersWithNickname.put(identity.getNick(), identitySet);
+            logger.debug("Nick created and identity added.");
+        }
+    }
+
     public void removeLabelFromIdentity(String label, UserIdentity identity){
         if(labelsOfUser.get(identity).contains(label)){
             labelsOfUser.get(identity).remove(label);
@@ -99,6 +106,7 @@ public class IdentityStore {
         if(usersInLabels.get(label).contains(identity)){
             usersInLabels.get(label).remove(identity);
             logger.debug("Removed identity from the label.");
+            removeIdentityFromNick(identity);
         }
         else{
             logger.debug("Identity not present in the label.");
@@ -107,7 +115,7 @@ public class IdentityStore {
 
     public Set<UserIdentity> getIdentitiesWithLabel(String label){
         if(usersInLabels.containsKey(label)){
-            logger.debug("Label was present, returning userIdentities");
+            logger.debug("Label was present, returning userIdentities.");
             return usersInLabels.get(label);
         }
         else{
@@ -115,9 +123,19 @@ public class IdentityStore {
         }
     }
 
+    private void removeIdentityFromNick(UserIdentity identity) {
+        if(usersWithNickname.containsKey(identity.getNick())){
+            logger.debug("Nickname exists, removing identity from it.");
+            usersWithNickname.get(identity.getNick()).remove(identity);
+        }
+        else{
+            logger.debug("Nickname isn't present so identity is also not present.");
+        }
+    }
+
     public Set<String> getLabelsForIdentity(UserIdentity identity){
         if(labelsOfUser.containsKey(identity)){
-            logger.debug("Identity was present, returning corresponding labels");
+            logger.debug("Identity was present, returning corresponding labels.");
             return labelsOfUser.get(identity);
         }
         else{
