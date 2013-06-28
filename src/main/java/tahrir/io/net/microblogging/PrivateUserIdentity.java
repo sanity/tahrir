@@ -15,7 +15,7 @@ public class PrivateUserIdentity extends UserIdentity{
         this.pvtKey=pvtKey;
     }
 
-    PrivateUserIdentity(){
+    protected PrivateUserIdentity(){
     }
 
 
