@@ -1,5 +1,6 @@
 package tahrir.io.net.microblogging;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,17 +36,17 @@ public class IdentityStore {
     }
 
     //contains circles in String (label) i.e following, etc. And the id info in UserIdentity.
-    private TreeMap<String, Set<UserIdentity>> usersInLabels=new TreeMap();
+    private HashMap<String, Set<UserIdentity>> usersInLabels= Maps.newHashMap();
 
-    private TreeMap<UserIdentity, Set<String>> labelsOfUser =new TreeMap();
+    private HashMap<UserIdentity, Set<String>> labelsOfUser = Maps.newHashMap();
 
-    private TreeMap<String, Set<UserIdentity>> usersWithNickname =new TreeMap();
+    private TreeMap<String, Set<UserIdentity>> usersWithNickname = Maps.newTreeMap();
 
 
     public void addLabelToIdentity(String label, UserIdentity identity){
         //checks whether the identity exists, if not, adds the identity first and then adds label.
         if(!(labelsOfUser.containsKey(identity))){
-            Set<String> labels=new HashSet<String>();
+            Set<String> labels=Sets.newHashSet();
             labels.add(label);
             labelsOfUser.put(identity, labels);
             logger.debug("New identity created and label added.");
@@ -67,7 +68,12 @@ public class IdentityStore {
         }
     }
 
-    public void addIdentityToLabel(UserIdentity identity, String label){
+    private void addIdentityToLabel(UserIdentity identity, String label){
+        if(!(usersInLabels.containsKey(label))){
+            Set<UserIdentity> identitySet = Sets.newHashSet();
+            identitySet.add(identity);
+            usersInLabels.put(label, identitySet);
+        }
         if(usersInLabels.get(label).contains(identity)){
             logger.debug("Label already contains identity.");
         }
@@ -101,7 +107,7 @@ public class IdentityStore {
         }
     }
 
-    public void removeIdentityFromLabel(UserIdentity identity, String label){
+    private void removeIdentityFromLabel(UserIdentity identity, String label){
         if(usersInLabels.get(label).contains(identity)){
             usersInLabels.get(label).remove(identity);
             logger.debug("Removed identity from the label.");
@@ -122,7 +128,7 @@ public class IdentityStore {
         }
     }
 
-    private void removeIdentityFromNick(UserIdentity identity) {
+    public void removeIdentityFromNick(UserIdentity identity) {
         if(usersWithNickname.containsKey(identity.getNick())){
             logger.debug("Nickname exists, removing identity from it.");
             usersWithNickname.get(identity.getNick()).remove(identity);
@@ -146,7 +152,7 @@ public class IdentityStore {
 
         int indexOfLastChar=nick.length()-1;
         String upperBoundNick= nick.substring(0, indexOfLastChar);
-        upperBoundNick+=(nick.charAt(indexOfLastChar)+1);
+        upperBoundNick += (char)(nick.charAt(indexOfLastChar)+1);
         final SortedMap<String, Set<UserIdentity>> sortedMap = usersWithNickname.subMap(nick, upperBoundNick);
 
         SortedSet<UserIdentity> sortedUserIdentities = Sets.newTreeSet(new NickNameComparator());
