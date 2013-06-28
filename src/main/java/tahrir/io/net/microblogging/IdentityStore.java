@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
@@ -143,4 +144,23 @@ public class IdentityStore {
         }
     }
 
+    public SortedMap<String, Set<UserIdentity>> getUserIdentitiesStartingWith(String nick){
+
+        //Set<UserIdentity> setOfIdentitesHavingGivenNick=new HashSet();
+        //creating tempNick to give the to point for the submap method
+        int indexOfLastChar=nick.length()-1;
+        String tempNick= nick.substring(0, indexOfLastChar);
+        tempNick+=(nick.charAt(indexOfLastChar)+1);
+        return usersWithNickname.subMap(nick, tempNick);
+
+        //if only the nicks were required
+        //return usersWithGivenNick.keySet();
+    }
+
+    public Set<UserIdentity> getIdentitiesWithNick(String nick){
+        return usersWithNickname.get(nick);
+    }
+
 }
+
+
