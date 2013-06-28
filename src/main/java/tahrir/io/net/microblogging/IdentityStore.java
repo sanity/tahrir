@@ -23,6 +23,27 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class IdentityStore {
     private static Logger logger = LoggerFactory.getLogger(ContactBook.class);
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IdentityStore that = (IdentityStore) o;
+
+        if (labelsOfUser != null ? !labelsOfUser.equals(that.labelsOfUser) : that.labelsOfUser != null) return false;
+        if (usersInLabels != null ? !usersInLabels.equals(that.usersInLabels) : that.usersInLabels != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = usersInLabels != null ? usersInLabels.hashCode() : 0;
+        result = 31 * result + (labelsOfUser != null ? labelsOfUser.hashCode() : 0);
+        return result;
+    }
+
     //contains circles in String (label) i.e following, etc. And the id info in UserIdentity.
     private TreeMap<String, Set<UserIdentity>> usersInLabels=new TreeMap();
 
