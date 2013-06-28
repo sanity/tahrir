@@ -1,7 +1,5 @@
 package tahrir.io.net.microblogging;
 
-import tahrir.io.crypto.TrCrypto;
-
 import java.security.interfaces.RSAPublicKey;
 
 /**
@@ -23,5 +21,8 @@ public class UserIdentity {
     }
     public String getNick(){
         return this.nickName;
+    }
+    public RSAPublicKey getPubKey() {
+        return pubKey;
     }
 }

@@ -1,5 +1,6 @@
 package tahrir.io.net.microblogging;
 
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,13 +142,20 @@ public class IdentityStore {
         }
     }
 
-    public SortedMap<String, Set<UserIdentity>> getUserIdentitiesStartingWith(String nick){
+    public SortedSet<UserIdentity> getUserIdentitiesStartingWith(String nick){
 
         int indexOfLastChar=nick.length()-1;
         String upperBoundNick= nick.substring(0, indexOfLastChar);
         upperBoundNick+=(nick.charAt(indexOfLastChar)+1);
-        return usersWithNickname.subMap(nick, upperBoundNick);
+        final SortedMap<String, Set<UserIdentity>> sortedMap = usersWithNickname.subMap(nick, upperBoundNick);
 
+        SortedSet<UserIdentity> sortedUserIdentities = Sets.newTreeSet(new NickNameComparator());
+
+        for (Set<UserIdentity> userIdentities : sortedMap.values()) {
+            sortedUserIdentities.addAll(userIdentities);
+        }
+
+        return sortedUserIdentities;
     }
 
     public Set<UserIdentity> getIdentitiesWithNick(String nick){
@@ -159,6 +167,18 @@ public class IdentityStore {
         }
     }
 
+    private static class NickNameComparator implements Comparator<UserIdentity> {
+
+        @Override
+        public int compare(final UserIdentity o1, final UserIdentity o2) {
+            int nickComparison = o1.getNick().compareTo(o2.getNick());
+            if (nickComparison != 0) {
+                return nickComparison;
+            } else {
+                return o1.getPubKey().toString().compareTo(o2.getPubKey().toString());
+            }
+        }
+    }
 }
 
 
