@@ -1,12 +1,10 @@
 package tahrir.io.net.microblogging;
 
-import com.google.common.collect.Sets;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tahrir.io.crypto.TrCrypto;
 
 import java.security.interfaces.RSAPublicKey;
-import java.util.*;
 
 /**
  * Author   : Ravisvi <ravitejasvi@gmail.com>
@@ -36,7 +34,7 @@ public class IdentityStoreTest {
 
     @Test
     public void addIdentityToNickTest(){
-        testStore.addIdentityToNick(identityTwo);
+        testStore.addIdentityToUsersWithNickname(identityTwo);
         Assert.assertTrue(testStore.getIdentitiesWithNick(identityTwo.getNick()).contains(identityTwo));
     }
 
@@ -66,13 +64,13 @@ public class IdentityStoreTest {
 
     @Test
     public void getUserIdentitiesStartingWithTest(){
-        testStore.addIdentityToNick(identityOne);
+        testStore.addIdentityToUsersWithNickname(identityOne);
         Assert.assertTrue(testStore.getUserIdentitiesStartingWith(boundingNick).contains(identityOne));
     }
 
     @Test
     public void getIdentitiesWithNick(){
-        testStore.addIdentityToNick(identityOne);
+        testStore.addIdentityToUsersWithNickname(identityOne);
         Assert.assertTrue(testStore.getIdentitiesWithNick(identityOne.getNick()).contains(identityOne));
     }
 

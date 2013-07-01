@@ -2,9 +2,14 @@ package tahrir.io.net.microblogging;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tahrir.tools.TrUtils;
 
+import java.io.*;
+import java.lang.reflect.Type;
+import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 
 /**
@@ -13,6 +18,37 @@ import java.util.*;
  */
 public class IdentityStore {
     private static Logger logger = LoggerFactory.getLogger(ContactBook.class);
+    private File identityStoreFile;
+    //contains circles in String (label) i.e following, etc. And the id info in UserIdentity.
+    private HashMap<String, Set<UserIdentity>> usersInLabels= Maps.newHashMap();
+
+    private HashMap<UserIdentity, Set<String>> labelsOfUser;
+
+    private TreeMap<String, Set<UserIdentity>> usersWithNickname = Maps.newTreeMap();
+
+    public IdentityStore(File identityStoreFile){
+        FileReader identityStoreFileReader=null;
+        try{
+            this.identityStoreFile=identityStoreFile;
+            identityStoreFileReader=new FileReader(identityStoreFile);
+            logger.info("Trying to load identity store.");
+
+        }
+        catch(FileNotFoundException e){
+            logger.warn("The identity store file doesn't exist.");
+            throw new RuntimeException("File not found, invalid file.");
+        }
+        Type idStoreType = new TypeToken<Map<UserIdentity, Set<String>>>() {}.getType();
+        labelsOfUser = TrUtils.gson.fromJson(identityStoreFileReader, idStoreType);
+        updateUsersInLabelsMap(labelsOfUser);
+        updateUsersWithNickMap(labelsOfUser);
+        if (labelsOfUser == null) {
+            logger.info("Failed to load any idStore. Creating new Identity Store.");
+            labelsOfUser = Maps.newHashMap();
+        } else {
+            logger.info("Identity Store successfully loaded from file.");
+        }
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -35,12 +71,29 @@ public class IdentityStore {
         return result;
     }
 
-    //contains circles in String (label) i.e following, etc. And the id info in UserIdentity.
-    private HashMap<String, Set<UserIdentity>> usersInLabels= Maps.newHashMap();
+    private void updateUsersInLabelsMap(HashMap<UserIdentity, Set<String>> labelsOfUser){
+        Iterator labelsOfUserIterator = labelsOfUser.entrySet().iterator();
+        while (labelsOfUserIterator.hasNext()) {
+            Map.Entry pairs = (Map.Entry)labelsOfUserIterator.next();
+            //iterate through the set of labels.
+            Iterator<String> labelIterator = labelsOfUser.get(pairs.getValue()).iterator();
+            while(labelIterator.hasNext()) {
+                String label = labelIterator.next();
+                updateUsersInLabel((UserIdentity) pairs.getKey(), label);
+                labelIterator.remove();
+                }
+            labelsOfUserIterator.remove();
+            }
+    }
 
-    private HashMap<UserIdentity, Set<String>> labelsOfUser = Maps.newHashMap();
-
-    private TreeMap<String, Set<UserIdentity>> usersWithNickname = Maps.newTreeMap();
+    private void updateUsersWithNickMap(HashMap<UserIdentity, Set<String>> labelsOfUser){
+        Iterator labelsOfUserIterator = labelsOfUser.entrySet().iterator();
+        while (labelsOfUserIterator.hasNext()) {
+            Map.Entry pairs = (Map.Entry)labelsOfUserIterator.next();
+            addIdentityToUsersWithNickname((UserIdentity) pairs.getKey());
+            labelsOfUserIterator.remove();
+        }
+    }
 
 
     public void addLabelToIdentity(String label, UserIdentity identity){
@@ -50,8 +103,9 @@ public class IdentityStore {
             labels.add(label);
             labelsOfUser.put(identity, labels);
             logger.debug("New identity created and label added.");
-            addIdentityToNick(identity);
-            addIdentityToLabel(identity, label);
+            updateIdentityInFile();
+            addIdentityToUsersWithNickname(identity);
+            updateUsersInLabel(identity, label);
         }
         else{
             //adds to the already existing identity if the label isn't present.
@@ -61,14 +115,14 @@ public class IdentityStore {
             else{
                 labelsOfUser.get(identity).add(label);
                 logger.debug("Added label to the existing identity.");
-                addIdentityToLabel(identity, label);
+                updateUsersInLabel(identity, label);
 
             }
 
         }
     }
 
-    private void addIdentityToLabel(UserIdentity identity, String label){
+    private void updateUsersInLabel(UserIdentity identity, String label){
         if(!(usersInLabels.containsKey(label))){
             Set<UserIdentity> identitySet = Sets.newHashSet();
             identitySet.add(identity);
@@ -83,7 +137,7 @@ public class IdentityStore {
         }
     }
 
-    public void addIdentityToNick(UserIdentity identity){
+    public void addIdentityToUsersWithNickname(UserIdentity identity){
         if(usersWithNickname.containsKey(identity.getNick())){
             usersWithNickname.get(identity.getNick()).add(identity);
             logger.debug("Nick was already present, added identity to it.");
@@ -101,6 +155,7 @@ public class IdentityStore {
             labelsOfUser.get(identity).remove(label);
             logger.debug("Label removed from identity.");
             removeIdentityFromLabel(identity, label);
+            updateIdentityInFile();
         }
         else{
             logger.debug("The identity doesn't contain the label.");
@@ -162,6 +217,19 @@ public class IdentityStore {
         }
 
         return sortedUserIdentities;
+    }
+
+    private void updateIdentityInFile() {
+        logger.info("Adding identities to file");
+        try {
+            //TODO: Try to append idStore into the file rather than rewriting the whole thing.
+            final FileWriter identityStoreWriter = new FileWriter(identityStoreFile);
+            identityStoreWriter.write(TrUtils.gson.toJson(labelsOfUser));
+            identityStoreWriter.close();
+        } catch (final IOException ioException) {
+            logger.error("Problem writing identities to file: the identities weren't saved.");
+            ioException.printStackTrace();
+        }
     }
 
     public Set<UserIdentity> getIdentitiesWithNick(String nick){
