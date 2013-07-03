@@ -5,11 +5,11 @@ import com.google.common.collect.Sets;
 import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tahrir.TrConstants;
 import tahrir.tools.TrUtils;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 
 /**
@@ -17,37 +17,44 @@ import java.util.*;
  * Date     : 26/6/13
  */
 public class IdentityStore {
-    private static Logger logger = LoggerFactory.getLogger(ContactBook.class);
-    private File identityStoreFile;
+    private static Logger logger = LoggerFactory.getLogger(IdentityStore.class);
+    private File identityStoreFile = new File(TrConstants.identityStoreTestFilePath);
     //contains circles in String (label) i.e following, etc. And the id info in UserIdentity.
     private HashMap<String, Set<UserIdentity>> usersInLabels= Maps.newHashMap();
 
-    private HashMap<UserIdentity, Set<String>> labelsOfUser;
+    private HashMap<UserIdentity, Set<String>> labelsOfUser = Maps.newHashMap();
 
     private TreeMap<String, Set<UserIdentity>> usersWithNickname = Maps.newTreeMap();
 
     public IdentityStore(File identityStoreFile){
-        FileReader identityStoreFileReader=null;
-        try{
-            this.identityStoreFile=identityStoreFile;
-            identityStoreFileReader=new FileReader(identityStoreFile);
-            logger.info("Trying to load identity store.");
 
+        if(identityStoreFile.exists()){
+            this.identityStoreFile=identityStoreFile;
+            FileReader identityStoreFileReader=null;
+            try {
+                identityStoreFileReader=new FileReader(identityStoreFile);
+            }
+            catch (FileNotFoundException e) {
+                logger.info("The identity store file doesn't exist.");
+                throw new RuntimeException("File not found, invalid file.");
+            }
+            logger.info("Trying to load identity store.");
+            Type idStoreType = new TypeToken<Map<UserIdentity, Set<String>>>() {}.getType();
+            labelsOfUser.putAll((Map<UserIdentity, Set<String>>)TrUtils.gson.fromJson(identityStoreFileReader, idStoreType));
+
+            if (labelsOfUser == null) {
+                logger.info("Failed to load any idStore. Creating new Identity Store.");
+                labelsOfUser = Maps.newHashMap();
+            }
+            else {
+                updateUsersInLabelsMap(labelsOfUser);
+                updateUsersWithNickMap(labelsOfUser);
+                logger.info("Identity Store successfully loaded from file.");
+            }
         }
-        catch(FileNotFoundException e){
-            logger.warn("The identity store file doesn't exist.");
-            throw new RuntimeException("File not found, invalid file.");
-        }
-        Type idStoreType = new TypeToken<Map<UserIdentity, Set<String>>>() {}.getType();
-        labelsOfUser = TrUtils.gson.fromJson(identityStoreFileReader, idStoreType);
-        updateUsersInLabelsMap(labelsOfUser);
-        updateUsersWithNickMap(labelsOfUser);
-        if (labelsOfUser == null) {
-            logger.info("Failed to load any idStore. Creating new Identity Store.");
-            labelsOfUser = Maps.newHashMap();
-        } else {
-            logger.info("Identity Store successfully loaded from file.");
-        }
+    else{
+        logger.info("The identity store file doesn't exist.");
+    }
     }
 
     @Override
@@ -72,14 +79,14 @@ public class IdentityStore {
     }
 
     private void updateUsersInLabelsMap(HashMap<UserIdentity, Set<String>> labelsOfUser){
-        Iterator labelsOfUserIterator = labelsOfUser.entrySet().iterator();
+        Iterator<Map.Entry<UserIdentity, Set<String>>> labelsOfUserIterator = labelsOfUser.entrySet().iterator();
         while (labelsOfUserIterator.hasNext()) {
-            Map.Entry pairs = (Map.Entry)labelsOfUserIterator.next();
+            Map.Entry<UserIdentity, Set<String>> pairs = labelsOfUserIterator.next();
             //iterate through the set of labels.
             Iterator<String> labelIterator = labelsOfUser.get(pairs.getValue()).iterator();
             while(labelIterator.hasNext()) {
                 String label = labelIterator.next();
-                updateUsersInLabel((UserIdentity) pairs.getKey(), label);
+                updateUsersInLabel(pairs.getKey(), label);
                 labelIterator.remove();
                 }
             labelsOfUserIterator.remove();
@@ -87,16 +94,16 @@ public class IdentityStore {
     }
 
     private void updateUsersWithNickMap(HashMap<UserIdentity, Set<String>> labelsOfUser){
-        Iterator labelsOfUserIterator = labelsOfUser.entrySet().iterator();
+        Iterator<Map.Entry<UserIdentity, Set<String>>> labelsOfUserIterator = labelsOfUser.entrySet().iterator();
         while (labelsOfUserIterator.hasNext()) {
-            Map.Entry pairs = (Map.Entry)labelsOfUserIterator.next();
-            addIdentityToUsersWithNickname((UserIdentity) pairs.getKey());
+            Map.Entry<UserIdentity, Set<String>> pairs = labelsOfUserIterator.next();
+            addIdentityToUsersWithNickname(pairs.getKey());
             labelsOfUserIterator.remove();
         }
     }
 
-
-    public void addLabelToIdentity(String label, UserIdentity identity){
+    // adds the identity to all the maps.
+    public void addIdentity(String label, UserIdentity identity){
         //checks whether the identity exists, if not, adds the identity first and then adds label.
         if(!(labelsOfUser.containsKey(identity))){
             Set<String> labels=Sets.newHashSet();
@@ -173,6 +180,15 @@ public class IdentityStore {
         }
     }
 
+    public boolean hasIdentityInIdStore(UserIdentity identity){
+        if(usersWithNickname.containsKey(identity.getNick())){
+            if (usersWithNickname.get(identity.getNick()).contains(identity)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Set<UserIdentity> getIdentitiesWithLabel(String label){
         if(usersInLabels.containsKey(label)){
             logger.debug("Label was present, returning userIdentities.");
@@ -223,7 +239,7 @@ public class IdentityStore {
         logger.info("Adding identities to file");
         try {
             //TODO: Try to append idStore into the file rather than rewriting the whole thing.
-            final FileWriter identityStoreWriter = new FileWriter(identityStoreFile);
+            FileWriter identityStoreWriter = new FileWriter(identityStoreFile);
             identityStoreWriter.write(TrUtils.gson.toJson(labelsOfUser));
             identityStoreWriter.close();
         } catch (final IOException ioException) {

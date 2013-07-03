@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.microblogging.MicroblogParser;
+import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.containers.MicroblogsForViewing;
 import tahrir.io.net.microblogging.microblogs.Microblog;
 import tahrir.io.net.microblogging.microblogs.Microblog;
@@ -35,10 +36,10 @@ public class GUITest {
 		  This is pretty silly: creating parsed microblogs and then, using their information, turn them into
 		  their unparsed form and later insert them as if they were from broadcast.
 		 */
-		Tuple2<RSAPublicKey, String> user1 = new Tuple2<RSAPublicKey, String>(TrCrypto.createRsaKeyPair().a, "user1");
-		Tuple2<RSAPublicKey, String> user2 = new Tuple2<RSAPublicKey, String>(TrCrypto.createRsaKeyPair().a, "user2");
 
-		node.mbClasses.contactBook.addContact(user1.b, user1.a);
+        UserIdentity user1=new UserIdentity("user1", TrCrypto.createRsaKeyPair().a);
+        UserIdentity user2=new UserIdentity("user2", TrCrypto.createRsaKeyPair().a);
+		node.mbClasses.identityStore.addIdentity("Following", user1);
 
 		ParsedMicroblog fromRand = TrUtils.TestUtils.getParsedMicroblog();
 		ParsedMicroblog fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);

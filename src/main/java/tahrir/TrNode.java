@@ -138,22 +138,21 @@ public class TrNode {
 
 	public static class MicrobloggingClasses {
 		public final MicroblogBroadcaster mbScheduler;
-		public final ContactBook contactBook;
+        public final IdentityStore identityStore;
+
 		public final ShortenedPublicKeyFinder spkFinder;
 		public final IncomingMicroblogHandler incomingMbHandler;
 		public final MicroblogOutbox mbsForBroadcast;
 		public final MicroblogsForViewing mbsForViewing;
-		public final IdentityMap idMap;
 
 		public MicrobloggingClasses(final TrNode node) {
-			contactBook = new ContactBook(
-					getOrCreateFile(new File(node.rootDirectory, node.config.contacts)));
+            identityStore=new IdentityStore(getOrCreateFile(new File(node.rootDirectory, node.config.contacts)));
+
 			spkFinder = new ShortenedPublicKeyFinder(
 					getOrCreateFile(new File(node.rootDirectory, node.config.publicKeyChars)));
-			idMap = new IdentityMap(spkFinder, contactBook);
 			mbsForBroadcast = new MicroblogOutbox();
-			mbsForViewing = new MicroblogsForViewing(contactBook);
-			incomingMbHandler = new IncomingMicroblogHandler(mbsForViewing, mbsForBroadcast, contactBook, idMap);
+			mbsForViewing = new MicroblogsForViewing(identityStore);
+			incomingMbHandler = new IncomingMicroblogHandler(mbsForViewing, mbsForBroadcast, identityStore);
 			mbScheduler = new MicroblogBroadcaster(node);
             TrUtils.executor.scheduleAtFixedRate(mbScheduler, 1, 1, TimeUnit.MINUTES);
 		}

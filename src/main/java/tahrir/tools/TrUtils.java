@@ -14,6 +14,7 @@ import tahrir.io.net.microblogging.MicroblogParser.MentionPart;
 import tahrir.io.net.microblogging.MicroblogParser.ParsedPart;
 import tahrir.io.net.microblogging.MicroblogParser.PositionComparator;
 import tahrir.io.net.microblogging.MicroblogParser.TextPart;
+import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.microblogs.GeneralMicroblogInfo;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.GsonSerializers.RSAPublicKeyDeserializer;
@@ -137,12 +138,11 @@ public class TrUtils {
 		/**
 		 * Get a microblog from a user that mentions another user twice.
 		 */
-		public static ParsedMicroblog getParsedMicroblog(Tuple2<RSAPublicKey, String> from,
-				Tuple2<RSAPublicKey, String> mention) {
+		public static ParsedMicroblog getParsedMicroblog(UserIdentity from, UserIdentity mention) {
 			int mbPosition = 0;
-			ParsedPart mentionPart = new MentionPart(mbPosition++, mention.a, mention.b);
+			ParsedPart mentionPart = new MentionPart(mbPosition++, mention.getPubKey(), mention.getNick());
 			ParsedPart textPart = new TextPart(mbPosition++, " was just mentioned.");
-			ParsedPart anotherMentionPart = new MentionPart(mbPosition++, mention.a, mention.b);
+			ParsedPart anotherMentionPart = new MentionPart(mbPosition++, mention.getPubKey(), mention.getNick());
 			ParsedPart anotherTextPart = new TextPart(mbPosition++, " and look he was just mentioned again!");
 
 			SortedMultiset<ParsedPart> parsedParts = TreeMultiset.create(new PositionComparator());
@@ -151,21 +151,21 @@ public class TrUtils {
 			parsedParts.add(anotherMentionPart);
 			parsedParts.add(anotherTextPart);
 
-			GeneralMicroblogInfo mbData = new GeneralMicroblogInfo(null, from.b, from.a, System.currentTimeMillis());
+			GeneralMicroblogInfo mbData = new GeneralMicroblogInfo(null, from.getNick(), from.getPubKey(), System.currentTimeMillis());
 			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(), parsedParts));
 		}
 
 		/**
 		 * Get microblog from a user which is just text, no mentions.
 		 */
-		public static ParsedMicroblog getParsedMicroblog(Tuple2<RSAPublicKey, String> from) {
+		public static ParsedMicroblog getParsedMicroblog(UserIdentity from) {
 			int mbPosition = 0;
 			ParsedPart textPart = new TextPart(mbPosition++, "This is just a plain text microblog.");
 
 			SortedMultiset<ParsedPart> parsedParts = TreeMultiset.create(new PositionComparator());
 			parsedParts.add(textPart);
 
-			GeneralMicroblogInfo mbData = new GeneralMicroblogInfo(null, from.b, from.a, System.currentTimeMillis());
+			GeneralMicroblogInfo mbData = new GeneralMicroblogInfo(null, from.getNick(), from.getPubKey(), System.currentTimeMillis());
 			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(), parsedParts));
 		}
 

@@ -50,6 +50,7 @@ public class TrConstants {
     public static final int POST_HGAP_PX=50;
 
 	public static final String MAIN_WINDOW_ARTWORK_PATH = "artwork/";
+    public static final String identityStoreTestFilePath="src\\";
 
 	/**
 	 * Records constants to do with the microblog XML format.

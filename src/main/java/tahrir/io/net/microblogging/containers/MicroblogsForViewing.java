@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
-import tahrir.io.net.microblogging.ContactBook;
+import tahrir.io.net.microblogging.IdentityStore;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.TrUtils;
 
@@ -21,13 +21,13 @@ public class MicroblogsForViewing {
 	private static Logger logger = LoggerFactory.getLogger(MicroblogsForViewing.class);
 
 	private final SortedSet<ParsedMicroblog> parsedMicroblogs;
-	private final ParsedMicroblogTimeComparator comparator;
+	private static final ParsedMicroblogTimeComparator comparator =new ParsedMicroblogTimeComparator();
 
-	private final ContactBook contactBook;
+	private final IdentityStore identityStore;
 
-	public MicroblogsForViewing(final ContactBook contactBook) {
-		this.contactBook = contactBook;
-		comparator = new ParsedMicroblogTimeComparator();
+	public MicroblogsForViewing(final IdentityStore identityStore) {
+		this.identityStore = identityStore;
+		//comparator = new ParsedMicroblogTimeComparator();
         SortedSet<ParsedMicroblog> tmpSet = Sets.newTreeSet(comparator);
 		parsedMicroblogs = Collections.synchronizedSortedSet(tmpSet);
 	}
@@ -67,7 +67,7 @@ public class MicroblogsForViewing {
 	}
 
 	private boolean shouldAddByReplacement(final ParsedMicroblog mb) {
-		return contactBook.hasContact(mb.getMbData().getAuthorPubKey()) || isNewerThanLast(mb);
+		return identityStore.hasIdentityInIdStore(mb.getMbData().getUserIdentity()) || isNewerThanLast(mb);
 	}
 
 	private boolean isNewerThanLast(final ParsedMicroblog mb) {

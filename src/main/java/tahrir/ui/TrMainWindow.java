@@ -66,7 +66,7 @@ public class TrMainWindow {
 		final MicroblogDisplayPage unfilteredPostPage = new MicroblogDisplayPage(
 				new Unfiltered(sourceForFilters), this);
 		final MicroblogDisplayPage followingPostPage = new MicroblogDisplayPage(
-				new ContactsFilter(sourceForFilters, node.mbClasses.contactBook), this);
+				new ContactsFilter(sourceForFilters, node.mbClasses.identityStore), this);
 		final JPanel mentions = new JPanel();
 		final MicroblogDisplayPage myPostsPage = new MicroblogDisplayPage(
 				new AuthorFilter(sourceForFilters, node.getRemoteNodeAddress().publicKey), this);

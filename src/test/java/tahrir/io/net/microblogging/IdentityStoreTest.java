@@ -2,8 +2,10 @@ package tahrir.io.net.microblogging;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import tahrir.TrConstants;
 import tahrir.io.crypto.TrCrypto;
 
+import java.io.File;
 import java.security.interfaces.RSAPublicKey;
 
 /**
@@ -12,6 +14,7 @@ import java.security.interfaces.RSAPublicKey;
  */
 public class IdentityStoreTest {
 
+    File identityStoreTestFile=new File(TrConstants.identityStoreTestFilePath);
     RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
     final String user1nick = "name1";
 
@@ -20,14 +23,14 @@ public class IdentityStoreTest {
 
     final String boundingNick = "na";
 
-    IdentityStore testStore=new IdentityStore();
+    IdentityStore testStore=new IdentityStore(identityStoreTestFile);
     UserIdentity identityOne=new UserIdentity(user1nick, user1Key);
     UserIdentity identityTwo=new UserIdentity(user2nick, user2Key);
     final String label= "Following";
 
     @Test
     public void addLabelToIdentityTest(){
-        testStore.addLabelToIdentity(label, identityOne);
+        testStore.addIdentity(label, identityOne);
         Assert.assertTrue(testStore.getIdentitiesWithLabel(label).contains(identityOne));
         Assert.assertTrue(testStore.getLabelsForIdentity(identityOne).contains(label));
     }
@@ -47,7 +50,7 @@ public class IdentityStoreTest {
 
     @Test
     public void getIdentitiesWithLabelTest(){
-        testStore.addLabelToIdentity(label, identityTwo);
+        testStore.addIdentity(label, identityTwo);
         Assert.assertTrue(testStore.getIdentitiesWithLabel(label).contains(identityTwo));
     }
 
@@ -73,5 +76,14 @@ public class IdentityStoreTest {
         testStore.addIdentityToUsersWithNickname(identityOne);
         Assert.assertTrue(testStore.getIdentitiesWithNick(identityOne.getNick()).contains(identityOne));
     }
+
+    /*@Test
+    public void fileLoadingTest(){
+        testStore.addIdentity("Following", identityTwo);
+        UserIdentity testUser2 = new UserIdentity("TestUser2", TrCrypto.createRsaKeyPair().a);
+        testStore.addIdentity("Friends", testUser2);
+        IdentityStore testStore2=new IdentityStore(identityStoreTestFile);
+        Assert.assertTrue(testStore2.getIdentitiesWithLabel("TestUser2").contains(testUser2));
+    } */
 
 }

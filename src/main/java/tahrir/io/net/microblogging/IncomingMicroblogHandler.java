@@ -24,17 +24,14 @@ public class IncomingMicroblogHandler {
 
 	private final MicroblogsForViewing mbsForViewing;
 	private final MicroblogOutbox mbsForBroadcast;
-
-	private final ContactBook contactBook;
-	private final IdentityMap idMap;
+    private final IdentityStore identityStore;
 
 	public IncomingMicroblogHandler(final MicroblogsForViewing mbsForViewing,
 									final MicroblogOutbox mbsForBroadcast,
-									final ContactBook contactBook, final IdentityMap identityMap) {
+									final IdentityStore identityStore) {
 		this.mbsForBroadcast = mbsForBroadcast;
 		this.mbsForViewing = mbsForViewing;
-		this.contactBook = contactBook;
-		idMap = identityMap;
+        this.identityStore=identityStore;
 	}
 
 	public void handleInsertion(final Microblog mbForBroadcast) {
@@ -53,21 +50,19 @@ public class IncomingMicroblogHandler {
 			return;
 		}
 		// the microblog has now passed all the requirements with parsing and otherData constraints
-		if (contactBook.hasContact(generalMbData.getAuthorPubKey())) {
+		if (identityStore.hasIdentityInIdStore(generalMbData.getUserIdentity())) {
 			// a better priority if they're one of your contacts
 			mbForBroadcast.priority -= TrConstants.CONTACT_PRIORITY_INCREASE;
 		}
 		ParsedMicroblog parsedMb = new ParsedMicroblog(generalMbData, parser.getMentionsFound().keySet(),
 				parser.getParsedParts());
-		addDiscoveredIdentities(parser.getMentionsFound(),
-				new Tuple2<RSAPublicKey, String>(generalMbData.getAuthorPubKey(), generalMbData.getAuthorNick()));
+        UserIdentity userIdentity=new UserIdentity(generalMbData.getAuthorNick(), generalMbData.getAuthorPubKey());
+		addDiscoveredIdentities(new Tuple2<String, UserIdentity>(userIdentity.getNick(), userIdentity));
 		mbsForViewing.insert(parsedMb);
 		mbsForBroadcast.insert(mbForBroadcast);
 	}
 
-	private void addDiscoveredIdentities(Map<RSAPublicKey, String> fromParsing,
-										 Tuple2<RSAPublicKey, String> fromGeneralData) {
-		idMap.addNewIdentity(fromGeneralData.a, fromGeneralData.b);
-		idMap.addNewIdentities(fromParsing);
+	private void addDiscoveredIdentities(Tuple2<String, UserIdentity> fromGeneralData) {
+        identityStore.addIdentity(fromGeneralData.a, fromGeneralData.b);
 	}
 }
