@@ -27,30 +27,28 @@ public class IdentityStore {
     private TreeMap<String, Set<UserIdentity>> usersWithNickname = Maps.newTreeMap();
 
     public IdentityStore(File identityStoreFile){
-
+        this.identityStoreFile=identityStoreFile;
         if(identityStoreFile.exists()){
-            this.identityStoreFile=identityStoreFile;
-            FileReader identityStoreFileReader=null;
             try {
-                identityStoreFileReader=new FileReader(identityStoreFile);
+                FileReader identityStoreFileReader = new FileReader(identityStoreFile);
+                logger.info("Trying to load identity store.");
+                Type idStoreType = new TypeToken<Map<UserIdentity, Set<String>>>() {}.getType();
+                labelsOfUser.putAll((Map<UserIdentity, Set<String>>)TrUtils.gson.fromJson(identityStoreFileReader, idStoreType));
+
+                if (labelsOfUser == null) {
+                    logger.info("Failed to load any idStore. Creating new Identity Store.");
+                    labelsOfUser = Maps.newHashMap();
+                }
+                else {
+                    updateUsersInLabelsMap(labelsOfUser);
+                    updateUsersWithNickMap(labelsOfUser);
+                    logger.info("Identity Store successfully loaded from file.");
+                }
             }
             catch (FileNotFoundException e) {
                 logger.info("The identity store file doesn't exist.");
-                throw new RuntimeException("File not found, invalid file.");
             }
-            logger.info("Trying to load identity store.");
-            Type idStoreType = new TypeToken<Map<UserIdentity, Set<String>>>() {}.getType();
-            labelsOfUser.putAll((Map<UserIdentity, Set<String>>)TrUtils.gson.fromJson(identityStoreFileReader, idStoreType));
 
-            if (labelsOfUser == null) {
-                logger.info("Failed to load any idStore. Creating new Identity Store.");
-                labelsOfUser = Maps.newHashMap();
-            }
-            else {
-                updateUsersInLabelsMap(labelsOfUser);
-                updateUsersWithNickMap(labelsOfUser);
-                logger.info("Identity Store successfully loaded from file.");
-            }
         }
     else{
         logger.info("The identity store file doesn't exist.");
