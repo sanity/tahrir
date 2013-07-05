@@ -7,6 +7,7 @@ import tahrir.io.crypto.TrCrypto;
 
 import java.io.File;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Set;
 
 /**
  * Author   : Ravisvi <ravitejasvi@gmail.com>
@@ -76,14 +77,23 @@ public class IdentityStoreTest {
         testStore.addIdentityToUsersWithNickname(identityOne);
         Assert.assertTrue(testStore.getIdentitiesWithNick(identityOne.getNick()).contains(identityOne));
     }
+    @Test
+    public void duplicateUsersTest(){
+        UserIdentity testUser2 = new UserIdentity("TestUser2", TrCrypto.createRsaKeyPair().a);
+        testStore.addIdentity("Friends", testUser2);
+        testStore.addIdentity("Friends", testUser2);
+        Assert.assertFalse((testStore.getIdentitiesWithNick(testUser2.getNick()).size())>1);
+    }
 
-    /*@Test
+   @Test
     public void fileLoadingTest(){
         testStore.addIdentity("Following", identityTwo);
         UserIdentity testUser2 = new UserIdentity("TestUser2", TrCrypto.createRsaKeyPair().a);
         testStore.addIdentity("Friends", testUser2);
+       UserIdentity testUser3 = new UserIdentity("TestUser2", TrCrypto.createRsaKeyPair().a);
+       testStore.addIdentity("Friends", testUser3);
         IdentityStore testStore2=new IdentityStore(identityStoreTestFile);
-        Assert.assertTrue(testStore2.getIdentitiesWithLabel("TestUser2").contains(testUser2));
-    } */
+        Assert.assertTrue(testStore2.hasIdentityInIdStore(testUser2));
+    }
 
 }
