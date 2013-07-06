@@ -187,8 +187,9 @@ public class IdentityStore {
             if (usersWithNickname.get(identity.getNick()).contains(identity)){
                 return true;
             }
+            else return false;
         }
-        return false;
+        else return false;
     }
 
     public Set<UserIdentity> getIdentitiesWithLabel(String label){
