@@ -35,7 +35,7 @@ public class IdentityStore {
                 Type idStoreType = new TypeToken<Map<String, Set<UserIdentity>>>() {}.getType();
                 usersInLabels = TrUtils.gson.fromJson(identityStoreFileReader, idStoreType);
 
-                if (labelsOfUser == null) {
+                if (usersInLabels == null) {
                     logger.info("Failed to load any idStore. Creating new Identity Store.");
                     usersInLabels = Maps.newHashMap();
                 }
@@ -86,12 +86,13 @@ public class IdentityStore {
                 addIdentityToUsersWithNickname(userIdentity);
             }
         }
+
     }
 
     // adds the identity to all the maps.
     public void addIdentity(String label, UserIdentity identity){
         //checks whether the identity exists, if not, adds the identity first and then adds label.
-        if(labelsOfUser.isEmpty()||!(labelsOfUser.containsKey(identity))){
+        if(!(labelsOfUser.containsKey(identity))){
             Set<String> labels=Sets.newHashSet();
             labels.add(label);
             labelsOfUser.put(identity, labels);
@@ -116,7 +117,7 @@ public class IdentityStore {
     }
 
     private void updateLabelsOfUsers(UserIdentity identity, String label){
-        if (labelsOfUser.isEmpty() || !(labelsOfUser.containsKey(identity))){
+        if (!(labelsOfUser.containsKey(identity))){
             Set<String> labelSet = Sets.newHashSet();
             labelSet.add(label);
             labelsOfUser.put(identity, labelSet);
@@ -132,7 +133,7 @@ public class IdentityStore {
     }
 
     private void updateUsersInLabel(UserIdentity identity, String label){
-        if (usersInLabels.isEmpty()||!(usersInLabels.containsKey(label))){
+        if (!(usersInLabels.containsKey(label))){
             Set<UserIdentity> identitySet = Sets.newHashSet();
             identitySet.add(identity);
             usersInLabels.put(label, identitySet);

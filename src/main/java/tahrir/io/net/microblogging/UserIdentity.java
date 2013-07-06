@@ -19,6 +19,27 @@ public class UserIdentity {
     public UserIdentity(){
 
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserIdentity that = (UserIdentity) o;
+
+        if (nickName != null ? !nickName.equals(that.nickName) : that.nickName != null) return false;
+        if (!pubKey.equals(that.pubKey)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = nickName != null ? nickName.hashCode() : 0;
+        result = 31 * result + pubKey.hashCode();
+        return result;
+    }
+
     public String getNick(){
         return this.nickName;
     }
