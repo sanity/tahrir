@@ -39,7 +39,7 @@ public class GUITest {
 
         UserIdentity user1=new UserIdentity("user1", TrCrypto.createRsaKeyPair().a);
         UserIdentity user2=new UserIdentity("user2", TrCrypto.createRsaKeyPair().a);
-		node.mbClasses.identityStore.addIdentity("Following", user1);
+		node.mbClasses.identityStore.addIdentityWithLabel("Following", user1);
 
 		ParsedMicroblog fromRand = TrUtils.TestUtils.getParsedMicroblog();
 		ParsedMicroblog fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);

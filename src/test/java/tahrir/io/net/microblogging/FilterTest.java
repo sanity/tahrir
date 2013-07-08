@@ -66,8 +66,8 @@ public class FilterTest {
 		}
 		// in this test we add both user A and B to contacts
         final IdentityStore identityStore= new IdentityStore(testFile);
-		identityStore.addIdentity("Following", userA);
-        identityStore.addIdentity("Following", userB);
+		identityStore.addIdentityWithLabel("Following", userA);
+        identityStore.addIdentity(userB);
 
 		final ContactsFilter filter = new ContactsFilter(microblogs, identityStore);
 		final List<ParsedMicroblog> filterMbs = filter.getMicroblogs();

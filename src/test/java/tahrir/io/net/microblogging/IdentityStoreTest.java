@@ -31,7 +31,7 @@ public class IdentityStoreTest {
         UserIdentity identityOne=new UserIdentity(user1nick, user1Key);
         final String label= "Following";
 
-        testStore.addIdentity(label, identityOne);
+        testStore.addIdentityWithLabel(label, identityOne);
         Assert.assertTrue(testStore.getIdentitiesWithLabel(label).contains(identityOne));
         Assert.assertTrue(testStore.getLabelsForIdentity(identityOne).contains(label));
         identityStoreTestFile.delete();
@@ -63,7 +63,7 @@ public class IdentityStoreTest {
         UserIdentity identityOne=new UserIdentity(user1nick, user1Key);
         final String label= "Following";
 
-        testStore.addIdentity(label, identityOne);
+        testStore.addIdentityWithLabel(label, identityOne);
 
         testStore.removeLabelFromIdentity(label, identityOne);
         Assert.assertFalse(testStore.getIdentitiesWithLabel(label).contains(identityOne));
@@ -80,7 +80,7 @@ public class IdentityStoreTest {
         UserIdentity identityTwo=new UserIdentity(user1nick, user1Key);
         final String label= "Following";
 
-        testStore.addIdentity(label, identityTwo);
+        testStore.addIdentityWithLabel(label, identityTwo);
         Assert.assertTrue(testStore.getIdentitiesWithLabel(label).contains(identityTwo));
         identityStoreTestFile.delete();
     }
@@ -108,7 +108,7 @@ public class IdentityStoreTest {
         UserIdentity identityTwo=new UserIdentity(user1nick, user1Key);
         final String label= "Following";
 
-        testStore.addIdentity(label, identityTwo);
+        testStore.addIdentityWithLabel(label, identityTwo);
         Assert.assertTrue(testStore.getLabelsForIdentity(identityTwo).contains(label));
         identityStoreTestFile.delete();
     }
@@ -145,8 +145,8 @@ public class IdentityStoreTest {
 
         UserIdentity testUser2 = new UserIdentity("TestUser2", TrCrypto.createRsaKeyPair().a);
 
-        testStore.addIdentity("Friends", testUser2);
-        testStore.addIdentity("Friends", testUser2);
+        testStore.addIdentityWithLabel("Friends", testUser2);
+        testStore.addIdentityWithLabel("Friends", testUser2);
 
         Assert.assertFalse((testStore.getIdentitiesWithNick(testUser2.getNick()).size())>1);
         identityStoreTestFile.delete();
@@ -158,10 +158,21 @@ public class IdentityStoreTest {
        IdentityStore testStore=new IdentityStore(identityStoreTestFile);
 
        UserIdentity testUser3 = new UserIdentity("TestUser3", TrCrypto.createRsaKeyPair().a);
-       testStore.addIdentity("Friends", testUser3);
+       testStore.addIdentityWithLabel("Friends", testUser3);
        IdentityStore testStore2=new IdentityStore(identityStoreTestFile);
        Assert.assertTrue(testStore2.hasIdentityInIdStore(testUser3));
        identityStoreTestFile.delete();
+    }
+
+    @Test
+    public void emptyLabelTest(){
+        File identityStoreTestFile=new File(TrConstants.identityStoreTestFilePath);
+        IdentityStore testStore=new IdentityStore(identityStoreTestFile);
+
+        UserIdentity testUser3 = new UserIdentity("TestUser3", TrCrypto.createRsaKeyPair().a);
+        testStore.addIdentity(testUser3);
+        Assert.assertTrue(testStore.hasIdentityInIdStore(testUser3));
+        identityStoreTestFile.delete();
     }
 
 }

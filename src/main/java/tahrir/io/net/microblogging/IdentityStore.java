@@ -89,8 +89,23 @@ public class IdentityStore {
 
     }
 
-    // adds the identity to all the maps.
-    public void addIdentity(String label, UserIdentity identity){
+
+    public void addIdentity(UserIdentity identity){
+        //As label is not specified, this contact is not added to the file, but added temporarily to the map
+        if(!(labelsOfUser.containsKey(identity))){
+
+            Set<String> labels=Collections.emptySet();
+            labelsOfUser.put(identity, labels);
+            logger.debug("New identity created and label added.");
+            addIdentityToUsersWithNickname(identity);
+            addIdentityToUsersWithNickname(identity);
+        }
+        else{
+                logger.debug("Identity already exists");
+        }
+    }
+
+    public void addIdentityWithLabel(String label, UserIdentity identity){
         //checks whether the identity exists, if not, adds the identity first and then adds label.
         if(!(labelsOfUser.containsKey(identity))){
             Set<String> labels=Sets.newHashSet();

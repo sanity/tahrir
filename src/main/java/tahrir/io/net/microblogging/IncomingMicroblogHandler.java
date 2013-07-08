@@ -63,6 +63,6 @@ public class IncomingMicroblogHandler {
 	}
 
 	private void addDiscoveredIdentities(Tuple2<String, UserIdentity> fromGeneralData) {
-        identityStore.addIdentity(fromGeneralData.a, fromGeneralData.b);
+        identityStore.addIdentity(fromGeneralData.b);
 	}
 }
