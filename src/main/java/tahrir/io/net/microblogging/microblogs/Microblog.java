@@ -62,7 +62,9 @@ public class Microblog {
         if (priority != microblog.priority) return false;
         if (!message.equals(microblog.message)) return false;
         if (!otherData.equals(microblog.otherData)) return false;
+        if(signature != null && microblog.signature != null) {
         if (!signature.equals(microblog.signature)) return false;
+        }
 
         return true;
     }
