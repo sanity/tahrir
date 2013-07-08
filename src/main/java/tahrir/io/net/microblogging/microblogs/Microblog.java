@@ -72,7 +72,12 @@ public class Microblog {
         int result = priority;
         result = 31 * result + otherData.hashCode();
         result = 31 * result + message.hashCode();
+        if(signature != null){
         result = 31 * result + signature.hashCode();
+        }
+        else{
+            result = 31 * result;
+        }
         return result;
     }
 }
