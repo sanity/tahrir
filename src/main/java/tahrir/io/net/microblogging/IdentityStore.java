@@ -198,6 +198,15 @@ public class IdentityStore {
         }
     }
 
+    public boolean hasIdentityInLabel(UserIdentity identity){
+        //currently checks if user is following the identity.
+        if(labelsOfUser.get(identity).contains(TrConstants.following)){
+            return true;
+        }
+
+        return false;
+    }
+
     public boolean hasIdentityInIdStore(UserIdentity identity){
         if(usersWithNickname.containsKey(identity.getNick())){
             if (usersWithNickname.get(identity.getNick()).contains(identity)){

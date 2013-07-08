@@ -65,6 +65,7 @@ public class Microblog {
         if(signature != null && microblog.signature != null) {
         if (!signature.equals(microblog.signature)) return false;
         }
+        if(signature == null && microblog.signature == null) return false;
 
         return true;
     }

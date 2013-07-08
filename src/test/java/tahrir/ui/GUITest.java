@@ -1,6 +1,7 @@
 package tahrir.ui;
 
 import com.google.common.collect.Sets;
+import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.microblogging.MicroblogParser;
@@ -39,8 +40,8 @@ public class GUITest {
 
         UserIdentity user1=new UserIdentity("user1", TrCrypto.createRsaKeyPair().a);
         UserIdentity user2=new UserIdentity("user2", TrCrypto.createRsaKeyPair().a);
-		node.mbClasses.identityStore.addIdentityWithLabel("Following", user1);
-
+		node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.following, user1);
+        node.mbClasses.identityStore.addIdentity(user2);
 		ParsedMicroblog fromRand = TrUtils.TestUtils.getParsedMicroblog();
 		ParsedMicroblog fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);
 		ParsedMicroblog fromUser2 = TrUtils.TestUtils.getParsedMicroblog(user2, user1);
