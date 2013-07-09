@@ -1,5 +1,6 @@
 package tahrir.io.net.microblogging;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.reflect.TypeToken;
@@ -176,18 +177,25 @@ public class IdentityStore {
     }
 
     public void removeLabelFromIdentity(String label, UserIdentity identity){
+        if(labelsOfUser.containsKey(identity)){
         if(labelsOfUser.get(identity).contains(label)){
             labelsOfUser.get(identity).remove(label);
             logger.debug("Label removed from identity.");
             removeIdentityFromLabel(identity, label);
             updateIdentityInFile();
         }
+
         else{
             logger.debug("The identity doesn't contain the label.");
+        }
+        }
+        else{
+            logger.debug("The identity doesn't exist");
         }
     }
 
     private void removeIdentityFromLabel(UserIdentity identity, String label){
+        if(usersInLabels.containsKey(label)){
         if(usersInLabels.get(label).contains(identity)){
             usersInLabels.get(label).remove(identity);
             logger.debug("Removed identity from the label.");
@@ -196,18 +204,25 @@ public class IdentityStore {
         else{
             logger.debug("Identity not present in the label.");
         }
+        }
+        else{
+            logger.debug("Label doesn't exist");
+        }
     }
 
     public boolean hasIdentityInLabel(UserIdentity identity){
         //currently checks if user is following the identity.
+        if(labelsOfUser.containsKey(identity)){
         if(labelsOfUser.get(identity).contains(TrConstants.following)){
             return true;
+        }
         }
 
         return false;
     }
 
     public boolean hasIdentityInIdStore(UserIdentity identity){
+
         if(usersWithNickname.containsKey(identity.getNick())){
             if (usersWithNickname.get(identity.getNick()).contains(identity)){
                 return true;
