@@ -1,6 +1,8 @@
 package tahrir;
 
 import com.google.common.collect.Lists;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.io.crypto.TrCrypto;
@@ -46,6 +48,9 @@ public class TrNode {
 	public File pubNodeIdFile;
 	public File publicNodeIdsDir;
 	public final File rootDirectory;
+    public final File identityStoreFile;
+
+    public final EventBus eventBus = new EventBus();
 
 	public final TrPeerManager peerManager;
 
@@ -53,10 +58,14 @@ public class TrNode {
 
 	public TrSessionManager sessionMgr;
 
+    public IdentityStore identityStore;
+
 	public TrNode(final File rootDirectory, final TrConfig config)
 			throws SocketException {
 		this.rootDirectory = rootDirectory;
 		this.config = config;
+        this.identityStoreFile = new File(rootDirectory+System.getProperty("file.separator")+"id-store.json");
+        this.identityStore = new IdentityStore(identityStoreFile);
 		privNodeIdFile = new File(rootDirectory, config.privateNodeId);
 		pubNodeIdFile = new File(rootDirectory, config.publicNodeId);
 		if (!privNodeIdFile.exists()) {
@@ -135,6 +144,7 @@ public class TrNode {
 	public void modifyPublicNodeId(final ModifyBlock<RemoteNodeAddress> mb) {
 		Persistence.loadAndModify(RemoteNodeAddress.class, pubNodeIdFile, mb);
 	}
+
 
 	public static class MicrobloggingClasses {
 		public final MicroblogBroadcaster mbScheduler;

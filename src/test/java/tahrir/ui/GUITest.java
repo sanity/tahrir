@@ -8,13 +8,9 @@ import tahrir.io.net.microblogging.MicroblogParser;
 import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.containers.MicroblogsForViewing;
 import tahrir.io.net.microblogging.microblogs.Microblog;
-import tahrir.io.net.microblogging.microblogs.Microblog;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.TrUtils;
-import tahrir.tools.Tuple2;
 
-import javax.swing.*;
-import java.security.interfaces.RSAPublicKey;
 import java.util.SortedSet;
 
 public class GUITest {
@@ -41,7 +37,7 @@ public class GUITest {
 
         UserIdentity user1=new UserIdentity("user1", TrCrypto.createRsaKeyPair().a);
         UserIdentity user2=new UserIdentity("user2", TrCrypto.createRsaKeyPair().a);
-		node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.following, user1);
+		node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.FOLLOWING, user1);
         node.mbClasses.identityStore.addIdentity(user2);
 		ParsedMicroblog fromRand = TrUtils.TestUtils.getParsedMicroblog();
 		ParsedMicroblog fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);

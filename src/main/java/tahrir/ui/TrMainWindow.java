@@ -86,7 +86,7 @@ public class TrMainWindow {
 		/*
 		TODO: Decide icon or text
 		tabbedPane.addTab(null, createTabIcon("unfiltered.png"), unfilteredPostPage.getContent(), "All posts");
-		tabbedPane.addTab(null, createTabIcon("following.png"), followingPostPage.getContent(), "Following posts");
+		tabbedPane.addTab(null, createTabIcon("FOLLOWING.png"), followingPostPage.getContent(), "Following posts");
 		tabbedPane.addTab(null, createTabIcon("mentions.png"), mentions, "Mentions");
 		tabbedPane.addTab(null, createTabIcon("my-posts.png"), myPostsPage.getContent(), "My posts");
 		tabbedPane.addTab(null, createTabIcon("contact-book.png"), contactBook, "Contact book");

@@ -7,7 +7,6 @@ import tahrir.io.crypto.TrCrypto;
 
 import java.io.File;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Set;
 
 /**
  * Author   : Ravisvi <ravitejasvi@gmail.com>
@@ -24,7 +23,7 @@ public class IdentityStoreTest {
 
     @Test
     public void addLabelToIdentityTest(){
-        File identityStoreTestFile=new File(TrConstants.identityStoreTestFilePath);
+        File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name1";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
@@ -39,7 +38,7 @@ public class IdentityStoreTest {
 
     @Test
     public void addIdentityToNickTest(){
-        File identityStoreTestFile=new File(TrConstants.identityStoreTestFilePath);
+        File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
         RSAPublicKey user2Key = TrCrypto.createRsaKeyPair().a;
         final String user2nick = "name2";
@@ -56,7 +55,7 @@ public class IdentityStoreTest {
     @Test
     public void removeLabelFromIdentityTest(){
 
-        File identityStoreTestFile=new File(TrConstants.identityStoreTestFilePath);
+        File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name1";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
@@ -73,7 +72,7 @@ public class IdentityStoreTest {
 
     @Test
     public void getIdentitiesWithLabelTest(){
-        File identityStoreTestFile=new File(TrConstants.identityStoreTestFilePath);
+        File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name2";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
@@ -87,7 +86,7 @@ public class IdentityStoreTest {
 
     @Test
     public void removeIdentityFromNickTest(){
-        File identityStoreTestFile=new File(TrConstants.identityStoreTestFilePath);
+        File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
         RSAPublicKey user2Key = TrCrypto.createRsaKeyPair().a;
         final String user2nick = "name2";
@@ -101,7 +100,7 @@ public class IdentityStoreTest {
 
     @Test
     public void getLabelsForIdentityTest(){
-        File identityStoreTestFile=new File(TrConstants.identityStoreTestFilePath);
+        File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name2";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
@@ -115,7 +114,7 @@ public class IdentityStoreTest {
 
     @Test
     public void getUserIdentitiesStartingWithTest(){
-        File identityStoreTestFile=new File(TrConstants.identityStoreTestFilePath);
+        File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name1";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
@@ -128,7 +127,7 @@ public class IdentityStoreTest {
 
     @Test
     public void getIdentitiesWithNick(){
-        File identityStoreTestFile=new File(TrConstants.identityStoreTestFilePath);
+        File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name1";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
@@ -140,7 +139,7 @@ public class IdentityStoreTest {
     }
     @Test
     public void duplicateUsersTest(){
-        File identityStoreTestFile=new File(TrConstants.identityStoreTestFilePath);
+        File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
 
         UserIdentity testUser2 = new UserIdentity("TestUser2", TrCrypto.createRsaKeyPair().a);
@@ -154,7 +153,7 @@ public class IdentityStoreTest {
 
    @Test
     public void fileLoadingTest(){
-       File identityStoreTestFile=new File(TrConstants.identityStoreTestFilePath);
+       File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
        IdentityStore testStore=new IdentityStore(identityStoreTestFile);
 
        UserIdentity testUser3 = new UserIdentity("TestUser3", TrCrypto.createRsaKeyPair().a);
@@ -166,7 +165,7 @@ public class IdentityStoreTest {
 
     @Test
     public void emptyLabelTest(){
-        File identityStoreTestFile=new File(TrConstants.identityStoreTestFilePath);
+        File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
 
         UserIdentity testUser3 = new UserIdentity("TestUser3", TrCrypto.createRsaKeyPair().a);

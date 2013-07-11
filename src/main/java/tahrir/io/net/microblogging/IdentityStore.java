@@ -1,6 +1,5 @@
 package tahrir.io.net.microblogging;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.reflect.TypeToken;
@@ -19,11 +18,11 @@ import java.util.*;
  */
 public class IdentityStore {
     private static Logger logger = LoggerFactory.getLogger(IdentityStore.class);
-    private File identityStoreFile = new File(TrConstants.identityStoreTestFilePath);
-    //contains circles in String (label) i.e following, etc. And the id info in UserIdentity.
+    private File identityStoreFile = new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
+    //contains circles in String (label) i.e FOLLOWING, etc. And the id info in UserIdentity.
     private HashMap<String, Set<UserIdentity>> usersInLabels;
 
-    private HashMap<UserIdentity, Set<String>> labelsOfUser = Maps.newHashMap();
+    public HashMap<UserIdentity, Set<String>> labelsOfUser = Maps.newHashMap();
 
     private TreeMap<String, Set<UserIdentity>> usersWithNickname = Maps.newTreeMap();
 
@@ -90,7 +89,6 @@ public class IdentityStore {
 
     }
 
-
     public void addIdentity(UserIdentity identity){
         //As label is not specified, this contact is not added to the file, but added temporarily to the map
         if(!(labelsOfUser.containsKey(identity))){
@@ -103,6 +101,22 @@ public class IdentityStore {
         }
         else{
                 logger.debug("Identity already exists");
+        }
+    }
+
+    public void removeIdentity(UserIdentity identity){
+        if(labelsOfUser.containsKey(identity)){
+            removeIdentityFromNick(identity);
+            for(String label: labelsOfUser.get(identity)){
+            removeIdentityFromLabel(identity, label);
+            }
+            labelsOfUser.remove(identity);
+            logger.debug("Identity removed.");
+            updateIdentityInFile();
+        }
+        else{
+            //adds to the already existing identity if the label isn't present.
+                logger.debug("Identity doesn't exist.");
         }
     }
 
@@ -211,9 +225,9 @@ public class IdentityStore {
     }
 
     public boolean hasIdentityInLabel(UserIdentity identity){
-        //currently checks if user is following the identity.
+        //currently checks if user is FOLLOWING the identity.
         if(labelsOfUser.containsKey(identity)){
-        if(labelsOfUser.get(identity).contains(TrConstants.following)){
+        if(labelsOfUser.get(identity).contains(TrConstants.FOLLOWING)){
             return true;
         }
         }
