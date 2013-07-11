@@ -2,7 +2,6 @@ package tahrir;
 
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.io.crypto.TrCrypto;
@@ -66,6 +65,7 @@ public class TrNode {
 		this.config = config;
         this.identityStoreFile = new File(rootDirectory+System.getProperty("file.separator")+"id-store.json");
         this.identityStore = new IdentityStore(identityStoreFile);
+        this.identityStore.eventBusSetter(eventBus);
 		privNodeIdFile = new File(rootDirectory, config.privateNodeId);
 		pubNodeIdFile = new File(rootDirectory, config.publicNodeId);
 		if (!privNodeIdFile.exists()) {

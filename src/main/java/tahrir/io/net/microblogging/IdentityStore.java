@@ -2,11 +2,14 @@ package tahrir.io.net.microblogging;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.tools.TrUtils;
+import tahrir.ui.IdentityModifiedEvent;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -25,6 +28,9 @@ public class IdentityStore {
     public HashMap<UserIdentity, Set<String>> labelsOfUser = Maps.newHashMap();
 
     private TreeMap<String, Set<UserIdentity>> usersWithNickname = Maps.newTreeMap();
+
+    private EventBus eventBus;
+
 
     public IdentityStore(File identityStoreFile){
         this.identityStoreFile=identityStoreFile;
@@ -54,6 +60,10 @@ public class IdentityStore {
         usersInLabels = Maps.newHashMap();
         logger.info("The identity store file doesn't exist.");
     }
+    }
+
+    public void eventBusSetter(EventBus eventBus){
+        this.eventBus = eventBus;
     }
 
     @Override
@@ -97,7 +107,7 @@ public class IdentityStore {
             labelsOfUser.put(identity, labels);
             logger.debug("New identity created and label added.");
             addIdentityToUsersWithNickname(identity);
-            addIdentityToUsersWithNickname(identity);
+            eventBus.post(new IdentityModifiedEvent(identity, TrConstants.add));
         }
         else{
                 logger.debug("Identity already exists");
@@ -112,6 +122,7 @@ public class IdentityStore {
             }
             labelsOfUser.remove(identity);
             logger.debug("Identity removed.");
+            eventBus.post(new IdentityModifiedEvent(identity, !(TrConstants.add)));
             updateIdentityInFile();
         }
         else{
@@ -129,6 +140,7 @@ public class IdentityStore {
             logger.debug("New identity created and label added.");
             addIdentityToUsersWithNickname(identity);
             updateUsersInLabel(identity, label);
+            eventBus.post(new IdentityModifiedEvent(identity, TrConstants.add));
             updateIdentityInFile();
         }
         else{
@@ -151,6 +163,7 @@ public class IdentityStore {
             Set<String> labelSet = Sets.newHashSet();
             labelSet.add(label);
             labelsOfUser.put(identity, labelSet);
+            eventBus.post(new IdentityModifiedEvent(identity, TrConstants.add));
         }
         else if(!(labelsOfUser.get(identity).contains(label))){
             labelsOfUser.get(identity).add(label);
@@ -181,6 +194,7 @@ public class IdentityStore {
         if(usersWithNickname.containsKey(identity.getNick())){
             usersWithNickname.get(identity.getNick()).add(identity);
             logger.debug("Nick was already present, added identity to it.");
+
         }
         else{
             Set<UserIdentity> identitySet=new HashSet();
@@ -188,6 +202,7 @@ public class IdentityStore {
             usersWithNickname.put(identity.getNick(), identitySet);
             logger.debug("Nick created and identity added.");
         }
+        eventBus.post(new IdentityModifiedEvent(identity, TrConstants.add));
     }
 
     public void removeLabelFromIdentity(String label, UserIdentity identity){
@@ -196,6 +211,7 @@ public class IdentityStore {
             labelsOfUser.get(identity).remove(label);
             logger.debug("Label removed from identity.");
             removeIdentityFromLabel(identity, label);
+            eventBus.post(new IdentityModifiedEvent(identity, !(TrConstants.add)));
             updateIdentityInFile();
         }
 
@@ -260,6 +276,7 @@ public class IdentityStore {
         if(usersWithNickname.containsKey(identity.getNick())){
             logger.debug("Nickname exists, removing identity from it.");
             usersWithNickname.get(identity.getNick()).remove(identity);
+            eventBus.post(new IdentityModifiedEvent(identity, !(TrConstants.add)));
         }
         else{
             logger.debug("Nickname isn't present so identity is also not present.");

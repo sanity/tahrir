@@ -54,6 +54,8 @@ public class TrConstants {
     public static final String IDENTITY_STORE_TEST_FILE_PATH = System.getProperty("java.io.tmpdir")+System.getProperty("file.separator")+"temp-id-store.json";
 
     public static final String FOLLOWING = "FOLLOWING";
+
+    public static boolean add = true;
 	/**
 	 * Records constants to do with the microblog XML format.
 	 *
