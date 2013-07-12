@@ -70,23 +70,23 @@ public class TrMainWindow {
 		final JPanel mentions = new JPanel();
 		final MicroblogDisplayPage myPostsPage = new MicroblogDisplayPage(
 				new AuthorFilter(sourceForFilters, node.getRemoteNodeAddress().publicKey), this);
-		final JPanel contactBook = new JPanel();
+        final ContactBookDisplayPage contactBookDisplayPage = new ContactBookDisplayPage(this);
+
 		final JPanel settings = new JPanel();
 
 		mentions.add(new JLabel("This is the mentions page"));
-		contactBook.add(new JLabel("This is the contact book page"));
 		settings.add(new JLabel("This is the settings page"));
 
         tabbedPane.addTab("All", unfilteredPostPage.getContent());
         tabbedPane.addTab("Following", followingPostPage.getContent());
         tabbedPane.addTab("Mentions", mentions);
         tabbedPane.addTab("My posts", myPostsPage.getContent());
-        tabbedPane.addTab("Contacts", contactBook);
+        tabbedPane.addTab("Contacts", contactBookDisplayPage.getContent());
         tabbedPane.addTab("Settings", settings);
 		/*
 		TODO: Decide icon or text
 		tabbedPane.addTab(null, createTabIcon("unfiltered.png"), unfilteredPostPage.getContent(), "All posts");
-		tabbedPane.addTab(null, createTabIcon("FOLLOWING.png"), followingPostPage.getContent(), "Following posts");
+		tabbedPane.addTab(null, createTabIcon("following.png"), followingPostPage.getContent(), "Following posts");
 		tabbedPane.addTab(null, createTabIcon("mentions.png"), mentions, "Mentions");
 		tabbedPane.addTab(null, createTabIcon("my-posts.png"), myPostsPage.getContent(), "My posts");
 		tabbedPane.addTab(null, createTabIcon("contact-book.png"), contactBook, "Contact book");

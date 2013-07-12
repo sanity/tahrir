@@ -31,7 +31,7 @@ public class IncomingMicroblogHandler {
 									final IdentityStore identityStore) {
 		this.mbsForBroadcast = mbsForBroadcast;
 		this.mbsForViewing = mbsForViewing;
-        this.identityStore=identityStore;
+        this.identityStore = identityStore;
 	}
 
 	public void handleInsertion(final Microblog mbForBroadcast) {

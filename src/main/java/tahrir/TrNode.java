@@ -65,7 +65,7 @@ public class TrNode {
 		this.config = config;
         this.identityStoreFile = new File(rootDirectory+System.getProperty("file.separator")+"id-store.json");
         this.identityStore = new IdentityStore(identityStoreFile);
-        this.identityStore.eventBusSetter(eventBus);
+        this.identityStore.setEventBus(eventBus);
 		privNodeIdFile = new File(rootDirectory, config.privateNodeId);
 		pubNodeIdFile = new File(rootDirectory, config.publicNodeId);
 		if (!privNodeIdFile.exists()) {
@@ -104,7 +104,7 @@ public class TrNode {
 		registerSessions();
 
 		if (config.peers.runBroadcast) {
-			mbClasses = new MicrobloggingClasses(this);
+			mbClasses = new MicrobloggingClasses(this, this.eventBus);
 		}
 	}
 
@@ -149,15 +149,14 @@ public class TrNode {
 	public static class MicrobloggingClasses {
 		public final MicroblogBroadcaster mbScheduler;
         public final IdentityStore identityStore;
-
 		public final ShortenedPublicKeyFinder spkFinder;
 		public final IncomingMicroblogHandler incomingMbHandler;
 		public final MicroblogOutbox mbsForBroadcast;
 		public final MicroblogsForViewing mbsForViewing;
 
-		public MicrobloggingClasses(final TrNode node) {
+		public MicrobloggingClasses(final TrNode node, final EventBus eventBus) {
             identityStore=new IdentityStore(getOrCreateFile(new File(node.rootDirectory, node.config.contacts)));
-
+            identityStore.setEventBus(eventBus);
 			spkFinder = new ShortenedPublicKeyFinder(
 					getOrCreateFile(new File(node.rootDirectory, node.config.publicKeyChars)));
 			mbsForBroadcast = new MicroblogOutbox();
