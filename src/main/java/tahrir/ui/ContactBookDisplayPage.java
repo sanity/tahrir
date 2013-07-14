@@ -23,9 +23,9 @@ public class ContactBookDisplayPage {
     public ContactBookDisplayPage(final TrMainWindow mainWindow) {
         eventBus = mainWindow.node.eventBus;
         tableModel = new ContactBookTableModel();
-        for (Map.Entry<UserIdentity, Set<String>> pairs : mainWindow.node.identityStore.labelsOfUser.entrySet()){
+        for (UserIdentity userIdentity: mainWindow.node.identityStore.labelsOfUser.keySet()){
             {
-                tableModel.addNewIdentity(pairs.getKey());
+                tableModel.addNewIdentity(userIdentity);
             }
         }
 
@@ -87,6 +87,7 @@ public class ContactBookDisplayPage {
             if(!(users.contains(identity))){
             users.add(identity);
             fireTableDataChanged();
+            this.fireTableRowsInserted(0, tableModel.getRowCount());
             }
         }
 

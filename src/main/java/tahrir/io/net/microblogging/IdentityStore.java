@@ -107,7 +107,7 @@ public class IdentityStore {
             labelsOfUser.put(identity, labels);
             logger.debug("New identity created and label added.");
             addIdentityToUsersWithNickname(identity);
-            eventBus.post(new IdentityModifiedEvent(identity, IdentityModifiedEvent.IdentityModificationType.ADD));
+
         }
         else{
                 logger.debug("Identity already exists");
@@ -163,7 +163,6 @@ public class IdentityStore {
             Set<String> labelSet = Sets.newHashSet();
             labelSet.add(label);
             labelsOfUser.put(identity, labelSet);
-            eventBus.post(new IdentityModifiedEvent(identity, IdentityModifiedEvent.IdentityModificationType.ADD));
         }
         else if(!(labelsOfUser.get(identity).contains(label))){
             labelsOfUser.get(identity).add(label);
@@ -202,7 +201,6 @@ public class IdentityStore {
             usersWithNickname.put(identity.getNick(), identitySet);
             logger.debug("Nick created and identity added.");
         }
-        eventBus.post(new IdentityModifiedEvent(identity, IdentityModifiedEvent.IdentityModificationType.ADD));
     }
 
     public void removeLabelFromIdentity(String label, UserIdentity identity){
