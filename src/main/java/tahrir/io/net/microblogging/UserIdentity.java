@@ -1,5 +1,8 @@
 package tahrir.io.net.microblogging;
 
+import com.google.common.base.Optional;
+
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 /**
@@ -10,10 +13,12 @@ public class UserIdentity {
 
     protected String nickName;
     protected RSAPublicKey pubKey;
+    protected Optional<RSAPrivateKey> pvtKey;
 
-    public UserIdentity(String nickName, RSAPublicKey pubKey) {
+    public UserIdentity(String nickName, RSAPublicKey pubKey, Optional<RSAPrivateKey> pvtKey) {
         this.nickName = nickName;
-        this.pubKey=pubKey;
+        this.pubKey = pubKey;
+        this.pvtKey = pvtKey;
     }
 
     public UserIdentity(){
@@ -43,7 +48,12 @@ public class UserIdentity {
     public String getNick(){
         return this.nickName;
     }
+
     public RSAPublicKey getPubKey() {
         return pubKey;
+    }
+
+    public  RSAPrivateKey getPvtKey(){
+        return pvtKey.get();
     }
 }
