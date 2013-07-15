@@ -1,5 +1,6 @@
 package tahrir.io.net.microblogging;
 
+import com.google.common.base.Optional;
 import nu.xom.ParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import tahrir.io.net.microblogging.microblogs.Microblog;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.Tuple2;
 
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
 
@@ -56,7 +58,7 @@ public class IncomingMicroblogHandler {
 		}
 		ParsedMicroblog parsedMb = new ParsedMicroblog(generalMbData, parser.getMentionsFound().keySet(),
 				parser.getParsedParts());
-        UserIdentity userIdentity=new UserIdentity(generalMbData.getAuthorNick(), generalMbData.getAuthorPubKey());
+        UserIdentity userIdentity=new UserIdentity(generalMbData.getAuthorNick(), generalMbData.getAuthorPubKey(), Optional.<RSAPrivateKey>absent());
 		addDiscoveredIdentities(new Tuple2<String, UserIdentity>(userIdentity.getNick(), userIdentity));
 		mbsForViewing.insert(parsedMb);
 		mbsForBroadcast.insert(mbForBroadcast);

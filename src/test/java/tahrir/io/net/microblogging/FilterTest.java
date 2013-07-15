@@ -1,5 +1,6 @@
 package tahrir.io.net.microblogging;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ import tahrir.tools.Tuple2;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 import java.util.SortedSet;
@@ -36,8 +38,8 @@ public class FilterTest {
 
 	@BeforeClass
 	public void setup() {
-        userA = new UserIdentity( "UserA", TrCrypto.createRsaKeyPair().a);
-        userB = new UserIdentity( "UserB", TrCrypto.createRsaKeyPair().a);
+        userA = new UserIdentity( "UserA", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
+        userB = new UserIdentity( "UserB", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
 
 
 		mbForUnfilteredOnly = TrUtils.TestUtils.getParsedMicroblog();

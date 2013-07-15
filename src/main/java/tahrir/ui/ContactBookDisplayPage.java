@@ -84,7 +84,7 @@ public class ContactBookDisplayPage {
         }
 
         public void addNewIdentity(UserIdentity identity) {
-            if(!(users.contains(identity))){
+            if(!(users.contains(identity)) && identity.getPvtKey()!=null){
             users.add(identity);
             fireTableDataChanged();
             this.fireTableRowsInserted(0, tableModel.getRowCount());

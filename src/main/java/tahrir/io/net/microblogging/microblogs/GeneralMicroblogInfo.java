@@ -1,7 +1,9 @@
 package tahrir.io.net.microblogging.microblogs;
 
+import com.google.common.base.Optional;
 import tahrir.io.net.microblogging.UserIdentity;
 
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 /**
@@ -82,7 +84,7 @@ public class GeneralMicroblogInfo {
 	}
 
     public UserIdentity getUserIdentity(){
-        return new UserIdentity(authorNick, authorPubKey);
+        return new UserIdentity(authorNick, authorPubKey, Optional.<RSAPrivateKey>absent());
     }
 
 	public long getTimeCreated() {

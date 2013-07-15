@@ -1,5 +1,6 @@
 package tahrir.ui;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import tahrir.TrConstants;
 import tahrir.TrNode;
@@ -11,6 +12,7 @@ import tahrir.io.net.microblogging.microblogs.Microblog;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.TrUtils;
 
+import java.security.interfaces.RSAPrivateKey;
 import java.util.SortedSet;
 
 public class GUITest {
@@ -35,8 +37,8 @@ public class GUITest {
 		  their unparsed form and later insert them as if they were from broadcast.
 		 */
 
-        UserIdentity user1=new UserIdentity("user1", TrCrypto.createRsaKeyPair().a);
-        UserIdentity user2=new UserIdentity("user2", TrCrypto.createRsaKeyPair().a);
+        UserIdentity user1=new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
+        UserIdentity user2=new UserIdentity("user2", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
 		node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.FOLLOWING, user1);
         node.mbClasses.identityStore.addIdentity(user2);
 		ParsedMicroblog fromRand = TrUtils.TestUtils.getParsedMicroblog();

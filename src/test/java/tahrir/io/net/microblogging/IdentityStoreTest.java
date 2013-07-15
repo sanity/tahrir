@@ -1,11 +1,13 @@
 package tahrir.io.net.microblogging;
 
+import com.google.common.base.Optional;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tahrir.TrConstants;
 import tahrir.io.crypto.TrCrypto;
 
 import java.io.File;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 /**
@@ -27,7 +29,7 @@ public class IdentityStoreTest {
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name1";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
-        UserIdentity identityOne=new UserIdentity(user1nick, user1Key);
+        UserIdentity identityOne=new UserIdentity(user1nick, user1Key, Optional.<RSAPrivateKey>absent());
         final String label= "Following";
 
         testStore.addIdentityWithLabel(label, identityOne);
@@ -42,7 +44,7 @@ public class IdentityStoreTest {
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
         RSAPublicKey user2Key = TrCrypto.createRsaKeyPair().a;
         final String user2nick = "name2";
-        UserIdentity identityTwo=new UserIdentity(user2nick, user2Key);
+        UserIdentity identityTwo=new UserIdentity(user2nick, user2Key, Optional.<RSAPrivateKey>absent());
 
 
 
@@ -59,7 +61,7 @@ public class IdentityStoreTest {
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name1";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
-        UserIdentity identityOne=new UserIdentity(user1nick, user1Key);
+        UserIdentity identityOne=new UserIdentity(user1nick, user1Key, Optional.<RSAPrivateKey>absent());
         final String label= "Following";
 
         testStore.addIdentityWithLabel(label, identityOne);
@@ -76,7 +78,7 @@ public class IdentityStoreTest {
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name2";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
-        UserIdentity identityTwo=new UserIdentity(user1nick, user1Key);
+        UserIdentity identityTwo=new UserIdentity(user1nick, user1Key, Optional.<RSAPrivateKey>absent());
         final String label= "Following";
 
         testStore.addIdentityWithLabel(label, identityTwo);
@@ -90,7 +92,7 @@ public class IdentityStoreTest {
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
         RSAPublicKey user2Key = TrCrypto.createRsaKeyPair().a;
         final String user2nick = "name2";
-        UserIdentity identityTwo=new UserIdentity(user2nick, user2Key);
+        UserIdentity identityTwo=new UserIdentity(user2nick, user2Key, Optional.<RSAPrivateKey>absent());
 
         testStore.addIdentityToUsersWithNickname(identityTwo);
         testStore.removeIdentityFromNick(identityTwo);
@@ -104,7 +106,7 @@ public class IdentityStoreTest {
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name2";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
-        UserIdentity identityTwo=new UserIdentity(user1nick, user1Key);
+        UserIdentity identityTwo=new UserIdentity(user1nick, user1Key, Optional.<RSAPrivateKey>absent());
         final String label= "Following";
 
         testStore.addIdentityWithLabel(label, identityTwo);
@@ -118,7 +120,7 @@ public class IdentityStoreTest {
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name1";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
-        UserIdentity identityOne=new UserIdentity(user1nick, user1Key);
+        UserIdentity identityOne=new UserIdentity(user1nick, user1Key, Optional.<RSAPrivateKey>absent());
 
         testStore.addIdentityToUsersWithNickname(identityOne);
         Assert.assertTrue(testStore.getUserIdentitiesStartingWith(boundingNick).contains(identityOne));
@@ -131,7 +133,7 @@ public class IdentityStoreTest {
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name1";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
-        UserIdentity identityOne=new UserIdentity(user1nick, user1Key);
+        UserIdentity identityOne=new UserIdentity(user1nick, user1Key, Optional.<RSAPrivateKey>absent());
 
         testStore.addIdentityToUsersWithNickname(identityOne);
         Assert.assertTrue(testStore.getIdentitiesWithNick(identityOne.getNick()).contains(identityOne));
@@ -142,7 +144,7 @@ public class IdentityStoreTest {
         File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
 
-        UserIdentity testUser2 = new UserIdentity("TestUser2", TrCrypto.createRsaKeyPair().a);
+        UserIdentity testUser2 = new UserIdentity("TestUser2", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
 
         testStore.addIdentityWithLabel("Friends", testUser2);
         testStore.addIdentityWithLabel("Friends", testUser2);
@@ -156,7 +158,7 @@ public class IdentityStoreTest {
        File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
        IdentityStore testStore=new IdentityStore(identityStoreTestFile);
 
-       UserIdentity testUser3 = new UserIdentity("TestUser3", TrCrypto.createRsaKeyPair().a);
+       UserIdentity testUser3 = new UserIdentity("TestUser3", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
        testStore.addIdentityWithLabel("Friends", testUser3);
        IdentityStore testStore2=new IdentityStore(identityStoreTestFile);
        Assert.assertTrue(testStore2.hasIdentityInIdStore(testUser3));
@@ -168,7 +170,7 @@ public class IdentityStoreTest {
         File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
 
-        UserIdentity testUser3 = new UserIdentity("TestUser3", TrCrypto.createRsaKeyPair().a);
+        UserIdentity testUser3 = new UserIdentity("TestUser3", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
         testStore.addIdentity(testUser3);
         Assert.assertTrue(testStore.hasIdentityInIdStore(testUser3));
         identityStoreTestFile.delete();
