@@ -56,4 +56,12 @@ public class UserIdentity {
     public  RSAPrivateKey getPvtKey(){
         return pvtKey.get();
     }
+
+    public boolean hasPvtKey(){
+        if (pvtKey.isPresent()){
+            return true;
+        }
+        else return false;
+    }
+
 }

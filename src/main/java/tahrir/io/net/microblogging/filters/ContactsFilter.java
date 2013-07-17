@@ -17,6 +17,6 @@ public class ContactsFilter extends MicroblogFilter {
 	@Override
 	public boolean passesFilter(final ParsedMicroblog parsedMb) {
         //compare author nick and their public keys
-        return identityStore.hasIdentityInLabel(parsedMb.getMbData().getUserIdentity());
+        return identityStore.hasIdentityInLabel(parsedMb.getMbData().getAuthor());
 	}
 }

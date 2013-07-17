@@ -67,7 +67,7 @@ public class MicroblogsForViewing {
 	}
 
 	private boolean shouldAddByReplacement(final ParsedMicroblog mb) {
-		return identityStore.hasIdentityInIdStore(mb.getMbData().getUserIdentity()) || isNewerThanLast(mb);
+		return identityStore.hasIdentityInIdStore(mb.getMbData().getAuthor()) || isNewerThanLast(mb);
 	}
 
 	private boolean isNewerThanLast(final ParsedMicroblog mb) {

@@ -13,8 +13,6 @@ import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.Tuple2;
 
 import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.Map;
 
 /**
  * Handles things to do with newly incoming microblogs.
@@ -52,7 +50,7 @@ public class IncomingMicroblogHandler {
 			return;
 		}
 		// the microblog has now passed all the requirements with parsing and otherData constraints
-		if (identityStore.hasIdentityInIdStore(generalMbData.getUserIdentity())) {
+		if (identityStore.hasIdentityInIdStore(generalMbData.getAuthor())) {
 			// a better priority if they're one of your contacts
 			mbForBroadcast.priority -= TrConstants.CONTACT_PRIORITY_INCREASE;
 		}

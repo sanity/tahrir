@@ -83,7 +83,7 @@ public class GeneralMicroblogInfo {
 		return authorPubKey;
 	}
 
-    public UserIdentity getUserIdentity(){
+    public UserIdentity getAuthor(){
         return new UserIdentity(authorNick, authorPubKey, Optional.<RSAPrivateKey>absent());
     }
 
