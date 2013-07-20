@@ -49,7 +49,9 @@ public class ContactBookDisplayPage {
     @Subscribe
     public void identityModified(IdentityModifiedEvent event){
         if(event.type.equals(IdentityModifiedEvent.IdentityModificationType.ADD)){
+            if(!event.identity.hasPvtKey()){
                 tableModel.addNewIdentity(event.identity);
+            }
         }
         else{
             tableModel.removeIdentity(event.identity);
@@ -86,7 +88,6 @@ public class ContactBookDisplayPage {
         public void addNewIdentity(UserIdentity identity) {
             if(!(users.contains(identity)) && !(identity.hasPvtKey())){
             users.add(identity);
-            fireTableDataChanged();
             this.fireTableRowsInserted(0, tableModel.getRowCount());
             }
         }

@@ -39,8 +39,10 @@ public class GUITest {
 
         UserIdentity user1=new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
         UserIdentity user2=new UserIdentity("user2", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
+        UserIdentity user3 = new UserIdentity("User 3", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
 		node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.FOLLOWING, user1);
         node.mbClasses.identityStore.addIdentity(user2);
+        node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user3);
 		ParsedMicroblog fromRand = TrUtils.TestUtils.getParsedMicroblog();
 		ParsedMicroblog fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);
 		ParsedMicroblog fromUser2 = TrUtils.TestUtils.getParsedMicroblog(user2, user1);

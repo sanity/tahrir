@@ -71,18 +71,16 @@ public class TrMainWindow {
 		final MicroblogDisplayPage myPostsPage = new MicroblogDisplayPage(
 				new AuthorFilter(sourceForFilters, node.getRemoteNodeAddress().publicKey), this);
         final ContactBookDisplayPage contactBookDisplayPage = new ContactBookDisplayPage(this);
-
-		final JPanel settings = new JPanel();
+        final SettingsDisplayPage settingsDisplayPage = new SettingsDisplayPage(this);
 
 		mentions.add(new JLabel("This is the mentions page"));
-		settings.add(new JLabel("This is the settings page"));
 
         tabbedPane.addTab("All", unfilteredPostPage.getContent());
         tabbedPane.addTab("Following", followingPostPage.getContent());
         tabbedPane.addTab("Mentions", mentions);
         tabbedPane.addTab("My posts", myPostsPage.getContent());
         tabbedPane.addTab("Contacts", contactBookDisplayPage.getContent());
-        tabbedPane.addTab("Settings", settings);
+        tabbedPane.addTab("Settings", settingsDisplayPage.getContent());
 		/*
 		TODO: Decide icon or text
 		tabbedPane.addTab(null, createTabIcon("unfiltered.png"), unfilteredPostPage.getContent(), "All posts");

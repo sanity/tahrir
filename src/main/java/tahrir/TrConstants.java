@@ -55,6 +55,8 @@ public class TrConstants {
 
     public static final String FOLLOWING = "FOLLOWING";
 
+    public static final String OWN = "Own";
+
     public static boolean add = true;
 	/**
 	 * Records constants to do with the microblog XML format.
