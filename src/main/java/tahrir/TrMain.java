@@ -5,6 +5,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.tools.TrUtils;
+import tahrir.ui.TrMainWindow;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +28,23 @@ public class TrMain {
 			}
 		}
 		final TrMainConfig config = readConfiguration(new File(rootDirectory, options.configFile));
-	}
+
+        try {
+            final TrNode node = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
+            if(config.startGui){
+                final TrMainWindow mainWindow = new TrMainWindow(node);
+                mainWindow.getContent().revalidate();
+            }
+            else{
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+
+
+    }
 
 	private static CommandLineOptions readCommandLineOpts(final String[] args) {
 		final CommandLineOptions commandLineOptions = new CommandLineOptions();
