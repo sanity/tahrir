@@ -7,7 +7,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
-import tahrir.TrConfig;
+import tahrir.TrNodeConfig;
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.microblogging.MicroblogParser.MentionPart;
@@ -51,8 +51,9 @@ public class TrUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> T parseJson(final File jsonFile, final Type type) throws JsonParseException, IOException {
 		final FileReader json = new FileReader(jsonFile);
-		json.close();
-		return (T) gson.<Object>fromJson(json, type);
+		T ret = (T) gson.<Object>fromJson(json, type);
+        json.close();
+        return ret;
 	}
 
 	public static <T> T parseJson(final String json, final Class<T> type) throws JsonParseException {
@@ -92,7 +93,7 @@ public class TrUtils {
 				final int minPeers, final int maxPeers) throws Exception {
 			final File nodeDir = createTempDirectory();
 
-			final TrConfig nodeConfig = new TrConfig();
+			final TrNodeConfig nodeConfig = new TrNodeConfig();
 
 			nodeConfig.udp.listenPort = port;
 			nodeConfig.localHostName = "127.0.0.1";

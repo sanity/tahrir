@@ -41,7 +41,7 @@ public class TrNode {
 
 	Logger logger = LoggerFactory.getLogger(TrNode.class);
 
-	public final TrConfig config;
+	public final TrNodeConfig config;
 
 	public File privNodeIdFile;
 	public File pubNodeIdFile;
@@ -59,7 +59,7 @@ public class TrNode {
 
     public IdentityStore identityStore;
 
-	public TrNode(final File rootDirectory, final TrConfig config)
+	public TrNode(final File rootDirectory, final TrNodeConfig config)
 			throws SocketException {
 		this.rootDirectory = rootDirectory;
 		this.config = config;

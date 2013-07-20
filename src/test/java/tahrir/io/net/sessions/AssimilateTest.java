@@ -15,7 +15,7 @@ public class AssimilateTest {
 	public void twoPeerTest() throws Exception {
 		System.out.println("Joiner (7644) will assimilate to seed (7643)");
 
-		final TrConfig seedConfig = new TrConfig();
+		final TrNodeConfig seedConfig = new TrNodeConfig();
 		seedConfig.capabilities.allowsAssimilation = true;
 		seedConfig.capabilities.allowsUnsolicitiedInbound = true;
 		seedConfig.peers.runMaintainance = false;
@@ -28,7 +28,7 @@ public class AssimilateTest {
 
 		final File joinerDir = TestUtils.createTempDirectory();
 
-		final TrConfig joinerConfig = new TrConfig();
+		final TrNodeConfig joinerConfig = new TrNodeConfig();
 
 		joinerConfig.udp.listenPort = 7644;
 		joinerConfig.localHostName = "localhost";

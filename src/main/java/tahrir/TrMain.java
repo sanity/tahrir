@@ -1,11 +1,13 @@
 package tahrir;
 
-import java.io.*;
-
-import org.kohsuke.args4j.*;
-import org.slf4j.*;
-
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tahrir.tools.TrUtils;
+
+import java.io.File;
+import java.io.IOException;
 
 public class TrMain {
 
@@ -24,7 +26,7 @@ public class TrMain {
 				System.exit(-1);
 			}
 		}
-		final TrConfig config = readConfiguration(new File(rootDirectory, options.configFile));
+		final TrMainConfig config = readConfiguration(new File(rootDirectory, options.configFile));
 	}
 
 	private static CommandLineOptions readCommandLineOpts(final String[] args) {
@@ -52,15 +54,15 @@ public class TrMain {
 
 	public static class CommandLineOptions {
 		public boolean help = false;
-		public String dir = System.getProperty("user.home") + System.getProperty("path.separator") + "tahrir";
+		public String dir = System.getProperty("user.home") + "/tahrir";
 		public String configFile = "tahrir.json";
 	}
 
-	private static TrConfig readConfiguration(final File file) {
-		TrConfig config = new TrConfig();
+	private static TrMainConfig readConfiguration(final File file) {
+        TrMainConfig config = new TrMainConfig();
 		if (file.exists()) {
 			try {
-				config = TrUtils.parseJson(file, TrConfig.class);
+				config = TrUtils.parseJson(file, TrMainConfig.class);
 			} catch (final Exception e) {
 				logger.error("Couldn't read configuration file: " + file, e);
 				System.exit(-1);
@@ -75,4 +77,10 @@ public class TrMain {
 
 		return config;
 	}
+
+    public static class TrMainConfig {
+        public boolean startGui = true;
+
+        public TrNodeConfig node = new TrNodeConfig();
+    }
 }

@@ -18,7 +18,7 @@ public class LongTests {
 	}
 
 	public void start() throws Exception {
-		final TrConfig seedConfig = new TrConfig();
+		final TrNodeConfig seedConfig = new TrNodeConfig();
 		seedConfig.capabilities.allowsAssimilation = true;
 		seedConfig.capabilities.allowsUnsolicitiedInbound = true;
 		seedConfig.peers.assimilate = false;
@@ -38,7 +38,7 @@ public class LongTests {
 			Thread.sleep(500);
 			final File joinerDir = TestUtils.createTempDirectory();
 
-			final TrConfig joinerConfig = new TrConfig();
+			final TrNodeConfig joinerConfig = new TrNodeConfig();
 
 			joinerConfig.udp.listenPort = 20050+x;
 			joinerConfig.localHostName = "127.0.0.1";

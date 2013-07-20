@@ -4,7 +4,7 @@ import tahrir.io.net.*;
 import tahrir.io.net.TrPeerManager.Capabilities;
 import tahrir.io.net.udpV1.UdpNetworkInterface.UNIConfig;
 
-public class TrConfig {
+public class TrNodeConfig {
 	public String privateNodeId = "myprivnodeid.dat";
 	public String publicNodeId = "mypubnodeid.dat";
 	public String publicNodeIdsDir = "publicPeers";

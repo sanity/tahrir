@@ -7,7 +7,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import tahrir.TrConfig;
+import tahrir.TrNodeConfig;
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.sessions.Priority;
@@ -51,10 +51,10 @@ public class TrNetTest {
 
 		final TrNetworkInterface iface2 = new UdpNetworkInterface(udpNetIfaceConf2, kp2);
 
-		final TrConfig trCfg1 = new TrConfig();
+		final TrNodeConfig trCfg1 = new TrNodeConfig();
 		setTrConfig(trCfg1);
 
-		final TrConfig trCfg2 = new TrConfig();
+		final TrNodeConfig trCfg2 = new TrNodeConfig();
 		setTrConfig(trCfg2);
 
 		final TrNode node1 = new TrNode(TestUtils.createTempDirectory(), trCfg1);
@@ -142,7 +142,7 @@ public class TrNetTest {
 		Assert.assertTrue(testDone);
 	}
 
-	private void setTrConfig(TrConfig config) {
+	private void setTrConfig(TrNodeConfig config) {
 		// we are testing basic networking features, not higher level p2p stuff
 		config.peers.assimilate = false;
 		config.peers.runMaintainance = false;
