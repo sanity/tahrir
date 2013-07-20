@@ -1,4 +1,4 @@
-package tahrir.swingsUI;
+package tahrir.swingUI;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
