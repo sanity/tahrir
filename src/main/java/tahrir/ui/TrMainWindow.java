@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.TrNode;
+import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.filters.AuthorFilter;
 import tahrir.io.net.microblogging.filters.ContactsFilter;
 import tahrir.io.net.microblogging.filters.Unfiltered;
@@ -20,6 +21,7 @@ public class TrMainWindow {
 	public static Logger logger = LoggerFactory.getLogger(TrMainWindow.class.getName());
 
 	public TrNode node;
+    public UserIdentity currentIdentity;
 
 	private final JFrame frame;
 	private final JPanel contentPanel;
@@ -61,6 +63,14 @@ public class TrMainWindow {
 		tabbedPane.setSelectedIndex(newTabIndex);
 		tabbedPane.setTabComponentAt(newTabIndex, new ClosableTabComponent(tabName));
 	}
+
+    public void setCurrentIdentity(String nick){
+        for(UserIdentity identity :node.identityStore.getIdentitiesWithNick(nick)){
+            if(identity.hasPvtKey() && identity.getNick().equals(nick)){
+                currentIdentity = identity;
+            }
+        }
+    }
 
 	private void addTabs(final SortedSet<ParsedMicroblog> sourceForFilters) {
 		final MicroblogDisplayPage unfilteredPostPage = new MicroblogDisplayPage(
