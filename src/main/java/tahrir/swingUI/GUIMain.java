@@ -52,6 +52,7 @@ public class GUIMain {
             ParsedMicroblog fromRand = TrUtils.TestUtils.getParsedMicroblog();
             ParsedMicroblog fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);
             ParsedMicroblog fromUser2 = TrUtils.TestUtils.getParsedMicroblog(user2, user1);
+            ParsedMicroblog fromUser3 = TrUtils.TestUtils.getParsedMicroblog(user3);
             SortedSet<ParsedMicroblog> parsedMbs = Sets.newTreeSet(new MicroblogsForViewing.ParsedMicroblogTimeComparator());
             parsedMbs.add(fromRand);
             parsedMbs.add(fromUser1);
@@ -60,7 +61,24 @@ public class GUIMain {
             for (ParsedMicroblog parsedMicroblog : parsedMbs) {
                 String xmlMessage = MicroblogParser.getXML(parsedMicroblog.getParsedParts());
                 Microblog microblog = new Microblog(xmlMessage, parsedMicroblog.getMbData());
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
                 node.mbClasses.incomingMbHandler.handleInsertion(microblog);
             }
+
+            //checking to see if eventBus is working
+
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+            String xmlMessage = MicroblogParser.getXML(fromUser3.getParsedParts());
+            Microblog microblog = new Microblog(xmlMessage, fromUser3.getMbData());
+            node.mbClasses.incomingMbHandler.handleInsertion(microblog);
+
         }
 }
