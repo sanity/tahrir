@@ -8,6 +8,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import tahrir.io.net.microblogging.filters.FilterChangeListener;
 import tahrir.io.net.microblogging.filters.MicroblogFilter;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
@@ -17,12 +19,14 @@ import com.google.common.collect.Lists;
 public class MicroblogDisplayPage implements FilterChangeListener {
 	private final JComponent content;
 	private final MicroblogTableModel tableModel;
+    private final EventBus eventBus;
+    final ArrayList<ParsedMicroblog> initialMicroblogs;
 
 	public MicroblogDisplayPage(final MicroblogFilter filter, final TrMainWindow mainWindow) {
-		// TODO: a microblog may be received while this is being done and hence be lost we
-		// need a more advanced notification system. Google's event bus may handle this.F
-		final ArrayList<ParsedMicroblog> initialMicroblogs = filter.amInterestedInMicroblogs(this);
+
+        eventBus = mainWindow.node.eventBus;
 		tableModel = new MicroblogTableModel();
+        initialMicroblogs = filter.amInterestedInMicroblogs(this);
 		for (final ParsedMicroblog parsedMb : initialMicroblogs) {
 			tableModel.addNewMicroblog(parsedMb);
 		}
@@ -41,7 +45,23 @@ public class MicroblogDisplayPage implements FilterChangeListener {
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setViewportView(table);
 		content = scrollPane;
+        eventBus.register(this);
 	}
+
+    @Subscribe
+    public void modifyMicroblogsDisplay(MicroblogsModifiedEvent event){
+        if(event.type.equals(MicroblogsModifiedEvent.ModificationType.ADD)){
+            if(!initialMicroblogs.contains(event.parsedMb)){
+                tableModel.addNewMicroblog(event.parsedMb);
+            }
+        }
+        else{
+            if(initialMicroblogs.contains(event.parsedMb)){
+                tableModel.removeMicroblog(event.parsedMb);
+            }
+        }
+    }
+
 
 	@Override
 	public void filterChange(final FilterChangeEvent event) {

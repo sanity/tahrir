@@ -29,7 +29,7 @@ public class IdentityStore {
 
     private TreeMap<String, Set<UserIdentity>> usersWithNickname = Maps.newTreeMap();
 
-    private EventBus eventBus;
+    public EventBus eventBus;
 
 
     public IdentityStore(File identityStoreFile){

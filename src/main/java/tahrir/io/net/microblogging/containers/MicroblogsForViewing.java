@@ -7,6 +7,7 @@ import tahrir.TrConstants;
 import tahrir.io.net.microblogging.IdentityStore;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.TrUtils;
+import tahrir.ui.MicroblogsModifiedEvent;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,11 +40,14 @@ public class MicroblogsForViewing {
 
 		if (!isFull()) {
 			addToParsed(mb);
+            identityStore.eventBus.post(new MicroblogsModifiedEvent(mb, MicroblogsModifiedEvent.ModificationType.ADD));
 			inserted = true;
 		} else if (shouldAddByReplacement(mb)) {
 			// make room
 			removeFromParsed(parsedMicroblogs.last());
+            identityStore.eventBus.post(new MicroblogsModifiedEvent(mb, MicroblogsModifiedEvent.ModificationType.REMOVE));
 			addToParsed(mb);
+            identityStore.eventBus.post(new MicroblogsModifiedEvent(mb, MicroblogsModifiedEvent.ModificationType.ADD));
 			inserted = true;
 			logger.info("Adding a microblog for viewing by replacement");
 		}
@@ -56,14 +60,12 @@ public class MicroblogsForViewing {
 
 	private void removeFromParsed(final ParsedMicroblog mb) {
 		parsedMicroblogs.remove(mb);
-		// also needs to be removed from listeners (filters) to avoid wasting memory
-		TrUtils.eventBus.post(new MicroblogRemovalEvent(mb));
+        identityStore.eventBus.post(new MicroblogsModifiedEvent(mb, MicroblogsModifiedEvent.ModificationType.REMOVE));
 	}
 
 	private void addToParsed(final ParsedMicroblog mb) {
 		parsedMicroblogs.add(mb);
-		// post event to listeners i.e filters
-		TrUtils.eventBus.post(new MicroblogAddedEvent(mb));
+        identityStore.eventBus.post(new MicroblogsModifiedEvent(mb, MicroblogsModifiedEvent.ModificationType.ADD));
 	}
 
 	private boolean shouldAddByReplacement(final ParsedMicroblog mb) {

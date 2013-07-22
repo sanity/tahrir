@@ -17,7 +17,7 @@ import java.util.ArrayList;
  */
 public class SettingsDisplayPage {
     private final JComponent content;
-    EventBus eventBus;
+    private final EventBus eventBus;
     DefaultComboBoxModel model = new DefaultComboBoxModel();
 
     public SettingsDisplayPage(final TrMainWindow mainWindow) {
