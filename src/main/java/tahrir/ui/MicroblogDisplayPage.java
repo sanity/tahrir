@@ -1,35 +1,28 @@
 package tahrir.ui;
 
-import java.awt.*;
-import java.util.ArrayList;
-
-import javax.swing.JComponent;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.AbstractTableModel;
-
+import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import tahrir.io.net.microblogging.filters.FilterChangeListener;
-import tahrir.io.net.microblogging.filters.MicroblogFilter;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
-import com.google.common.collect.Lists;
+import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.SortedSet;
 
-public class MicroblogDisplayPage implements FilterChangeListener {
+public class MicroblogDisplayPage {
 	private final JComponent content;
 	private final MicroblogTableModel tableModel;
     private final EventBus eventBus;
-    final ArrayList<ParsedMicroblog> initialMicroblogs;
+    private final Predicate<ParsedMicroblog> filter;
 
-	public MicroblogDisplayPage(final MicroblogFilter filter, final TrMainWindow mainWindow) {
-
+    public MicroblogDisplayPage(final Predicate<ParsedMicroblog> filter, final TrMainWindow mainWindow) {
+        this.filter = filter;
         eventBus = mainWindow.node.eventBus;
 		tableModel = new MicroblogTableModel();
-        initialMicroblogs = filter.amInterestedInMicroblogs(this);
-		for (final ParsedMicroblog parsedMb : initialMicroblogs) {
-			tableModel.addNewMicroblog(parsedMb);
-		}
+
 		final JTable table = new JTable(tableModel);
 		final MicroblogRenderer renderer = new MicroblogRenderer(mainWindow);
 		// will allow it to fill entire scroll pane
@@ -45,33 +38,26 @@ public class MicroblogDisplayPage implements FilterChangeListener {
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setViewportView(table);
 		content = scrollPane;
-        eventBus.register(this);
-	}
 
-    @Subscribe
-    public void modifyMicroblogsDisplay(MicroblogsModifiedEvent event){
-        if(event.type.equals(MicroblogsModifiedEvent.ModificationType.ADD)){
-            if(!initialMicroblogs.contains(event.parsedMb)){
-                tableModel.addNewMicroblog(event.parsedMb);
-            }
-        }
-        else{
-            if(initialMicroblogs.contains(event.parsedMb)){
-                tableModel.removeMicroblog(event.parsedMb);
+        eventBus.register(this);
+
+        final SortedSet<ParsedMicroblog> existingMicroblogs = mainWindow.node.mbClasses.mbsForViewing.getMicroblogSet();
+
+        for (ParsedMicroblog parsedMicroblog : existingMicroblogs) {
+            if (filter.apply(parsedMicroblog)) {
+                tableModel.addNewMicroblog(parsedMicroblog);
             }
         }
     }
 
-
-	@Override
-	public void filterChange(final FilterChangeEvent event) {
-		final ParsedMicroblog parsedMb = event.mb;
-		if (event.removal) {
-			tableModel.removeMicroblog(parsedMb);
-		} else { // i.e added
-			tableModel.addNewMicroblog(parsedMb);
-		}
-	}
+    @Subscribe
+    public void modifyMicroblogsDisplay(MicroblogsModifiedEvent event){
+        if(event.type.equals(MicroblogsModifiedEvent.ModificationType.ADD)){
+            if(filter.apply(event.parsedMb)){
+                tableModel.addNewMicroblog(event.parsedMb);
+            }
+        }
+    }
 
 	public JComponent getContent() {
 		return content;
@@ -80,8 +66,10 @@ public class MicroblogDisplayPage implements FilterChangeListener {
 	@SuppressWarnings("serial")
 	private class MicroblogTableModel extends AbstractTableModel {
 		private final ArrayList<ParsedMicroblog> microblogs;
+        // TODO: Use a separate Set so that we can efficiently check whether
+        // microblogs are being added more than once
 
-		public MicroblogTableModel() {
+  		public MicroblogTableModel() {
 			microblogs = Lists.newArrayList();
 		}
 

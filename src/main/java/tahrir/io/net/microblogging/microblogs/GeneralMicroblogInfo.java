@@ -14,6 +14,7 @@ import java.security.interfaces.RSAPublicKey;
 
 public class GeneralMicroblogInfo {
 	private String languageCode;
+    // TODO: Use UserIdentity here
 	private String authorNick;
 	private RSAPublicKey authorPubKey;
 	private long timeCreated;
