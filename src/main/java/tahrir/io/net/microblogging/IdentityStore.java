@@ -13,6 +13,7 @@ import tahrir.ui.IdentityModifiedEvent;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 
 /**
@@ -327,6 +328,17 @@ public class IdentityStore {
         else{
             return Collections.emptySet();
         }
+    }
+
+    public UserIdentity getIdentitiesWithPubKey(RSAPublicKey authorKey) {
+        for( Map.Entry<String, Set<UserIdentity>> entry: usersWithNickname.entrySet()){
+            for(UserIdentity identity: entry.getValue()){
+                if (identity.getPubKey().equals(authorKey)){
+                    return identity;
+                }
+            }
+        }
+        return null;
     }
 
     private static class NickNameComparator implements Comparator<UserIdentity> {

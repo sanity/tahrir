@@ -7,7 +7,7 @@ import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.filters.AuthorFilter;
-import tahrir.io.net.microblogging.filters.ContactsFilter;
+import tahrir.io.net.microblogging.filters.FollowingFilter;
 import tahrir.io.net.microblogging.filters.Unfiltered;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
@@ -36,7 +36,7 @@ public class TrMainWindow {
 		tabbedPane = new JTabbedPane();
 		tabbedPane.setPreferredSize(new Dimension(TrConstants.GUI_WIDTH_PX, TrConstants.GUI_HEIGHT_PX - 120));
 		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-		addTabs(node.mbClasses.mbsForViewing.getMicroblogSet());
+		addTabs();
 		contentPanel.add(tabbedPane, "wrap");
 
 		final JTextPane newPostPane = new JTextPane();
@@ -72,14 +72,14 @@ public class TrMainWindow {
         }
     }
 
-	private void addTabs(final SortedSet<ParsedMicroblog> sourceForFilters) {
+	private void addTabs() {
 		final MicroblogDisplayPage unfilteredPostPage = new MicroblogDisplayPage(
-				new Unfiltered(sourceForFilters), this);
+				new Unfiltered(), this);
 		final MicroblogDisplayPage followingPostPage = new MicroblogDisplayPage(
-				new ContactsFilter(sourceForFilters, node.mbClasses.identityStore), this);
+				new FollowingFilter(this.node.identityStore.getIdentitiesWithLabel(TrConstants.FOLLOWING)),this);
 		final JPanel mentions = new JPanel();
 		final MicroblogDisplayPage myPostsPage = new MicroblogDisplayPage(
-				new AuthorFilter(sourceForFilters, node.getRemoteNodeAddress().publicKey), this);
+				new AuthorFilter(this.node.identityStore.getIdentitiesWithLabel(TrConstants.OWN)), this);
         final ContactBookDisplayPage contactBookDisplayPage = new ContactBookDisplayPage(this);
         final SettingsDisplayPage settingsDisplayPage = new SettingsDisplayPage(this);
 

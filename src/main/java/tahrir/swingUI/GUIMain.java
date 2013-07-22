@@ -61,21 +61,10 @@ public class GUIMain {
             for (ParsedMicroblog parsedMicroblog : parsedMbs) {
                 String xmlMessage = MicroblogParser.getXML(parsedMicroblog.getParsedParts());
                 Microblog microblog = new Microblog(xmlMessage, parsedMicroblog.getMbData());
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                }
                 node.mbClasses.incomingMbHandler.handleInsertion(microblog);
             }
 
             //checking to see if eventBus is working
-
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            }
             String xmlMessage = MicroblogParser.getXML(fromUser3.getParsedParts());
             Microblog microblog = new Microblog(xmlMessage, fromUser3.getMbData());
             node.mbClasses.incomingMbHandler.handleInsertion(microblog);
