@@ -40,14 +40,11 @@ public class MicroblogsForViewing {
 
 		if (!isFull()) {
 			addToParsed(mb);
-            identityStore.eventBus.post(new MicroblogsModifiedEvent(mb, MicroblogsModifiedEvent.ModificationType.ADD));
 			inserted = true;
 		} else if (shouldAddByReplacement(mb)) {
 			// make room
 			removeFromParsed(parsedMicroblogs.last());
-            identityStore.eventBus.post(new MicroblogsModifiedEvent(mb, MicroblogsModifiedEvent.ModificationType.REMOVE));
 			addToParsed(mb);
-            identityStore.eventBus.post(new MicroblogsModifiedEvent(mb, MicroblogsModifiedEvent.ModificationType.ADD));
 			inserted = true;
 			logger.info("Adding a microblog for viewing by replacement");
 		}
