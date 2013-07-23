@@ -5,9 +5,9 @@ import com.google.common.collect.Sets;
 import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
-import tahrir.io.net.microblogging.MicroblogParser;
+import tahrir.io.net.microblogging.BroadcastMessageParser;
 import tahrir.io.net.microblogging.UserIdentity;
-import tahrir.io.net.microblogging.containers.MicroblogInbox;
+import tahrir.io.net.microblogging.containers.BroadcastMessageInbox;
 import tahrir.io.net.microblogging.microblogs.Microblog;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.TrUtils;
@@ -53,19 +53,19 @@ public class GUIMain {
             ParsedMicroblog fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);
             ParsedMicroblog fromUser2 = TrUtils.TestUtils.getParsedMicroblog(user2, user1);
             ParsedMicroblog fromUser3 = TrUtils.TestUtils.getParsedMicroblog(user3);
-            SortedSet<ParsedMicroblog> parsedMbs = Sets.newTreeSet(new MicroblogInbox.ParsedMicroblogTimeComparator());
+            SortedSet<ParsedMicroblog> parsedMbs = Sets.newTreeSet(new BroadcastMessageInbox.ParsedMicroblogTimeComparator());
             parsedMbs.add(fromRand);
             parsedMbs.add(fromUser1);
             parsedMbs.add(fromUser2);
 
             for (ParsedMicroblog parsedMicroblog : parsedMbs) {
-                String xmlMessage = MicroblogParser.getXML(parsedMicroblog.getParsedParts());
+                String xmlMessage = BroadcastMessageParser.getXML(parsedMicroblog.getParsedParts());
                 Microblog microblog = new Microblog(xmlMessage, parsedMicroblog.getMbData());
                 node.mbClasses.incomingMbHandler.handleInsertion(microblog);
             }
 
             //checking to see if eventBus is working
-            String xmlMessage = MicroblogParser.getXML(fromUser3.getParsedParts());
+            String xmlMessage = BroadcastMessageParser.getXML(fromUser3.getParsedParts());
             Microblog microblog = new Microblog(xmlMessage, fromUser3.getMbData());
             node.mbClasses.incomingMbHandler.handleInsertion(microblog);
 

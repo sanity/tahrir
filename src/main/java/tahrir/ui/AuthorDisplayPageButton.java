@@ -1,6 +1,5 @@
 package tahrir.ui;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.filters.AuthorFilter;
@@ -10,7 +9,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Set;
 
 /**
- * Represents a button that, when clicked, will create a tab which will display a MicroblogDisplayPage with an author's
+ * Represents a button that, when clicked, will create a tab which will display a BroadcastMessageDisplayPage with an author's
  * microblogs.
  * 
  * @author Kieran Donegan <kdonegan.92@gmail.com>
@@ -34,7 +33,7 @@ public class AuthorDisplayPageButton extends TabCreateButton {
 	public void actionPerformed(final ActionEvent arg0) {
         final Set<UserIdentity> authors = Sets.newHashSet();
         authors.add(authorIdentity);
-		final MicroblogDisplayPage mbDisplayPage = new MicroblogDisplayPage(new AuthorFilter(authors), mainWindow);
+		final BroadcastMessageDisplayPage mbDisplayPage = new BroadcastMessageDisplayPage(new AuthorFilter(authors), mainWindow);
 		setContents(mbDisplayPage.getContent());
 		super.actionPerformed(arg0);
 	}

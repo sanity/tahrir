@@ -3,8 +3,8 @@ package tahrir.io.net.microblogging.microblogs;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedMultiset;
 import com.google.common.collect.Sets;
-import tahrir.io.net.microblogging.MicroblogParser.MentionPart;
-import tahrir.io.net.microblogging.MicroblogParser.ParsedPart;
+import tahrir.io.net.microblogging.BroadcastMessageParser.MentionPart;
+import tahrir.io.net.microblogging.BroadcastMessageParser.ParsedPart;
 
 import java.security.interfaces.RSAPublicKey;
 import java.util.Set;

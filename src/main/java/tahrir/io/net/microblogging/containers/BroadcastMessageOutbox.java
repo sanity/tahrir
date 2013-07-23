@@ -7,11 +7,11 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-public class MicroblogOutbox {
+public class BroadcastMessageOutbox {
 	private final PriorityQueue<Microblog> outbox;
 	private final Set<Integer> seen;
 
-	public MicroblogOutbox() {
+	public BroadcastMessageOutbox() {
 		outbox = new PriorityQueue<Microblog>(100, new MicroblogPriorityComparator());
 		seen = Sets.newLinkedHashSet();
 	}

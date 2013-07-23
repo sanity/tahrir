@@ -15,10 +15,10 @@ import java.awt.*;
  * 
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
-public class MicroblogRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor {
+public class BroadcastMessageRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor {
 	private final TrMainWindow mainWindow;
 
-	public MicroblogRenderer(final TrMainWindow mainWindow) {
+	public BroadcastMessageRenderer(final TrMainWindow mainWindow) {
 		this.mainWindow = mainWindow;
 	}
 
@@ -26,7 +26,7 @@ public class MicroblogRenderer extends AbstractCellEditor implements TableCellRe
 	public Component getTableCellRendererComponent(final JTable table, final Object value,
 			final boolean isSelected, final boolean hasFocus, final int row, final int column) {
 		final ParsedMicroblog parsedMb = (ParsedMicroblog) value;
-		final MicroblogPostPanel panel = new MicroblogPostPanel(parsedMb, mainWindow);
+		final BroadcastMessagePostPanel panel = new BroadcastMessagePostPanel(parsedMb, mainWindow);
 
 		return panel.getContent();
 	}
@@ -40,7 +40,7 @@ public class MicroblogRenderer extends AbstractCellEditor implements TableCellRe
 	public Component getTableCellEditorComponent(final JTable table, final Object value,
 			final boolean isSelected, final int row, final int column) {
 		final ParsedMicroblog parsedMb = (ParsedMicroblog) value;
-		final MicroblogPostPanel panel = new MicroblogPostPanel(parsedMb, mainWindow);
+		final BroadcastMessagePostPanel panel = new BroadcastMessagePostPanel(parsedMb, mainWindow);
 		return panel.getContent();
 	}
 }

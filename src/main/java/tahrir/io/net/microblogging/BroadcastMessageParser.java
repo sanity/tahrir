@@ -22,8 +22,8 @@ import static tahrir.TrConstants.FormatInfo.*;
  *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
-public class MicroblogParser {
-	private static final Logger logger = LoggerFactory.getLogger(MicroblogParser.class);
+public class BroadcastMessageParser {
+	private static final Logger logger = LoggerFactory.getLogger(BroadcastMessageParser.class);
 
 	private final SortedMultiset<ParsedPart> parsedParts = TreeMultiset.create(new PositionComparator());
 	/**
@@ -31,7 +31,7 @@ public class MicroblogParser {
 	 */
 	private final Map<RSAPublicKey, String> mentionsFound = Maps.newHashMap();
 
-	public MicroblogParser(String messageToParse) throws ParsingException {
+	public BroadcastMessageParser(String messageToParse) throws ParsingException {
 		parseMessage(messageToParse);
 	}
 

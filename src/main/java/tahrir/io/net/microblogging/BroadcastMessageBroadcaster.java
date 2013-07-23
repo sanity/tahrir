@@ -16,13 +16,13 @@ import java.util.Set;
  *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
-public class MicroblogBroadcaster implements Runnable {
-	private static Logger log = LoggerFactory.getLogger(MicroblogBroadcaster.class);
+public class BroadcastMessageBroadcaster implements Runnable {
+	private static Logger log = LoggerFactory.getLogger(BroadcastMessageBroadcaster.class);
 
 	private final TrNode node;
     private boolean disabled = false;
 
-    public MicroblogBroadcaster(final TrNode node) {
+    public BroadcastMessageBroadcaster(final TrNode node) {
 		this.node = node;
 	}
 

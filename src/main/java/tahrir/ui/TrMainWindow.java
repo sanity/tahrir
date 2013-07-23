@@ -9,13 +9,11 @@ import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.filters.AuthorFilter;
 import tahrir.io.net.microblogging.filters.FollowingFilter;
 import tahrir.io.net.microblogging.filters.Unfiltered;
-import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.SortedSet;
 
 public class TrMainWindow {
 	public static Logger logger = LoggerFactory.getLogger(TrMainWindow.class.getName());
@@ -73,12 +71,12 @@ public class TrMainWindow {
     }
 
 	private void addTabs() {
-		final MicroblogDisplayPage unfilteredPostPage = new MicroblogDisplayPage(
+		final BroadcastMessageDisplayPage unfilteredPostPage = new BroadcastMessageDisplayPage(
 				new Unfiltered(), this);
-		final MicroblogDisplayPage followingPostPage = new MicroblogDisplayPage(
+		final BroadcastMessageDisplayPage followingPostPage = new BroadcastMessageDisplayPage(
 				new FollowingFilter(this.node.identityStore.getIdentitiesWithLabel(TrConstants.FOLLOWING)),this);
 		final JPanel mentions = new JPanel();
-		final MicroblogDisplayPage myPostsPage = new MicroblogDisplayPage(
+		final BroadcastMessageDisplayPage myPostsPage = new BroadcastMessageDisplayPage(
 				new AuthorFilter(this.node.identityStore.getIdentitiesWithLabel(TrConstants.OWN)), this);
         final ContactBookDisplayPage contactBookDisplayPage = new ContactBookDisplayPage(this);
         final SettingsDisplayPage settingsDisplayPage = new SettingsDisplayPage(this);

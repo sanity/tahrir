@@ -12,19 +12,19 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.SortedSet;
 
-public class MicroblogDisplayPage {
+public class BroadcastMessageDisplayPage {
 	private final JComponent content;
 	private final MicroblogTableModel tableModel;
     private final EventBus eventBus;
     private final Predicate<ParsedMicroblog> filter;
 
-    public MicroblogDisplayPage(final Predicate<ParsedMicroblog> filter, final TrMainWindow mainWindow) {
+    public BroadcastMessageDisplayPage(final Predicate<ParsedMicroblog> filter, final TrMainWindow mainWindow) {
         this.filter = filter;
         eventBus = mainWindow.node.eventBus;
 		tableModel = new MicroblogTableModel();
 
 		final JTable table = new JTable(tableModel);
-		final MicroblogRenderer renderer = new MicroblogRenderer(mainWindow);
+		final BroadcastMessageRenderer renderer = new BroadcastMessageRenderer(mainWindow);
 		// will allow it to fill entire scroll pane
 		table.setFillsViewportHeight(true);
 		// TODO: change the size as needed
@@ -51,8 +51,8 @@ public class MicroblogDisplayPage {
     }
 
     @Subscribe
-    public void modifyMicroblogsDisplay(MicroblogsModifiedEvent event){
-        if(event.type.equals(MicroblogsModifiedEvent.ModificationType.RECIEVED)){
+    public void modifyMicroblogsDisplay(BroadcastMessageModifiedEvent event){
+        if(event.type.equals(BroadcastMessageModifiedEvent.ModificationType.RECIEVED)){
             if(filter.apply(event.parsedMb)){
                 tableModel.addNewMicroblog(event.parsedMb);
             }

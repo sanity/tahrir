@@ -7,7 +7,7 @@ import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.io.net.microblogging.microblogs.Microblog;
 import tahrir.tools.TrUtils;
 
-public class MicroblogBroadcastTest {
+public class BroadcastMessageBroadcastTest {
 
     @Test
     public void simpleTest() throws Exception {

@@ -7,17 +7,17 @@ import tahrir.io.crypto.TrCrypto;
 
 import static tahrir.TrConstants.FormatInfo.*;
 
-public class MicroblogParserTest {
+public class BroadcastMessageParserTest {
 	/**
 	 * Create a simple micoblog with nothing but text.
 	 */
 	@Test
 	public void simpleTextTest() throws Exception {
 		String xml = new Document(getRootWithText()).toXML();
-		MicroblogParser parser = new MicroblogParser(xml);
+		BroadcastMessageParser parser = new BroadcastMessageParser(xml);
 
 		// convert back to XML and compare with original
-		Assert.assertEquals(MicroblogParser.getXML(parser.getParsedParts()), xml);
+		Assert.assertEquals(BroadcastMessageParser.getXML(parser.getParsedParts()), xml);
 
 		Assert.assertTrue(parser.getMentionsFound().size() == 0);
 	}
@@ -37,10 +37,10 @@ public class MicroblogParserTest {
 		mentionElement.appendChild(base64Mention);
 
 		String xml = new Document(root).toXML();
-		MicroblogParser parser = new MicroblogParser(xml);
+		BroadcastMessageParser parser = new BroadcastMessageParser(xml);
 
 		// convert back to XML and compare with original
-		Assert.assertEquals(MicroblogParser.getXML(parser.getParsedParts()), xml);
+		Assert.assertEquals(BroadcastMessageParser.getXML(parser.getParsedParts()), xml);
 
 		Assert.assertTrue(parser.getMentionsFound().size() == 1);
 	}

@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.io.net.microblogging.IdentityStore;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
-import tahrir.ui.MicroblogsModifiedEvent;
+import tahrir.ui.BroadcastMessageModifiedEvent;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,15 +17,15 @@ import java.util.SortedSet;
  *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
-public class MicroblogInbox {
-	private static Logger logger = LoggerFactory.getLogger(MicroblogInbox.class);
+public class BroadcastMessageInbox {
+	private static Logger logger = LoggerFactory.getLogger(BroadcastMessageInbox.class);
 
 	private final SortedSet<ParsedMicroblog> parsedMicroblogs;
 	private static final ParsedMicroblogTimeComparator comparator =new ParsedMicroblogTimeComparator();
 
 	private final IdentityStore identityStore;
 
-	public MicroblogInbox(final IdentityStore identityStore) {
+	public BroadcastMessageInbox(final IdentityStore identityStore) {
 		this.identityStore = identityStore;
 		//comparator = new ParsedMicroblogTimeComparator();
         SortedSet<ParsedMicroblog> tmpSet = Sets.newTreeSet(comparator);
@@ -56,12 +56,12 @@ public class MicroblogInbox {
 
 	private void removeFromParsed(final ParsedMicroblog mb) {
 		parsedMicroblogs.remove(mb);
-        identityStore.eventBus.post(new MicroblogsModifiedEvent(mb, MicroblogsModifiedEvent.ModificationType.REMOVE));
+        identityStore.eventBus.post(new BroadcastMessageModifiedEvent(mb, BroadcastMessageModifiedEvent.ModificationType.REMOVE));
 	}
 
 	private void addToParsed(final ParsedMicroblog mb) {
 		parsedMicroblogs.add(mb);
-        identityStore.eventBus.post(new MicroblogsModifiedEvent(mb, MicroblogsModifiedEvent.ModificationType.RECIEVED));
+        identityStore.eventBus.post(new BroadcastMessageModifiedEvent(mb, BroadcastMessageModifiedEvent.ModificationType.RECIEVED));
 	}
 
 	private boolean shouldAddByReplacement(final ParsedMicroblog mb) {

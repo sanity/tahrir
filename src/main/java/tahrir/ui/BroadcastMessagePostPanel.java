@@ -5,9 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.TrNode;
-import tahrir.io.net.microblogging.MicroblogParser;
-import tahrir.io.net.microblogging.MicroblogParser.ParsedPart;
-import tahrir.io.net.microblogging.microblogs.Microblog;
+import tahrir.io.net.microblogging.BroadcastMessageParser;
+import tahrir.io.net.microblogging.BroadcastMessageParser.ParsedPart;
 import tahrir.io.net.microblogging.microblogs.Microblog;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
@@ -29,12 +28,12 @@ import java.util.Date;
  *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
-public class MicroblogPostPanel {
-	private static final Logger logger = LoggerFactory.getLogger(MicroblogPostPanel.class);
+public class BroadcastMessagePostPanel {
+	private static final Logger logger = LoggerFactory.getLogger(BroadcastMessagePostPanel.class);
 	private final JPanel content;
 	private final TrMainWindow mainWindow;
 
-	public MicroblogPostPanel(final ParsedMicroblog mb, final TrMainWindow mainWindow) {
+	public BroadcastMessagePostPanel(final ParsedMicroblog mb, final TrMainWindow mainWindow) {
 		this.mainWindow = mainWindow;
 		content = new JPanel(new MigLayout());
         content.setBackground(Color.WHITE);
@@ -145,7 +144,7 @@ public class MicroblogPostPanel {
         }
 
         public void actionPerformed(ActionEvent actionEvent) {
-                String xmlMessage = MicroblogParser.getXML(pmb.getParsedParts());
+                String xmlMessage = BroadcastMessageParser.getXML(pmb.getParsedParts());
                 Microblog microblog = new Microblog(xmlMessage, pmb.getMbData());
                 node.mbClasses.incomingMbHandler.handleInsertion(microblog);
         }

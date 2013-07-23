@@ -6,13 +6,13 @@ import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
  * User: ravisvi <ravitejasvi@gmail.com>
  * Date: 22/07/13
  */
-public class MicroblogsModifiedEvent {
+public class BroadcastMessageModifiedEvent {
     public ParsedMicroblog parsedMb;
     public enum ModificationType{
         RECIEVED, REMOVE;
     }
     ModificationType type;
-    public MicroblogsModifiedEvent(ParsedMicroblog parsedMb, ModificationType type){
+    public BroadcastMessageModifiedEvent(ParsedMicroblog parsedMb, ModificationType type){
         this.parsedMb = parsedMb;
         this.type = type;
     }
