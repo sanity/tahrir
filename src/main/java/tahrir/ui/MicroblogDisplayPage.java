@@ -52,7 +52,7 @@ public class MicroblogDisplayPage {
 
     @Subscribe
     public void modifyMicroblogsDisplay(MicroblogsModifiedEvent event){
-        if(event.type.equals(MicroblogsModifiedEvent.ModificationType.ADD)){
+        if(event.type.equals(MicroblogsModifiedEvent.ModificationType.RECIEVED)){
             if(filter.apply(event.parsedMb)){
                 tableModel.addNewMicroblog(event.parsedMb);
             }

@@ -1,5 +1,6 @@
 package tahrir.io.net.microblogging;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
@@ -330,15 +331,15 @@ public class IdentityStore {
         }
     }
 
-    public UserIdentity getIdentitiesWithPubKey(RSAPublicKey authorKey) {
+    public Optional<UserIdentity> getIdentityWithPubKey(RSAPublicKey authorKey) {
         for( Map.Entry<String, Set<UserIdentity>> entry: usersWithNickname.entrySet()){
             for(UserIdentity identity: entry.getValue()){
                 if (identity.getPubKey().equals(authorKey)){
-                    return identity;
+                    return Optional.of(identity);
                 }
             }
         }
-        return null;
+        return Optional.absent();
     }
 
     private static class NickNameComparator implements Comparator<UserIdentity> {

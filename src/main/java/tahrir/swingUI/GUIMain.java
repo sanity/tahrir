@@ -7,7 +7,7 @@ import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.microblogging.MicroblogParser;
 import tahrir.io.net.microblogging.UserIdentity;
-import tahrir.io.net.microblogging.containers.MicroblogsForViewing;
+import tahrir.io.net.microblogging.containers.MicroblogInbox;
 import tahrir.io.net.microblogging.microblogs.Microblog;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.TrUtils;
@@ -53,7 +53,7 @@ public class GUIMain {
             ParsedMicroblog fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);
             ParsedMicroblog fromUser2 = TrUtils.TestUtils.getParsedMicroblog(user2, user1);
             ParsedMicroblog fromUser3 = TrUtils.TestUtils.getParsedMicroblog(user3);
-            SortedSet<ParsedMicroblog> parsedMbs = Sets.newTreeSet(new MicroblogsForViewing.ParsedMicroblogTimeComparator());
+            SortedSet<ParsedMicroblog> parsedMbs = Sets.newTreeSet(new MicroblogInbox.ParsedMicroblogTimeComparator());
             parsedMbs.add(fromRand);
             parsedMbs.add(fromUser1);
             parsedMbs.add(fromUser2);

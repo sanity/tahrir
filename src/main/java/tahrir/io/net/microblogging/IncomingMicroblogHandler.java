@@ -5,8 +5,8 @@ import nu.xom.ParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
+import tahrir.io.net.microblogging.containers.MicroblogInbox;
 import tahrir.io.net.microblogging.containers.MicroblogOutbox;
-import tahrir.io.net.microblogging.containers.MicroblogsForViewing;
 import tahrir.io.net.microblogging.microblogs.GeneralMicroblogInfo;
 import tahrir.io.net.microblogging.microblogs.Microblog;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
@@ -22,11 +22,11 @@ import java.security.interfaces.RSAPrivateKey;
 public class IncomingMicroblogHandler {
 	private static final Logger logger = LoggerFactory.getLogger(ParsedMicroblog.class);
 
-	private final MicroblogsForViewing mbsForViewing;
+	private final MicroblogInbox mbsForViewing;
 	private final MicroblogOutbox mbsForBroadcast;
     private final IdentityStore identityStore;
 
-	public IncomingMicroblogHandler(final MicroblogsForViewing mbsForViewing,
+	public IncomingMicroblogHandler(final MicroblogInbox mbsForViewing,
 									final MicroblogOutbox mbsForBroadcast,
 									final IdentityStore identityStore) {
 		this.mbsForBroadcast = mbsForBroadcast;

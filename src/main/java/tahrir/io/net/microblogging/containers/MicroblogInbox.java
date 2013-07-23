@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.io.net.microblogging.IdentityStore;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
-import tahrir.tools.TrUtils;
 import tahrir.ui.MicroblogsModifiedEvent;
 
 import java.util.Collections;
@@ -18,15 +17,15 @@ import java.util.SortedSet;
  *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
-public class MicroblogsForViewing {
-	private static Logger logger = LoggerFactory.getLogger(MicroblogsForViewing.class);
+public class MicroblogInbox {
+	private static Logger logger = LoggerFactory.getLogger(MicroblogInbox.class);
 
 	private final SortedSet<ParsedMicroblog> parsedMicroblogs;
 	private static final ParsedMicroblogTimeComparator comparator =new ParsedMicroblogTimeComparator();
 
 	private final IdentityStore identityStore;
 
-	public MicroblogsForViewing(final IdentityStore identityStore) {
+	public MicroblogInbox(final IdentityStore identityStore) {
 		this.identityStore = identityStore;
 		//comparator = new ParsedMicroblogTimeComparator();
         SortedSet<ParsedMicroblog> tmpSet = Sets.newTreeSet(comparator);
@@ -62,7 +61,7 @@ public class MicroblogsForViewing {
 
 	private void addToParsed(final ParsedMicroblog mb) {
 		parsedMicroblogs.add(mb);
-        identityStore.eventBus.post(new MicroblogsModifiedEvent(mb, MicroblogsModifiedEvent.ModificationType.ADD));
+        identityStore.eventBus.post(new MicroblogsModifiedEvent(mb, MicroblogsModifiedEvent.ModificationType.RECIEVED));
 	}
 
 	private boolean shouldAddByReplacement(final ParsedMicroblog mb) {

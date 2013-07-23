@@ -1,5 +1,6 @@
 package tahrir.ui;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.filters.AuthorFilter;
@@ -24,7 +25,7 @@ public class AuthorDisplayPageButton extends TabCreateButton {
 		super(mainWindow, text);
 		this.authorKey = authorKey;
 		this.mainWindow = mainWindow;
-        this.authorIdentity = mainWindow.node.identityStore.getIdentitiesWithPubKey(authorKey);
+        this.authorIdentity = mainWindow.node.identityStore.getIdentityWithPubKey(authorKey).get();
 		addActionListener(this);
 		makeTransparent();
 	}

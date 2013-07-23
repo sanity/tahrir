@@ -9,7 +9,7 @@ import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 public class MicroblogsModifiedEvent {
     public ParsedMicroblog parsedMb;
     public enum ModificationType{
-        ADD, REMOVE;
+        RECIEVED, REMOVE;
     }
     ModificationType type;
     public MicroblogsModifiedEvent(ParsedMicroblog parsedMb, ModificationType type){

@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.*;
 import tahrir.io.net.microblogging.*;
+import tahrir.io.net.microblogging.containers.MicroblogInbox;
 import tahrir.io.net.microblogging.containers.MicroblogOutbox;
-import tahrir.io.net.microblogging.containers.MicroblogsForViewing;
 import tahrir.io.net.sessions.AssimilateSession;
 import tahrir.io.net.sessions.AssimilateSessionImpl;
 import tahrir.io.net.sessions.TopologyMaintenanceSession;
@@ -152,7 +152,7 @@ public class TrNode {
 		public final ShortenedPublicKeyFinder spkFinder;
 		public final IncomingMicroblogHandler incomingMbHandler;
 		public final MicroblogOutbox mbsForBroadcast;
-		public final MicroblogsForViewing mbsForViewing;
+		public final MicroblogInbox mbsForViewing;
 
 		public MicrobloggingClasses(final TrNode node, final EventBus eventBus) {
             identityStore=new IdentityStore(getOrCreateFile(new File(node.rootDirectory, node.config.contacts)));
@@ -160,7 +160,7 @@ public class TrNode {
 			spkFinder = new ShortenedPublicKeyFinder(
 					getOrCreateFile(new File(node.rootDirectory, node.config.publicKeyChars)));
 			mbsForBroadcast = new MicroblogOutbox();
-			mbsForViewing = new MicroblogsForViewing(identityStore);
+			mbsForViewing = new MicroblogInbox(identityStore);
 			incomingMbHandler = new IncomingMicroblogHandler(mbsForViewing, mbsForBroadcast, identityStore);
 			mbScheduler = new MicroblogBroadcaster(node);
             TrUtils.executor.scheduleAtFixedRate(mbScheduler, 1, 1, TimeUnit.MINUTES);
