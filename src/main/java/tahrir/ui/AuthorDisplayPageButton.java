@@ -1,5 +1,6 @@
 package tahrir.ui;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.filters.AuthorFilter;
@@ -17,14 +18,14 @@ import java.util.Set;
 @SuppressWarnings("serial")
 public class AuthorDisplayPageButton extends TabCreateButton {
 	private final RSAPublicKey authorKey;
-    private final UserIdentity authorIdentity;
+    private final Optional<UserIdentity> authorIdentity;
 	private final TrMainWindow mainWindow;
 
 	public AuthorDisplayPageButton(final TrMainWindow mainWindow, RSAPublicKey authorKey, String text) {
 		super(mainWindow, text);
 		this.authorKey = authorKey;
 		this.mainWindow = mainWindow;
-        this.authorIdentity = mainWindow.node.identityStore.getIdentityWithPubKey(authorKey).get();
+        this.authorIdentity = mainWindow.node.mbClasses.identityStore.getIdentityWithPubKey(authorKey);
 		addActionListener(this);
 		makeTransparent();
 	}
@@ -32,7 +33,8 @@ public class AuthorDisplayPageButton extends TabCreateButton {
 	@Override
 	public void actionPerformed(final ActionEvent arg0) {
         final Set<UserIdentity> authors = Sets.newHashSet();
-        authors.add(authorIdentity);
+        if(authorIdentity.isPresent())
+        authors.add(authorIdentity.get());
 		final BroadcastMessageDisplayPage mbDisplayPage = new BroadcastMessageDisplayPage(new AuthorFilter(authors), mainWindow);
 		setContents(mbDisplayPage.getContent());
 		super.actionPerformed(arg0);

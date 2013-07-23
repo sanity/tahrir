@@ -91,8 +91,7 @@ public class BroadcastMessageDisplayPage {
 		public void addNewMicroblog(final ParsedMicroblog mb) {
 			microblogs.add(0, mb);
 			// This is what updates the GUI with new microblogs.
-			// Firing about the entire table here. It seems to be necessary.
-			fireTableDataChanged();
+            this.fireTableRowsInserted(0, tableModel.getRowCount());
 		}
 
 		public void removeMicroblog(final ParsedMicroblog mb) {
