@@ -20,7 +20,7 @@ public class BroadcastMessageDisplayPage {
 
     public BroadcastMessageDisplayPage(final Predicate<ParsedMicroblog> filter, final TrMainWindow mainWindow) {
         this.filter = filter;
-        eventBus = mainWindow.node.eventBus;
+        eventBus = mainWindow.node.mbClasses.identityStore.eventBus;
 		tableModel = new MicroblogTableModel();
 
 		final JTable table = new JTable(tableModel);

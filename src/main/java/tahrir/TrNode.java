@@ -49,23 +49,19 @@ public class TrNode {
 	public final File rootDirectory;
     public final File identityStoreFile;
 
-    public final EventBus eventBus = new EventBus();
-
 	public final TrPeerManager peerManager;
 
 	public MicrobloggingClasses mbClasses;
 
 	public TrSessionManager sessionMgr;
 
-    public IdentityStore identityStore;
 
 	public TrNode(final File rootDirectory, final TrNodeConfig config)
 			throws SocketException {
 		this.rootDirectory = rootDirectory;
 		this.config = config;
         this.identityStoreFile = new File(rootDirectory+System.getProperty("file.separator")+"id-store.json");
-        this.identityStore = new IdentityStore(identityStoreFile);
-        this.identityStore.setEventBus(eventBus);
+
 		privNodeIdFile = new File(rootDirectory, config.privateNodeId);
 		pubNodeIdFile = new File(rootDirectory, config.publicNodeId);
 		if (!privNodeIdFile.exists()) {
@@ -104,7 +100,7 @@ public class TrNode {
 		registerSessions();
 
 		if (config.peers.runBroadcast) {
-			mbClasses = new MicrobloggingClasses(this, this.eventBus);
+			mbClasses = new MicrobloggingClasses(this);
 		}
 	}
 
@@ -153,8 +149,8 @@ public class TrNode {
 		public final IncomingBroadcastMessageHandler incomingMbHandler;
 		public final BroadcastMessageOutbox mbsForBroadcast;
 		public final BroadcastMessageInbox mbsForViewing;
-
-		public MicrobloggingClasses(final TrNode node, final EventBus eventBus) {
+        public final EventBus eventBus= new EventBus();
+		public MicrobloggingClasses(final TrNode node) {
             identityStore=new IdentityStore(getOrCreateFile(new File(node.rootDirectory, node.config.contacts)));
             identityStore.setEventBus(eventBus);
 			spkFinder = new ShortenedPublicKeyFinder(

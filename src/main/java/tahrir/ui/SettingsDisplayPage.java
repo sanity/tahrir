@@ -21,11 +21,11 @@ public class SettingsDisplayPage {
     DefaultComboBoxModel model = new DefaultComboBoxModel();
 
     public SettingsDisplayPage(final TrMainWindow mainWindow) {
-        eventBus = mainWindow.node.eventBus;
+        eventBus = mainWindow.node.mbClasses.identityStore.eventBus;
         final JPanel panel = new JPanel();
         panel.add(new JLabel("Choose a profile"));
 
-        for (UserIdentity userIdentity: mainWindow.node.identityStore.labelsOfUser.keySet()){
+        for (UserIdentity userIdentity: mainWindow.node.mbClasses.identityStore.labelsOfUser.keySet()){
             if(userIdentity.hasPvtKey()){
                 model.addElement(userIdentity.getNick());
             }

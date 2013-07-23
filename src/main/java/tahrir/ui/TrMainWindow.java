@@ -63,7 +63,7 @@ public class TrMainWindow {
 	}
 
     public void setCurrentIdentity(String nick){
-        for(UserIdentity identity :node.identityStore.getIdentitiesWithNick(nick)){
+        for(UserIdentity identity :node.mbClasses.identityStore.getIdentitiesWithNick(nick)){
             if(identity.hasPvtKey() && identity.getNick().equals(nick)){
                 currentIdentity = identity;
             }
@@ -74,10 +74,10 @@ public class TrMainWindow {
 		final BroadcastMessageDisplayPage unfilteredPostPage = new BroadcastMessageDisplayPage(
 				new Unfiltered(), this);
 		final BroadcastMessageDisplayPage followingPostPage = new BroadcastMessageDisplayPage(
-				new FollowingFilter(this.node.identityStore.getIdentitiesWithLabel(TrConstants.FOLLOWING)),this);
+				new FollowingFilter(this.node.mbClasses.identityStore.getIdentitiesWithLabel(TrConstants.FOLLOWING)),this);
 		final JPanel mentions = new JPanel();
 		final BroadcastMessageDisplayPage myPostsPage = new BroadcastMessageDisplayPage(
-				new AuthorFilter(this.node.identityStore.getIdentitiesWithLabel(TrConstants.OWN)), this);
+				new AuthorFilter(this.node.mbClasses.identityStore.getIdentitiesWithLabel(TrConstants.OWN)), this);
         final ContactBookDisplayPage contactBookDisplayPage = new ContactBookDisplayPage(this);
         final SettingsDisplayPage settingsDisplayPage = new SettingsDisplayPage(this);
 
