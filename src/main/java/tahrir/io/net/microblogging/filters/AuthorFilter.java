@@ -2,6 +2,8 @@ package tahrir.io.net.microblogging.filters;
 
 import com.google.common.base.Predicate;
 import com.sun.istack.internal.Nullable;
+import tahrir.TrConstants;
+import tahrir.io.net.microblogging.IdentityStore;
 import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
@@ -15,15 +17,14 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class AuthorFilter implements Predicate<ParsedMicroblog> {
-    private final Set<UserIdentity> authors;
+    private final IdentityStore identityStore;
 
-    public AuthorFilter(Set<UserIdentity> authors) {
-
-        this.authors = authors;
+    public AuthorFilter(IdentityStore identityStore) {
+        this.identityStore = identityStore;
     }
 
     @Override
     public boolean apply(@Nullable final tahrir.io.net.microblogging.microblogs.ParsedMicroblog parsedMicroblog) {
-        return authors.contains(parsedMicroblog.getMbData().getAuthor());
+        return identityStore.getIdentitiesWithLabel(TrConstants.OWN).contains(parsedMicroblog.getMbData().getAuthor());
     }
 }

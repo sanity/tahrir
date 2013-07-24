@@ -1,6 +1,7 @@
 package tahrir.io.net.microblogging.containers;
 
 import com.google.common.collect.Sets;
+import com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
@@ -24,9 +25,11 @@ public class BroadcastMessageInbox {
 	private static final ParsedMicroblogTimeComparator comparator =new ParsedMicroblogTimeComparator();
 
 	private final IdentityStore identityStore;
+    private final EventBus eventBus;
 
 	public BroadcastMessageInbox(final IdentityStore identityStore) {
 		this.identityStore = identityStore;
+        eventBus = identityStore.eventBus;
 		//comparator = new ParsedMicroblogTimeComparator();
         SortedSet<ParsedMicroblog> tmpSet = Sets.newTreeSet(comparator);
 		parsedMicroblogs = Collections.synchronizedSortedSet(tmpSet);
@@ -56,12 +59,16 @@ public class BroadcastMessageInbox {
 
 	private void removeFromParsed(final ParsedMicroblog mb) {
 		parsedMicroblogs.remove(mb);
-        identityStore.eventBus.post(new BroadcastMessageModifiedEvent(mb, BroadcastMessageModifiedEvent.ModificationType.REMOVE));
+        logger.debug("Going to post to eventBus for removing a broadcastMessage");
+        eventBus.post(new BroadcastMessageModifiedEvent(mb, BroadcastMessageModifiedEvent.ModificationType.REMOVE));
+        logger.debug("Event posted.");
 	}
 
 	private void addToParsed(final ParsedMicroblog mb) {
 		parsedMicroblogs.add(mb);
-        identityStore.eventBus.post(new BroadcastMessageModifiedEvent(mb, BroadcastMessageModifiedEvent.ModificationType.RECIEVED));
+        logger.debug("Going to  post to eventBus for adding a BroadcastMessage");
+        eventBus.post(new BroadcastMessageModifiedEvent(mb, BroadcastMessageModifiedEvent.ModificationType.RECEIVED));
+        logger.debug("Event posted (adding)");
 	}
 
 	private boolean shouldAddByReplacement(final ParsedMicroblog mb) {

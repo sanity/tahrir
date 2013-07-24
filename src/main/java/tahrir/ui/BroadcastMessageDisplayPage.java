@@ -4,6 +4,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
 import javax.swing.*;
@@ -17,10 +19,10 @@ public class BroadcastMessageDisplayPage {
 	private final MicroblogTableModel tableModel;
     private final EventBus eventBus;
     private final Predicate<ParsedMicroblog> filter;
-
+    private static final Logger logger = LoggerFactory.getLogger(BroadcastMessageDisplayPage.class.getName());
     public BroadcastMessageDisplayPage(final Predicate<ParsedMicroblog> filter, final TrMainWindow mainWindow) {
         this.filter = filter;
-        eventBus = mainWindow.node.mbClasses.identityStore.eventBus;
+        eventBus = mainWindow.node.mbClasses.eventBus;
 		tableModel = new MicroblogTableModel();
 
 		final JTable table = new JTable(tableModel);
@@ -38,7 +40,7 @@ public class BroadcastMessageDisplayPage {
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setViewportView(table);
 		content = scrollPane;
-
+        logger.debug("EventBus registered");
         eventBus.register(this);
 
         final SortedSet<ParsedMicroblog> existingMicroblogs = mainWindow.node.mbClasses.mbsForViewing.getMicroblogSet();
@@ -52,9 +54,16 @@ public class BroadcastMessageDisplayPage {
 
     @Subscribe
     public void modifyMicroblogsDisplay(BroadcastMessageModifiedEvent event){
-        if(event.type.equals(BroadcastMessageModifiedEvent.ModificationType.RECIEVED)){
+        logger.debug("Event received,  going to be handled.");
+        if(event.type.equals(BroadcastMessageModifiedEvent.ModificationType.RECEIVED)){
+            logger.debug("Broadcast message is going to be added as the modification type was RECEIVED.");
             if(filter.apply(event.parsedMb)){
+                logger.debug("Filter passed");
                 tableModel.addNewMicroblog(event.parsedMb);
+                logger.debug("Event Handled");
+            }
+            else{
+                logger.debug("Filter Failed.");
             }
         }
     }
@@ -89,7 +98,11 @@ public class BroadcastMessageDisplayPage {
 		}
 
 		public void addNewMicroblog(final ParsedMicroblog mb) {
-			microblogs.add(0, mb);
+			if(microblogs.contains(mb)){
+                logger.debug("The broadcast message was already added.");
+            }
+            microblogs.add(0, mb);
+            logger.debug("BMessage added");
 			// This is what updates the GUI with new microblogs.
             this.fireTableRowsInserted(0, tableModel.getRowCount());
 		}

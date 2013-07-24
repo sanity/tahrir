@@ -21,7 +21,7 @@ public class ContactBookDisplayPage {
     EventBus eventBus;
 
     public ContactBookDisplayPage(final TrMainWindow mainWindow) {
-        eventBus = mainWindow.node.mbClasses.identityStore.eventBus;
+        eventBus = mainWindow.node.mbClasses.eventBus;
         tableModel = new ContactBookTableModel();
         for (UserIdentity userIdentity: mainWindow.node.mbClasses.identityStore.labelsOfUser.keySet()){
             {

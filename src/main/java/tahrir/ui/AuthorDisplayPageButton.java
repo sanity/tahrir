@@ -26,7 +26,8 @@ public class AuthorDisplayPageButton extends TabCreateButton {
 		this.authorKey = authorKey;
 		this.mainWindow = mainWindow;
         this.authorIdentity = mainWindow.node.mbClasses.identityStore.getIdentityWithPubKey(authorKey);
-		addActionListener(this);
+
+        addActionListener(this);
 		makeTransparent();
 	}
 
@@ -35,7 +36,7 @@ public class AuthorDisplayPageButton extends TabCreateButton {
         final Set<UserIdentity> authors = Sets.newHashSet();
         if(authorIdentity.isPresent())
         authors.add(authorIdentity.get());
-		final BroadcastMessageDisplayPage mbDisplayPage = new BroadcastMessageDisplayPage(new AuthorFilter(authors), mainWindow);
+		final BroadcastMessageDisplayPage mbDisplayPage = new BroadcastMessageDisplayPage(new AuthorFilter(mainWindow.node.mbClasses.identityStore), mainWindow);
 		setContents(mbDisplayPage.getContent());
 		super.actionPerformed(arg0);
 	}
