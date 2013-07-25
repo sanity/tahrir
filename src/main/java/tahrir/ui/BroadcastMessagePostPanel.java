@@ -7,7 +7,7 @@ import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.io.net.microblogging.BroadcastMessageParser;
 import tahrir.io.net.microblogging.BroadcastMessageParser.ParsedPart;
-import tahrir.io.net.microblogging.microblogs.Microblog;
+import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
 import javax.swing.*;
@@ -145,8 +145,8 @@ public class BroadcastMessagePostPanel {
 
         public void actionPerformed(ActionEvent actionEvent) {
                 String xmlMessage = BroadcastMessageParser.getXML(pmb.getParsedParts());
-                Microblog microblog = new Microblog(xmlMessage, pmb.getMbData());
-                node.mbClasses.incomingMbHandler.handleInsertion(microblog);
+                BroadcastMessage broadcastMessage = new BroadcastMessage(xmlMessage, pmb.getMbData());
+                node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
         }
 
 

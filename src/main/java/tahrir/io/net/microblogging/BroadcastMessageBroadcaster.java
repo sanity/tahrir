@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import tahrir.TrNode;
 import tahrir.io.net.PhysicalNetworkLocation;
 import tahrir.io.net.TrPeerManager;
-import tahrir.io.net.microblogging.microblogs.Microblog;
+import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
 
 import java.util.Map;
 import java.util.Set;
@@ -30,10 +30,10 @@ public class BroadcastMessageBroadcaster implements Runnable {
     public void run() {
         if (!disabled) {
             Set<PhysicalNetworkLocation> peersThatReceiveMessageBroadcasts = findPeersThatReceiveMessageBroadcasts(node.peerManager.peers);
-            final Microblog microblogForBroadcast = node.mbClasses.mbsForBroadcast.getMicroblogForBroadcast();
+            final BroadcastMessage broadcastMessageForBroadcast = node.mbClasses.mbsForBroadcast.getMicroblogForBroadcast();
             for (PhysicalNetworkLocation recepient : peersThatReceiveMessageBroadcasts) {
                 final TransmitMicroblogSessionImpl localMicroblogBroadcastSession = node.sessionMgr.getOrCreateLocalSession(TransmitMicroblogSessionImpl.class);
-                localMicroblogBroadcastSession.attemptToSendMicroblogAndWaitUntilComplete(microblogForBroadcast, recepient);
+                localMicroblogBroadcastSession.attemptToSendMicroblogAndWaitUntilComplete(broadcastMessageForBroadcast, recepient);
             }
         }
     }

@@ -8,7 +8,7 @@ import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.microblogging.BroadcastMessageParser;
 import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.containers.BroadcastMessageInbox;
-import tahrir.io.net.microblogging.microblogs.Microblog;
+import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.TrUtils;
 import tahrir.ui.TrMainWindow;
@@ -45,10 +45,17 @@ public class GUIMain {
 
             UserIdentity user1=new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
             UserIdentity user2=new UserIdentity("user2", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
-            UserIdentity user3 = new UserIdentity("User 3", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
+            UserIdentity user3 = new UserIdentity("User 3", node.getRemoteNodeAddress().publicKey, Optional.of(node.getPrivateNodeId().privateKey));
+            UserIdentity user4 = new UserIdentity("User 4", node.getRemoteNodeAddress().publicKey, Optional.of(node.getPrivateNodeId().privateKey));
+            UserIdentity user5 = new UserIdentity("User 5", node.getRemoteNodeAddress().publicKey, Optional.of(node.getPrivateNodeId().privateKey));
+            UserIdentity user6 = new UserIdentity("User 6", node.getRemoteNodeAddress().publicKey, Optional.of(node.getPrivateNodeId().privateKey));
             node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.FOLLOWING, user1);
             node.mbClasses.identityStore.addIdentity(user2);
             node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user3);
+            node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user4);
+            node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user5);
+            node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user6);
+
             ParsedMicroblog fromRand = TrUtils.TestUtils.getParsedMicroblog();
             ParsedMicroblog fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);
             ParsedMicroblog fromUser2 = TrUtils.TestUtils.getParsedMicroblog(user2, user1);
@@ -60,14 +67,14 @@ public class GUIMain {
 
             for (ParsedMicroblog parsedMicroblog : parsedMbs) {
                 String xmlMessage = BroadcastMessageParser.getXML(parsedMicroblog.getParsedParts());
-                Microblog microblog = new Microblog(xmlMessage, parsedMicroblog.getMbData());
-                node.mbClasses.incomingMbHandler.handleInsertion(microblog);
+                BroadcastMessage broadcastMessage = new BroadcastMessage(xmlMessage, parsedMicroblog.getMbData());
+                node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
             }
 
             //checking to see if eventBus is working
             String xmlMessage = BroadcastMessageParser.getXML(fromUser3.getParsedParts());
-            Microblog microblog = new Microblog(xmlMessage, fromUser3.getMbData());
-            node.mbClasses.incomingMbHandler.handleInsertion(microblog);
+            BroadcastMessage broadcastMessage = new BroadcastMessage(xmlMessage, fromUser3.getMbData());
+            node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
 
         }
 }

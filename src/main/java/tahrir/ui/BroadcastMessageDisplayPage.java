@@ -54,16 +54,9 @@ public class BroadcastMessageDisplayPage {
 
     @Subscribe
     public void modifyMicroblogsDisplay(BroadcastMessageModifiedEvent event){
-        logger.debug("Event received,  going to be handled.");
         if(event.type.equals(BroadcastMessageModifiedEvent.ModificationType.RECEIVED)){
-            logger.debug("Broadcast message is going to be added as the modification type was RECEIVED.");
             if(filter.apply(event.parsedMb)){
-                logger.debug("Filter passed");
                 tableModel.addNewMicroblog(event.parsedMb);
-                logger.debug("Event Handled");
-            }
-            else{
-                logger.debug("Filter Failed.");
             }
         }
     }
@@ -98,12 +91,8 @@ public class BroadcastMessageDisplayPage {
 		}
 
 		public void addNewMicroblog(final ParsedMicroblog mb) {
-			if(microblogs.contains(mb)){
-                logger.debug("The broadcast message was already added.");
-            }
             microblogs.add(0, mb);
-            logger.debug("BMessage added");
-			// This is what updates the GUI with new microblogs.
+            // This is what updates the GUI with new microblogs.
             this.fireTableRowsInserted(0, tableModel.getRowCount());
 		}
 

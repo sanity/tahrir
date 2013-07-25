@@ -4,7 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import tahrir.TrNode;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
-import tahrir.io.net.microblogging.microblogs.Microblog;
+import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
 import tahrir.tools.TrUtils;
 
 public class BroadcastMessageBroadcastTest {
@@ -19,7 +19,7 @@ public class BroadcastMessageBroadcastTest {
             pi.capabilities.receivesMessageBroadcasts = true;
         }
 
-        final Microblog testMb = new Microblog(sendingNode, "<mb>Hello world</mb>");
+        final BroadcastMessage testMb = new BroadcastMessage(sendingNode, "<mb>Hello world</mb>");
         sendingNode.mbClasses.mbsForBroadcast.insert(testMb);
 
         // stop the receiver from broadcasting
@@ -51,8 +51,8 @@ public class BroadcastMessageBroadcastTest {
         }
 
 
-        final Microblog testMb0 = new Microblog(sendingNode, "<mb>You SHOULD have this microblog!</mb>", 0);
-        final Microblog testMb1 = new Microblog(sendingNode, "<mb>You should NOT have this microblog!</mb>", Integer.MAX_VALUE);
+        final BroadcastMessage testMb0 = new BroadcastMessage(sendingNode, "<mb>You SHOULD have this microblog!</mb>", 0);
+        final BroadcastMessage testMb1 = new BroadcastMessage(sendingNode, "<mb>You should NOT have this microblog!</mb>", Integer.MAX_VALUE);
         sendingNode.mbClasses.mbsForBroadcast.insert(testMb1);
         sendingNode.mbClasses.mbsForBroadcast.insert(testMb0);
 

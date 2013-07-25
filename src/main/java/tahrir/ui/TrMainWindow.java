@@ -1,14 +1,18 @@
 package tahrir.ui;
 
 import net.miginfocom.swing.MigLayout;
+import nu.xom.ParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.TrNode;
+import tahrir.TrNodeConfig;
+import tahrir.io.net.microblogging.BroadcastMessageParser;
 import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.filters.AuthorFilter;
 import tahrir.io.net.microblogging.filters.FollowingFilter;
 import tahrir.io.net.microblogging.filters.Unfiltered;
+import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +23,6 @@ public class TrMainWindow {
 	public static Logger logger = LoggerFactory.getLogger(TrMainWindow.class.getName());
 
 	public TrNode node;
-    public UserIdentity currentIdentity;
 
 	private final JFrame frame;
 	private final JPanel contentPanel;
@@ -45,6 +48,22 @@ public class TrMainWindow {
 		contentPanel.add(newPostPane, "split 2");
 
 		final JButton newPostButton = new JButton("Post");
+        newPostButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String message = newPostPane.getText();
+                    BroadcastMessageParser parsedMicroblog = new BroadcastMessageParser("<mb>"+message+"</mb>");
+                    final BroadcastMessage newBroadcastMessage = new BroadcastMessage(node,
+                            BroadcastMessageParser.getXML(parsedMicroblog.getParsedParts()));
+                    node.mbClasses.incomingMbHandler.handleInsertion(newBroadcastMessage);
+                } catch (ParsingException e1) {
+                    e1.printStackTrace();
+                }
+
+
+            }
+        });
 		contentPanel.add(newPostButton, "align center");
 
 		frame = new JFrame();
@@ -65,7 +84,7 @@ public class TrMainWindow {
     public void setCurrentIdentity(String nick){
         for(UserIdentity identity :node.mbClasses.identityStore.getIdentitiesWithNick(nick)){
             if(identity.hasPvtKey() && identity.getNick().equals(nick)){
-                currentIdentity = identity;
+                node.config.currentUserIdentity = identity;
             }
         }
     }

@@ -4,13 +4,14 @@ import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.crypto.TrSignature;
+import tahrir.io.net.microblogging.UserIdentity;
 
 /**
  * A microblog for broadcast.
  *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
-public class Microblog {
+public class BroadcastMessage {
 	public int priority;
 	public GeneralMicroblogInfo otherData;
 	/**
@@ -20,17 +21,17 @@ public class Microblog {
 	public TrSignature signature;
 
 	// for serialization
-	public Microblog() {
+	public BroadcastMessage() {
 
 	}
 
-	public Microblog(final TrNode creatingNode, final String message) {
+	public BroadcastMessage(final TrNode creatingNode, final String message) {
 		this(creatingNode, message, TrConstants.BROADCAST_INIT_PRIORITY);
 	}
 
-	public Microblog(final TrNode creatingNode, final String message, final int priority) {
+	public BroadcastMessage(final TrNode creatingNode, final String message, final int priority) {
 		// TODO: get info from config
-		otherData = new GeneralMicroblogInfo("", "", creatingNode.getRemoteNodeAddress().publicKey, System.currentTimeMillis());
+		otherData = new GeneralMicroblogInfo("", creatingNode.config.currentUserIdentity.getNick(), creatingNode.getRemoteNodeAddress().publicKey, System.currentTimeMillis());
 		this.priority = priority;
 		this.message = message;
 		try {
@@ -46,7 +47,7 @@ public class Microblog {
 	 * @param message
 	 * @param otherData
 	 */
-	public Microblog(String message, GeneralMicroblogInfo otherData) {
+	public BroadcastMessage(String message, GeneralMicroblogInfo otherData) {
 		this.message = message;
 		this.otherData = otherData;
 		this.signature = null;
@@ -57,15 +58,15 @@ public class Microblog {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        final Microblog microblog = (Microblog) o;
+        final BroadcastMessage broadcastMessage = (BroadcastMessage) o;
 
-        if (priority != microblog.priority) return false;
-        if (!message.equals(microblog.message)) return false;
-        if (!otherData.equals(microblog.otherData)) return false;
-        if(signature != null && microblog.signature != null) {
-        if (!signature.equals(microblog.signature)) return false;
+        if (priority != broadcastMessage.priority) return false;
+        if (!message.equals(broadcastMessage.message)) return false;
+        if (!otherData.equals(broadcastMessage.otherData)) return false;
+        if(signature != null && broadcastMessage.signature != null) {
+        if (!signature.equals(broadcastMessage.signature)) return false;
         }
-        if(signature == null && microblog.signature == null) return false;
+        if(signature == null && broadcastMessage.signature == null) return false;
 
         return true;
     }

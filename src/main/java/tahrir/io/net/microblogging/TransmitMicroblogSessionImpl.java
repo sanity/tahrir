@@ -6,7 +6,7 @@ import tahrir.TrNode;
 import tahrir.io.net.PhysicalNetworkLocation;
 import tahrir.io.net.TrSessionImpl;
 import tahrir.io.net.TrSessionManager;
-import tahrir.io.net.microblogging.microblogs.Microblog;
+import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class TransmitMicroblogSessionImpl extends TrSessionImpl implements TransmitMicroblogSession {
     private static final Logger logger = LoggerFactory.getLogger(TransmitMicroblogSessionImpl.class.getName());
 
-    private Microblog microblogToSend;
+    private BroadcastMessage broadcastMessageToSend;
 
     private TransmitMicroblogSession receiverSess;
     private TransmitMicroblogSession initiatorSess;
@@ -33,8 +33,8 @@ public class TransmitMicroblogSessionImpl extends TrSessionImpl implements Trans
         super(sessionId, node, sessionMgr);
     }
 
-    public void attemptToSendMicroblogAndWaitUntilComplete(final Microblog microblogToSend, final PhysicalNetworkLocation recepient) {
-        this.microblogToSend = microblogToSend;
+    public void attemptToSendMicroblogAndWaitUntilComplete(final BroadcastMessage broadcastMessageToSend, final PhysicalNetworkLocation recepient) {
+        this.broadcastMessageToSend = broadcastMessageToSend;
         receiverSess = remoteSession(TransmitMicroblogSession.class, connection(recepient));
         receiverSess.registerFailureListener(new Runnable() {
             @Override
@@ -42,11 +42,11 @@ public class TransmitMicroblogSessionImpl extends TrSessionImpl implements Trans
                 sessionFinished();
             }
         });
-        receiverSess.areYouInterested(this.microblogToSend.hashCode());
+        receiverSess.areYouInterested(this.broadcastMessageToSend.hashCode());
         this.transmissionCompleteLatch = new CountDownLatch(1);
         try {
             if (!this.transmissionCompleteLatch.await(1, TimeUnit.MINUTES)) {
-                logger.warn("Microblog broadcast timed out");
+                logger.warn("BroadcastMessage broadcast timed out");
             }
         } catch (InterruptedException e) {
             logger.error("Latch interrupted while awaiting broadcast completion");
@@ -62,13 +62,13 @@ public class TransmitMicroblogSessionImpl extends TrSessionImpl implements Trans
 
     public void interestIs(final boolean interest) {
         if (interest) {
-            receiverSess.sendMicroblog(microblogToSend);
+            receiverSess.sendMicroblog(broadcastMessageToSend);
         } else {
             sessionFinished();
         }
     }
 
-    public void sendMicroblog(final Microblog mb) {
+    public void sendMicroblog(final BroadcastMessage mb) {
         node.mbClasses.incomingMbHandler.handleInsertion(mb);
         initiatorSess.sessionFinished();
     }

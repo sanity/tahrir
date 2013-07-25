@@ -59,16 +59,12 @@ public class BroadcastMessageInbox {
 
 	private void removeFromParsed(final ParsedMicroblog mb) {
 		parsedMicroblogs.remove(mb);
-        logger.debug("Going to post to eventBus for removing a broadcastMessage");
         eventBus.post(new BroadcastMessageModifiedEvent(mb, BroadcastMessageModifiedEvent.ModificationType.REMOVE));
-        logger.debug("Event posted.");
 	}
 
 	private void addToParsed(final ParsedMicroblog mb) {
 		parsedMicroblogs.add(mb);
-        logger.debug("Going to  post to eventBus for adding a BroadcastMessage");
         eventBus.post(new BroadcastMessageModifiedEvent(mb, BroadcastMessageModifiedEvent.ModificationType.RECEIVED));
-        logger.debug("Event posted (adding)");
 	}
 
 	private boolean shouldAddByReplacement(final ParsedMicroblog mb) {

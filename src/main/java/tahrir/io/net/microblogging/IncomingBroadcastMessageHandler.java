@@ -8,7 +8,7 @@ import tahrir.TrConstants;
 import tahrir.io.net.microblogging.containers.BroadcastMessageInbox;
 import tahrir.io.net.microblogging.containers.BroadcastMessageOutbox;
 import tahrir.io.net.microblogging.microblogs.GeneralMicroblogInfo;
-import tahrir.io.net.microblogging.microblogs.Microblog;
+import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
 import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 import tahrir.tools.Tuple2;
 
@@ -34,7 +34,7 @@ public class IncomingBroadcastMessageHandler {
         this.identityStore = identityStore;
 	}
 
-	public void handleInsertion(final Microblog mbForBroadcast) {
+	public void handleInsertion(final BroadcastMessage mbForBroadcast) {
 		GeneralMicroblogInfo generalMbData = mbForBroadcast.otherData;
 		String unparsedMessage = mbForBroadcast.message;
 		if (!BroadcastMessageIntegrityChecks.isValidMicroblog(generalMbData, unparsedMessage)) {
