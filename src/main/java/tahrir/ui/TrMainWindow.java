@@ -53,15 +53,14 @@ public class TrMainWindow {
             public void actionPerformed(ActionEvent e) {
                 try {
                     String message = newPostPane.getText();
-                    BroadcastMessageParser parsedMicroblog = new BroadcastMessageParser("<mb>"+message+"</mb>");
+                    BroadcastMessageParser parsedMicroblog = new BroadcastMessageParser("<mb><txt>"+message+"</txt></mb>");
                     final BroadcastMessage newBroadcastMessage = new BroadcastMessage(node,
                             BroadcastMessageParser.getXML(parsedMicroblog.getParsedParts()));
                     node.mbClasses.incomingMbHandler.handleInsertion(newBroadcastMessage);
                 } catch (ParsingException e1) {
                     e1.printStackTrace();
                 }
-
-
+               newPostPane.setText("");
             }
         });
 		contentPanel.add(newPostButton, "align center");
