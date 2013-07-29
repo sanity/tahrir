@@ -1,6 +1,6 @@
 package tahrir.ui;
 
-import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
+import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
@@ -25,7 +25,7 @@ public class BroadcastMessageRenderer extends AbstractCellEditor implements Tabl
 	@Override
 	public Component getTableCellRendererComponent(final JTable table, final Object value,
 			final boolean isSelected, final boolean hasFocus, final int row, final int column) {
-		final ParsedMicroblog parsedMb = (ParsedMicroblog) value;
+		final ParsedBroadcastMessage parsedMb = (ParsedBroadcastMessage) value;
 		final BroadcastMessagePostPanel panel = new BroadcastMessagePostPanel(parsedMb, mainWindow);
 
 		return panel.getContent();
@@ -39,7 +39,7 @@ public class BroadcastMessageRenderer extends AbstractCellEditor implements Tabl
 	@Override
 	public Component getTableCellEditorComponent(final JTable table, final Object value,
 			final boolean isSelected, final int row, final int column) {
-		final ParsedMicroblog parsedMb = (ParsedMicroblog) value;
+		final ParsedBroadcastMessage parsedMb = (ParsedBroadcastMessage) value;
 		final BroadcastMessagePostPanel panel = new BroadcastMessagePostPanel(parsedMb, mainWindow);
 		return panel.getContent();
 	}

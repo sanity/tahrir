@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.io.net.microblogging.containers.BroadcastMessageInbox;
 import tahrir.io.net.microblogging.containers.BroadcastMessageOutbox;
-import tahrir.io.net.microblogging.microblogs.GeneralMicroblogInfo;
+import tahrir.io.net.microblogging.microblogs.GeneralBroadcastMessageInfo;
 import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
-import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
+import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
 import tahrir.tools.Tuple2;
 
 import java.security.interfaces.RSAPrivateKey;
@@ -20,7 +20,7 @@ import java.security.interfaces.RSAPrivateKey;
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 public class IncomingBroadcastMessageHandler {
-	private static final Logger logger = LoggerFactory.getLogger(ParsedMicroblog.class);
+	private static final Logger logger = LoggerFactory.getLogger(ParsedBroadcastMessage.class);
 
 	private final BroadcastMessageInbox mbsForViewing;
 	private final BroadcastMessageOutbox mbsForBroadcast;
@@ -35,7 +35,7 @@ public class IncomingBroadcastMessageHandler {
 	}
 
 	public void handleInsertion(final BroadcastMessage mbForBroadcast) {
-		GeneralMicroblogInfo generalMbData = mbForBroadcast.otherData;
+		GeneralBroadcastMessageInfo generalMbData = mbForBroadcast.otherData;
 		String unparsedMessage = mbForBroadcast.message;
 		if (!BroadcastMessageIntegrityChecks.isValidMicroblog(generalMbData, unparsedMessage)) {
 			logger.info("A microblog is being ignored because it didn't match required otherData requirements");
@@ -54,7 +54,7 @@ public class IncomingBroadcastMessageHandler {
 			// a better priority if they're one of your contacts
 			mbForBroadcast.priority -= TrConstants.CONTACT_PRIORITY_INCREASE;
 		}
-		ParsedMicroblog parsedMb = new ParsedMicroblog(generalMbData, parser.getMentionsFound().keySet(),
+		ParsedBroadcastMessage parsedMb = new ParsedBroadcastMessage(generalMbData, parser.getMentionsFound().keySet(),
 				parser.getParsedParts());
         UserIdentity userIdentity=new UserIdentity(generalMbData.getAuthorNick(), generalMbData.getAuthorPubKey(), Optional.<RSAPrivateKey>absent());
 		addDiscoveredIdentities(new Tuple2<String, UserIdentity>(userIdentity.getNick(), userIdentity));

@@ -8,7 +8,7 @@ import tahrir.TrNode;
 import tahrir.io.net.microblogging.BroadcastMessageParser;
 import tahrir.io.net.microblogging.BroadcastMessageParser.ParsedPart;
 import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
-import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
+import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -33,7 +33,7 @@ public class BroadcastMessagePostPanel {
 	private final JPanel content;
 	private final TrMainWindow mainWindow;
 
-	public BroadcastMessagePostPanel(final ParsedMicroblog mb, final TrMainWindow mainWindow) {
+	public BroadcastMessagePostPanel(final ParsedBroadcastMessage mb, final TrMainWindow mainWindow) {
 		this.mainWindow = mainWindow;
 		content = new JPanel(new MigLayout());
         content.setBackground(Color.WHITE);
@@ -49,14 +49,14 @@ public class BroadcastMessagePostPanel {
 		return content;
 	}
 
-	private void addPostTime(final ParsedMicroblog mb) {
+	private void addPostTime(final ParsedBroadcastMessage mb) {
 		final JLabel postTime = new JLabel(DateParser.parseTime(mb.getMbData().getTimeCreated()));
 		postTime.setForeground(Color.GRAY);
 		postTime.setFont(new Font("time", Font.PLAIN, postTime.getFont().getSize() - 2));
         content.add(postTime, "gap push, wrap");
 	}
 
-	private void addAuthorButton(final ParsedMicroblog mb, final TrMainWindow mainWindow) {
+	private void addAuthorButton(final ParsedBroadcastMessage mb, final TrMainWindow mainWindow) {
 		final AuthorDisplayPageButton authorNick = new AuthorDisplayPageButton(mainWindow,
 				mb.getMbData().getAuthorPubKey(), mb.getMbData().getAuthorNick());
 		authorNick.setFont(new Font("bold", Font.BOLD, authorNick.getFont().getSize() + 2));
@@ -72,7 +72,7 @@ public class BroadcastMessagePostPanel {
         return messageTextPane;
 
     }
-	private void addTextPane(final ParsedMicroblog mb, TrMainWindow mainWindow) {
+	private void addTextPane(final ParsedBroadcastMessage mb, TrMainWindow mainWindow) {
         final JTextPane messageTextPane = new JTextPane();
         setTextPane(messageTextPane);
 
@@ -97,7 +97,7 @@ public class BroadcastMessagePostPanel {
 		content.add(messageTextPane, "wrap, width min:"+(TrConstants.GUI_WIDTH_PX-7));
 	}
 
-    private void addReBroadcastButtons(final TrNode node, final ParsedMicroblog pmb){
+    private void addReBroadcastButtons(final TrNode node, final ParsedBroadcastMessage pmb){
 
         final JButton reBroadcastButton = new JButton("Boost");
         reBroadcastButton.addMouseListener(new MouseAdapter() {
@@ -137,8 +137,8 @@ public class BroadcastMessagePostPanel {
     private final class reBroadcast implements ActionListener
     {
         private final TrNode node;
-        private final ParsedMicroblog pmb;
-        public reBroadcast(final TrNode node, final ParsedMicroblog pmb) {
+        private final ParsedBroadcastMessage pmb;
+        public reBroadcast(final TrNode node, final ParsedBroadcastMessage pmb) {
             this.node = node;
             this.pmb = pmb;
         }

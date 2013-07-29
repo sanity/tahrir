@@ -12,7 +12,7 @@ import java.security.interfaces.RSAPublicKey;
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 
-public class GeneralMicroblogInfo {
+public class GeneralBroadcastMessageInfo {
 	private String languageCode;
     // TODO: Use UserIdentity here
 	private String authorNick;
@@ -20,12 +20,12 @@ public class GeneralMicroblogInfo {
 	private long timeCreated;
 
     // For serialization
-    public GeneralMicroblogInfo() {
+    public GeneralBroadcastMessageInfo() {
 
     }
 
-	public GeneralMicroblogInfo(final String languageCode, final String authorNick,
-			final RSAPublicKey authorPubKey, final long timeCreated) {
+	public GeneralBroadcastMessageInfo(final String languageCode, final String authorNick,
+                                       final RSAPublicKey authorPubKey, final long timeCreated) {
 		this.languageCode = languageCode;
 		this.authorNick = authorNick;
 		this.authorPubKey = authorPubKey;
@@ -49,9 +49,9 @@ public class GeneralMicroblogInfo {
 			return true;
 		if (obj == null)
 			return false;
-		if (!(obj instanceof GeneralMicroblogInfo))
+		if (!(obj instanceof GeneralBroadcastMessageInfo))
 			return false;
-		final GeneralMicroblogInfo other = (GeneralMicroblogInfo) obj;
+		final GeneralBroadcastMessageInfo other = (GeneralBroadcastMessageInfo) obj;
 		if (authorNick == null) {
 			if (other.authorNick != null)
 				return false;

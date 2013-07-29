@@ -15,8 +15,8 @@ import java.util.Set;
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 
-public class ParsedMicroblog {
-	private final GeneralMicroblogInfo mbData;
+public class ParsedBroadcastMessage {
+	private final GeneralBroadcastMessageInfo mbData;
 	private final ImmutableSortedMultiset<ParsedPart> parsedParts;
 	/**
 	 * Fast lookup of mentions for filtering.
@@ -24,8 +24,8 @@ public class ParsedMicroblog {
 	private final ImmutableSet<RSAPublicKey> mentions;
 
 
-	public ParsedMicroblog(final GeneralMicroblogInfo mbData, ImmutableSet<RSAPublicKey> mentions,
-			ImmutableSortedMultiset<ParsedPart> parsedParts) {
+	public ParsedBroadcastMessage(final GeneralBroadcastMessageInfo mbData, ImmutableSet<RSAPublicKey> mentions,
+                                  ImmutableSortedMultiset<ParsedPart> parsedParts) {
 		this.mbData = mbData;
 		this.mentions = mentions;
 		this.parsedParts = parsedParts;
@@ -34,7 +34,7 @@ public class ParsedMicroblog {
 	/**
 	 * Easy constructor for testing purposes. Not for normal usage as it makes constructor unnecessarily slow.
 	 */
-	public ParsedMicroblog(GeneralMicroblogInfo mbData, ImmutableSortedMultiset<ParsedPart> parsedParts) {
+	public ParsedBroadcastMessage(GeneralBroadcastMessageInfo mbData, ImmutableSortedMultiset<ParsedPart> parsedParts) {
 		this.mbData = mbData;
 		this.parsedParts = parsedParts;
 		// extract the mentions from the parsedParts
@@ -56,7 +56,7 @@ public class ParsedMicroblog {
 		return parsedParts;
 	}
 
-	public GeneralMicroblogInfo getMbData() {
+	public GeneralBroadcastMessageInfo getMbData() {
 		return mbData;
 	}
 
@@ -65,7 +65,7 @@ public class ParsedMicroblog {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 
-		ParsedMicroblog that = (ParsedMicroblog) o;
+		ParsedBroadcastMessage that = (ParsedBroadcastMessage) o;
 
 		if (!mbData.equals(that.mbData)) return false;
 		if (!parsedParts.equals(that.parsedParts)) return false;

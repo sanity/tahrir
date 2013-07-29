@@ -9,7 +9,7 @@ import tahrir.io.net.microblogging.BroadcastMessageParser;
 import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.containers.BroadcastMessageInbox;
 import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
-import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
+import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
 import tahrir.tools.TrUtils;
 import tahrir.ui.TrMainWindow;
 
@@ -56,18 +56,18 @@ public class GUIMain {
             node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user5);
             node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user6);
 
-            ParsedMicroblog fromRand = TrUtils.TestUtils.getParsedMicroblog();
-            ParsedMicroblog fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);
-            ParsedMicroblog fromUser2 = TrUtils.TestUtils.getParsedMicroblog(user2, user1);
-            ParsedMicroblog fromUser3 = TrUtils.TestUtils.getParsedMicroblog(user3);
-            SortedSet<ParsedMicroblog> parsedMbs = Sets.newTreeSet(new BroadcastMessageInbox.ParsedMicroblogTimeComparator());
+            ParsedBroadcastMessage fromRand = TrUtils.TestUtils.getParsedMicroblog();
+            ParsedBroadcastMessage fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);
+            ParsedBroadcastMessage fromUser2 = TrUtils.TestUtils.getParsedMicroblog(user2, user1);
+            ParsedBroadcastMessage fromUser3 = TrUtils.TestUtils.getParsedMicroblog(user3);
+            SortedSet<ParsedBroadcastMessage> parsedMbs = Sets.newTreeSet(new BroadcastMessageInbox.ParsedMicroblogTimeComparator());
             parsedMbs.add(fromRand);
             parsedMbs.add(fromUser1);
             parsedMbs.add(fromUser2);
 
-            for (ParsedMicroblog parsedMicroblog : parsedMbs) {
-                String xmlMessage = BroadcastMessageParser.getXML(parsedMicroblog.getParsedParts());
-                BroadcastMessage broadcastMessage = new BroadcastMessage(xmlMessage, parsedMicroblog.getMbData());
+            for (ParsedBroadcastMessage parsedBroadcastMessage : parsedMbs) {
+                String xmlMessage = BroadcastMessageParser.getXML(parsedBroadcastMessage.getParsedParts());
+                BroadcastMessage broadcastMessage = new BroadcastMessage(xmlMessage, parsedBroadcastMessage.getMbData());
                 node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
             }
 

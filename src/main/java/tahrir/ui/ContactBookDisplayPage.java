@@ -1,10 +1,8 @@
 package tahrir.ui;
 
-import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import tahrir.io.net.microblogging.UserIdentity;
-import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;

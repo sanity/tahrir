@@ -4,16 +4,13 @@ import com.google.common.base.Predicate;
 import com.sun.istack.internal.Nullable;
 import tahrir.TrConstants;
 import tahrir.io.net.microblogging.IdentityStore;
-import tahrir.io.net.microblogging.UserIdentity;
-import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
-
-import java.util.Set;
+import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
 
 /**
  * User: ravisvi <ravitejasvi@gmail.com>
  * Date: 23/07/13
  */
-public class FollowingFilter  implements Predicate<ParsedMicroblog> {
+public class FollowingFilter  implements Predicate<ParsedBroadcastMessage> {
 
     private final IdentityStore identityStore;
 
@@ -22,7 +19,7 @@ public class FollowingFilter  implements Predicate<ParsedMicroblog> {
     }
 
     @Override
-    public boolean apply(@Nullable final tahrir.io.net.microblogging.microblogs.ParsedMicroblog parsedMicroblog) {
-        return identityStore.getIdentitiesWithLabel(TrConstants.FOLLOWING).contains(parsedMicroblog.getMbData().getAuthor());
+    public boolean apply(@Nullable final ParsedBroadcastMessage parsedBroadcastMessage) {
+        return identityStore.getIdentitiesWithLabel(TrConstants.FOLLOWING).contains(parsedBroadcastMessage.getMbData().getAuthor());
     }
 }

@@ -15,8 +15,8 @@ import tahrir.io.net.microblogging.BroadcastMessageParser.ParsedPart;
 import tahrir.io.net.microblogging.BroadcastMessageParser.PositionComparator;
 import tahrir.io.net.microblogging.BroadcastMessageParser.TextPart;
 import tahrir.io.net.microblogging.UserIdentity;
-import tahrir.io.net.microblogging.microblogs.GeneralMicroblogInfo;
-import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
+import tahrir.io.net.microblogging.microblogs.GeneralBroadcastMessageInfo;
+import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
 import tahrir.tools.GsonSerializers.RSAPublicKeyDeserializer;
 import tahrir.tools.GsonSerializers.RSAPublicKeySerializer;
 
@@ -121,7 +121,7 @@ public class TrUtils {
 		/**
 		 * Get a microblog by a random user which has a mention to another random user.
 		 */
-		public static ParsedMicroblog getParsedMicroblog() {
+		public static ParsedBroadcastMessage getParsedMicroblog() {
 			int mbPosition = 0;
 			ParsedPart text = new TextPart(mbPosition++, "Here's a mention of a random user ");
 			ParsedPart mention = new MentionPart(mbPosition++, TrCrypto.createRsaKeyPair().a, "anAlias");
@@ -130,16 +130,16 @@ public class TrUtils {
 			parsedParts.add(text);
 			parsedParts.add(mention);
 
-			GeneralMicroblogInfo mbData = new GeneralMicroblogInfo(null, "aAuthor", TrCrypto.createRsaKeyPair().a,
+			GeneralBroadcastMessageInfo mbData = new GeneralBroadcastMessageInfo(null, "aAuthor", TrCrypto.createRsaKeyPair().a,
 					System.currentTimeMillis());
-			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(),
+			return new ParsedBroadcastMessage(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(),
 					parsedParts));
 		}
 
 		/**
 		 * Get a microblog from a user that mentions another user twice.
 		 */
-		public static ParsedMicroblog getParsedMicroblog(UserIdentity from, UserIdentity mention) {
+		public static ParsedBroadcastMessage getParsedMicroblog(UserIdentity from, UserIdentity mention) {
 			int mbPosition = 0;
 			ParsedPart mentionPart = new MentionPart(mbPosition++, mention.getPubKey(), mention.getNick());
 			ParsedPart textPart = new TextPart(mbPosition++, " was just mentioned.");
@@ -152,22 +152,22 @@ public class TrUtils {
 			parsedParts.add(anotherMentionPart);
 			parsedParts.add(anotherTextPart);
 
-			GeneralMicroblogInfo mbData = new GeneralMicroblogInfo(null, from.getNick(), from.getPubKey(), System.currentTimeMillis());
-			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(), parsedParts));
+			GeneralBroadcastMessageInfo mbData = new GeneralBroadcastMessageInfo(null, from.getNick(), from.getPubKey(), System.currentTimeMillis());
+			return new ParsedBroadcastMessage(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(), parsedParts));
 		}
 
 		/**
 		 * Get microblog from a user which is just text, no mentions.
 		 */
-		public static ParsedMicroblog getParsedMicroblog(UserIdentity from) {
+		public static ParsedBroadcastMessage getParsedMicroblog(UserIdentity from) {
 			int mbPosition = 0;
 			ParsedPart textPart = new TextPart(mbPosition++, "This is just a plain text microblog.");
 
 			SortedMultiset<ParsedPart> parsedParts = TreeMultiset.create(new PositionComparator());
 			parsedParts.add(textPart);
 
-			GeneralMicroblogInfo mbData = new GeneralMicroblogInfo(null, from.getNick(), from.getPubKey(), System.currentTimeMillis());
-			return new ParsedMicroblog(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(), parsedParts));
+			GeneralBroadcastMessageInfo mbData = new GeneralBroadcastMessageInfo(null, from.getNick(), from.getPubKey(), System.currentTimeMillis());
+			return new ParsedBroadcastMessage(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(), parsedParts));
 		}
 
 		public static File createTempDirectory() throws IOException {

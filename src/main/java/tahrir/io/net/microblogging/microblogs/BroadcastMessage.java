@@ -4,7 +4,6 @@ import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.crypto.TrSignature;
-import tahrir.io.net.microblogging.UserIdentity;
 
 /**
  * A microblog for broadcast.
@@ -13,7 +12,7 @@ import tahrir.io.net.microblogging.UserIdentity;
  */
 public class BroadcastMessage {
 	public int priority;
-	public GeneralMicroblogInfo otherData;
+	public GeneralBroadcastMessageInfo otherData;
 	/**
 	 * Message is the microblog in an XML format.
 	 */
@@ -31,7 +30,7 @@ public class BroadcastMessage {
 
 	public BroadcastMessage(final TrNode creatingNode, final String message, final int priority) {
 		// TODO: get info from config
-		otherData = new GeneralMicroblogInfo("", creatingNode.config.currentUserIdentity.getNick(), creatingNode.getRemoteNodeAddress().publicKey, System.currentTimeMillis());
+		otherData = new GeneralBroadcastMessageInfo("", creatingNode.config.currentUserIdentity.getNick(), creatingNode.getRemoteNodeAddress().publicKey, System.currentTimeMillis());
 		this.priority = priority;
 		this.message = message;
 		try {
@@ -47,7 +46,7 @@ public class BroadcastMessage {
 	 * @param message
 	 * @param otherData
 	 */
-	public BroadcastMessage(String message, GeneralMicroblogInfo otherData) {
+	public BroadcastMessage(String message, GeneralBroadcastMessageInfo otherData) {
 		this.message = message;
 		this.otherData = otherData;
 		this.signature = null;

@@ -6,7 +6,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
+import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -18,9 +18,9 @@ public class BroadcastMessageDisplayPage {
 	private final JComponent content;
 	private final MicroblogTableModel tableModel;
     private final EventBus eventBus;
-    private final Predicate<ParsedMicroblog> filter;
+    private final Predicate<ParsedBroadcastMessage> filter;
     private static final Logger logger = LoggerFactory.getLogger(BroadcastMessageDisplayPage.class.getName());
-    public BroadcastMessageDisplayPage(final Predicate<ParsedMicroblog> filter, final TrMainWindow mainWindow) {
+    public BroadcastMessageDisplayPage(final Predicate<ParsedBroadcastMessage> filter, final TrMainWindow mainWindow) {
         this.filter = filter;
         eventBus = mainWindow.node.mbClasses.eventBus;
 		tableModel = new MicroblogTableModel();
@@ -32,8 +32,8 @@ public class BroadcastMessageDisplayPage {
 		// TODO: change the size as needed
 		table.setRowHeight(110);
         table.setGridColor(new Color(244,242,242));
-		table.setDefaultRenderer(ParsedMicroblog.class, renderer);
-		table.setDefaultEditor(ParsedMicroblog.class, renderer);
+		table.setDefaultRenderer(ParsedBroadcastMessage.class, renderer);
+		table.setDefaultEditor(ParsedBroadcastMessage.class, renderer);
 
 		final JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -43,11 +43,11 @@ public class BroadcastMessageDisplayPage {
         logger.debug("EventBus registered");
         eventBus.register(this);
 
-        final SortedSet<ParsedMicroblog> existingMicroblogs = mainWindow.node.mbClasses.mbsForViewing.getMicroblogSet();
+        final SortedSet<ParsedBroadcastMessage> existingMicroblogs = mainWindow.node.mbClasses.mbsForViewing.getMicroblogSet();
 
-        for (ParsedMicroblog parsedMicroblog : existingMicroblogs) {
-            if (filter.apply(parsedMicroblog)) {
-                tableModel.addNewMicroblog(parsedMicroblog);
+        for (ParsedBroadcastMessage parsedBroadcastMessage : existingMicroblogs) {
+            if (filter.apply(parsedBroadcastMessage)) {
+                tableModel.addNewMicroblog(parsedBroadcastMessage);
             }
         }
     }
@@ -67,7 +67,7 @@ public class BroadcastMessageDisplayPage {
 
 	@SuppressWarnings("serial")
 	private class MicroblogTableModel extends AbstractTableModel {
-		private final ArrayList<ParsedMicroblog> microblogs;
+		private final ArrayList<ParsedBroadcastMessage> microblogs;
         // TODO: Use a separate Set so that we can efficiently check whether
         // microblogs are being added more than once
 
@@ -90,13 +90,13 @@ public class BroadcastMessageDisplayPage {
 			return microblogs.get(row);
 		}
 
-		public void addNewMicroblog(final ParsedMicroblog mb) {
+		public void addNewMicroblog(final ParsedBroadcastMessage mb) {
             microblogs.add(0, mb);
             // This is what updates the GUI with new microblogs.
             this.fireTableRowsInserted(0, tableModel.getRowCount());
 		}
 
-		public void removeMicroblog(final ParsedMicroblog mb) {
+		public void removeMicroblog(final ParsedBroadcastMessage mb) {
 			final int mbIndex = microblogs.indexOf(mb);
 			microblogs.remove(mbIndex);
 			// should we fire a cell updated?
@@ -105,7 +105,7 @@ public class BroadcastMessageDisplayPage {
 
 		@Override
 		public Class<?> getColumnClass(final int columnIndex) {
-			return ParsedMicroblog.class;
+			return ParsedBroadcastMessage.class;
 		}
 
 		@Override

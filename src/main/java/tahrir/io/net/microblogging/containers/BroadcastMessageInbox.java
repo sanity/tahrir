@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.io.net.microblogging.IdentityStore;
-import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
+import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
 import tahrir.ui.BroadcastMessageModifiedEvent;
 
 import java.util.Collections;
@@ -21,7 +21,7 @@ import java.util.SortedSet;
 public class BroadcastMessageInbox {
 	private static Logger logger = LoggerFactory.getLogger(BroadcastMessageInbox.class);
 
-	private final SortedSet<ParsedMicroblog> parsedMicroblogs;
+	private final SortedSet<ParsedBroadcastMessage> parsedBroadcastMessages;
 	private static final ParsedMicroblogTimeComparator comparator =new ParsedMicroblogTimeComparator();
 
 	private final IdentityStore identityStore;
@@ -31,12 +31,12 @@ public class BroadcastMessageInbox {
 		this.identityStore = identityStore;
         eventBus = identityStore.eventBus;
 		//comparator = new ParsedMicroblogTimeComparator();
-        SortedSet<ParsedMicroblog> tmpSet = Sets.newTreeSet(comparator);
-		parsedMicroblogs = Collections.synchronizedSortedSet(tmpSet);
+        SortedSet<ParsedBroadcastMessage> tmpSet = Sets.newTreeSet(comparator);
+		parsedBroadcastMessages = Collections.synchronizedSortedSet(tmpSet);
 	}
 
 	// synchronised to ensure that size of set is checked properly
-	public synchronized boolean insert(final ParsedMicroblog mb) {
+	public synchronized boolean insert(final ParsedBroadcastMessage mb) {
 		// the microblog might not be added
 		boolean inserted = false;
 
@@ -45,7 +45,7 @@ public class BroadcastMessageInbox {
 			inserted = true;
 		} else if (shouldAddByReplacement(mb)) {
 			// make room
-			removeFromParsed(parsedMicroblogs.last());
+			removeFromParsed(parsedBroadcastMessages.last());
 			addToParsed(mb);
 			inserted = true;
 			logger.info("Adding a microblog for viewing by replacement");
@@ -53,49 +53,49 @@ public class BroadcastMessageInbox {
 		return inserted;
 	}
 
-	public SortedSet<ParsedMicroblog> getMicroblogSet() {
-		return parsedMicroblogs;
+	public SortedSet<ParsedBroadcastMessage> getMicroblogSet() {
+		return parsedBroadcastMessages;
 	}
 
-	private void removeFromParsed(final ParsedMicroblog mb) {
-		parsedMicroblogs.remove(mb);
+	private void removeFromParsed(final ParsedBroadcastMessage mb) {
+		parsedBroadcastMessages.remove(mb);
         eventBus.post(new BroadcastMessageModifiedEvent(mb, BroadcastMessageModifiedEvent.ModificationType.REMOVE));
 	}
 
-	private void addToParsed(final ParsedMicroblog mb) {
-		parsedMicroblogs.add(mb);
+	private void addToParsed(final ParsedBroadcastMessage mb) {
+		parsedBroadcastMessages.add(mb);
         eventBus.post(new BroadcastMessageModifiedEvent(mb, BroadcastMessageModifiedEvent.ModificationType.RECEIVED));
 	}
 
-	private boolean shouldAddByReplacement(final ParsedMicroblog mb) {
+	private boolean shouldAddByReplacement(final ParsedBroadcastMessage mb) {
 		return identityStore.hasIdentityInIdStore(mb.getMbData().getAuthor()) || isNewerThanLast(mb);
 	}
 
-	private boolean isNewerThanLast(final ParsedMicroblog mb) {
-		return comparator.compare(mb, parsedMicroblogs.last()) < 0;
+	private boolean isNewerThanLast(final ParsedBroadcastMessage mb) {
+		return comparator.compare(mb, parsedBroadcastMessages.last()) < 0;
 	}
 
 	private boolean isFull() {
-		return parsedMicroblogs.size() > TrConstants.MAX_MICROBLOGS_FOR_VIEWING;
+		return parsedBroadcastMessages.size() > TrConstants.MAX_MICROBLOGS_FOR_VIEWING;
 	}
 
-	public static class ParsedMicroblogTimeComparator implements Comparator<ParsedMicroblog> {
+	public static class ParsedMicroblogTimeComparator implements Comparator<ParsedBroadcastMessage> {
 		@Override
-		public int compare(final ParsedMicroblog mb1, final ParsedMicroblog mb2) {
+		public int compare(final ParsedBroadcastMessage mb1, final ParsedBroadcastMessage mb2) {
 			return Double.compare(mb2.getMbData().getTimeCreated(), mb1.getMbData().getTimeCreated());
 		}
 	}
 
 	public static class MicroblogAddedEvent {
-		public ParsedMicroblog mb;
-		public MicroblogAddedEvent(final ParsedMicroblog mb) {
+		public ParsedBroadcastMessage mb;
+		public MicroblogAddedEvent(final ParsedBroadcastMessage mb) {
 			this.mb = mb;
 		}
 	}
 
 	public static class MicroblogRemovalEvent {
-		public ParsedMicroblog mb;
-		public MicroblogRemovalEvent(final ParsedMicroblog mb) {
+		public ParsedBroadcastMessage mb;
+		public MicroblogRemovalEvent(final ParsedBroadcastMessage mb) {
 			this.mb = mb;
 		}
 	}

@@ -4,10 +4,7 @@ import com.google.common.base.Predicate;
 import com.sun.istack.internal.Nullable;
 import tahrir.TrConstants;
 import tahrir.io.net.microblogging.IdentityStore;
-import tahrir.io.net.microblogging.UserIdentity;
-import tahrir.io.net.microblogging.microblogs.ParsedMicroblog;
-
-import java.util.Set;
+import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,7 +13,7 @@ import java.util.Set;
  * Time: 1:22 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AuthorFilter implements Predicate<ParsedMicroblog> {
+public class AuthorFilter implements Predicate<ParsedBroadcastMessage> {
     private final IdentityStore identityStore;
 
     public AuthorFilter(IdentityStore identityStore) {
@@ -24,7 +21,7 @@ public class AuthorFilter implements Predicate<ParsedMicroblog> {
     }
 
     @Override
-    public boolean apply(@Nullable final tahrir.io.net.microblogging.microblogs.ParsedMicroblog parsedMicroblog) {
-        return identityStore.getIdentitiesWithLabel(TrConstants.OWN).contains(parsedMicroblog.getMbData().getAuthor());
+    public boolean apply(@Nullable final ParsedBroadcastMessage parsedBroadcastMessage) {
+        return identityStore.getIdentitiesWithLabel(TrConstants.OWN).contains(parsedBroadcastMessage.getMbData().getAuthor());
     }
 }
