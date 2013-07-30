@@ -3,80 +3,102 @@ package tahrir.io.net.microblogging.microblogs;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedMultiset;
 import com.google.common.collect.Sets;
+import nu.xom.Builder;
+import nu.xom.Document;
+import nu.xom.Element;
+import nu.xom.ParsingException;
+import tahrir.TrConstants;
 import tahrir.io.net.microblogging.BroadcastMessageParser.MentionPart;
 import tahrir.io.net.microblogging.BroadcastMessageParser.ParsedPart;
 
+import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
+import java.util.ArrayList;
 import java.util.Set;
 
 /**
- * A microblog which has been parsed.
+ * BroadcastMessage in xml format.
  *
- * @author Kieran Donegan <kdonegan.92@gmail.com>
+ * @author Ravi Tejasvi <ravitejasvi@gmail.com>
  */
 
 public class ParsedBroadcastMessage {
-	private final GeneralBroadcastMessageInfo mbData;
-	private final ImmutableSortedMultiset<ParsedPart> parsedParts;
-	/**
-	 * Fast lookup of mentions for filtering.
-	 */
-	private final ImmutableSet<RSAPublicKey> mentions;
 
+    private Document broadcastMessageDocument;
+    /**
+     * Format for xml is
+     * <mb>
+     *     <txt>
+     *         <mtn></mtn>
+     *     </txt>
+     * </mb>
+     */
 
-	public ParsedBroadcastMessage(final GeneralBroadcastMessageInfo mbData, ImmutableSet<RSAPublicKey> mentions,
-                                  ImmutableSortedMultiset<ParsedPart> parsedParts) {
-		this.mbData = mbData;
-		this.mentions = mentions;
-		this.parsedParts = parsedParts;
-	}
+    private ParsedBroadcastMessage(Document broadcastMessageDocument){
+        this.broadcastMessageDocument = broadcastMessageDocument;
+    }
 
-	/**
-	 * Easy constructor for testing purposes. Not for normal usage as it makes constructor unnecessarily slow.
-	 */
-	public ParsedBroadcastMessage(GeneralBroadcastMessageInfo mbData, ImmutableSortedMultiset<ParsedPart> parsedParts) {
-		this.mbData = mbData;
-		this.parsedParts = parsedParts;
-		// extract the mentions from the parsedParts
-		Set<RSAPublicKey> tempMentions = Sets.newHashSet();
-		for (ParsedPart parsedPart : parsedParts) {
-			if (parsedPart instanceof MentionPart) {
-				MentionPart asMentionPart = (MentionPart) parsedPart;
-				tempMentions.add(asMentionPart.getPubKeyOfMentioned());
-			}
-		}
-		mentions = ImmutableSet.copyOf(tempMentions);
-	}
+    public static ParsedBroadcastMessage createParsedBroadcastMessage(String unparsedBroadcastMessage){
+        Element rootElement = new Element(TrConstants.FormatInfo.ROOT);
+        Element plainText = new Element(TrConstants.FormatInfo.PLAIN_TEXT);
+        Element mention = new Element(TrConstants.FormatInfo.MENTION);
+        Document broadcastMessageDocument = new Document(rootElement);
+        broadcastMessageDocument.appendChild(plainText);
+        for(int charPos = 0; charPos < unparsedBroadcastMessage.length(); charPos++){
+            if(unparsedBroadcastMessage.charAt(charPos) == '@'){
+                StringBuilder tempBroadcastMessageMentionPart = new StringBuilder();
+                plainText.appendChild(mention);
+                charPos++;
+                while(unparsedBroadcastMessage.charAt(charPos)!= ' '){
+                    tempBroadcastMessageMentionPart.append(unparsedBroadcastMessage.charAt(charPos));
+                    charPos++;
+                }
+                mention.appendChild(tempBroadcastMessageMentionPart.toString());
+            }
+            else{
+                StringBuilder tempBroadcastMessagePart = new StringBuilder();
+                while(unparsedBroadcastMessage.charAt(charPos)!= ' '){
+                    tempBroadcastMessagePart.append(unparsedBroadcastMessage.charAt(charPos));
+                    charPos++;
+                }
+                plainText.appendChild(tempBroadcastMessagePart.toString());
+            }
+        }
+        return new ParsedBroadcastMessage(broadcastMessageDocument);
+    }
 
-	public boolean hasMention(final RSAPublicKey userKey) {
-		return mentions.contains(userKey);
-	}
+    public ParsedBroadcastMessage(String broadcastMessageInXml){
+        try {
+            this.broadcastMessageDocument = new Builder().build(broadcastMessageInXml, null);
+        } catch (ParsingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	public ImmutableSortedMultiset<ParsedPart> getParsedParts() {
-		return parsedParts;
-	}
+    public String docToXmlString(){
+        return this.broadcastMessageDocument.toXML();
+    }
 
-	public GeneralBroadcastMessageInfo getMbData() {
-		return mbData;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		ParsedBroadcastMessage that = (ParsedBroadcastMessage) o;
-
-		if (!mbData.equals(that.mbData)) return false;
-		if (!parsedParts.equals(that.parsedParts)) return false;
-
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		int result = mbData.hashCode();
-		result = 31 * result + parsedParts.hashCode();
-		return result;
-	}
+    public String getUnparsedBroadcastMessage(){
+        String docInXmlString = this.docToXmlString();
+        StringBuilder unparsedBroadcastMessage = new StringBuilder();
+        for(char charPos = 0; charPos< docInXmlString.length(); charPos++){
+            if(docInXmlString.charAt(charPos) == '<'){
+                charPos++;
+                if(docInXmlString.charAt(charPos) == 'm'){
+                    unparsedBroadcastMessage.append('@');
+                    charPos++;
+                }
+                while(docInXmlString.charAt(charPos)!= '>'){
+                    charPos++;
+                }
+            }
+            else{
+                unparsedBroadcastMessage.append(docInXmlString.charAt(charPos));
+            }
+        }
+        return unparsedBroadcastMessage.toString();
+    }
 }
