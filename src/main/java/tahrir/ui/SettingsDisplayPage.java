@@ -2,14 +2,11 @@ package tahrir.ui;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import tahrir.io.net.microblogging.UserIdentity;
+import tahrir.io.net.broadcasts.UserIdentity;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 
 /**
  * User: ravisvi <ravitejasvi@gmail.com>

@@ -1,8 +1,8 @@
-package tahrir.io.net.microblogging;
+package tahrir.io.net.broadcasts;
 
 import tahrir.TrConstants;
 import tahrir.io.net.TrSession;
-import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.io.net.sessions.Priority;
 
 public interface TransmitMicroblogSession extends TrSession {

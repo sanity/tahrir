@@ -1,4 +1,4 @@
-package tahrir.io.net.microblogging;
+package tahrir.io.net.broadcasts;
 
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import tahrir.TrNode;
 import tahrir.io.net.PhysicalNetworkLocation;
 import tahrir.io.net.TrPeerManager;
-import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 
 import java.util.Map;
 import java.util.Set;

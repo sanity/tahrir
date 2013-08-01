@@ -1,12 +1,12 @@
-package tahrir.io.net.microblogging.containers;
+package tahrir.io.net.broadcasts.containers;
 
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
-import tahrir.io.net.microblogging.IdentityStore;
-import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.io.net.broadcasts.IdentityStore;
+import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.ui.BroadcastMessageModifiedEvent;
 
 import java.util.Collections;

@@ -1,4 +1,4 @@
-package tahrir.io.net.microblogging.broadcastMessages;
+package tahrir.io.net.broadcasts.broadcastMessages;
 
 import nu.xom.*;
 import tahrir.TrConstants;
@@ -14,7 +14,6 @@ import java.io.IOException;
 public class ParsedBroadcastMessage {
 
     private Document broadcastMessageDocument;
-    private String languageCode;
     private long timeCreated;
     /**
      * Format for xml is
@@ -27,14 +26,21 @@ public class ParsedBroadcastMessage {
 
     private ParsedBroadcastMessage(Document broadcastMessageDocument){
         this.broadcastMessageDocument = broadcastMessageDocument;
+        this.timeCreated = System.currentTimeMillis();
     }
 
-    public static ParsedBroadcastMessage createFromPlaintext(String plaintextBroadcastMessage){
+    public long getTimeCreated(){
+        return this.timeCreated;
+    }
+
+    public static ParsedBroadcastMessage createFromPlaintext(String plaintextBroadcastMessage, String languageCode){
         Element rootElement = new Element(TrConstants.FormatInfo.ROOT);
         Element plainText = new Element(TrConstants.FormatInfo.PLAIN_TEXT);
         Element mention = new Element(TrConstants.FormatInfo.MENTION);
         Document broadcastMessageDocument = new Document(rootElement);
         broadcastMessageDocument.appendChild(plainText);
+        Attribute language = new Attribute("lang", languageCode);
+        plainText.addAttribute(language);
         for(int charPos = 0; charPos < plaintextBroadcastMessage.length(); charPos++){
             if(plaintextBroadcastMessage.charAt(charPos) == '@'){
                 StringBuilder tempBroadcastMessageMentionPart = new StringBuilder();

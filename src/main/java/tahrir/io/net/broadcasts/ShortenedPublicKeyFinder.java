@@ -1,6 +1,5 @@
-package tahrir.io.net.microblogging;
+package tahrir.io.net.broadcasts;
 
-import com.google.gson.JsonParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;

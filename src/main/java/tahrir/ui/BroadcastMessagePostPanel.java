@@ -5,10 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.TrNode;
-import tahrir.io.net.microblogging.BroadcastMessageParser;
-import tahrir.io.net.microblogging.BroadcastMessageParser.ParsedPart;
-import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
-import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.SignedBroadcastMessage;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -33,32 +32,32 @@ public class BroadcastMessagePostPanel {
 	private final JPanel content;
 	private final TrMainWindow mainWindow;
 
-	public BroadcastMessagePostPanel(final ParsedBroadcastMessage mb, final TrMainWindow mainWindow) {
+	public BroadcastMessagePostPanel(final BroadcastMessage bm, final TrMainWindow mainWindow) {
 		this.mainWindow = mainWindow;
 		content = new JPanel(new MigLayout());
         content.setBackground(Color.WHITE);
 
 
-		addAuthorButton(mb, mainWindow);
-		addPostTime(mb);
-		addTextPane(mb, mainWindow);
-		addReBroadcastButtons(mainWindow.node, mb);
+		addAuthorButton(bm, mainWindow);
+		addPostTime(bm);
+		addTextPane(bm.signedBroadcastMessage.parsedBroadcastMessage, mainWindow);
+		addReBroadcastButtons(mainWindow.node, bm);
 	}
 
 	public JComponent getContent() {
 		return content;
 	}
 
-	private void addPostTime(final ParsedBroadcastMessage mb) {
-		final JLabel postTime = new JLabel(DateParser.parseTime(mb.getMbData().getTimeCreated()));
+	private void addPostTime(final BroadcastMessage bm) {
+		final JLabel postTime = new JLabel(DateParser.parseTime(bm.signedBroadcastMessage.parsedBroadcastMessage.getTimeCreated()));
 		postTime.setForeground(Color.GRAY);
 		postTime.setFont(new Font("time", Font.PLAIN, postTime.getFont().getSize() - 2));
         content.add(postTime, "gap push, wrap");
 	}
 
-	private void addAuthorButton(final ParsedBroadcastMessage mb, final TrMainWindow mainWindow) {
+	private void addAuthorButton(final BroadcastMessage bm, final TrMainWindow mainWindow) {
 		final AuthorDisplayPageButton authorNick = new AuthorDisplayPageButton(mainWindow,
-				mb.getMbData().getAuthorPubKey(), mb.getMbData().getAuthorNick());
+				bm.signedBroadcastMessage.getAuthor());
 		authorNick.setFont(new Font("bold", Font.BOLD, authorNick.getFont().getSize() + 2));
         authorNick.setForeground(new Color(65,131,196));     //SteelBlue color
 		content.add(authorNick, "align left");
@@ -72,7 +71,7 @@ public class BroadcastMessagePostPanel {
         return messageTextPane;
 
     }
-	private void addTextPane(final ParsedBroadcastMessage mb, TrMainWindow mainWindow) {
+	private void addTextPane(final ParsedBroadcastMessage bm, TrMainWindow mainWindow) {
         final JTextPane messageTextPane = new JTextPane();
         setTextPane(messageTextPane);
 
@@ -97,7 +96,7 @@ public class BroadcastMessagePostPanel {
 		content.add(messageTextPane, "wrap, width min:"+(TrConstants.GUI_WIDTH_PX-7));
 	}
 
-    private void addReBroadcastButtons(final TrNode node, final ParsedBroadcastMessage pmb){
+    private void addReBroadcastButtons(final TrNode node, final BroadcastMessage bm){
 
         final JButton reBroadcastButton = new JButton("Boost");
         reBroadcastButton.addMouseListener(new MouseAdapter() {
@@ -111,7 +110,7 @@ public class BroadcastMessagePostPanel {
         });
         setVotingButtonConfigs(reBroadcastButton, "Re-broadcast this");
         content.add(reBroadcastButton, "split 2, span, align right");
-        reBroadcast action=new reBroadcast(node, pmb);
+        reBroadcast action=new reBroadcast(node, bm);
         reBroadcastButton.addActionListener(action);
     }
 
@@ -137,16 +136,15 @@ public class BroadcastMessagePostPanel {
     private final class reBroadcast implements ActionListener
     {
         private final TrNode node;
-        private final ParsedBroadcastMessage pmb;
-        public reBroadcast(final TrNode node, final ParsedBroadcastMessage pmb) {
+        private final BroadcastMessage bm;
+        public reBroadcast(final TrNode node, final BroadcastMessage bm) {
             this.node = node;
-            this.pmb = pmb;
+            this.bm = bm;
         }
 
         public void actionPerformed(ActionEvent actionEvent) {
-                String xmlMessage = BroadcastMessageParser.getXML(pmb.getParsedParts());
-                BroadcastMessage broadcastMessage = new BroadcastMessage(xmlMessage, pmb.getMbData());
-                node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
+                bm.resetPriority();
+                node.mbClasses.incomingMbHandler.handleInsertion(bm);
         }
 
 

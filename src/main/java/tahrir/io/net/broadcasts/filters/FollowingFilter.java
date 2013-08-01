@@ -1,10 +1,10 @@
-package tahrir.io.net.microblogging.filters;
+package tahrir.io.net.broadcasts.filters;
 
 import com.google.common.base.Predicate;
 import com.sun.istack.internal.Nullable;
 import tahrir.TrConstants;
-import tahrir.io.net.microblogging.IdentityStore;
-import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.io.net.broadcasts.IdentityStore;
+import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 
 /**
  * User: ravisvi <ravitejasvi@gmail.com>

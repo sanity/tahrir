@@ -6,7 +6,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;

@@ -1,15 +1,15 @@
-package tahrir.io.net.microblogging.broadcastMessages;
+package tahrir.io.net.broadcasts.broadcastMessages;
 
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.crypto.TrSignature;
-import tahrir.io.net.microblogging.UserIdentity;
+import tahrir.io.net.broadcasts.UserIdentity;
 
 /**
  * User: ravisvi <ravitejasvi@gmail.com>
  * Date: 01/08/13
  */
 public class SignedBroadcastMessage {
-    private ParsedBroadcastMessage parsedBroadcastMessage;
+    public ParsedBroadcastMessage parsedBroadcastMessage;
     private UserIdentity author;
     private TrSignature signature;
 
@@ -26,6 +26,14 @@ public class SignedBroadcastMessage {
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public TrSignature getSignature(){
+        return signature;
+    }
+
+    public UserIdentity getAuthor(){
+        return author;
     }
 
 

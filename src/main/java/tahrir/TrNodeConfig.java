@@ -4,10 +4,8 @@ import com.google.common.base.Optional;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.*;
 import tahrir.io.net.TrPeerManager.Capabilities;
-import tahrir.io.net.microblogging.UserIdentity;
+import tahrir.io.net.broadcasts.UserIdentity;
 import tahrir.io.net.udpV1.UdpNetworkInterface.UNIConfig;
-
-import java.security.interfaces.RSAPrivateKey;
 
 public class TrNodeConfig {
 	public String privateNodeId = "myprivnodeid.dat";

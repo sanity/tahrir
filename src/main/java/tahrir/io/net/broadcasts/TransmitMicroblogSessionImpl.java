@@ -1,4 +1,4 @@
-package tahrir.io.net.microblogging;
+package tahrir.io.net.broadcasts;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,7 +6,7 @@ import tahrir.TrNode;
 import tahrir.io.net.PhysicalNetworkLocation;
 import tahrir.io.net.TrSessionImpl;
 import tahrir.io.net.TrSessionManager;
-import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;

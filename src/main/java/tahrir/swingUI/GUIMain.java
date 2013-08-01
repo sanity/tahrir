@@ -5,11 +5,10 @@ import com.google.common.collect.Sets;
 import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
-import tahrir.io.net.microblogging.BroadcastMessageParser;
-import tahrir.io.net.microblogging.UserIdentity;
-import tahrir.io.net.microblogging.containers.BroadcastMessageInbox;
-import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
-import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.io.net.broadcasts.UserIdentity;
+import tahrir.io.net.broadcasts.containers.BroadcastMessageInbox;
+import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.tools.TrUtils;
 import tahrir.ui.TrMainWindow;
 

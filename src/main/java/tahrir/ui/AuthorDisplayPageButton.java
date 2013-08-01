@@ -2,8 +2,8 @@ package tahrir.ui;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-import tahrir.io.net.microblogging.UserIdentity;
-import tahrir.io.net.microblogging.filters.AuthorFilter;
+import tahrir.io.net.broadcasts.UserIdentity;
+import tahrir.io.net.broadcasts.filters.AuthorFilter;
 
 import java.awt.event.ActionEvent;
 import java.security.interfaces.RSAPublicKey;
@@ -17,15 +17,13 @@ import java.util.Set;
  */
 @SuppressWarnings("serial")
 public class AuthorDisplayPageButton extends TabCreateButton {
-	private final RSAPublicKey authorKey;
     private final Optional<UserIdentity> authorIdentity;
 	private final TrMainWindow mainWindow;
 
-	public AuthorDisplayPageButton(final TrMainWindow mainWindow, RSAPublicKey authorKey, String text) {
-		super(mainWindow, text);
-		this.authorKey = authorKey;
+	public AuthorDisplayPageButton(final TrMainWindow mainWindow, UserIdentity identity) {
+		super(mainWindow, identity.getNick());
 		this.mainWindow = mainWindow;
-        this.authorIdentity = mainWindow.node.mbClasses.identityStore.getIdentityWithPubKey(authorKey);
+        this.authorIdentity = Optional.of(identity);
 
         addActionListener(this);
 		makeTransparent();

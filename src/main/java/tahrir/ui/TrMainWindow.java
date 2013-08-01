@@ -6,12 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.TrNode;
-import tahrir.io.net.microblogging.BroadcastMessageParser;
-import tahrir.io.net.microblogging.UserIdentity;
-import tahrir.io.net.microblogging.filters.AuthorFilter;
-import tahrir.io.net.microblogging.filters.FollowingFilter;
-import tahrir.io.net.microblogging.filters.Unfiltered;
-import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
+import tahrir.io.net.broadcasts.UserIdentity;
+import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.SignedBroadcastMessage;
+import tahrir.io.net.broadcasts.filters.AuthorFilter;
+import tahrir.io.net.broadcasts.filters.FollowingFilter;
+import tahrir.io.net.broadcasts.filters.Unfiltered;
+import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -50,16 +51,13 @@ public class TrMainWindow {
         newPostButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    String message = newPostPane.getText();
-                    BroadcastMessageParser parsedMicroblog = new BroadcastMessageParser("<mb><txt>"+message+"</txt></mb>");
-                    final BroadcastMessage newBroadcastMessage = new BroadcastMessage(node,
-                            BroadcastMessageParser.getXML(parsedMicroblog.getParsedParts()));
-                    node.mbClasses.incomingMbHandler.handleInsertion(newBroadcastMessage);
-                } catch (ParsingException e1) {
-                    e1.printStackTrace();
-                }
-               newPostPane.setText("");
+                String message = newPostPane.getText();
+                //TODO: get the language from config or settings page.
+                ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext(message, "en");
+                SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.config.currentUserIdentity);
+                final BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
+                node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
+                newPostPane.setText("");
             }
         });
 		contentPanel.add(newPostButton, "align center");

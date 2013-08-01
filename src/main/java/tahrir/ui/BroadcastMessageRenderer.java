@@ -1,6 +1,6 @@
 package tahrir.ui;
 
-import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;

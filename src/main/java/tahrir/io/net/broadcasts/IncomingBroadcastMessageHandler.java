@@ -1,15 +1,14 @@
-package tahrir.io.net.microblogging;
+package tahrir.io.net.broadcasts;
 
 import com.google.common.base.Optional;
 import nu.xom.ParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
-import tahrir.io.net.microblogging.containers.BroadcastMessageInbox;
-import tahrir.io.net.microblogging.containers.BroadcastMessageOutbox;
-import tahrir.io.net.microblogging.broadcastMessages.GeneralBroadcastMessageInfo;
-import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
-import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.io.net.broadcasts.containers.BroadcastMessageInbox;
+import tahrir.io.net.broadcasts.containers.BroadcastMessageOutbox;
+import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.tools.Tuple2;
 
 import java.security.interfaces.RSAPrivateKey;
@@ -35,30 +34,19 @@ public class IncomingBroadcastMessageHandler {
 	}
 
 	public void handleInsertion(final BroadcastMessage mbForBroadcast) {
-		GeneralBroadcastMessageInfo generalMbData = mbForBroadcast.otherData;
-		String unparsedMessage = mbForBroadcast.message;
-		if (!BroadcastMessageIntegrityChecks.isValidMicroblog(generalMbData, unparsedMessage)) {
+		if (!BroadcastMessageIntegrityChecks.isValidMicroblog(mbForBroadcast.signedBroadcastMessage.parsedBroadcastMessage.getPlainTextBroadcastMessage())) {
 			logger.info("A microblog is being ignored because it didn't match required otherData requirements");
 			return;
 		}
-		// try parse the message
-		BroadcastMessageParser parser = null;
-		try {
-			parser = new BroadcastMessageParser(unparsedMessage);
-		} catch (final ParsingException e) {
-			logger.info("A microblog is being ignored because it failed to be parsed");
-			return;
-		}
+
 		// the microblog has now passed all the requirements with parsing and otherData constraints
-		if (identityStore.hasIdentityInIdStore(generalMbData.getAuthor())) {
+		if (identityStore.hasIdentityInIdStore(mbForBroadcast.signedBroadcastMessage.getAuthor())) {
 			// a better priority if they're one of your contacts
 			mbForBroadcast.priority -= TrConstants.CONTACT_PRIORITY_INCREASE;
 		}
-		ParsedBroadcastMessage parsedMb = new ParsedBroadcastMessage(generalMbData, parser.getMentionsFound().keySet(),
-				parser.getParsedParts());
-        UserIdentity userIdentity=new UserIdentity(generalMbData.getAuthorNick(), generalMbData.getAuthorPubKey(), Optional.<RSAPrivateKey>absent());
+        UserIdentity userIdentity = mbForBroadcast.signedBroadcastMessage.getAuthor();
 		addDiscoveredIdentities(new Tuple2<String, UserIdentity>(userIdentity.getNick(), userIdentity));
-		mbsForViewing.insert(parsedMb);
+		mbsForViewing.insert(mbForBroadcast.signedBroadcastMessage.parsedBroadcastMessage);
 		mbsForBroadcast.insert(mbForBroadcast);
 	}
 

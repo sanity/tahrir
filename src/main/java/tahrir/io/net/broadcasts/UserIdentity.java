@@ -1,4 +1,4 @@
-package tahrir.io.net.microblogging;
+package tahrir.io.net.broadcasts;
 
 import com.google.common.base.Optional;
 

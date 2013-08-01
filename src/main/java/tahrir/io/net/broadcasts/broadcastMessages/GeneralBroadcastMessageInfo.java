@@ -1,7 +1,7 @@
-package tahrir.io.net.microblogging.broadcastMessages;
+package tahrir.io.net.broadcasts.broadcastMessages;
 
 import com.google.common.base.Optional;
-import tahrir.io.net.microblogging.UserIdentity;
+import tahrir.io.net.broadcasts.UserIdentity;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;

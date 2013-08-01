@@ -68,7 +68,7 @@ public class TrConstants {
 	 */
 	public static class FormatInfo {
 		public static int ALIAS_ATTRIBUTE_INDEX = 0;
-		public static String ROOT = "mb";
+		public static String ROOT = "bm";
 		public static String PLAIN_TEXT = "txt";
 		public static String MENTION = "mtn";
 		public static String ALIAS_ATTRIBUTE = "alias";
