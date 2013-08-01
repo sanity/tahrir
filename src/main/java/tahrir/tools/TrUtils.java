@@ -15,8 +15,8 @@ import tahrir.io.net.microblogging.BroadcastMessageParser.ParsedPart;
 import tahrir.io.net.microblogging.BroadcastMessageParser.PositionComparator;
 import tahrir.io.net.microblogging.BroadcastMessageParser.TextPart;
 import tahrir.io.net.microblogging.UserIdentity;
-import tahrir.io.net.microblogging.microblogs.GeneralBroadcastMessageInfo;
-import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.GeneralBroadcastMessageInfo;
+import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.tools.GsonSerializers.RSAPublicKeyDeserializer;
 import tahrir.tools.GsonSerializers.RSAPublicKeySerializer;
 

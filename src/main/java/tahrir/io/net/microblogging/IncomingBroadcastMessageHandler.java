@@ -7,15 +7,15 @@ import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.io.net.microblogging.containers.BroadcastMessageInbox;
 import tahrir.io.net.microblogging.containers.BroadcastMessageOutbox;
-import tahrir.io.net.microblogging.microblogs.GeneralBroadcastMessageInfo;
-import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
-import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.GeneralBroadcastMessageInfo;
+import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.tools.Tuple2;
 
 import java.security.interfaces.RSAPrivateKey;
 
 /**
- * Handles things to do with newly incoming microblogs.
+ * Handles things to do with newly incoming broadcastMessages.
  *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */

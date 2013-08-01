@@ -7,8 +7,8 @@ import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.io.net.microblogging.BroadcastMessageParser;
 import tahrir.io.net.microblogging.BroadcastMessageParser.ParsedPart;
-import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
-import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;

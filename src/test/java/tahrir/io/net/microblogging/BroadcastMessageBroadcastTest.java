@@ -4,7 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import tahrir.TrNode;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
-import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
 import tahrir.tools.TrUtils;
 
 public class BroadcastMessageBroadcastTest {

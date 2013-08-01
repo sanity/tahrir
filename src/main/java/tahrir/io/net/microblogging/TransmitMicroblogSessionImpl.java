@@ -6,7 +6,7 @@ import tahrir.TrNode;
 import tahrir.io.net.PhysicalNetworkLocation;
 import tahrir.io.net.TrSessionImpl;
 import tahrir.io.net.TrSessionManager;
-import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;

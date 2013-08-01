@@ -8,8 +8,8 @@ import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.microblogging.BroadcastMessageParser;
 import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.containers.BroadcastMessageInbox;
-import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
-import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.tools.TrUtils;
 import tahrir.ui.TrMainWindow;
 
@@ -39,7 +39,7 @@ public class GUIMain {
 
         public static void addTestInformationToNode(final TrNode node) {
 		/*
-		  This is pretty silly: creating parsed microblogs and then, using their information, turn them into
+		  This is pretty silly: creating parsed broadcastMessages and then, using their information, turn them into
 		  their unparsed form and later insert them as if they were from broadcast.
 		 */
 

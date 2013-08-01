@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import tahrir.TrNode;
 import tahrir.io.net.PhysicalNetworkLocation;
 import tahrir.io.net.TrPeerManager;
-import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
 
 import java.util.Map;
 import java.util.Set;

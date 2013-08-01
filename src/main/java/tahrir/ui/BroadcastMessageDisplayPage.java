@@ -6,7 +6,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -69,7 +69,7 @@ public class BroadcastMessageDisplayPage {
 	private class MicroblogTableModel extends AbstractTableModel {
 		private final ArrayList<ParsedBroadcastMessage> microblogs;
         // TODO: Use a separate Set so that we can efficiently check whether
-        // microblogs are being added more than once
+        // broadcastMessages are being added more than once
 
   		public MicroblogTableModel() {
 			microblogs = Lists.newArrayList();
@@ -92,7 +92,7 @@ public class BroadcastMessageDisplayPage {
 
 		public void addNewMicroblog(final ParsedBroadcastMessage mb) {
             microblogs.add(0, mb);
-            // This is what updates the GUI with new microblogs.
+            // This is what updates the GUI with new broadcastMessages.
             this.fireTableRowsInserted(0, tableModel.getRowCount());
 		}
 

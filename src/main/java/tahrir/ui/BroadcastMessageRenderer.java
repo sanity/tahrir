@@ -1,6 +1,6 @@
 package tahrir.ui;
 
-import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
@@ -8,7 +8,7 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
 /**
- * Renderer for rendering parsed microblogs in a JTable.
+ * Renderer for rendering parsed broadcastMessages in a JTable.
  * 
  * We can make this more efficient by using a single JPanel, updating it and using it
  * for both rendering and editing.

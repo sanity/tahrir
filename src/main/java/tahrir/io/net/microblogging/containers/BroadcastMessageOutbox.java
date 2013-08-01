@@ -1,7 +1,7 @@
 package tahrir.io.net.microblogging.containers;
 
 import com.google.common.collect.Sets;
-import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;

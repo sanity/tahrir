@@ -2,7 +2,7 @@ package tahrir.io.net.microblogging.filters;
 
 import com.google.common.base.Predicate;
 import com.sun.istack.internal.Nullable;
-import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
 
 /**
  * User: ravisvi <ravitejasvi@gmail.com>

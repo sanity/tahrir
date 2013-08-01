@@ -1,4 +1,4 @@
-package tahrir.io.net.microblogging.microblogs;
+package tahrir.io.net.microblogging.broadcastMessages;
 
 import com.google.common.base.Optional;
 import tahrir.io.net.microblogging.UserIdentity;
@@ -7,7 +7,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 /**
- * Holds common state for broadcast and parsed microblogs.
+ * Holds common state for broadcast and parsed broadcastMessages.
  *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */

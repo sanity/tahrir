@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.io.net.microblogging.IdentityStore;
-import tahrir.io.net.microblogging.microblogs.ParsedBroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.ui.BroadcastMessageModifiedEvent;
 
 import java.util.Collections;
@@ -14,7 +14,7 @@ import java.util.Comparator;
 import java.util.SortedSet;
 
 /**
- * Stores a collection of microblogs for viewing purposes, normally to display in the GUI.
+ * Stores a collection of broadcastMessages for viewing purposes, normally to display in the GUI.
  *
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */

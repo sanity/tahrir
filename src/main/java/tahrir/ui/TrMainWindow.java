@@ -6,13 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.TrNode;
-import tahrir.TrNodeConfig;
 import tahrir.io.net.microblogging.BroadcastMessageParser;
 import tahrir.io.net.microblogging.UserIdentity;
 import tahrir.io.net.microblogging.filters.AuthorFilter;
 import tahrir.io.net.microblogging.filters.FollowingFilter;
 import tahrir.io.net.microblogging.filters.Unfiltered;
-import tahrir.io.net.microblogging.microblogs.BroadcastMessage;
+import tahrir.io.net.microblogging.broadcastMessages.BroadcastMessage;
 
 import javax.swing.*;
 import java.awt.*;

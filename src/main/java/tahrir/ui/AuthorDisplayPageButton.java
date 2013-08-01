@@ -11,7 +11,7 @@ import java.util.Set;
 
 /**
  * Represents a button that, when clicked, will create a tab which will display a BroadcastMessageDisplayPage with an author's
- * microblogs.
+ * broadcastMessages.
  * 
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */

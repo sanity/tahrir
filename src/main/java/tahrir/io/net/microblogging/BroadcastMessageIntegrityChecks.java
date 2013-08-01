@@ -1,6 +1,6 @@
 package tahrir.io.net.microblogging;
 
-import tahrir.io.net.microblogging.microblogs.GeneralBroadcastMessageInfo;
+import tahrir.io.net.microblogging.broadcastMessages.GeneralBroadcastMessageInfo;
 
 public class BroadcastMessageIntegrityChecks {
 	public static boolean isValidMicroblog(GeneralBroadcastMessageInfo generalBroadcastMessageInfo, String unparsedMessage) {
