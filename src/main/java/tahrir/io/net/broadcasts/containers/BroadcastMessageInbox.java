@@ -82,7 +82,7 @@ public class BroadcastMessageInbox {
 	public static class ParsedMicroblogTimeComparator implements Comparator<ParsedBroadcastMessage> {
 		@Override
 		public int compare(final ParsedBroadcastMessage mb1, final ParsedBroadcastMessage mb2) {
-			return Double.compare(mb2.getMbData().getTimeCreated(), mb1.getMbData().getTimeCreated());
+			return Double.compare(mb2.getTimeCreated(), mb1.getTimeCreated());
 		}
 	}
 

@@ -4,6 +4,7 @@ import nu.xom.*;
 import tahrir.TrConstants;
 
 import java.io.IOException;
+import java.util.Scanner;
 
 /**
  * BroadcastMessage in xml format.
@@ -41,26 +42,18 @@ public class ParsedBroadcastMessage {
         broadcastMessageDocument.appendChild(plainText);
         Attribute language = new Attribute("lang", languageCode);
         plainText.addAttribute(language);
-        for(int charPos = 0; charPos < plaintextBroadcastMessage.length(); charPos++){
-            if(plaintextBroadcastMessage.charAt(charPos) == '@'){
-                StringBuilder tempBroadcastMessageMentionPart = new StringBuilder();
+        Scanner pbmScanner = new Scanner(plaintextBroadcastMessage);
+        while(pbmScanner.hasNext()){
+            String tempBroadcastMessagePart = pbmScanner.next();
+            if(tempBroadcastMessagePart.startsWith("@")){
                 plainText.appendChild(mention);
-                charPos++;
-                while(plaintextBroadcastMessage.charAt(charPos)!= ' '){
-                    tempBroadcastMessageMentionPart.append(plaintextBroadcastMessage.charAt(charPos));
-                    charPos++;
-                }
-                mention.appendChild(tempBroadcastMessageMentionPart.toString());
+                mention.appendChild(tempBroadcastMessagePart);
             }
             else{
-                StringBuilder tempBroadcastMessagePart = new StringBuilder();
-                while(plaintextBroadcastMessage.charAt(charPos)!= ' '){
-                    tempBroadcastMessagePart.append(plaintextBroadcastMessage.charAt(charPos));
-                    charPos++;
-                }
-                plainText.appendChild(tempBroadcastMessagePart.toString());
+                plainText.appendChild(tempBroadcastMessagePart);
             }
         }
+
         return new ParsedBroadcastMessage(broadcastMessageDocument);
     }
 
