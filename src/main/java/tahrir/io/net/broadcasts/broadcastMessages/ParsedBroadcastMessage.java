@@ -2,6 +2,7 @@ package tahrir.io.net.broadcasts.broadcastMessages;
 
 import nu.xom.*;
 import tahrir.TrConstants;
+import tahrir.io.net.broadcasts.IdentityStore;
 
 import java.io.IOException;
 import java.util.Scanner;
@@ -34,7 +35,7 @@ public class ParsedBroadcastMessage {
         return this.timeCreated;
     }
 
-    public static ParsedBroadcastMessage createFromPlaintext(String plaintextBroadcastMessage, String languageCode){
+    public static ParsedBroadcastMessage createFromPlaintext(String plaintextBroadcastMessage, String languageCode, IdentityStore identityStore){
         Element rootElement = new Element(TrConstants.FormatInfo.ROOT);
         Element plainText = new Element(TrConstants.FormatInfo.PLAIN_TEXT);
         Element mention = new Element(TrConstants.FormatInfo.MENTION);
@@ -44,10 +45,14 @@ public class ParsedBroadcastMessage {
         plainText.addAttribute(language);
         Scanner pbmScanner = new Scanner(plaintextBroadcastMessage);
         while(pbmScanner.hasNext()){
+            String mentionPartWithoutAtSymbol;
             String tempBroadcastMessagePart = pbmScanner.next();
             if(tempBroadcastMessagePart.startsWith("@")){
                 plainText.appendChild(mention);
-                mention.appendChild(tempBroadcastMessagePart);
+                mentionPartWithoutAtSymbol = tempBroadcastMessagePart.substring(1);
+                Attribute publicKey = new Attribute("pubKey", identityStore.getIdentityWithNick(mentionPartWithoutAtSymbol).get().getPubKey().toString());
+                mention.addAttribute(publicKey);
+                mention.appendChild(mentionPartWithoutAtSymbol);
             }
             else{
                 plainText.appendChild(tempBroadcastMessagePart);

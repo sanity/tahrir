@@ -1,5 +1,6 @@
 package tahrir.ui;
 
+import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 
 import javax.swing.*;
@@ -25,8 +26,8 @@ public class BroadcastMessageRenderer extends AbstractCellEditor implements Tabl
 	@Override
 	public Component getTableCellRendererComponent(final JTable table, final Object value,
 			final boolean isSelected, final boolean hasFocus, final int row, final int column) {
-		final ParsedBroadcastMessage parsedMb = (ParsedBroadcastMessage) value;
-		final BroadcastMessagePostPanel panel = new BroadcastMessagePostPanel(parsedMb, mainWindow);
+		final BroadcastMessage broadcastMessage = (BroadcastMessage) value;
+		final BroadcastMessagePostPanel panel = new BroadcastMessagePostPanel(broadcastMessage, mainWindow);
 
 		return panel.getContent();
 	}
@@ -39,8 +40,8 @@ public class BroadcastMessageRenderer extends AbstractCellEditor implements Tabl
 	@Override
 	public Component getTableCellEditorComponent(final JTable table, final Object value,
 			final boolean isSelected, final int row, final int column) {
-		final ParsedBroadcastMessage parsedMb = (ParsedBroadcastMessage) value;
-		final BroadcastMessagePostPanel panel = new BroadcastMessagePostPanel(parsedMb, mainWindow);
+		final BroadcastMessage broadcastMessage = (BroadcastMessage) value;
+		final BroadcastMessagePostPanel panel = new BroadcastMessagePostPanel(broadcastMessage, mainWindow);
 		return panel.getContent();
 	}
 }

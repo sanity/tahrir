@@ -6,6 +6,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 
 import javax.swing.*;
@@ -18,9 +19,9 @@ public class BroadcastMessageDisplayPage {
 	private final JComponent content;
 	private final MicroblogTableModel tableModel;
     private final EventBus eventBus;
-    private final Predicate<ParsedBroadcastMessage> filter;
+    private final Predicate<BroadcastMessage> filter;
     private static final Logger logger = LoggerFactory.getLogger(BroadcastMessageDisplayPage.class.getName());
-    public BroadcastMessageDisplayPage(final Predicate<ParsedBroadcastMessage> filter, final TrMainWindow mainWindow) {
+    public BroadcastMessageDisplayPage(final Predicate<BroadcastMessage> filter, final TrMainWindow mainWindow) {
         this.filter = filter;
         eventBus = mainWindow.node.mbClasses.eventBus;
 		tableModel = new MicroblogTableModel();
@@ -43,11 +44,11 @@ public class BroadcastMessageDisplayPage {
         logger.debug("EventBus registered");
         eventBus.register(this);
 
-        final SortedSet<ParsedBroadcastMessage> existingMicroblogs = mainWindow.node.mbClasses.mbsForViewing.getMicroblogSet();
+        final SortedSet<BroadcastMessage> existingMicroblogs = mainWindow.node.mbClasses.mbsForViewing.getMicroblogSet();
 
-        for (ParsedBroadcastMessage parsedBroadcastMessage : existingMicroblogs) {
-            if (filter.apply(parsedBroadcastMessage)) {
-                tableModel.addNewMicroblog(parsedBroadcastMessage);
+        for (BroadcastMessage broadcastMessage : existingMicroblogs) {
+            if (filter.apply(broadcastMessage)) {
+                tableModel.addNewMicroblog(broadcastMessage);
             }
         }
     }
@@ -55,8 +56,8 @@ public class BroadcastMessageDisplayPage {
     @Subscribe
     public void modifyMicroblogsDisplay(BroadcastMessageModifiedEvent event){
         if(event.type.equals(BroadcastMessageModifiedEvent.ModificationType.RECEIVED)){
-            if(filter.apply(event.parsedMb)){
-                tableModel.addNewMicroblog(event.parsedMb);
+            if(filter.apply(event.broadcastMessage)){
+                tableModel.addNewMicroblog(event.broadcastMessage);
             }
         }
     }
@@ -67,12 +68,12 @@ public class BroadcastMessageDisplayPage {
 
 	@SuppressWarnings("serial")
 	private class MicroblogTableModel extends AbstractTableModel {
-		private final ArrayList<ParsedBroadcastMessage> microblogs;
+		private final ArrayList<BroadcastMessage> broadcastMessages;
         // TODO: Use a separate Set so that we can efficiently check whether
         // broadcastMessages are being added more than once
 
   		public MicroblogTableModel() {
-			microblogs = Lists.newArrayList();
+			broadcastMessages = Lists.newArrayList();
 		}
 
 		@Override
@@ -82,23 +83,23 @@ public class BroadcastMessageDisplayPage {
 
 		@Override
 		public int getRowCount() {
-			return microblogs.size();
+			return broadcastMessages.size();
 		}
 
 		@Override
 		public Object getValueAt(final int row, final int col) {
-			return microblogs.get(row);
+			return broadcastMessages.get(row);
 		}
 
-		public void addNewMicroblog(final ParsedBroadcastMessage mb) {
-            microblogs.add(0, mb);
+		public void addNewMicroblog(final BroadcastMessage bm) {
+            broadcastMessages.add(0, bm);
             // This is what updates the GUI with new broadcastMessages.
             this.fireTableRowsInserted(0, tableModel.getRowCount());
 		}
 
 		public void removeMicroblog(final ParsedBroadcastMessage mb) {
-			final int mbIndex = microblogs.indexOf(mb);
-			microblogs.remove(mbIndex);
+			final int mbIndex = broadcastMessages.indexOf(mb);
+			broadcastMessages.remove(mbIndex);
 			// should we fire a cell updated?
 			//fireTableCellUpdated(mbIndex, 0);
 		}

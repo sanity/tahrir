@@ -190,17 +190,19 @@ public class IdentityStore {
         }
     }
 
-    public void addIdentityToUsersWithNickname(UserIdentity identity){
+    public boolean addIdentityToUsersWithNickname(UserIdentity identity){
         if(usersWithNickname.containsKey(identity.getNick())){
-            usersWithNickname.get(identity.getNick()).add(identity);
-            logger.debug("Nick was already present, added identity to it.");
-
+            //usersWithNickname.get(identity.getNick()).add(identity);
+            //logger.debug("Nick was already present, added identity to it.");
+            logger.debug("Nick already present choose another.");
+            return false;
         }
         else{
             Set<UserIdentity> identitySet=new HashSet();
             identitySet.add(identity);
             usersWithNickname.put(identity.getNick(), identitySet);
             logger.debug("Nick created and identity added.");
+            return true;
         }
     }
 
@@ -327,6 +329,18 @@ public class IdentityStore {
         }
         else{
             return Collections.emptySet();
+        }
+    }
+
+    public Optional<UserIdentity> getIdentityWithNick(String nick){
+        /**Current version can't handle more than one identity with same nick.
+         *  This get's the first identity with that nick.
+        */
+        if(usersWithNickname.containsKey(nick)){
+            return Optional.of(usersWithNickname.get(nick).iterator().next());
+        }
+        else{
+            return Optional.absent();
         }
     }
 
