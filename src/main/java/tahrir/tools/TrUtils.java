@@ -11,6 +11,7 @@ import tahrir.TrNodeConfig;
 import tahrir.TrNode;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.broadcasts.UserIdentity;
+import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.tools.GsonSerializers.RSAPublicKeyDeserializer;
 import tahrir.tools.GsonSerializers.RSAPublicKeySerializer;
@@ -116,7 +117,7 @@ public class TrUtils {
 		/**
 		 * Get a microblog by a random user which has a mention to another random user.
 		 */
-		public static ParsedBroadcastMessage getParsedMicroblog() {
+		public static BroadcastMessage getBroadcastMessage() {
 			int mbPosition = 0;
 			ParsedPart text = new TextPart(mbPosition++, "Here's a mention of a random user ");
 			ParsedPart mention = new MentionPart(mbPosition++, TrCrypto.createRsaKeyPair().a, "anAlias");

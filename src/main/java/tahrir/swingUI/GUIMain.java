@@ -55,7 +55,7 @@ public class GUIMain {
             node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user5);
             node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user6);
 
-            ParsedBroadcastMessage fromRand = TrUtils.TestUtils.getParsedMicroblog();
+            ParsedBroadcastMessage fromRand = TrUtils.TestUtils.getBroadcastMessage();
             ParsedBroadcastMessage fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);
             ParsedBroadcastMessage fromUser2 = TrUtils.TestUtils.getParsedMicroblog(user2, user1);
             ParsedBroadcastMessage fromUser3 = TrUtils.TestUtils.getParsedMicroblog(user3);

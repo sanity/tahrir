@@ -37,10 +37,9 @@ public class BroadcastMessagePostPanel {
 		content = new JPanel(new MigLayout());
         content.setBackground(Color.WHITE);
 
-
-		addAuthorButton(bm, mainWindow);
+        addAuthorButton(bm, mainWindow);
 		addPostTime(bm);
-		addTextPane(bm.signedBroadcastMessage.parsedBroadcastMessage, mainWindow);
+		addTextPane(bm, mainWindow);
 		addReBroadcastButtons(mainWindow.node, bm);
 	}
 
@@ -71,28 +70,10 @@ public class BroadcastMessagePostPanel {
         return messageTextPane;
 
     }
-	private void addTextPane(final ParsedBroadcastMessage bm, TrMainWindow mainWindow) {
+	private void addTextPane(final BroadcastMessage bm, TrMainWindow mainWindow) {
         final JTextPane messageTextPane = new JTextPane();
         setTextPane(messageTextPane);
-
-        Document doc = messageTextPane.getDocument();
-        Style textStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
-		for (ParsedPart parsedPart : mb.getParsedParts()) {
-			if (parsedPart.toSwingComponent(mainWindow).isPresent()) {
-				JComponent asComponent = parsedPart.toSwingComponent(mainWindow).get();
-				// make the component level with the text
-				asComponent.setAlignmentY(0.7f);
-				messageTextPane.insertComponent(asComponent);
-			} else {
-				// insert as text
-				try {
-					doc.insertString(doc.getLength(), parsedPart.toText(), textStyle);
-				} catch (BadLocationException e) {
-					throw new RuntimeException("Bad location in message text pane.");
-				}
-			}
-		}
-
+        messageTextPane.setText(bm.signedBroadcastMessage.parsedBroadcastMessage.getPlainTextBroadcastMessage());
 		content.add(messageTextPane, "wrap, width min:"+(TrConstants.GUI_WIDTH_PX-7));
 	}
 

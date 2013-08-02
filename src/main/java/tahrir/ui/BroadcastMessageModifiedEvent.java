@@ -1,5 +1,6 @@
 package tahrir.ui;
 
+import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 
 /**
@@ -7,13 +8,13 @@ import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
  * Date: 22/07/13
  */
 public class BroadcastMessageModifiedEvent {
-    public ParsedBroadcastMessage parsedMb;
+    public BroadcastMessage broadcastMessage;
     public enum ModificationType{
         RECEIVED, REMOVE;
     }
     ModificationType type;
-    public BroadcastMessageModifiedEvent(ParsedBroadcastMessage parsedMb, ModificationType type){
-        this.parsedMb = parsedMb;
+    public BroadcastMessageModifiedEvent(BroadcastMessage broadcastMessage, ModificationType type){
+        this.broadcastMessage = broadcastMessage;
         this.type = type;
     }
 }

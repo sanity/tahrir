@@ -46,7 +46,7 @@ public class IncomingBroadcastMessageHandler {
 		}
         UserIdentity userIdentity = mbForBroadcast.signedBroadcastMessage.getAuthor();
 		addDiscoveredIdentities(new Tuple2<String, UserIdentity>(userIdentity.getNick(), userIdentity));
-		mbsForViewing.insert(mbForBroadcast.signedBroadcastMessage.parsedBroadcastMessage);
+		mbsForViewing.insert(mbForBroadcast);
 		mbsForBroadcast.insert(mbForBroadcast);
 	}
 

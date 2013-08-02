@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.io.net.broadcasts.IdentityStore;
+import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.ui.BroadcastMessageModifiedEvent;
 
@@ -21,8 +22,8 @@ import java.util.SortedSet;
 public class BroadcastMessageInbox {
 	private static Logger logger = LoggerFactory.getLogger(BroadcastMessageInbox.class);
 
-	private final SortedSet<ParsedBroadcastMessage> parsedBroadcastMessages;
-	private static final ParsedMicroblogTimeComparator comparator =new ParsedMicroblogTimeComparator();
+	private final SortedSet<BroadcastMessage> broadcastMessages;
+	private static final MicroblogTimeComparator comparator =new MicroblogTimeComparator();
 
 	private final IdentityStore identityStore;
     private final EventBus eventBus;
@@ -31,58 +32,58 @@ public class BroadcastMessageInbox {
 		this.identityStore = identityStore;
         eventBus = identityStore.eventBus;
 		//comparator = new ParsedMicroblogTimeComparator();
-        SortedSet<ParsedBroadcastMessage> tmpSet = Sets.newTreeSet(comparator);
-		parsedBroadcastMessages = Collections.synchronizedSortedSet(tmpSet);
+        SortedSet<BroadcastMessage> tmpSet = Sets.newTreeSet(comparator);
+		broadcastMessages = Collections.synchronizedSortedSet(tmpSet);
 	}
 
 	// synchronised to ensure that size of set is checked properly
-	public synchronized boolean insert(final ParsedBroadcastMessage mb) {
+	public synchronized boolean insert(final BroadcastMessage bm) {
 		// the microblog might not be added
 		boolean inserted = false;
 
 		if (!isFull()) {
-			addToParsed(mb);
+			addToBroadcastMessages(bm);
 			inserted = true;
-		} else if (shouldAddByReplacement(mb)) {
+		} else if (shouldAddByReplacement(bm)) {
 			// make room
-			removeFromParsed(parsedBroadcastMessages.last());
-			addToParsed(mb);
+			removeFromBroadcastMessages(broadcastMessages.last());
+			addToBroadcastMessages(bm);
 			inserted = true;
 			logger.info("Adding a microblog for viewing by replacement");
 		}
 		return inserted;
 	}
 
-	public SortedSet<ParsedBroadcastMessage> getMicroblogSet() {
-		return parsedBroadcastMessages;
+	public SortedSet<BroadcastMessage> getMicroblogSet() {
+		return broadcastMessages;
 	}
 
-	private void removeFromParsed(final ParsedBroadcastMessage mb) {
-		parsedBroadcastMessages.remove(mb);
-        eventBus.post(new BroadcastMessageModifiedEvent(mb, BroadcastMessageModifiedEvent.ModificationType.REMOVE));
+	private void removeFromBroadcastMessages(final BroadcastMessage bm) {
+		broadcastMessages.remove(bm);
+        eventBus.post(new BroadcastMessageModifiedEvent(bm, BroadcastMessageModifiedEvent.ModificationType.REMOVE));
 	}
 
-	private void addToParsed(final ParsedBroadcastMessage mb) {
-		parsedBroadcastMessages.add(mb);
-        eventBus.post(new BroadcastMessageModifiedEvent(mb, BroadcastMessageModifiedEvent.ModificationType.RECEIVED));
+	private void addToBroadcastMessages(final BroadcastMessage bm) {
+		broadcastMessages.add(bm);
+        eventBus.post(new BroadcastMessageModifiedEvent(bm, BroadcastMessageModifiedEvent.ModificationType.RECEIVED));
 	}
 
-	private boolean shouldAddByReplacement(final ParsedBroadcastMessage mb) {
-		return identityStore.hasIdentityInIdStore(mb.getMbData().getAuthor()) || isNewerThanLast(mb);
+	private boolean shouldAddByReplacement(final BroadcastMessage bm) {
+		return identityStore.hasIdentityInIdStore(bm.signedBroadcastMessage.getAuthor()) || isNewerThanLast(bm);
 	}
 
-	private boolean isNewerThanLast(final ParsedBroadcastMessage mb) {
-		return comparator.compare(mb, parsedBroadcastMessages.last()) < 0;
+	private boolean isNewerThanLast(final BroadcastMessage bm) {
+		return comparator.compare(bm, broadcastMessages.last()) < 0;
 	}
 
 	private boolean isFull() {
-		return parsedBroadcastMessages.size() > TrConstants.MAX_MICROBLOGS_FOR_VIEWING;
+		return broadcastMessages.size() > TrConstants.MAX_MICROBLOGS_FOR_VIEWING;
 	}
 
-	public static class ParsedMicroblogTimeComparator implements Comparator<ParsedBroadcastMessage> {
+	public static class MicroblogTimeComparator implements Comparator<BroadcastMessage> {
 		@Override
-		public int compare(final ParsedBroadcastMessage mb1, final ParsedBroadcastMessage mb2) {
-			return Double.compare(mb2.getTimeCreated(), mb1.getTimeCreated());
+		public int compare(final BroadcastMessage mb1, final BroadcastMessage mb2) {
+			return Double.compare(mb2.signedBroadcastMessage.parsedBroadcastMessage.getTimeCreated(), mb1.signedBroadcastMessage.parsedBroadcastMessage.getTimeCreated());
 		}
 	}
 
