@@ -37,13 +37,9 @@ public class GUIMain {
         }
 
         public static void addTestInformationToNode(final TrNode node) {
-		/*
-		  This is pretty silly: creating parsed broadcastMessages and then, using their information, turn them into
-		  their unparsed form and later insert them as if they were from broadcast.
-		 */
 
-            UserIdentity user1=new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
-            UserIdentity user2=new UserIdentity("user2", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
+            UserIdentity user1=new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
+            UserIdentity user2=new UserIdentity("user2", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
             UserIdentity user3 = new UserIdentity("User 3", node.getRemoteNodeAddress().publicKey, Optional.of(node.getPrivateNodeId().privateKey));
             UserIdentity user4 = new UserIdentity("User 4", node.getRemoteNodeAddress().publicKey, Optional.of(node.getPrivateNodeId().privateKey));
             UserIdentity user5 = new UserIdentity("User 5", node.getRemoteNodeAddress().publicKey, Optional.of(node.getPrivateNodeId().privateKey));
@@ -55,25 +51,19 @@ public class GUIMain {
             node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user5);
             node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user6);
 
-            ParsedBroadcastMessage fromRand = TrUtils.TestUtils.getBroadcastMessage();
-            ParsedBroadcastMessage fromUser1 = TrUtils.TestUtils.getParsedMicroblog(user1);
-            ParsedBroadcastMessage fromUser2 = TrUtils.TestUtils.getParsedMicroblog(user2, user1);
-            ParsedBroadcastMessage fromUser3 = TrUtils.TestUtils.getParsedMicroblog(user3);
-            SortedSet<ParsedBroadcastMessage> parsedMbs = Sets.newTreeSet(new BroadcastMessageInbox.ParsedMicroblogTimeComparator());
-            parsedMbs.add(fromRand);
-            parsedMbs.add(fromUser1);
-            parsedMbs.add(fromUser2);
-
-            for (ParsedBroadcastMessage parsedBroadcastMessage : parsedMbs) {
-                String xmlMessage = BroadcastMessageParser.getXML(parsedBroadcastMessage.getParsedParts());
-                BroadcastMessage broadcastMessage = new BroadcastMessage(xmlMessage, parsedBroadcastMessage.getMbData());
+            BroadcastMessage fromRand = TrUtils.TestUtils.getBroadcastMessage(node);
+            BroadcastMessage fromUser1 = TrUtils.TestUtils.getBroadcastMessageFrom(node);
+            BroadcastMessage fromUser2 = TrUtils.TestUtils.getBroadcastMessage(user2, user1, node);
+            BroadcastMessage fromUser3 = TrUtils.TestUtils.getBroadcastMessageFrom(node, user3);
+            SortedSet<BroadcastMessage> broadcastMessages = Sets.newTreeSet(new BroadcastMessageInbox.BroadcastMessageTimeComparator());
+            broadcastMessages.add(fromRand);
+            broadcastMessages.add(fromUser1);
+            broadcastMessages.add(fromUser2);
+            broadcastMessages.add(fromUser3);
+            for (BroadcastMessage broadcastMessage : broadcastMessages) {
                 node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
             }
 
-            //checking to see if eventBus is working
-            String xmlMessage = BroadcastMessageParser.getXML(fromUser3.getParsedParts());
-            BroadcastMessage broadcastMessage = new BroadcastMessage(xmlMessage, fromUser3.getMbData());
-            node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
 
         }
 }

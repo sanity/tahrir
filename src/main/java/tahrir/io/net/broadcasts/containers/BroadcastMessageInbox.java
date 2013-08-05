@@ -23,7 +23,7 @@ public class BroadcastMessageInbox {
 	private static Logger logger = LoggerFactory.getLogger(BroadcastMessageInbox.class);
 
 	private final SortedSet<BroadcastMessage> broadcastMessages;
-	private static final MicroblogTimeComparator comparator =new MicroblogTimeComparator();
+	private static final BroadcastMessageTimeComparator comparator =new BroadcastMessageTimeComparator();
 
 	private final IdentityStore identityStore;
     private final EventBus eventBus;
@@ -80,7 +80,7 @@ public class BroadcastMessageInbox {
 		return broadcastMessages.size() > TrConstants.MAX_MICROBLOGS_FOR_VIEWING;
 	}
 
-	public static class MicroblogTimeComparator implements Comparator<BroadcastMessage> {
+	public static class BroadcastMessageTimeComparator implements Comparator<BroadcastMessage> {
 		@Override
 		public int compare(final BroadcastMessage mb1, final BroadcastMessage mb2) {
 			return Double.compare(mb2.signedBroadcastMessage.parsedBroadcastMessage.getTimeCreated(), mb1.signedBroadcastMessage.parsedBroadcastMessage.getTimeCreated());

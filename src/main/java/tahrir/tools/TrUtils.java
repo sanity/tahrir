@@ -1,5 +1,6 @@
 package tahrir.tools;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSortedMultiset;
 import com.google.common.collect.SortedMultiset;
 import com.google.common.collect.TreeMultiset;
@@ -13,11 +14,13 @@ import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.broadcasts.UserIdentity;
 import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.SignedBroadcastMessage;
 import tahrir.tools.GsonSerializers.RSAPublicKeyDeserializer;
 import tahrir.tools.GsonSerializers.RSAPublicKeySerializer;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Random;
 import java.util.concurrent.Executors;
@@ -117,54 +120,43 @@ public class TrUtils {
 		/**
 		 * Get a microblog by a random user which has a mention to another random user.
 		 */
-		public static BroadcastMessage getBroadcastMessage() {
-			int mbPosition = 0;
-			ParsedPart text = new TextPart(mbPosition++, "Here's a mention of a random user ");
-			ParsedPart mention = new MentionPart(mbPosition++, TrCrypto.createRsaKeyPair().a, "anAlias");
-
-			SortedMultiset<ParsedPart> parsedParts = TreeMultiset.create(new PositionComparator());
-			parsedParts.add(text);
-			parsedParts.add(mention);
-
-			GeneralBroadcastMessageInfo mbData = new GeneralBroadcastMessageInfo(null, "aAuthor", TrCrypto.createRsaKeyPair().a,
-					System.currentTimeMillis());
-			return new ParsedBroadcastMessage(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(),
-					parsedParts));
+		public static BroadcastMessage getBroadcastMessage(TrNode node1) {
+            UserIdentity randomUser = new UserIdentity("Random User", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
+            node1.mbClasses.identityStore.addIdentity(randomUser);
+			ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hi @user1, How are you?", "en", node1.mbClasses.identityStore);
+            SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, randomUser);
+            BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
+	        return broadcastMessage;
 		}
 
 		/**
 		 * Get a microblog from a user that mentions another user twice.
 		 */
-		public static ParsedBroadcastMessage getParsedMicroblog(UserIdentity from, UserIdentity mention) {
-			int mbPosition = 0;
-			ParsedPart mentionPart = new MentionPart(mbPosition++, mention.getPubKey(), mention.getNick());
-			ParsedPart textPart = new TextPart(mbPosition++, " was just mentioned.");
-			ParsedPart anotherMentionPart = new MentionPart(mbPosition++, mention.getPubKey(), mention.getNick());
-			ParsedPart anotherTextPart = new TextPart(mbPosition++, " and look he was just mentioned again!");
-
-			SortedMultiset<ParsedPart> parsedParts = TreeMultiset.create(new PositionComparator());
-			parsedParts.add(mentionPart);
-			parsedParts.add(textPart);
-			parsedParts.add(anotherMentionPart);
-			parsedParts.add(anotherTextPart);
-
-			GeneralBroadcastMessageInfo mbData = new GeneralBroadcastMessageInfo(null, from.getNick(), from.getPubKey(), System.currentTimeMillis());
-			return new ParsedBroadcastMessage(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(), parsedParts));
+		public static BroadcastMessage getBroadcastMessage(UserIdentity from, UserIdentity mention, TrNode node) {
+            ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hi @"+mention.getNick()+" , what are uoy?", "en", node.mbClasses.identityStore);
+            SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, from);
+            BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
+            return broadcastMessage;
 		}
 
 		/**
-		 * Get microblog from a user which is just text, no mentions.
+		 * Get broadcastMessage from a user which is just text, no mentions.
 		 */
-		public static ParsedBroadcastMessage getParsedMicroblog(UserIdentity from) {
-			int mbPosition = 0;
-			ParsedPart textPart = new TextPart(mbPosition++, "This is just a plain text microblog.");
+		public static BroadcastMessage getBroadcastMessageFrom(TrNode node) {
+            ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hi , who aren't you?", "en", node.mbClasses.identityStore);
+            SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.config.currentUserIdentity);
+            BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
+            return broadcastMessage;
 
-			SortedMultiset<ParsedPart> parsedParts = TreeMultiset.create(new PositionComparator());
-			parsedParts.add(textPart);
-
-			GeneralBroadcastMessageInfo mbData = new GeneralBroadcastMessageInfo(null, from.getNick(), from.getPubKey(), System.currentTimeMillis());
-			return new ParsedBroadcastMessage(mbData, ImmutableSortedMultiset.copyOf(new PositionComparator(), parsedParts));
 		}
+
+        public static BroadcastMessage getBroadcastMessageFrom(TrNode node, UserIdentity identity) {
+            ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hi , who aren't you?", "en", node.mbClasses.identityStore);
+            SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, identity);
+            BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
+            return broadcastMessage;
+
+        }
 
 		public static File createTempDirectory() throws IOException {
 			final File temp;

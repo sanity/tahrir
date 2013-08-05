@@ -1,10 +1,14 @@
 package tahrir.io.net.broadcasts;
 
+import com.google.common.base.Optional;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tahrir.TrNode;
+import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
 import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.SignedBroadcastMessage;
 import tahrir.tools.TrUtils;
 
 public class BroadcastMessageBroadcastTest {
@@ -18,9 +22,12 @@ public class BroadcastMessageBroadcastTest {
         for (final TrPeerInfo pi : sendingNode.peerManager.peers.values()) {
             pi.capabilities.receivesMessageBroadcasts = true;
         }
+        sendingNode.config.currentUserIdentity = new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
 
-        final BroadcastMessage testMb = new BroadcastMessage(sendingNode, "<mb>Hello world</mb>");
-        sendingNode.mbClasses.mbsForBroadcast.insert(testMb);
+        final ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hello world", "en", sendingNode.mbClasses.identityStore);
+        final SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, sendingNode.config.currentUserIdentity);
+        final BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
+        sendingNode.mbClasses.mbsForBroadcast.insert(broadcastMessage);
 
         // stop the receiver from broadcasting
         receivingNode.mbClasses.mbScheduler.disable();
@@ -33,12 +40,12 @@ public class BroadcastMessageBroadcastTest {
 
         for (int x = 0; x < 50; x++) {
             Thread.sleep(20);
-            if (receivingNode.mbClasses.mbsForBroadcast.contains(testMb)) {
+            if (receivingNode.mbClasses.mbsForBroadcast.contains(broadcastMessage)) {
                 break;
             }
         }
 
-        Assert.assertTrue(receivingNode.mbClasses.mbsForBroadcast.contains(testMb), "Should contain the microblog");
+        Assert.assertTrue(receivingNode.mbClasses.mbsForBroadcast.contains(broadcastMessage), "Should contain the microblog");
     }
 
     @Test
@@ -50,11 +57,17 @@ public class BroadcastMessageBroadcastTest {
             pi.capabilities.receivesMessageBroadcasts = true;
         }
 
+        sendingNode.config.currentUserIdentity = new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
+        final ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("You SHOULD have this microblog!", "en", sendingNode.mbClasses.identityStore);
+        final SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, sendingNode.config.currentUserIdentity);
+        final BroadcastMessage broadcastMessage1 = new BroadcastMessage(signedBroadcastMessage);
 
-        final BroadcastMessage testMb0 = new BroadcastMessage(sendingNode, "<mb>You SHOULD have this microblog!</mb>", 0);
-        final BroadcastMessage testMb1 = new BroadcastMessage(sendingNode, "<mb>You should NOT have this microblog!</mb>", Integer.MAX_VALUE);
-        sendingNode.mbClasses.mbsForBroadcast.insert(testMb1);
-        sendingNode.mbClasses.mbsForBroadcast.insert(testMb0);
+        final ParsedBroadcastMessage parsedBroadcastMessage1 = ParsedBroadcastMessage.createFromPlaintext("You should NOT have this microblog!", "en", sendingNode.mbClasses.identityStore);
+        final SignedBroadcastMessage signedBroadcastMessage1 = new SignedBroadcastMessage(parsedBroadcastMessage1, sendingNode.config.currentUserIdentity);
+        final BroadcastMessage broadcastMessage2 = new BroadcastMessage(signedBroadcastMessage1);
+
+        sendingNode.mbClasses.mbsForBroadcast.insert(broadcastMessage1);
+        sendingNode.mbClasses.mbsForBroadcast.insert(broadcastMessage2);
 
         // stop the receiver from broadcasting
         receivingNode.mbClasses.mbScheduler.disable();
@@ -67,13 +80,13 @@ public class BroadcastMessageBroadcastTest {
 
         for (int x = 0; x < 75; x++) {
             Thread.sleep(50);
-            if (receivingNode.mbClasses.mbsForBroadcast.contains(testMb0)) {
+            if (receivingNode.mbClasses.mbsForBroadcast.contains(broadcastMessage1)) {
                 break;
             }
         }
 
-        Assert.assertTrue(receivingNode.mbClasses.mbsForBroadcast.contains(testMb0), "Should contain the microblog with low priority");
-        Assert.assertTrue(!receivingNode.mbClasses.mbsForBroadcast.contains(testMb1), "Should not contain the microblog with high priority.");
+        Assert.assertTrue(receivingNode.mbClasses.mbsForBroadcast.contains(broadcastMessage1), "Should contain the microblog with low priority");
+        Assert.assertTrue(!receivingNode.mbClasses.mbsForBroadcast.contains(broadcastMessage2), "Should not contain the microblog with high priority.");
     }
 
 }

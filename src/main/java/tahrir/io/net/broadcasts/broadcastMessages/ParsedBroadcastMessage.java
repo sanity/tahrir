@@ -40,9 +40,10 @@ public class ParsedBroadcastMessage {
         Element plainText = new Element(TrConstants.FormatInfo.PLAIN_TEXT);
         Element mention = new Element(TrConstants.FormatInfo.MENTION);
         Document broadcastMessageDocument = new Document(rootElement);
-        broadcastMessageDocument.appendChild(plainText);
+
         Attribute language = new Attribute("lang", languageCode);
         plainText.addAttribute(language);
+        rootElement.appendChild(plainText);
         Scanner pbmScanner = new Scanner(plaintextBroadcastMessage);
         while(pbmScanner.hasNext()){
             String mentionPartWithoutAtSymbol;
@@ -50,6 +51,10 @@ public class ParsedBroadcastMessage {
             if(tempBroadcastMessagePart.startsWith("@")){
                 plainText.appendChild(mention);
                 mentionPartWithoutAtSymbol = tempBroadcastMessagePart.substring(1);
+                char tempChar = mentionPartWithoutAtSymbol.charAt(mentionPartWithoutAtSymbol.length()-1);
+                if(!(Character.isLetter(tempChar)||Character.isDigit(tempChar))){
+                    mentionPartWithoutAtSymbol = mentionPartWithoutAtSymbol.substring(0, mentionPartWithoutAtSymbol.length()-1);
+                }
                 Attribute publicKey = new Attribute("pubKey", identityStore.getIdentityWithNick(mentionPartWithoutAtSymbol).get().getPubKey().toString());
                 mention.addAttribute(publicKey);
                 mention.appendChild(mentionPartWithoutAtSymbol);
