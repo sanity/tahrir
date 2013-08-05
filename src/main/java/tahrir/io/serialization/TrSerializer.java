@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.collect.Maps;
 
+import nu.xom.Document;
 import tahrir.io.net.PhysicalNetworkLocation;
 import tahrir.io.serialization.serializers.*;
 import tahrir.tools.ByteArraySegment;
@@ -32,6 +33,7 @@ public abstract class TrSerializer {
 		registerSerializer(new StringSerializer(), String.class);
 		registerSerializer(new CollectionSerializer(), Collection.class);
 		registerSerializer(new MapSerializer(), Map.class);
+        registerSerializer(new DocumentSerializer(), Document.class);
 		registerSerializer(new RSAPublicKeySerializer(), RSAPublicKey.class);
 		registerSerializer(new RSAPrivateKeySerializer(), RSAPrivateKey.class);
 		registerSerializer(new ByteArraySegmentSerializer(), ByteArraySegment.class);
