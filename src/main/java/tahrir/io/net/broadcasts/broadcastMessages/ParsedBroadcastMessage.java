@@ -54,13 +54,24 @@ public class ParsedBroadcastMessage {
                 char tempChar = mentionPartWithoutAtSymbol.charAt(mentionPartWithoutAtSymbol.length()-1);
                 if(!(Character.isLetter(tempChar)||Character.isDigit(tempChar))){
                     mentionPartWithoutAtSymbol = mentionPartWithoutAtSymbol.substring(0, mentionPartWithoutAtSymbol.length()-1);
+                    Attribute publicKey = new Attribute("pubKey", identityStore.getIdentityWithNick(mentionPartWithoutAtSymbol).get().getPubKey().toString());
+                    mention.addAttribute(publicKey);
+                    mention.appendChild(mentionPartWithoutAtSymbol);
+                    StringBuilder afterMention = new StringBuilder();
+                    afterMention.append(tempChar);
+                    afterMention.append(' ');
+                    plainText.appendChild(afterMention.toString());
                 }
+                else{
                 Attribute publicKey = new Attribute("pubKey", identityStore.getIdentityWithNick(mentionPartWithoutAtSymbol).get().getPubKey().toString());
                 mention.addAttribute(publicKey);
-                mention.appendChild(mentionPartWithoutAtSymbol);
+                mention.appendChild(mentionPartWithoutAtSymbol+" ");
+                }
+
             }
             else{
-                plainText.appendChild(tempBroadcastMessagePart);
+
+                plainText.appendChild(tempBroadcastMessagePart+" ");
             }
         }
 

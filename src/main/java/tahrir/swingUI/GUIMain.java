@@ -52,7 +52,7 @@ public class GUIMain {
             node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user6);
 
             BroadcastMessage fromRand = TrUtils.TestUtils.getBroadcastMessage(node);
-            BroadcastMessage fromUser1 = TrUtils.TestUtils.getBroadcastMessageFrom(node);
+            BroadcastMessage fromUser1 = TrUtils.TestUtils.getBroadcastMessageFrom(node, user1);
             BroadcastMessage fromUser2 = TrUtils.TestUtils.getBroadcastMessage(user2, user1, node);
             BroadcastMessage fromUser3 = TrUtils.TestUtils.getBroadcastMessageFrom(node, user3);
             SortedSet<BroadcastMessage> broadcastMessages = Sets.newTreeSet(new BroadcastMessageInbox.BroadcastMessageTimeComparator());

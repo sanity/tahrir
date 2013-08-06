@@ -59,7 +59,7 @@ public class BroadcastMessagePostPanel {
 				bm.signedBroadcastMessage.getAuthor());
 		authorNick.setFont(new Font("bold", Font.BOLD, authorNick.getFont().getSize() + 2));
         authorNick.setForeground(new Color(65,131,196));     //SteelBlue color
-		content.add(authorNick, "align left");
+		content.add(authorNick, "left align");
 	}
 
     private JTextPane setTextPane(final JTextPane messageTextPane)
