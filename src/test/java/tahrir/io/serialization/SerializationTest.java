@@ -2,6 +2,9 @@ package tahrir.io.serialization;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import nu.xom.Builder;
+import nu.xom.Document;
+import nu.xom.ParsingException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tahrir.io.crypto.TrCrypto;
@@ -97,6 +100,29 @@ public class SerializationTest {
 		Assert.assertEquals(ct, ct2);
 	}
 
+    @Test
+    public void documentSerialisationTest() throws Exception{
+        Document doc;
+        String xml = "<mb><txt>Hi <mtn>Jason</mtn>. Have I ever told you the definition of insanity?</txt></mb>";
+        try{
+            doc = new Builder().build(xml, null);
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+            final DataOutputStream dos = new DataOutputStream(baos);
+
+            TrSerializer.serializeTo(doc, dos);
+
+            final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
+            Document doc1 = TrSerializer.deserializeFrom(Document.class, dis);
+            String expectedXmlFromDoc = doc1.toXML();
+            String actualXmlFromDoc = doc.toXML();
+            Assert.assertEquals(actualXmlFromDoc, expectedXmlFromDoc);
+        }
+        catch (ParsingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 	@Test
 	public void duplicateObjectTest() throws Exception {
 		final ArrayList<String> listWithDuplicate = new ArrayList<String>();
