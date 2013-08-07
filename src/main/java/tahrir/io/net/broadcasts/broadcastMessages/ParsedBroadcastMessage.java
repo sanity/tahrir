@@ -15,7 +15,7 @@ import java.util.Scanner;
 
 public class ParsedBroadcastMessage {
 
-    private Document broadcastMessageDocument;
+    public Document broadcastMessageDocument;
     private long timeCreated;
     /**
      * Format for xml is

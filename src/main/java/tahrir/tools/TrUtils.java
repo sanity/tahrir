@@ -123,7 +123,7 @@ public class TrUtils {
 		public static BroadcastMessage getBroadcastMessage(TrNode node1) {
             UserIdentity randomUser = new UserIdentity("Random User", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
             node1.mbClasses.identityStore.addIdentity(randomUser);
-			ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hi @user1, How are you?", "en", node1.mbClasses.identityStore);
+			ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hi @User3, How are you?", "en", node1.mbClasses.identityStore);
             SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, randomUser);
             BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
 	        return broadcastMessage;

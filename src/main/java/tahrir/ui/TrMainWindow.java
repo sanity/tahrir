@@ -11,6 +11,7 @@ import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.io.net.broadcasts.broadcastMessages.SignedBroadcastMessage;
 import tahrir.io.net.broadcasts.filters.AuthorFilter;
 import tahrir.io.net.broadcasts.filters.FollowingFilter;
+import tahrir.io.net.broadcasts.filters.MentionsFilter;
 import tahrir.io.net.broadcasts.filters.Unfiltered;
 import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 
@@ -90,17 +91,16 @@ public class TrMainWindow {
 				new Unfiltered(), this);
 		final BroadcastMessageDisplayPage followingPostPage = new BroadcastMessageDisplayPage(
 				new FollowingFilter(this.node.mbClasses.identityStore),this);
-		final JPanel mentions = new JPanel();
+		final BroadcastMessageDisplayPage mentionsPostPage = new BroadcastMessageDisplayPage(
+                new MentionsFilter(node.mbClasses.identityStore), this);
 		final BroadcastMessageDisplayPage myPostsPage = new BroadcastMessageDisplayPage(
 				new AuthorFilter(this.node.mbClasses.identityStore), this);
         final ContactBookDisplayPage contactBookDisplayPage = new ContactBookDisplayPage(this);
         final SettingsDisplayPage settingsDisplayPage = new SettingsDisplayPage(this);
 
-		mentions.add(new JLabel("This is the mentions page"));
-
-        tabbedPane.addTab("All", unfilteredPostPage.getContent());
+	    tabbedPane.addTab("All", unfilteredPostPage.getContent());
         tabbedPane.addTab("Following", followingPostPage.getContent());
-        tabbedPane.addTab("Mentions", mentions);
+        tabbedPane.addTab("Mentions", mentionsPostPage.getContent());
         tabbedPane.addTab("My posts", myPostsPage.getContent());
         tabbedPane.addTab("Contacts", contactBookDisplayPage.getContent());
         tabbedPane.addTab("Settings", settingsDisplayPage.getContent());
