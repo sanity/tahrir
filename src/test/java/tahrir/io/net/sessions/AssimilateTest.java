@@ -90,22 +90,41 @@ public class AssimilateTest {
         joinerConfig.localHostName = "localhost";
         joinerConfig.peers.runMaintainance = true;
         joinerConfig.peers.topologyMaintenance = false;
-        joinerConfig.peers.runBroadcast = false;
+        joinerConfig.peers.runBroadcast = true;
 
         final File joinerPubNodeIdsDir = new File(joinerDir, joinerConfig.publicNodeIdsDir);
 
         joinerPubNodeIdsDir.mkdir();
 
+        final File joinerDir2 = TestUtils.createTempDirectory();
+
+        final TrNodeConfig joinerConfig2 = new TrNodeConfig();
+
+        joinerConfig2.udp.listenPort = 7645;
+        joinerConfig2.localHostName = "localhost";
+        joinerConfig2.peers.runMaintainance = true;
+        joinerConfig2.peers.topologyMaintenance = false;
+        joinerConfig2.peers.runBroadcast = true;
+
+        final File joinerPubNodeIdsDir2 = new File(joinerDir2, joinerConfig2.publicNodeIdsDir);
+
+        joinerPubNodeIdsDir2.mkdir();
+
+
         final TrPeerManager.TrPeerInfo seedPeerInfo = new TrPeerManager.TrPeerInfo(seedPublicNodeId);
         seedPeerInfo.capabilities = seedConfig.capabilities;
 
         Persistence.save(new File(joinerPubNodeIdsDir, "joiner-id"), seedPeerInfo);
-
+        Persistence.save(new File(joinerPubNodeIdsDir2, "joiner-id2"), seedPeerInfo);
         final TrNode joinerNode = new TrNode(joinerDir, joinerConfig);
+        final TrNode joinerNode2 = new TrNode(joinerDir2, joinerConfig2);
 
         try{
             final TrMainWindow mainWindow = new TrMainWindow(joinerNode);
             mainWindow.getContent().revalidate();
+
+            final TrMainWindow mainWindow2 = new TrMainWindow(joinerNode2);
+            mainWindow2.getContent().revalidate();
         }
         catch (final Exception e){
             e.printStackTrace();
