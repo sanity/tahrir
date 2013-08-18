@@ -87,9 +87,8 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
     public void requestNewConnection(final RemoteNodeAddress joinerAddress, int uId) {
         joinerPhysicalLocation = joinerAddress.physicalLocation;
         joinerPublicKey = joinerAddress.publicKey;
-
-
         final PhysicalNetworkLocation senderFV = sender();
+
         if (locallyInitiated) {
             logger.warn("Received requestNewConnection() from {}, but the session was locally initiated, ignoring",
                     senderFV);
@@ -114,7 +113,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
                 receivedRequestFrom.yourAddressIs(senderFV);
                 joinerPhysicalLocation = senderFV;
             }
-            if ((node.peerManager.peers.size() < node.peerManager.config.maxPeers)) {
+            if ((node.peerManager.peers.size() < node.peerManager.config.maxPeers) && !node.peerManager.peers.containsKey(joinerPhysicalLocation)) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Accepting joiner {} as a peer", joinerAddress);
                 }

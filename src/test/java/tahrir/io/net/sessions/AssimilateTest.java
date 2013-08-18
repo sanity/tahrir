@@ -129,7 +129,7 @@ public class AssimilateTest {
         catch (final Exception e){
             e.printStackTrace();
         }
-
+        Thread.sleep(50000);
 
     }
 }
