@@ -88,7 +88,6 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
         joinerPhysicalLocation = joinerAddress.physicalLocation;
         joinerPublicKey = joinerAddress.publicKey;
 
-
         final PhysicalNetworkLocation senderFV = sender();
         if (locallyInitiated) {
             logger.warn("Received requestNewConnection() from {}, but the session was locally initiated, ignoring",
