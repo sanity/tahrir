@@ -11,7 +11,7 @@
     <logger name="tahrir.io.net.sessions.AssimilateSessionImpl" level="DEBUG" />
 
     <!-- turn OFF all logging (children can override) -->
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
 

@@ -123,6 +123,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
                 final AssimilateSession requestorSession = remoteSession(AssimilateSession.class,
                         connectionWithUserLabel(joinerAddress, false, "topology"));
                 requestorSession.myCapabilitiesAre(node.config.capabilities, node.peerManager.locInfo.getLocation());
+                logger.info("Accepted joiner - {} as a peer, by {}", joinerAddress, remoteNodeAddress);
             } else relayAssimilateRequest(joinerAddress);
         }
     }
@@ -131,6 +132,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
         relay = node.peerManager.getPeerForAssimilation(alreadyAttempted);
         if (logger.isDebugEnabled()) {
             logger.debug("Forwarding assimilation request from {} to {}", joinerAddress, relay);
+            logger.info("Recieved assimilation request from {}, forwarding it to {}", joinerAddress, relay);
         }
 
         requestNewConnectionTime = System.currentTimeMillis();
@@ -170,7 +172,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
             logger.warn("Received acceptNewConnection() from {}, but was expecting it from {}", sender(), relay.remoteNodeAddress.physicalLocation);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("{} is accepting assimiliation request", acceptorPhysicalLocation);
+            logger.debug("{} is accepting assimilation request", acceptorPhysicalLocation);
         }
         requestNewConnectionFuture.cancel(false);
         node.peerManager.updatePeerInfo(relay.remoteNodeAddress.physicalLocation, new Function<TrPeerManager.TrPeerInfo, Void>() {
@@ -207,6 +209,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
                 logger.debug("Adding new connection to acceptor {}", acceptorPhysicalLocation);
                 node.peerManager.addNewPeer(new RemoteNodeAddress(acceptorPhysicalLocation,
                         acceptorPubkey), acceptorCapabilities, acceptorLocation);
+                logger.debug("{} is now connected to {}", joinerPhysicalLocation ,acceptorPhysicalLocation);
             }
         }
     }

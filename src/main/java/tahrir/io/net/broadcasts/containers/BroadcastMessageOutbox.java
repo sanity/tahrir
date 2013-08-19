@@ -16,7 +16,7 @@ public class BroadcastMessageOutbox {
 		seen = Sets.newLinkedHashSet();
 	}
 
-	public synchronized BroadcastMessage getMicroblogForBroadcast() {
+	public synchronized BroadcastMessage getMessageForBroadcast() {
 		return outbox.poll();
 	}
 

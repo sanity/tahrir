@@ -62,13 +62,13 @@ public class TransmitMicroblogSessionImpl extends TrSessionImpl implements Trans
 
     public void interestIs(final boolean interest) {
         if (interest) {
-            receiverSess.sendMicroblog(broadcastMessageToSend);
+            receiverSess.sendBroadcastMessage(broadcastMessageToSend);
         } else {
             sessionFinished();
         }
     }
 
-    public void sendMicroblog(final BroadcastMessage mb) {
+    public void sendBroadcastMessage(final BroadcastMessage mb) {
         node.mbClasses.incomingMbHandler.handleInsertion(mb);
         initiatorSess.sessionFinished();
     }
