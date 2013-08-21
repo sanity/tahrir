@@ -9,6 +9,7 @@ import tahrir.TrNode;
 import tahrir.io.net.*;
 import tahrir.io.net.TrPeerManager.Capabilities;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
+import tahrir.io.net.udpV1.UdpNetworkLocation;
 import tahrir.tools.Persistence.Modified;
 import tahrir.tools.Persistence.ModifyBlock;
 import tahrir.tools.TrUtils;
@@ -39,11 +40,11 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
 
     public AssimilateSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager sessionMgr) {
         super(sessionId, node, sessionMgr);
-        logger = LoggerFactory.getLogger(AssimilateSessionImpl.class.getName() + " [sesId: " + sessionId + "]");
+        logger = LoggerFactory.getLogger(AssimilateSessionImpl.class.getName() + " [sesId: " + sessionId + "]" + " [port: " + ((UdpNetworkLocation)node.getRemoteNodeAddress().physicalLocation).port + "]");
     }
 
     public void startAssimilation(final Runnable onFailure, final TrPeerInfo assimilateVia) {
-        logger.debug("Start assimilation via " + assimilateVia);
+        logger.info("Start assimilation via " + assimilateVia);
         relay = assimilateVia;
         requestNewConnectionTime = System.currentTimeMillis();
         requestNewConnectionFuture = TrUtils.executor.schedule(new AssimilationFailureChecker(), RELAY_ASSIMILATION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
@@ -210,6 +211,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
                 node.peerManager.addNewPeer(new RemoteNodeAddress(acceptorPhysicalLocation,
                         acceptorPubkey), acceptorCapabilities, acceptorLocation);
                 logger.debug("{} is now connected to {}", joinerPhysicalLocation ,acceptorPhysicalLocation);
+                logger.info("{} is now connected to {}", joinerPhysicalLocation ,acceptorPhysicalLocation);
             }
         }
     }
@@ -226,7 +228,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
                 // If we've already received the acceptorAddress and acceptorPubkey from an
                 // acceptNewConnection message from the acceptor then we can now add it to
                 // our peer manager
-                logger.debug("Adding new connection to acceptor {}", acceptorPhysicalLocation);
+                logger.info("Adding new connection to acceptor {}", acceptorPhysicalLocation);
                 node.peerManager.addNewPeer(new RemoteNodeAddress(acceptorPhysicalLocation,
                         acceptorPubkey), myCapabilities, topologyLocation);
             }
@@ -237,6 +239,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
             }
             node.peerManager.addNewPeer(new RemoteNodeAddress(joinerPhysicalLocation,
                     joinerPublicKey), myCapabilities, topologyLocation);
+            logger.info("Adding new connection to joiner {}", joinerPhysicalLocation);
         }
     }
 
