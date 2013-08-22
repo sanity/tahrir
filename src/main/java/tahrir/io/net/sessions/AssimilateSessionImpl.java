@@ -211,7 +211,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
                 node.peerManager.addNewPeer(new RemoteNodeAddress(acceptorPhysicalLocation,
                         acceptorPubkey), acceptorCapabilities, acceptorLocation);
                 logger.debug("{} is now connected to {}", joinerPhysicalLocation ,acceptorPhysicalLocation);
-                logger.info("{} is now connected to {}", joinerPhysicalLocation ,acceptorPhysicalLocation);
+                logger.info("{} is now connected to {}", node.getRemoteNodeAddress().physicalLocation, acceptorPhysicalLocation);
             }
         }
     }
