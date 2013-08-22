@@ -1,16 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<configuration debug = "true">
 
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-      <Pattern>%d{HH:mm:ss.SSS} %-5level %logger{10} (%file:%L\) - %msg%n</Pattern>
-    </encoder>
-  </appender>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %d{HH:mm:ss.SSS} %-5level %logger{10} (%file:%L\) - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
 
-  <root level="DEBUG">
-    <appender-ref ref="STDOUT" />
-  </root>
+    <logger name="tahrir.io.net.sessions.AssimilateSessionImpl" level="DEBUG" />
 
-    <logger name="tahrir.io.net.sessions.AssimilateSessionImpl" level="TRACE"/>
-    <logger name="tahrir.io.net.udpV1" level="INFO" />
+    <!-- turn OFF all logging (children can override) -->
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT" />
+    </root>
+
 </configuration>
