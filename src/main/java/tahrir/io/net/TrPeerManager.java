@@ -1,22 +1,14 @@
 package tahrir.io.net;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
-
+import com.google.common.base.Function;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.MapMaker;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.BetaDistributionImpl;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.io.net.TrPeerManager.TrPeerInfo.Assimilation;
@@ -26,8 +18,14 @@ import tahrir.tools.Persistence;
 import tahrir.tools.Persistence.Modified;
 import tahrir.tools.TrUtils;
 
-import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 public class TrPeerManager {
 	public static final double RECENTLY_ATTEMPTED_PENALTY = 1.3;
@@ -77,7 +75,7 @@ public class TrPeerManager {
 		addNewPeer(pubNodeAddress, capabilities, 0);
 	}
 	public void addNewPeer(final RemoteNodeAddress pubNodeAddress, final Capabilities capabilities, final int topologyLocation) {
-		logger.debug("addNewPeer "+pubNodeAddress);
+		logger.info("Adding new peer "+pubNodeAddress);
 		final TrPeerInfo tpi = new TrPeerInfo(pubNodeAddress);
 		tpi.capabilities = capabilities;
 		tpi.topologyLocation = topologyLocation;
@@ -451,7 +449,7 @@ public class TrPeerManager {
 		@Override
 		public String toString() {
 			final StringBuilder builder = new StringBuilder();
-			builder.append("TrPeerInfo [remoteNodeAddress=");
+			builder.append("PeerInfo [addr=");
 			builder.append(remoteNodeAddress);
 			builder.append("]");
 			return builder.toString();

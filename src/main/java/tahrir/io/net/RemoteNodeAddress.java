@@ -47,7 +47,7 @@ public class RemoteNodeAddress {
 	@Override
 	public String toString() {
 		final StringBuilder builder = new StringBuilder();
-		builder.append("RemoteNodeAddress [address=");
+		builder.append("RNA [loc=");
 		builder.append(physicalLocation);
 		builder.append("]");
 		return builder.toString();
