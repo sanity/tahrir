@@ -30,10 +30,11 @@ public class BroadcastMessageBroadcaster implements Runnable {
     public void run() {
         if (!disabled) {
             Set<PhysicalNetworkLocation> peersThatReceiveMessageBroadcasts = findPeersThatReceiveMessageBroadcasts(node.peerManager.peers);
-            final BroadcastMessage broadcastMessageForBroadcast = node.mbClasses.mbsForBroadcast.getMicroblogForBroadcast();
+            final BroadcastMessage broadcastMessageForBroadcast = node.mbClasses.mbsForBroadcast.getMessageForBroadcast();
             for (PhysicalNetworkLocation recepient : peersThatReceiveMessageBroadcasts) {
                 final TransmitMicroblogSessionImpl localMicroblogBroadcastSession = node.sessionMgr.getOrCreateLocalSession(TransmitMicroblogSessionImpl.class);
                 localMicroblogBroadcastSession.attemptToSendMicroblogAndWaitUntilComplete(broadcastMessageForBroadcast, recepient);
+
             }
         }
     }

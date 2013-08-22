@@ -140,7 +140,7 @@ public abstract class TrSerializer {
 						} else {
 							if (field.getGenericType() instanceof ParameterizedType)
 								throw new TrSerializableException(
-										"If you want to serialize a generic type you must register a TahrirSerializer for it");
+										"If you want to serialize a generic type you must register a TahrirSerializer for it, field name is "+ field.getName());
 							serializeTo(fieldObject, dos);
 						}
 					}

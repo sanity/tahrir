@@ -89,8 +89,11 @@ public class AssimilateTest {
         joinerConfig.udp.listenPort = 7644;
         joinerConfig.localHostName = "localhost";
         joinerConfig.peers.runMaintainance = true;
-        joinerConfig.peers.topologyMaintenance = false;
+        joinerConfig.peers.topologyMaintenance = true;
         joinerConfig.peers.runBroadcast = true;
+        joinerConfig.capabilities.allowsAssimilation = true;
+        joinerConfig.capabilities.allowsUnsolicitiedInbound = false;
+        joinerConfig.capabilities.receivesMessageBroadcasts = true;
 
         final File joinerPubNodeIdsDir = new File(joinerDir, joinerConfig.publicNodeIdsDir);
 
@@ -103,8 +106,11 @@ public class AssimilateTest {
         joinerConfig2.udp.listenPort = 7645;
         joinerConfig2.localHostName = "localhost";
         joinerConfig2.peers.runMaintainance = true;
-        joinerConfig2.peers.topologyMaintenance = false;
+        joinerConfig2.peers.topologyMaintenance = true;
         joinerConfig2.peers.runBroadcast = true;
+        joinerConfig2.capabilities.allowsAssimilation = true;
+        joinerConfig2.capabilities.allowsUnsolicitiedInbound = false;
+        joinerConfig2.capabilities.receivesMessageBroadcasts = true;
 
         final File joinerPubNodeIdsDir2 = new File(joinerDir2, joinerConfig2.publicNodeIdsDir);
 
@@ -129,7 +135,7 @@ public class AssimilateTest {
         catch (final Exception e){
             e.printStackTrace();
         }
-        Thread.sleep(50000);
+        Thread.sleep(500000);
 
     }
 }

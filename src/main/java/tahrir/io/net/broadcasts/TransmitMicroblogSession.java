@@ -10,7 +10,7 @@ public interface TransmitMicroblogSession extends TrSession {
 	public void areYouInterested(final int mbHash);
 
 	@Priority(TrConstants.MICROBLOG_BROADCAST_PRIORITY)
-	public void sendMicroblog(final BroadcastMessage mb);
+	public void sendBroadcastMessage(final BroadcastMessage mb);
 
 	@Priority(TrConstants.MICROBLOG_BROADCAST_PRIORITY)
 	public void interestIs(boolean interest);
