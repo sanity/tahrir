@@ -3,5 +3,3 @@ notifications:
   email:
     - ian.clarke@gmail.com
     - ravitejasvi@gmail.com
-  on_success: never
-  on_failure: always
