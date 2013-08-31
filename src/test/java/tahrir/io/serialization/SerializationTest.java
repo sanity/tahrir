@@ -7,6 +7,7 @@ import nu.xom.Document;
 import nu.xom.ParsingException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import sun.security.rsa.RSAPrivateKeyImpl;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.RemoteNodeAddress;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
@@ -14,6 +15,7 @@ import tahrir.io.net.udpV1.UdpNetworkLocation;
 
 import java.io.*;
 import java.net.InetAddress;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -99,6 +101,25 @@ public class SerializationTest {
 		final CollectionsTypes ct2 = TrSerializer.deserializeFrom(CollectionsTypes.class, dis);
 		Assert.assertEquals(ct, ct2);
 	}
+
+    @Test
+    public void pvtKeySerialisationTest() throws Exception{
+        RSAPrivateKey pvtKey = TrCrypto.createRsaKeyPair().b;
+        try{
+
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+            final DataOutputStream dos = new DataOutputStream(baos);
+
+            TrSerializer.serializeTo(pvtKey, dos);
+
+            final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
+            RSAPrivateKey pvtKey1 = TrSerializer.deserializeFrom(RSAPrivateKey.class, dis);
+
+            Assert.assertEquals(pvtKey1, pvtKey);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void documentSerialisationTest() throws Exception{

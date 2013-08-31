@@ -2,6 +2,8 @@ package tahrir.io.net.sessions;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,8 @@ import tahrir.tools.Persistence.ModifyBlock;
 import tahrir.tools.TrUtils;
 
 import java.security.interfaces.RSAPublicKey;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ScheduledFuture;
@@ -142,7 +146,20 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
     }
 
     private void relayAssimilateRequest(RemoteNodeAddress joinerAddress) {
-        relay = node.peerManager.getPeerForAssimilation(alreadyAttempted);
+
+        Map<PhysicalNetworkLocation, Boolean> alreadyAttemptedMap = Maps.newConcurrentMap();
+        Set<PhysicalNetworkLocation> alreadyAttemptedSet = Sets.newSetFromMap(alreadyAttemptedMap);
+        /*for(PhysicalNetworkLocation physicalLocation : alreadyAttempted){
+            alreadyAttemptedMap.put(physicalLocation, true);
+        }
+        alreadyAttemptedMap.put(node.getRemoteNodeAddress().physicalLocation, true);
+        */
+        for(PhysicalNetworkLocation physicalLocation : alreadyAttempted){
+            alreadyAttemptedSet.add(physicalLocation);
+        }
+
+
+        relay = node.peerManager.getPeerForAssimilation(alreadyAttemptedSet);//Collections.newSetFromMap(alreadyAttemptedMap));
         logger.info("Forwarding assimilation request from {}, for joiner {} to {}", new Object[] {sender(), joinerAddress, relay});
 
         requestNewConnectionTime = System.currentTimeMillis();
