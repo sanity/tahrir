@@ -1,7 +1,6 @@
 package tahrir.io.net.broadcasts.filters;
 
 import com.google.common.base.Predicate;
-import com.sun.istack.internal.Nullable;
 import nu.xom.Document;
 import tahrir.TrConstants;
 import tahrir.io.net.broadcasts.IdentityStore;
@@ -21,7 +20,7 @@ public class MentionsFilter implements Predicate<BroadcastMessage> {
     }
 
     @Override
-    public boolean apply(@Nullable final BroadcastMessage broadcastMessage) {
+    public boolean apply(final BroadcastMessage broadcastMessage) {
         Document doc = broadcastMessage.signedBroadcastMessage.parsedBroadcastMessage.broadcastMessageDocument;
         for (UserIdentity identity : identityStore.getIdentitiesWithLabel(TrConstants.OWN)){
             for(int docCount = 0; docCount<doc.query("//"+TrConstants.FormatInfo.MENTION).size(); docCount++){
