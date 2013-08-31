@@ -1,5 +1,6 @@
 package tahrir.io.serialization;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import nu.xom.Builder;
@@ -101,6 +102,20 @@ public class SerializationTest {
 		final CollectionsTypes ct2 = TrSerializer.deserializeFrom(CollectionsTypes.class, dis);
 		Assert.assertEquals(ct, ct2);
 	}
+
+    @Test
+    public void optionalTypeTest() throws Exception{
+        Optional<RSAPrivateKey> pvtKey = Optional.of(TrCrypto.createRsaKeyPair().b);
+        try{
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+            final DataOutputStream dos = new DataOutputStream(baos);
+            TrSerializer.serializeTo(pvtKey, dos);
+            final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
+            Assert.assertEquals(TrSerializer.deserializeFrom(Optional.class, dis), pvtKey);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void pvtKeySerialisationTest() throws Exception{

@@ -7,6 +7,7 @@ import java.security.interfaces.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 
 import nu.xom.Document;
@@ -39,6 +40,7 @@ public abstract class TrSerializer {
 		registerSerializer(new ByteArraySegmentSerializer(), ByteArraySegment.class);
 		registerSerializer(new InetAddressSerializer(), InetAddress.class);
 		registerSerializer(new NetworkLocationSerializer(), PhysicalNetworkLocation.class);
+        registerSerializer(new OptionalSerializer(), Optional.class);
 	}
 
 	private static final Map<Class<?>, Map<Integer, Field>> fieldMap = Maps.newHashMap();
