@@ -56,7 +56,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Proguard setup, see http://blog.boxofrats.com/2009/08/07/setting-up-maven-for-scala-and-proguard/ -->
+			<!-- Proguard setup, see http://blog.boxofrats.com/2009/08/07/setting-up-maven-for-scala-and-proguard/ TEMPORARILY DISABLED
 			<plugin>
 				<groupId>com.pyx4me</groupId>
 				<artifactId>proguard-maven-plugin</artifactId>
@@ -88,7 +88,7 @@
 						<lib>${java.home}/../Classes/jce.jar</lib>
 					</libs>
 				</configuration>
-			</plugin>
+			</plugin> -->
 		</plugins>
 	</build>
 	<dependencies>
