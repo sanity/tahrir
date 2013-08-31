@@ -157,6 +157,8 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
         for(PhysicalNetworkLocation physicalLocation : alreadyAttempted){
             alreadyAttemptedSet.add(physicalLocation);
         }
+        alreadyAttemptedSet.add(node.getRemoteNodeAddress().physicalLocation);
+        alreadyAttemptedSet.add(joinerAddress.physicalLocation);
 
 
         relay = node.peerManager.getPeerForAssimilation(alreadyAttemptedSet);//Collections.newSetFromMap(alreadyAttemptedMap));
