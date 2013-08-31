@@ -82,8 +82,8 @@
 					<injar>${project.build.finalName}-jar-with-dependencies.jar</injar>
 					<outjar>${project.build.finalName}-shrunk.jar</outjar>
 					<libs>
-						<!-- WARNING: This is required on OSX, will need to be adjusted for 
-							other platforms because these jar files are in a different location -->
+						 WARNING: This is required on OSX, will need to be adjusted for
+							other platforms because these jar files are in a different location
 						<lib>${java.home}/../Classes/classes.jar</lib>
 						<lib>${java.home}/../Classes/jce.jar</lib>
 					</libs>
