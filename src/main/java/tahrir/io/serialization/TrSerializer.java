@@ -1,18 +1,20 @@
 package tahrir.io.serialization;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.net.InetAddress;
-import java.security.interfaces.*;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.google.common.collect.Maps;
-
 import nu.xom.Document;
 import tahrir.io.net.PhysicalNetworkLocation;
 import tahrir.io.serialization.serializers.*;
 import tahrir.tools.ByteArraySegment;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.lang.reflect.*;
+import java.net.InetAddress;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class TrSerializer {
 
