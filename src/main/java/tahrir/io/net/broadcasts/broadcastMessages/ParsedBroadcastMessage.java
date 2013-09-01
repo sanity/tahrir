@@ -26,6 +26,10 @@ public class ParsedBroadcastMessage {
      * </mb>
      */
 
+    public ParsedBroadcastMessage(){
+        //for serialization
+    }
+
     private ParsedBroadcastMessage(Document broadcastMessageDocument){
         this.broadcastMessageDocument = broadcastMessageDocument;
         this.timeCreated = System.currentTimeMillis();
