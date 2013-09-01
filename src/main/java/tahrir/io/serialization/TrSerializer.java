@@ -1,5 +1,6 @@
 package tahrir.io.serialization;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import nu.xom.Document;
 import tahrir.io.net.PhysicalNetworkLocation;
@@ -41,6 +42,7 @@ public abstract class TrSerializer {
 		registerSerializer(new ByteArraySegmentSerializer(), ByteArraySegment.class);
 		registerSerializer(new InetAddressSerializer(), InetAddress.class);
 		registerSerializer(new NetworkLocationSerializer(), PhysicalNetworkLocation.class);
+        registerSerializer(new OptionalSerializer(), Optional.class);
 	}
 
 	private static final Map<Class<?>, Map<Integer, Field>> fieldMap = Maps.newHashMap();

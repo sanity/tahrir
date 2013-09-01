@@ -1,5 +1,6 @@
 package tahrir.io.serialization;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import nu.xom.Builder;
@@ -7,7 +8,6 @@ import nu.xom.Document;
 import nu.xom.ParsingException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import sun.security.rsa.RSAPrivateKeyImpl;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.RemoteNodeAddress;
 import tahrir.io.net.TrPeerManager.TrPeerInfo;
@@ -92,6 +92,7 @@ public class SerializationTest {
 		ct.hashSet = Sets.newHashSet();
 		ct.hashSet.add("one");
 		ct.hashSet.add("two");
+
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
 		final DataOutputStream dos = new DataOutputStream(baos);
 		TrSerializer.serializeTo(ct, dos);
@@ -101,6 +102,22 @@ public class SerializationTest {
 		final CollectionsTypes ct2 = TrSerializer.deserializeFrom(CollectionsTypes.class, dis);
 		Assert.assertEquals(ct, ct2);
 	}
+
+    @Test
+    public void optionalTypeTest() throws Exception{
+        Optionals optionals = new Optionals();
+        optionals.stringPresent = Optional.of("hello");
+        optionals.stringAbsent = Optional.absent();
+        try{
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+            final DataOutputStream dos = new DataOutputStream(baos);
+            TrSerializer.serializeTo(optionals, dos);
+            final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
+            Assert.assertEquals(TrSerializer.deserializeFrom(Optionals.class, dis), optionals);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void pvtKeySerialisationTest() throws Exception{
@@ -198,6 +215,26 @@ public class SerializationTest {
 			return true;
 		}
 	}
+
+    public static class Optionals  {
+        public Optional<String> stringPresent;
+        public Optional<String> stringAbsent;
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            final Optionals optionals = (Optionals) o;
+
+            if (stringAbsent != null ? !stringAbsent.equals(optionals.stringAbsent) : optionals.stringAbsent != null)
+                return false;
+            if (stringPresent != null ? !stringPresent.equals(optionals.stringPresent) : optionals.stringPresent != null)
+                return false;
+
+            return true;
+        }
+    }
 
 	public static class PrimitiveTypes implements Serializable {
 		private static final long serialVersionUID = -5992856042046042767L;
