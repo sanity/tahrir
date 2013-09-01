@@ -19,7 +19,17 @@ import tahrir.tools.TrUtils.TestUtils;
 import tahrir.ui.TrMainWindow;
 
 public class AssimilateTest {
-	@Test
+
+    public static void main(String [] args){
+        AssimilateTest test = new AssimilateTest();
+        try {
+            test.threePeerTest();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
 	public void twoPeerTest() throws Exception {
 		System.out.println("Joiner (7644) will assimilate to seed (7643)");
 
@@ -69,7 +79,7 @@ public class AssimilateTest {
 		Assert.assertTrue(seedNode.peerManager.peers.containsKey(joinerNode.getRemoteNodeAddress().physicalLocation), "The seed peer manager should contain the joiner peer");
 	}
 
-    @Test
+
     public void threePeerTest() throws Exception{
         final TrNodeConfig seedConfig = new TrNodeConfig();
         seedConfig.capabilities.allowsAssimilation = true;

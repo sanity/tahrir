@@ -22,11 +22,10 @@ public class BroadcastMessageParserTest {
 
             TrNode node = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
 
-		String xml = "<bm><txt>Hello there this is simple test.</txt></bm>" ;
+		String xml = "<?xml version=\"1.0\"?>\n<bm><txt lang=\"en\">Hello there this is simple test. </txt></bm>\n" ;
         ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hello there this is simple test.", "en", node.mbClasses.identityStore);
-
 		// convert back to XML and compare with original
-		Assert.assertTrue(parsedBroadcastMessage.asXmlString().equals(xml));
+		Assert.assertEquals(parsedBroadcastMessage.asXmlString(), xml);
 	}
 
 	/**

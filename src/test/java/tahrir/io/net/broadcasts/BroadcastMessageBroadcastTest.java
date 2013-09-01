@@ -38,6 +38,7 @@ public class BroadcastMessageBroadcastTest {
         // stop any more broadcasts
         sendingNode.mbClasses.mbScheduler.disable();
 
+        boolean a = receivingNode.mbClasses.mbsForBroadcast.contains(broadcastMessage);
         for (int x = 0; x < 50; x++) {
             Thread.sleep(20);
             if (receivingNode.mbClasses.mbsForBroadcast.contains(broadcastMessage)) {
