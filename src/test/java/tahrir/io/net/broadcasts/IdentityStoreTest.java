@@ -1,12 +1,14 @@
 package tahrir.io.net.broadcasts;
 
 import com.google.common.base.Optional;
+import com.google.common.eventbus.EventBus;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tahrir.TrConstants;
 import tahrir.io.crypto.TrCrypto;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
@@ -16,19 +18,27 @@ import java.security.interfaces.RSAPublicKey;
  */
 public class IdentityStoreTest {
 
-
-
-
-
     final String boundingNick = "na";
 
+    void createFileIfNotExists(File filename){
+        if(!filename.exists()){
+            try {
+                filename.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     @Test
     public void addLabelToIdentityTest(){
         File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
+       createFileIfNotExists(identityStoreTestFile);
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name1";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
+        EventBus testEventBus = new EventBus();
+        testStore.setEventBus(testEventBus);
         UserIdentity identityOne=new UserIdentity(user1nick, user1Key, Optional.<RSAPrivateKey>absent());
         final String label= "Following";
 
@@ -41,7 +51,10 @@ public class IdentityStoreTest {
     @Test
     public void addIdentityToNickTest(){
         File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
+        createFileIfNotExists(identityStoreTestFile);
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
+        EventBus testEventBus = new EventBus();
+        testStore.setEventBus(testEventBus);
         RSAPublicKey user2Key = TrCrypto.createRsaKeyPair().a;
         final String user2nick = "name2";
         UserIdentity identityTwo=new UserIdentity(user2nick, user2Key, Optional.<RSAPrivateKey>absent());
@@ -58,9 +71,12 @@ public class IdentityStoreTest {
     public void removeLabelFromIdentityTest(){
 
         File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
+        createFileIfNotExists(identityStoreTestFile);
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name1";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
+        EventBus testEventBus = new EventBus();
+        testStore.setEventBus(testEventBus);
         UserIdentity identityOne=new UserIdentity(user1nick, user1Key, Optional.<RSAPrivateKey>absent());
         final String label= "Following";
 
@@ -75,9 +91,12 @@ public class IdentityStoreTest {
     @Test
     public void getIdentitiesWithLabelTest(){
         File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
+        createFileIfNotExists(identityStoreTestFile);
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name2";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
+        EventBus testEventBus = new EventBus();
+        testStore.setEventBus(testEventBus);
         UserIdentity identityTwo=new UserIdentity(user1nick, user1Key, Optional.<RSAPrivateKey>absent());
         final String label= "Following";
 
@@ -89,7 +108,10 @@ public class IdentityStoreTest {
     @Test
     public void removeIdentityFromNickTest(){
         File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
+        createFileIfNotExists(identityStoreTestFile);
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
+        EventBus testEventBus = new EventBus();
+        testStore.setEventBus(testEventBus);
         RSAPublicKey user2Key = TrCrypto.createRsaKeyPair().a;
         final String user2nick = "name2";
         UserIdentity identityTwo=new UserIdentity(user2nick, user2Key, Optional.<RSAPrivateKey>absent());
@@ -103,9 +125,12 @@ public class IdentityStoreTest {
     @Test
     public void getLabelsForIdentityTest(){
         File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
+        createFileIfNotExists(identityStoreTestFile);
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name2";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
+        EventBus testEventBus = new EventBus();
+        testStore.setEventBus(testEventBus);
         UserIdentity identityTwo=new UserIdentity(user1nick, user1Key, Optional.<RSAPrivateKey>absent());
         final String label= "Following";
 
@@ -117,9 +142,12 @@ public class IdentityStoreTest {
     @Test
     public void getUserIdentitiesStartingWithTest(){
         File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
+        createFileIfNotExists(identityStoreTestFile);
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name1";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
+        EventBus testEventBus = new EventBus();
+        testStore.setEventBus(testEventBus);
         UserIdentity identityOne=new UserIdentity(user1nick, user1Key, Optional.<RSAPrivateKey>absent());
 
         testStore.addIdentityToUsersWithNickname(identityOne);
@@ -130,9 +158,12 @@ public class IdentityStoreTest {
     @Test
     public void getIdentitiesWithNick(){
         File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
+        createFileIfNotExists(identityStoreTestFile);
         RSAPublicKey user1Key = TrCrypto.createRsaKeyPair().a;
         final String user1nick = "name1";
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
+        EventBus testEventBus = new EventBus();
+        testStore.setEventBus(testEventBus);
         UserIdentity identityOne=new UserIdentity(user1nick, user1Key, Optional.<RSAPrivateKey>absent());
 
         testStore.addIdentityToUsersWithNickname(identityOne);
@@ -142,6 +173,7 @@ public class IdentityStoreTest {
     @Test
     public void duplicateUsersTest(){
         File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
+        createFileIfNotExists(identityStoreTestFile);
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
 
         UserIdentity testUser2 = new UserIdentity("TestUser2", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
@@ -156,7 +188,9 @@ public class IdentityStoreTest {
    @Test
     public void fileLoadingTest(){
        File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
+       createFileIfNotExists(identityStoreTestFile);
        IdentityStore testStore=new IdentityStore(identityStoreTestFile);
+
 
        UserIdentity testUser3 = new UserIdentity("TestUser3", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
        testStore.addIdentityWithLabel("Friends", testUser3);
@@ -168,6 +202,7 @@ public class IdentityStoreTest {
     @Test
     public void emptyLabelTest(){
         File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
+        createFileIfNotExists(identityStoreTestFile);
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
 
         UserIdentity testUser3 = new UserIdentity("TestUser3", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
