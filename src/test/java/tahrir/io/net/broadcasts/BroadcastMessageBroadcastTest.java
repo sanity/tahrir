@@ -37,7 +37,6 @@ public class BroadcastMessageBroadcastTest {
 
         // stop any more broadcasts
         sendingNode.mbClasses.mbScheduler.disable();
-
         boolean a = receivingNode.mbClasses.mbsForBroadcast.contains(broadcastMessage);
         for (int x = 0; x < 50; x++) {
             Thread.sleep(20);
@@ -46,7 +45,7 @@ public class BroadcastMessageBroadcastTest {
             }
         }
 
-        Assert.assertTrue(receivingNode.mbClasses.mbsForBroadcast.contains(broadcastMessage), "Should contain the microblog");
+        Assert.assertTrue(receivingNode.mbClasses.mbsForBroadcast.contains(broadcastMessage), "Should contain the BroadcastMessage");
     }
 
     @Test
