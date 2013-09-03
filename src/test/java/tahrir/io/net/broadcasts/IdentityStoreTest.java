@@ -2,6 +2,8 @@ package tahrir.io.net.broadcasts;
 
 import com.google.common.base.Optional;
 import com.google.common.eventbus.EventBus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tahrir.TrConstants;
@@ -18,13 +20,17 @@ import java.security.interfaces.RSAPublicKey;
  */
 public class IdentityStoreTest {
 
+    private static Logger logger = LoggerFactory.getLogger(IdentityStoreTest.class);
+
     final String boundingNick = "na";
 
-    void createFileIfNotExists(File filename){
+    void createFileIfNotExists(File filename) throws RuntimeException{
         if(!filename.exists()){
             try {
+                logger.debug("Identity Store file didn't exist, creating a new file.");
                 filename.createNewFile();
             } catch (IOException e) {
+                logger.info("Couldn't create identity store file! ");
                 e.printStackTrace();
             }
         }
@@ -175,7 +181,8 @@ public class IdentityStoreTest {
         File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
         createFileIfNotExists(identityStoreTestFile);
         IdentityStore testStore=new IdentityStore(identityStoreTestFile);
-
+        EventBus testEventBus = new EventBus();
+        testStore.setEventBus(testEventBus);
         UserIdentity testUser2 = new UserIdentity("TestUser2", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
 
         testStore.addIdentityWithLabel("Friends", testUser2);
@@ -190,7 +197,8 @@ public class IdentityStoreTest {
        File identityStoreTestFile=new File(TrConstants.IDENTITY_STORE_TEST_FILE_PATH);
        createFileIfNotExists(identityStoreTestFile);
        IdentityStore testStore=new IdentityStore(identityStoreTestFile);
-
+       EventBus testEventBus = new EventBus();
+       testStore.setEventBus(testEventBus);
 
        UserIdentity testUser3 = new UserIdentity("TestUser3", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
        testStore.addIdentityWithLabel("Friends", testUser3);
