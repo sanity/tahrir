@@ -1,8 +1,10 @@
 package tahrir.tools;
 
+import com.google.common.base.Optional;
 import com.google.gson.*;
 import tahrir.io.crypto.TrCrypto;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.security.interfaces.RSAPublicKey;
 
@@ -25,4 +27,6 @@ public class GsonSerializers {
 			return TrCrypto.decodeBase64(jsonElement.getAsJsonPrimitive().getAsString());
 		}
 	}
+
+
 }

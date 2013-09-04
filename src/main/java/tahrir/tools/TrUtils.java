@@ -44,6 +44,7 @@ public class TrUtils {
 
 	static {
 		GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapterFactory(new OptionalTypeAdapterFactory());
 		builder.registerTypeAdapter(RSAPublicKey.class, new RSAPublicKeySerializer());
 		builder.registerTypeAdapter(RSAPublicKey.class, new RSAPublicKeyDeserializer());
 		gson = builder.create();
