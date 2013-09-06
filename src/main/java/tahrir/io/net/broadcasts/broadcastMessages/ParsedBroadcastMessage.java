@@ -17,7 +17,30 @@ public class ParsedBroadcastMessage {
 
     public Document broadcastMessageDocument;
     private long timeCreated;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ParsedBroadcastMessage that = (ParsedBroadcastMessage) o;
+
+        if (timeCreated != that.timeCreated) return false;
+        if (broadcastMessageDocument != null ? !broadcastMessageDocument.equals(that.broadcastMessageDocument) : that.broadcastMessageDocument != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = broadcastMessageDocument != null ? broadcastMessageDocument.hashCode() : 0;
+        result = 31 * result + (int) (timeCreated ^ (timeCreated >>> 32));
+        return result;
+    }
+
     /**
+
      * Format for xml is
      * <mb>
      *     <txt>
@@ -97,16 +120,16 @@ public class ParsedBroadcastMessage {
         return new ParsedBroadcastMessage(broadcastMessageDocument);
     }
 
-    public static ParsedBroadcastMessage createFromBroadcastMessageInXML(String broadcastMessageInXml){
+   /* public static ParsedBroadcastMessage createFromBroadcastMessageInXML(String broadcastMessageInXml){
         try {
-            return new ParsedBroadcastMessage(new Builder().build(broadcastMessageInXml, null));
+            return new ParsedBroadcastMessage(new Builder().build(broadcastMessageInXml, ""));
         } catch (ParsingException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
-    }
+    }*/
 
     public String asXmlString(){
         return this.broadcastMessageDocument.toXML();
@@ -115,6 +138,10 @@ public class ParsedBroadcastMessage {
     public String getPlainTextBroadcastMessage(){
         StringBuilder plaintextBroadcastMessage = new StringBuilder();
         writeNode(broadcastMessageDocument.getRootElement(), plaintextBroadcastMessage);
+        if(plaintextBroadcastMessage.toString().endsWith(" ")){
+            //taking care of the additional " " added at the end while creating doc.
+            plaintextBroadcastMessage.deleteCharAt(plaintextBroadcastMessage.length()-1);
+        }
         return plaintextBroadcastMessage.toString();
     }
 
