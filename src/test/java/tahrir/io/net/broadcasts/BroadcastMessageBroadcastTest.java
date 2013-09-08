@@ -24,7 +24,7 @@ public class BroadcastMessageBroadcastTest {
         }
         sendingNode.config.currentUserIdentity = new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
 
-        final ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hello world", "en", sendingNode.mbClasses.identityStore);
+        final ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hello world", "en", sendingNode.mbClasses.identityStore, System.currentTimeMillis());
         final SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, sendingNode.config.currentUserIdentity);
         final BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
         sendingNode.mbClasses.mbsForBroadcast.insert(broadcastMessage);
@@ -58,11 +58,11 @@ public class BroadcastMessageBroadcastTest {
         }
 
         sendingNode.config.currentUserIdentity = new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
-        final ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("You SHOULD have this microblog!", "en", sendingNode.mbClasses.identityStore);
+        final ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("You SHOULD have this microblog!", "en", sendingNode.mbClasses.identityStore, System.currentTimeMillis());
         final SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, sendingNode.config.currentUserIdentity);
         final BroadcastMessage broadcastMessage1 = new BroadcastMessage(signedBroadcastMessage);
 
-        final ParsedBroadcastMessage parsedBroadcastMessage1 = ParsedBroadcastMessage.createFromPlaintext("You should NOT have this microblog!", "en", sendingNode.mbClasses.identityStore);
+        final ParsedBroadcastMessage parsedBroadcastMessage1 = ParsedBroadcastMessage.createFromPlaintext("You should NOT have this microblog!", "en", sendingNode.mbClasses.identityStore, System.currentTimeMillis());
         final SignedBroadcastMessage signedBroadcastMessage1 = new SignedBroadcastMessage(parsedBroadcastMessage1, sendingNode.config.currentUserIdentity);
         final BroadcastMessage broadcastMessage2 = new BroadcastMessage(signedBroadcastMessage1);
 

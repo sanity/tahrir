@@ -54,7 +54,7 @@ public class TrMainWindow {
             public void actionPerformed(ActionEvent e) {
                 String message = newPostPane.getText();
                 //TODO: get the language from config or settings page.
-                ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext(message, "en", node.mbClasses.identityStore);
+                ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext(message, "en", node.mbClasses.identityStore, System.currentTimeMillis());
                 SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.config.currentUserIdentity);
                 final BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
                 node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);

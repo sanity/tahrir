@@ -22,8 +22,8 @@ public class BroadcastMessageParserTest {
 
             TrNode node = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
 
-		String xml = "<?xml version=\"1.0\"?>\n<bm><txt lang=\"en\">Hello there this is simple test. </txt></bm>\n" ;
-        ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hello there this is simple test.", "en", node.mbClasses.identityStore);
+		String xml = "<?xml version=\"1.0\"?>\n<bm><txt lang=\"en\">Hello there this is simple test.</txt></bm>\n" ;
+        ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hello there this is simple test.", "en", node.mbClasses.identityStore, System.currentTimeMillis());
 		// convert back to XML and compare with original
 		Assert.assertEquals(parsedBroadcastMessage.asXmlString(), xml);
 	}

@@ -31,12 +31,12 @@ public class ParsedBroadcastMessage {
         //for serialization
     }
 
-    private ParsedBroadcastMessage(Document broadcastMessageDocument){
+    private ParsedBroadcastMessage(Document broadcastMessageDocument, long timeCreated){
         this.broadcastMessageDocument = broadcastMessageDocument;
-        this.timeCreated = System.currentTimeMillis();
+        this.timeCreated = timeCreated;
     }
 
-    public static ParsedBroadcastMessage createFromPlaintext(String plaintextBroadcastMessage, String languageCode, IdentityStore identityStore){
+    public static ParsedBroadcastMessage createFromPlaintext(String plaintextBroadcastMessage, String languageCode, IdentityStore identityStore, long timeCreated){
         Element rootElement = new Element(TrConstants.FormatInfo.ROOT);
 
         Document broadcastMessageDocument = new Document(rootElement);
@@ -44,7 +44,7 @@ public class ParsedBroadcastMessage {
 
         rootElement.appendChild(plainText);
 
-        return new ParsedBroadcastMessage(broadcastMessageDocument);
+        return new ParsedBroadcastMessage(broadcastMessageDocument, timeCreated);
     }
 
     private static Element generatePlainTextElement(final String plaintextBroadcastMessage, final IdentityStore identityStore, String languageCode) {
@@ -126,10 +126,6 @@ public class ParsedBroadcastMessage {
     public String getPlainTextBroadcastMessage(){
         StringBuilder plaintextBroadcastMessage = new StringBuilder();
         writeNode(broadcastMessageDocument.getRootElement(), plaintextBroadcastMessage);
-        if(plaintextBroadcastMessage.toString().endsWith(" ")){
-            //taking care of the additional " " added at the end while creating doc.
-            plaintextBroadcastMessage.deleteCharAt(plaintextBroadcastMessage.length()-1);
-        }
         return plaintextBroadcastMessage.toString();
     }
 

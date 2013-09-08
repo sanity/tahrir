@@ -126,7 +126,7 @@ public class TrUtils {
 		public static BroadcastMessage getBroadcastMessage(TrNode node1) {
             UserIdentity randomUser = new UserIdentity("Random User", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
             node1.mbClasses.identityStore.addIdentity(randomUser);
-			ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hi @User3, How are you?", "en", node1.mbClasses.identityStore);
+			ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hi @User3, How are you?", "en", node1.mbClasses.identityStore, System.currentTimeMillis());
             SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, randomUser);
             BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
 	        return broadcastMessage;
@@ -136,7 +136,7 @@ public class TrUtils {
 		 * Get a microblog from a user that mentions another user twice.
 		 */
 		public static BroadcastMessage getBroadcastMessage(UserIdentity from, UserIdentity mention, TrNode node) {
-            ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hi @"+mention.getNick()+", this is a sample with mention", "en", node.mbClasses.identityStore);
+            ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hi @"+mention.getNick()+", this is a sample with mention", "en", node.mbClasses.identityStore, System.currentTimeMillis());
             SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, from);
             BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
             return broadcastMessage;
@@ -146,7 +146,7 @@ public class TrUtils {
 		 * Get broadcastMessage from a user which is just text, no mentions.
 		 */
 		public static BroadcastMessage getBroadcastMessageFrom(TrNode node) {
-            ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Some post from a user.", "en", node.mbClasses.identityStore);
+            ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Some post from a user.", "en", node.mbClasses.identityStore, System.currentTimeMillis());
             SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.config.currentUserIdentity);
             BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
             return broadcastMessage;
@@ -154,7 +154,7 @@ public class TrUtils {
 		}
 
         public static BroadcastMessage getBroadcastMessageFrom(TrNode node, UserIdentity identity) {
-            ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("From a given node, given user.", "en", node.mbClasses.identityStore);
+            ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("From a given node, given user.", "en", node.mbClasses.identityStore, System.currentTimeMillis());
             SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, identity);
             BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
             return broadcastMessage;
