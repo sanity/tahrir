@@ -1,11 +1,10 @@
 package tahrir.io.net.broadcasts.broadcastMessages;
 
+import com.google.common.base.Optional;
 import nu.xom.*;
 import tahrir.TrConstants;
 import tahrir.io.net.broadcasts.IdentityStore;
-
-import java.io.IOException;
-import java.util.Scanner;
+import tahrir.io.net.broadcasts.UserIdentity;
 
 /**
  * BroadcastMessage in xml format.
@@ -17,27 +16,6 @@ public class ParsedBroadcastMessage {
 
     public Document broadcastMessageDocument;
     private long timeCreated;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ParsedBroadcastMessage that = (ParsedBroadcastMessage) o;
-
-        if (timeCreated != that.timeCreated) return false;
-        if (broadcastMessageDocument != null ? !broadcastMessageDocument.equals(that.broadcastMessageDocument) : that.broadcastMessageDocument != null)
-            return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = broadcastMessageDocument != null ? broadcastMessageDocument.hashCode() : 0;
-        result = 31 * result + (int) (timeCreated ^ (timeCreated >>> 32));
-        return result;
-    }
 
     /**
 
@@ -58,78 +36,88 @@ public class ParsedBroadcastMessage {
         this.timeCreated = System.currentTimeMillis();
     }
 
-    public long getTimeCreated(){
-        return this.timeCreated;
-    }
-
     public static ParsedBroadcastMessage createFromPlaintext(String plaintextBroadcastMessage, String languageCode, IdentityStore identityStore){
         Element rootElement = new Element(TrConstants.FormatInfo.ROOT);
-        Element plainText = new Element(TrConstants.FormatInfo.PLAIN_TEXT);
-        Element mention = new Element(TrConstants.FormatInfo.MENTION);
+
         Document broadcastMessageDocument = new Document(rootElement);
-        int positionOfScanner = 0;
-        Attribute language = new Attribute("lang", languageCode);
-        plainText.addAttribute(language);
+        Element plainText = generatePlainTextElement(plaintextBroadcastMessage, identityStore, languageCode);
+
         rootElement.appendChild(plainText);
-        Scanner pbmScanner = new Scanner(plaintextBroadcastMessage);
-        while(pbmScanner.hasNext()){
-            String mentionPartWithoutAtSymbol;
-            String tempBroadcastMessagePart = pbmScanner.next();
-            positionOfScanner++;
-
-            if(tempBroadcastMessagePart.startsWith("@")){
-                plainText.appendChild(mention);
-                mentionPartWithoutAtSymbol = tempBroadcastMessagePart.substring(1);
-                char tempChar = mentionPartWithoutAtSymbol.charAt(mentionPartWithoutAtSymbol.length()-1);
-                if(!(Character.isLetter(tempChar)||Character.isDigit(tempChar))){
-                    mentionPartWithoutAtSymbol = mentionPartWithoutAtSymbol.substring(0, mentionPartWithoutAtSymbol.length()-1);
-                    Attribute publicKey = new Attribute("pubKey", identityStore.getIdentityWithNick(mentionPartWithoutAtSymbol).get().getPubKey().toString());
-                    mention.addAttribute(publicKey);
-                    mention.appendChild(mentionPartWithoutAtSymbol);
-                    StringBuilder afterMention = new StringBuilder();
-                    afterMention.append(tempChar);
-                    afterMention.append(' ');
-                    plainText.appendChild(afterMention.toString());
-                }
-                else{
-                Attribute publicKey = new Attribute("pubKey", identityStore.getIdentityWithNick(mentionPartWithoutAtSymbol).get().getPubKey().toString());
-                mention.addAttribute(publicKey);
-                mention.appendChild(mentionPartWithoutAtSymbol+" ");
-                }
-
-            }
-            else{
-                Scanner tempScanner = new Scanner(plaintextBroadcastMessage);
-                for(int i= 0 ; i<positionOfScanner; i++)
-                    tempScanner.next();
-                while(pbmScanner.hasNext()){
-                    String temp = tempScanner.next();
-                    if(!(temp.startsWith("@"))){
-                        tempBroadcastMessagePart+=" "+temp;
-                        pbmScanner.next();
-
-                    }
-                    else{
-                        break;
-                    }
-                }
-                plainText.appendChild(tempBroadcastMessagePart+" ");
-            }
-        }
 
         return new ParsedBroadcastMessage(broadcastMessageDocument);
     }
 
-   /* public static ParsedBroadcastMessage createFromBroadcastMessageInXML(String broadcastMessageInXml){
-        try {
-            return new ParsedBroadcastMessage(new Builder().build(broadcastMessageInXml, ""));
-        } catch (ParsingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+    private static Element generatePlainTextElement(final String plaintextBroadcastMessage, final IdentityStore identityStore, String languageCode) {
+        Attribute language = new Attribute("lang", languageCode);
+        Element plainText = new Element(TrConstants.FormatInfo.PLAIN_TEXT);
+        plainText.addAttribute(language);
+        int position = 0;
+        while (position < plaintextBroadcastMessage.length()) {
+            if (plaintextBroadcastMessage.charAt(position) == '@') {
+                int endOfMention = position + 1;
+                while (Character.isLetterOrDigit(plaintextBroadcastMessage.charAt(endOfMention))) {
+                    endOfMention++;
+                }
+                String mentionNickname = plaintextBroadcastMessage.substring(position+1, endOfMention);
+                Optional<UserIdentity> optionalIdentityWithNick = identityStore.getIdentityWithNick(mentionNickname);
+                if (optionalIdentityWithNick.isPresent()) {
+                    Element mention = createMentionElement(optionalIdentityWithNick.get());
+                    plainText.appendChild(mention);
+                } else {
+                    plainText.appendChild("@"+mentionNickname);
+                }
+                position = endOfMention;
+            } else {
+                int indexOfNextMention = plaintextBroadcastMessage.indexOf('@', position);
+                int readTextUpTo;
+                if (indexOfNextMention != -1) {
+                    readTextUpTo = indexOfNextMention;
+                } else {
+                    readTextUpTo = plaintextBroadcastMessage.length();
+                }
+                String nextTextBlock = plaintextBroadcastMessage.substring(position, readTextUpTo);
+                plainText.appendChild(nextTextBlock);
+                if (indexOfNextMention == -1) {
+                    break;
+                }
+                position = indexOfNextMention;
+            }
         }
-        return null;
-    }*/
+        return plainText;
+    }
+
+    private static Element createMentionElement(final UserIdentity identityWithNick) {
+        Attribute publicKey = new Attribute("pubKey", identityWithNick.getPubKey().toString());
+        Element mention = new Element(TrConstants.FormatInfo.MENTION);
+        mention.addAttribute(publicKey);
+        mention.appendChild(identityWithNick.getNick());
+        return mention;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = broadcastMessageDocument != null ? broadcastMessageDocument.hashCode() : 0;
+        result = 31 * result + (int) (timeCreated ^ (timeCreated >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ParsedBroadcastMessage that = (ParsedBroadcastMessage) o;
+
+        if (timeCreated != that.timeCreated) return false;
+        if (broadcastMessageDocument != null ? !broadcastMessageDocument.equals(that.broadcastMessageDocument) : that.broadcastMessageDocument != null)
+            return false;
+
+        return true;
+    }
+
+    public long getTimeCreated(){
+        return this.timeCreated;
+    }
 
     public String asXmlString(){
         return this.broadcastMessageDocument.toXML();
