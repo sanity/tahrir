@@ -40,6 +40,9 @@ public class ParsedBroadcastMessage {
         Element rootElement = new Element(TrConstants.FormatInfo.ROOT);
 
         Document broadcastMessageDocument = new Document(rootElement);
+
+        //For checking purposes, implementation should be changed.
+        broadcastMessageDocument.setBaseURI("");
         Element plainText = generatePlainTextElement(plaintextBroadcastMessage, identityStore, languageCode);
 
         rootElement.appendChild(plainText);

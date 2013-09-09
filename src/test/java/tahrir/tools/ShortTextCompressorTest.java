@@ -56,11 +56,8 @@ public class ShortTextCompressorTest {
 	private static void test(final FreqTableFactory factory, final String text) {
 		final FrequencyTable table = factory.make(text);
 		final ShortTextCompressor compressor = new ShortTextCompressor(table);
-
 		final byte[] bytes = compressor.compress(text);
-
 		final String deCompress = compressor.deCompress(bytes);
-
 		Assert.assertEquals(text, deCompress);
 	}
 
