@@ -52,6 +52,7 @@ public class ParsedBroadcastMessage {
 
     private static Element generatePlainTextElement(final String plaintextBroadcastMessage, final IdentityStore identityStore, String languageCode) {
         Attribute language = new Attribute("lang", languageCode);
+        language.setType(Attribute.Type.CDATA);
         Element plainText = new Element(TrConstants.FormatInfo.PLAIN_TEXT);
         plainText.addAttribute(language);
         int position = 0;

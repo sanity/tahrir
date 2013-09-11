@@ -23,8 +23,8 @@ public class BroadcastMessageBroadcastTest {
             pi.capabilities.receivesMessageBroadcasts = true;
         }
         sendingNode.config.currentUserIdentity = new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
-
-        final ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hello world", "en", sendingNode.mbClasses.identityStore, System.currentTimeMillis());
+        String langCode = "en";
+        final ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hello world", langCode, sendingNode.mbClasses.identityStore, System.currentTimeMillis());
         final SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, sendingNode.config.currentUserIdentity);
         final BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
         sendingNode.mbClasses.mbsForBroadcast.insert(broadcastMessage);
@@ -38,6 +38,7 @@ public class BroadcastMessageBroadcastTest {
         // stop any more broadcasts
         sendingNode.mbClasses.mbScheduler.disable();
         boolean a = receivingNode.mbClasses.mbsForBroadcast.contains(broadcastMessage);
+
         for (int x = 0; x < 50; x++) {
             Thread.sleep(20);
             if (receivingNode.mbClasses.mbsForBroadcast.contains(broadcastMessage)) {
