@@ -8,7 +8,7 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 public class BroadcastMessageOutbox {
-	private final PriorityQueue<BroadcastMessage> outbox;
+	public final PriorityQueue<BroadcastMessage> outbox;
 	private final Set<Integer> seen;
 
 	public BroadcastMessageOutbox() {

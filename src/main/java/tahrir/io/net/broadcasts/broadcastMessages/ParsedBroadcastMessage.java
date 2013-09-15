@@ -100,7 +100,7 @@ public class ParsedBroadcastMessage {
 
     @Override
     public int hashCode() {
-        int result = broadcastMessageDocument != null ? broadcastMessageDocument.hashCode() : 0;
+        int result = broadcastMessageDocument != null ? broadcastMessageDocument.toXML().hashCode() : 0;
         result = 31 * result + (int) (timeCreated ^ (timeCreated >>> 32));
         return result;
     }
@@ -113,7 +113,7 @@ public class ParsedBroadcastMessage {
         ParsedBroadcastMessage that = (ParsedBroadcastMessage) o;
 
         if (timeCreated != that.timeCreated) return false;
-        if (broadcastMessageDocument != null ? !broadcastMessageDocument.equals(that.broadcastMessageDocument) : that.broadcastMessageDocument != null)
+        if (broadcastMessageDocument != null ? !broadcastMessageDocument.toXML().equals(that.broadcastMessageDocument.toXML()) : that.broadcastMessageDocument != null)
             return false;
 
         return true;

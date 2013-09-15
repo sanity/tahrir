@@ -46,7 +46,7 @@ public class BroadcastMessageBroadcastTest {
             }
         }
 
-        Assert.assertTrue(receivingNode.mbClasses.mbsForBroadcast.contains(broadcastMessage), "Should contain the BroadcastMessage");
+        Assert.assertTrue(receivingNode.mbClasses.mbsForBroadcast.contains(broadcastMessage));
     }
 
     @Test
