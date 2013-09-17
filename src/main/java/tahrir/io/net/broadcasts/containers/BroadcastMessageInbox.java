@@ -44,6 +44,7 @@ public class BroadcastMessageInbox {
 		if (!isFull()) {
 			addToBroadcastMessages(bm);
 			inserted = true;
+            logger.info("Added broadcast message to inbox.");
 		} else if (shouldAddByReplacement(bm)) {
 			// make room
 			removeFromBroadcastMessages(broadcastMessages.last());

@@ -1,4 +1,4 @@
-package tahrir.tools;
+/*package tahrir.tools;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -417,3 +417,4 @@ public class ShortTextCompressor {
 	}
 
 }
+ */

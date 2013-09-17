@@ -79,7 +79,7 @@ public class AssimilateTest {
 		Assert.assertTrue(seedNode.peerManager.peers.containsKey(joinerNode.getRemoteNodeAddress().physicalLocation), "The seed peer manager should contain the joiner peer");
 	}
 
-
+    @Test
     public void threePeerTest() throws Exception{
         final TrNodeConfig seedConfig = new TrNodeConfig();
         seedConfig.capabilities.allowsAssimilation = true;

@@ -1,4 +1,4 @@
-package tahrir.tools;
+/*package tahrir.tools;
 
 import java.util.*;
 
@@ -153,3 +153,4 @@ public class ShortTextCompressorTest {
 	}
 
 }
+ */
