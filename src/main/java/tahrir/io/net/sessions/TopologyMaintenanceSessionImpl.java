@@ -110,10 +110,15 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 
 		// tell them we're trying to connect
 		for (final RemoteNodeAddress nodeToConnect : willConnectTo) {
+
 			final TopologyMaintenanceSession forwarderSess = this.remoteSession(TopologyMaintenanceSession.class, connection(nodeToConnect));
 			forwarderSess.myCapabilitiesAre(node.config.capabilities, node.peerManager.locInfo.getLocation());
 		}
 	}
+
+    public int backOff(int attempt){
+        return ((2^attempt - 1)/2);
+    }
 
 	public void sendAcceptInfo(final RemoteNodeAddress acceptor, final LinkedList<RemoteNodeAddress> willConnectTo) {
 		if (willConnectTo.contains(node.getRemoteNodeAddress())) {
