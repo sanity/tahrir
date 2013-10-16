@@ -10,7 +10,8 @@ import tahrir.ui.TrMainWindow;
 import java.io.File;
 import java.io.IOException;
 
-public class TrMain {
+public class
+        TrMain {
 
 	public static Logger logger = LoggerFactory.getLogger(TrMain.class);
 
