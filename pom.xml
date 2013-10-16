@@ -59,7 +59,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Proguard setup, see http://blog.boxofrats.com/2009/08/07/setting-up-maven-for-scala-and-proguard/ TEMPORARILY DISABLED
+			<!-- Proguard setup, see http://blog.boxofrats.com/2009/08/07/setting-up-maven-for-scala-and-proguard/ -->
 			<plugin>
 				<groupId>com.pyx4me</groupId>
 				<artifactId>proguard-maven-plugin</artifactId>
@@ -72,26 +72,34 @@
 						</goals>
 					</execution>
 				</executions>
+                <!--Configuration options are not completely accurate,
+                some important classes are missing. However, size is reduced to 13% - Torcellite -->
 				<configuration>
 					<options>
 						<option>-allowaccessmodification</option>
+                        <option>-dontskipnonpubliclibraryclasses</option>
+                        <option>-dontskipnonpubliclibraryclassmembers</option>
 						<option>-keep public class ${project.build.mainClass} { public
 							static void main(java.lang.String[]);}</option>
 						<option>-dontwarn</option>
-						<option>-dontskipnonpubliclibraryclasses</option>
-						<option>-dontskipnonpubliclibraryclassmembers</option>
+                        <option>-dontobfuscate</option>
+                        <option>-dontoptimize</option>
+                        <option>-dontpreverify</option>
+                        <option>-ignorewarnings</option>
 					</options>
 					<includeDependency>false</includeDependency>
 					<injar>${project.build.finalName}-jar-with-dependencies.jar</injar>
 					<outjar>${project.build.finalName}-shrunk.jar</outjar>
-					<libs>
-						 WARNING: This is required on OSX, will need to be adjusted for
-							other platforms because these jar files are in a different location
+                    <!--Got rid of this for it to work on Linux - Torcellite-->
+					<!--<libs>
+						&lt;!&ndash; WARNING: This is required on OSX, will need to be adjusted for
+							other platforms because these jar files are in a different location &ndash;&gt;
 						<lib>${java.home}/../Classes/classes.jar</lib>
 						<lib>${java.home}/../Classes/jce.jar</lib>
-					</libs>
+					</libs>-->
+                    <maxMemory>2g</maxMemory>
 				</configuration>
-			</plugin> -->
+			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
