@@ -60,6 +60,7 @@
 				</executions>
 			</plugin>
 			<!-- Proguard setup, see http://blog.boxofrats.com/2009/08/07/setting-up-maven-for-scala-and-proguard/ -->
+            <!--If you're using Java 7, please replace proguard-4.3.jar in your maven repo with a 4.10.jar renamed to "proguard-4.3.jar"-->
 			<plugin>
 				<groupId>com.pyx4me</groupId>
 				<artifactId>proguard-maven-plugin</artifactId>
