@@ -97,6 +97,7 @@
                         <!-- sadly proguard doesn't seem to support environment variables -->
                         <!-- Java Run Time lib-->
                         <lib>/usr/lib/jvm/jdk1.7.0_25/jre/lib/rt.jar</lib>
+                        <!--you should probably add jce.jar on MacOS and rt.jar is called classes.jar in on MacOS-->
                         <!-- Third party libs -->
                         <lib>/home/torcellite/.m2/repository/com/google/code/gson/gson/2.2.2/gson-2.2.2.jar</lib>
                         <lib>/home/torcellite/.m2/repository/org/apache/commons/commons-math/2.2/commons-math-2.2.jar</lib>
