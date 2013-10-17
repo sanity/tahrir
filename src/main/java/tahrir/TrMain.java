@@ -97,7 +97,7 @@ public class
 	}
 
     public static class TrMainConfig {
-        public boolean startGui = true;
+        public boolean startGui = false;
 
         public TrNodeConfig node = new TrNodeConfig();
     }
