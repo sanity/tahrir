@@ -59,7 +59,8 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Proguard setup, see http://blog.boxofrats.com/2009/08/07/setting-up-maven-for-scala-and-proguard/ TEMPORARILY DISABLED
+			<!-- Proguard setup, see http://blog.boxofrats.com/2009/08/07/setting-up-maven-for-scala-and-proguard/ -->
+            <!--If you're using Java 7, please replace proguard-4.3.jar in your maven repo with a 4.10.jar renamed to "proguard-4.3.jar"-->
 			<plugin>
 				<groupId>com.pyx4me</groupId>
 				<artifactId>proguard-maven-plugin</artifactId>
@@ -72,26 +73,52 @@
 						</goals>
 					</execution>
 				</executions>
+                <!--Configuration options are not completely accurate,
+                some important classes are missing. However, size is reduced to 13% - Torcellite-->
 				<configuration>
 					<options>
+                        <option>-verbose</option>
 						<option>-allowaccessmodification</option>
+                        <option>-microedition</option>
+                        <option>-dontskipnonpubliclibraryclasses</option>
+                        <option>-dontskipnonpubliclibraryclassmembers</option>
+                        <option>-dontwarn</option>
+                        <!--needs to be removed soon-->
+                        <option>-dontoptimize</option>
+                        <!--not obfuscating now for debugging purposes-->
+                        <option>-dontobfuscate</option>
 						<option>-keep public class ${project.build.mainClass} { public
 							static void main(java.lang.String[]);}</option>
-						<option>-dontwarn</option>
-						<option>-dontskipnonpubliclibraryclasses</option>
-						<option>-dontskipnonpubliclibraryclassmembers</option>
 					</options>
 					<includeDependency>false</includeDependency>
 					<injar>${project.build.finalName}-jar-with-dependencies.jar</injar>
 					<outjar>${project.build.finalName}-shrunk.jar</outjar>
-					<libs>
-						 WARNING: This is required on OSX, will need to be adjusted for
-							other platforms because these jar files are in a different location
-						<lib>${java.home}/../Classes/classes.jar</lib>
-						<lib>${java.home}/../Classes/jce.jar</lib>
-					</libs>
+                    <libs>
+                        <!-- local repo changes, please update the location for a successful build - Torcellite -->
+                        <!-- sadly proguard doesn't seem to support environment variables -->
+                        <!-- Java Run Time lib-->
+                        <lib>/usr/lib/jvm/jdk1.7.0_25/jre/lib/rt.jar</lib>
+                        <!--you should probably add jce.jar on MacOS and rt.jar is called classes.jar in on MacOS-->
+                        <!-- Third party libs -->
+                        <lib>/home/torcellite/.m2/repository/com/google/code/gson/gson/2.2.2/gson-2.2.2.jar</lib>
+                        <lib>/home/torcellite/.m2/repository/org/apache/commons/commons-math/2.2/commons-math-2.2.jar</lib>
+                        <lib>/home/torcellite/.m2/repository/args4j/args4j/2.0.16/args4j-2.0.16.jar</lib>
+                        <lib>/home/torcellite/.m2/repository/org/testng/testng/5.14/testng-5.14.jar</lib>
+                        <lib>/home/torcellite/.m2/repository/bouncycastle/bcprov-jdk16/140/bcprov-jdk16-140.jar</lib>
+                        <lib>/home/torcellite/.m2/repository/com/google/guava/guava/14.0-rc3/guava-14.0-rc3.jar</lib>
+                        <lib>/home/torcellite/.m2/repository/ch/qos/logback/logback-core/0.9.28/logback-core-0.9.28.jar</lib>
+                        <lib>/home/torcellite/.m2/repository/com/miglayout/miglayout/3.7.4/miglayout-3.7.4.jar</lib>
+                        <lib>/home/torcellite/.m2/repository/joda-time/joda-time/1.6.2/joda-time-1.6.2.jar</lib>
+                        <lib>/home/torcellite/.m2/repository/com/google/inject/guice/3.0/guice-3.0.jar</lib>
+                        <lib>/home/torcellite/.m2/repository/xom/xom/1.2.5/xom-1.2.5.jar</lib>
+                        <lib>/home/torcellite/.m2/repository/commons-codec/commons-codec/1.6/commons-codec-1.6.jar</lib>
+                        <lib>/home/torcellite/.m2/repository/org/apache/commons/commons-lang3/3.1/commons-lang3-3.1.jar</lib>
+                        <lib>/home/torcellite/.m2/repository/xalan/xalan/2.7.0/xalan-2.7.0.jar</lib>
+                        <lib>/home/torcellite/.m2/repository/xerces/xercesImpl/2.8.0/xercesImpl-2.8.0.jar</lib>
+                    </libs>
+                    <maxMemory>2g</maxMemory>
 				</configuration>
-			</plugin> -->
+			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
