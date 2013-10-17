@@ -6,14 +6,8 @@ import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
-import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
-import tahrir.io.net.broadcasts.broadcastMessages.SignedBroadcastMessage;
 
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.Style;
-import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,6 +30,8 @@ public class BroadcastMessagePostPanel {
 		this.mainWindow = mainWindow;
 		content = new JPanel(new MigLayout());
         content.setBackground(Color.WHITE);
+
+        content.setPreferredSize(new Dimension(Integer.MAX_VALUE, calculatePanelHeight(bm)));
 
         addAuthorButton(bm, mainWindow);
 		addPostTime(bm);
@@ -100,6 +96,22 @@ public class BroadcastMessagePostPanel {
 		button.setFocusable(false);
 		button.setContentAreaFilled(false);
 	}
+
+    private int calculatePanelHeight(BroadcastMessage bm) {
+        // we have to estimate the width of the text pane, so that getPreferredSize
+        // can calculate the height based on the length of the message text.
+        // the trouble here is that JTable needs a fixed pixel height, where as
+        // the rest of the dimensions are calculated by the layout manager, leading
+        // to this magic number. maybe we should consider getting rid of the JTable
+        // (which is currently used to list the posts)
+        final int messageTextWidth = 360;
+
+        final JEditorPane dummyTextPane = new JEditorPane();
+        dummyTextPane.setSize(messageTextWidth, Short.MAX_VALUE);
+        dummyTextPane.setText(bm.signedBroadcastMessage.parsedBroadcastMessage.getPlainTextBroadcastMessage());
+
+        return dummyTextPane.getPreferredSize().height + 100;
+    }
 
 	private static class DateParser {
 		private static DateFormat dateFormater = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
