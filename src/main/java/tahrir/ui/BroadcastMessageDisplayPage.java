@@ -30,8 +30,6 @@ public class BroadcastMessageDisplayPage {
 		final BroadcastMessageRenderer renderer = new BroadcastMessageRenderer(mainWindow);
 		// will allow it to fill entire scroll pane
 		table.setFillsViewportHeight(true);
-		// TODO: change the size as needed
-		table.setRowHeight(110);
         table.setGridColor(new Color(244,242,242));
 		table.setDefaultRenderer(ParsedBroadcastMessage.class, renderer);
 		table.setDefaultEditor(ParsedBroadcastMessage.class, renderer);
