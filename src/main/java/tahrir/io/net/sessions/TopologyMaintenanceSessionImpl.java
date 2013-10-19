@@ -85,7 +85,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		}
 	}
 
-	public void sendResponses(final LinkedList<RemoteNodeAddress> forwarders) {
+	private void sendResponses(final LinkedList<RemoteNodeAddress> forwarders) {
 		int peersToAccept = getNumPeerToAccept(forwarders);
 
 		willConnectTo = Lists.newLinkedList();
@@ -116,7 +116,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		}
 	}
 
-    public int backOff(int attempt){
+    private int backOff(int attempt){
         return ((2^attempt - 1)/2);
     }
 
