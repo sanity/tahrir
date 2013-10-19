@@ -24,8 +24,8 @@ import java.security.interfaces.RSAPublicKey;
 public class UdpNetworkInterfaceTest {
 	private static final Logger logger = LoggerFactory.getLogger(UdpNetworkInterfaceTest.class);
 
-	private int port1 = 3156;
-	private int port2 = 3157;
+	private int port1 = 14322;
+	private int port2 = 15433;
 
 	private UdpNetworkInterface i1;
 	private UdpNetworkInterface i2;
