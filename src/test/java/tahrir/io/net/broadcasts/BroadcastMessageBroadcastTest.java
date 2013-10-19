@@ -16,8 +16,8 @@ public class BroadcastMessageBroadcastTest {
     @Test
     public void simpleTest() throws Exception {
 
-        TrNode sendingNode = TrUtils.TestUtils.makeNode(8766, false, false, false, true, 1, 1);
-        TrNode receivingNode = TrUtils.TestUtils.makeNode(8667, false, false, false, true, 1, 1);
+        TrNode sendingNode = TrUtils.TestUtils.makeNode(8932, false, false, false, true, 1, 1);
+        TrNode receivingNode = TrUtils.TestUtils.makeNode(8933, false, false, false, true, 1, 1);
         TrUtils.TestUtils.createBidirectionalConnection(sendingNode, receivingNode);
         for (final TrPeerInfo pi : sendingNode.peerManager.peers.values()) {
             pi.capabilities.receivesMessageBroadcasts = true;
