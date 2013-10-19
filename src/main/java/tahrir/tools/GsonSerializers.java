@@ -1,11 +1,10 @@
 package tahrir.tools;
 
-import com.google.common.base.Optional;
 import com.google.gson.*;
 import tahrir.io.crypto.TrCrypto;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 /**
@@ -24,9 +23,23 @@ public class GsonSerializers {
 		@Override
 		public RSAPublicKey deserialize(JsonElement jsonElement, Type type,
 				JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-			return TrCrypto.decodeBase64(jsonElement.getAsJsonPrimitive().getAsString());
+			return TrCrypto.decodeBase64PublicKey(jsonElement.getAsJsonPrimitive().getAsString());
 		}
 	}
+    public static class RSAPrivateKeySerializer implements JsonSerializer<RSAPrivateKey> {
+   		@Override
+   		public JsonElement serialize(RSAPrivateKey privateKey, Type type,
+   				JsonSerializationContext jsonSerializationContext) {
+   			return new JsonPrimitive(TrCrypto.toBase64(privateKey));
+   		}
+   	}
 
+   	public static class RSAPrivateKeyDeserializer implements JsonDeserializer<RSAPrivateKey> {
+   		@Override
+   		public RSAPrivateKey deserialize(JsonElement jsonElement, Type type,
+   				JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+   			return TrCrypto.decodeBase64PrivateKey(jsonElement.getAsJsonPrimitive().getAsString());
+   		}
+   	}
 
 }
