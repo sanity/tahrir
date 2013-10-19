@@ -49,7 +49,7 @@ public class TrNode {
 	public final File rootDirectory;
     public final File identityStoreFile;
 
-	public final TrPeerManager peerManager;
+	private final TrPeerManager peerManager;
 
 	public MicrobloggingClasses mbClasses;
 
@@ -189,4 +189,8 @@ public class TrNode {
 
 		public RSAPrivateKey privateKey;
 	}
+
+    public TrPeerManager getPeerManager() {
+        return peerManager;
+    }
 }

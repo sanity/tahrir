@@ -84,8 +84,8 @@ public class TrUtils {
 	 */
 	public static class TestUtils {
 		public static boolean isConnected(final TrNode node1, final TrNode node2) {
-			return node1.peerManager.peers.containsKey(node2.getRemoteNodeAddress().physicalLocation)
-					&& node2.peerManager.peers.containsKey(node1.getRemoteNodeAddress().physicalLocation);
+			return node1.getPeerManager().peers.containsKey(node2.getRemoteNodeAddress().physicalLocation)
+					&& node2.getPeerManager().peers.containsKey(node1.getRemoteNodeAddress().physicalLocation);
 		}
 
 		public static TrNode makeNode(final int port, final boolean maintenance, final boolean assimilate,
@@ -112,10 +112,10 @@ public class TrUtils {
 		}
 
 		public static void createBidirectionalConnection(final TrNode node1, final TrNode node2) {
-			node1.peerManager.addNewPeer(node2.getRemoteNodeAddress(), node2.config.capabilities,
-					node2.peerManager.locInfo.getLocation());
-			node2.peerManager.addNewPeer(node1.getRemoteNodeAddress(), node1.config.capabilities,
-					node1.peerManager.locInfo.getLocation());
+			node1.getPeerManager().addNewPeer(node2.getRemoteNodeAddress(), node2.config.capabilities,
+                    node2.getPeerManager().locInfo.getLocation());
+			node2.getPeerManager().addNewPeer(node1.getRemoteNodeAddress(), node1.config.capabilities,
+                    node1.getPeerManager().locInfo.getLocation());
 		}
 
 		/**

@@ -19,7 +19,7 @@ public class BroadcastMessageBroadcastTest {
         TrNode sendingNode = TrUtils.TestUtils.makeNode(8932, false, false, false, true, 1, 1);
         TrNode receivingNode = TrUtils.TestUtils.makeNode(8933, false, false, false, true, 1, 1);
         TrUtils.TestUtils.createBidirectionalConnection(sendingNode, receivingNode);
-        for (final TrPeerInfo pi : sendingNode.peerManager.peers.values()) {
+        for (final TrPeerInfo pi : sendingNode.getPeerManager().peers.values()) {
             pi.capabilities.receivesMessageBroadcasts = true;
         }
         sendingNode.config.currentUserIdentity = new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
@@ -54,7 +54,7 @@ public class BroadcastMessageBroadcastTest {
         TrNode sendingNode = TrUtils.TestUtils.makeNode(8769, false, false, false, true, 1, 1);
         TrNode receivingNode = TrUtils.TestUtils.makeNode(8645, false, false, false, true, 1, 1);
         TrUtils.TestUtils.createBidirectionalConnection(sendingNode, receivingNode);
-        for (final TrPeerInfo pi : sendingNode.peerManager.peers.values()) {
+        for (final TrPeerInfo pi : sendingNode.getPeerManager().peers.values()) {
             pi.capabilities.receivesMessageBroadcasts = true;
         }
 

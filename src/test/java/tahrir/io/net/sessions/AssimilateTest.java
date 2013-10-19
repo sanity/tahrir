@@ -63,14 +63,14 @@ public class AssimilateTest {
 
 		for (int x=0; x<50; x++) {
 			Thread.sleep(200);
-			if (joinerNode.peerManager.peers.containsKey(seedNode.getRemoteNodeAddress().physicalLocation)
-					&& seedNode.peerManager.peers.containsKey(joinerNode.getRemoteNodeAddress().physicalLocation)) {
+			if (joinerNode.getPeerManager().peers.containsKey(seedNode.getRemoteNodeAddress().physicalLocation)
+					&& seedNode.getPeerManager().peers.containsKey(joinerNode.getRemoteNodeAddress().physicalLocation)) {
 				break;
 			}
 		}
 		// Verify that they are now connected
-		Assert.assertTrue(joinerNode.peerManager.peers.containsKey(seedNode.getRemoteNodeAddress().physicalLocation), "The joiner peer manager should contain the seed peer");
-		Assert.assertTrue(seedNode.peerManager.peers.containsKey(joinerNode.getRemoteNodeAddress().physicalLocation), "The seed peer manager should contain the joiner peer");
+		Assert.assertTrue(joinerNode.getPeerManager().peers.containsKey(seedNode.getRemoteNodeAddress().physicalLocation), "The joiner peer manager should contain the seed peer");
+		Assert.assertTrue(seedNode.getPeerManager().peers.containsKey(joinerNode.getRemoteNodeAddress().physicalLocation), "The seed peer manager should contain the joiner peer");
 	}
 
     @Test(enabled = false) // This launches the GUI, it shouldn't.
