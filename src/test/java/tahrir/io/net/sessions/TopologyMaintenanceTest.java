@@ -7,7 +7,7 @@ import tahrir.TrNode;
 import tahrir.tools.TrUtils;
 
 public class TopologyMaintenanceTest {
-	private static int port = 8649;
+	private static int port = 8112;
 
 	/**
 	 * Nodes initially connected initiator<->forwarder1<->forwader2<->responder
