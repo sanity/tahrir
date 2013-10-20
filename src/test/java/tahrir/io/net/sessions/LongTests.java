@@ -79,7 +79,7 @@ public class LongTests {
 	private String getVertex(final TrNode node) throws Exception {
 		final StringBuilder builder = new StringBuilder();
 		for (final TrPeerInfo o : node.getPeerManager().peers.values()) {
-			final int nodeTopologyLoc = node.getPeerManager().locInfo.getLocation();
+			final int nodeTopologyLoc = node.getPeerManager().getLocInfo().getLocation();
 			builder.append( nodeTopologyLoc + " -- " + o.topologyLocation + "; ");
 		}
 		return builder.toString();

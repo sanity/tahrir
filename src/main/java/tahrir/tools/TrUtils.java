@@ -113,9 +113,9 @@ public class TrUtils {
 
 		public static void createBidirectionalConnection(final TrNode node1, final TrNode node2) {
 			node1.getPeerManager().addNewPeer(node2.getRemoteNodeAddress(), node2.getConfig().capabilities,
-                    node2.getPeerManager().locInfo.getLocation());
+                    node2.getPeerManager().getLocInfo().getLocation());
 			node2.getPeerManager().addNewPeer(node1.getRemoteNodeAddress(), node1.getConfig().capabilities,
-                    node1.getPeerManager().locInfo.getLocation());
+                    node1.getPeerManager().getLocInfo().getLocation());
 		}
 
 		/**

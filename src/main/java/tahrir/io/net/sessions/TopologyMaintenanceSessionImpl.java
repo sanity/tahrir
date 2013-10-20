@@ -63,7 +63,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		final RemoteNodeAddress closestPeerAddress = node.getPeerManager().getClosestPeer(locationToFind);
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("The closest peer found was {}, with a location of {}", node.getRemoteNodeAddress().physicalLocation, node.getPeerManager().locInfo.getLocation());
+			logger.debug("The closest peer found was {}, with a location of {}", node.getRemoteNodeAddress().physicalLocation, node.getPeerManager().getLocInfo().getLocation());
 		}
 
 		if (hopsToLive == 0 || closestPeerAddress.equals(node.getRemoteNodeAddress()) || (!initator && closestPeerAddress.physicalLocation.equals(sender()))) {
@@ -112,7 +112,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		for (final RemoteNodeAddress nodeToConnect : willConnectTo) {
 
 			final TopologyMaintenanceSession forwarderSess = this.remoteSession(TopologyMaintenanceSession.class, connection(nodeToConnect));
-			forwarderSess.myCapabilitiesAre(node.getConfig().capabilities, node.getPeerManager().locInfo.getLocation());
+			forwarderSess.myCapabilitiesAre(node.getConfig().capabilities, node.getPeerManager().getLocInfo().getLocation());
 		}
 	}
 
@@ -124,7 +124,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		if (willConnectTo.contains(node.getRemoteNodeAddress())) {
 			final TopologyMaintenanceSession acceptorSess = this.remoteSession(TopologyMaintenanceSession.class, connection(acceptor));
 			acceptorAddress = acceptor;
-			acceptorSess.myCapabilitiesAre(node.getConfig().capabilities, node.getPeerManager().locInfo.getLocation());
+			acceptorSess.myCapabilitiesAre(node.getConfig().capabilities, node.getPeerManager().getLocInfo().getLocation());
 		}
 
 		if (!initator) {

@@ -19,10 +19,10 @@ public class TopologyMaintenanceTest {
 		final TrNode forwarder2 = TrUtils.TestUtils.makeNode(port++, false, false, false, false, 4, 4);
 		final TrNode responder = TrUtils.TestUtils.makeNode(port++, false, false, false, false, 4, 4);
 
-		initiator.getPeerManager().locInfo.setLocation(0);
-		forwarder1.getPeerManager().locInfo.setLocation(1);
-		forwarder2.getPeerManager().locInfo.setLocation(2);
-		responder.getPeerManager().locInfo.setLocation(3);
+		initiator.getPeerManager().getLocInfo().setLocation(0);
+		forwarder1.getPeerManager().getLocInfo().setLocation(1);
+		forwarder2.getPeerManager().getLocInfo().setLocation(2);
+		responder.getPeerManager().getLocInfo().setLocation(3);
 
 		TrUtils.TestUtils.createBidirectionalConnection(initiator, forwarder1);
 		TrUtils.TestUtils.createBidirectionalConnection(forwarder1, forwarder2);

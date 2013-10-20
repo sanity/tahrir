@@ -38,7 +38,7 @@ public class TrPeerManager {
 	public Map<PhysicalNetworkLocation, TrPeerInfo> peers = new MapMaker().makeMap();
 	public final String sessionMgrLabel;
 
-	public final TopologyLocationInfo locInfo;
+	private final TopologyLocationInfo locInfo;
 	public boolean hasForwardedRecently = false;
 
 	private final TrNode node;
@@ -217,7 +217,7 @@ public class TrPeerManager {
 	public RemoteNodeAddress getClosestPeer(final int locationToFind) {
 		// closest peer is initially calling node
 		RemoteNodeAddress closestPeer = node.getRemoteNodeAddress();
-		final int callingNodeTopologyLoc = locInfo.location;
+		final int callingNodeTopologyLoc = getLocInfo().location;
 		int closestDistance = getLinearDistanceWithRollover(callingNodeTopologyLoc, locationToFind);
 
 		for (final TrPeerInfo ifo : peers.values()) {
@@ -318,7 +318,11 @@ public class TrPeerManager {
 		}
 	}
 
-	public static class BinaryStat {
+    public TopologyLocationInfo getLocInfo() {
+        return locInfo;
+    }
+
+    public static class BinaryStat {
 		private int maxRecall;
 		private long sum;
 		private long total;
