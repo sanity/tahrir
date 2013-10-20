@@ -1,7 +1,6 @@
 package tahrir.ui;
 
 import net.miginfocom.swing.MigLayout;
-import nu.xom.ParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
@@ -55,7 +54,7 @@ public class TrMainWindow {
                 String message = newPostPane.getText();
                 //TODO: get the language from config or settings page.
                 ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext(message, "en", node.mbClasses.identityStore, System.currentTimeMillis());
-                SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.config.currentUserIdentity);
+                SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.getConfig().currentUserIdentity);
                 final BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
                 node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
                 newPostPane.setText("");
@@ -81,7 +80,7 @@ public class TrMainWindow {
     public void setCurrentIdentity(String nick){
         for(UserIdentity identity :node.mbClasses.identityStore.getIdentitiesWithNick(nick)){
             if(identity.hasPvtKey() && identity.getNick().equals(nick)){
-                node.config.currentUserIdentity = identity;
+                node.getConfig().currentUserIdentity = identity;
             }
         }
     }

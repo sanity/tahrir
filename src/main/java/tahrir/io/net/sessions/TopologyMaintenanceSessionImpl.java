@@ -112,7 +112,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		for (final RemoteNodeAddress nodeToConnect : willConnectTo) {
 
 			final TopologyMaintenanceSession forwarderSess = this.remoteSession(TopologyMaintenanceSession.class, connection(nodeToConnect));
-			forwarderSess.myCapabilitiesAre(node.config.capabilities, node.getPeerManager().locInfo.getLocation());
+			forwarderSess.myCapabilitiesAre(node.getConfig().capabilities, node.getPeerManager().locInfo.getLocation());
 		}
 	}
 
@@ -124,7 +124,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		if (willConnectTo.contains(node.getRemoteNodeAddress())) {
 			final TopologyMaintenanceSession acceptorSess = this.remoteSession(TopologyMaintenanceSession.class, connection(acceptor));
 			acceptorAddress = acceptor;
-			acceptorSess.myCapabilitiesAre(node.config.capabilities, node.getPeerManager().locInfo.getLocation());
+			acceptorSess.myCapabilitiesAre(node.getConfig().capabilities, node.getPeerManager().locInfo.getLocation());
 		}
 
 		if (!initator) {

@@ -127,7 +127,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
                 receivedRequestFrom.acceptNewConnection(remoteNodeAddress);
                 final AssimilateSession requestorSession = remoteSession(AssimilateSession.class,
                         connectionWithUserLabel(joinerAddress, false, "topology"));
-                requestorSession.myCapabilitiesAre(node.config.capabilities, node.getPeerManager().locInfo.getLocation());
+                requestorSession.myCapabilitiesAre(node.getConfig().capabilities, node.getPeerManager().locInfo.getLocation());
                 logger.info("Accepted new joiner {} as a peer", joinerAddress);
             } else {
                 String reason;
@@ -229,7 +229,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
             logger.debug("Connect to {} and inform them of our capabilities", acceptorPhysicalLocation);
             final AssimilateSession acceptorSession = remoteSession(AssimilateSession.class,
                     connectionWithUserLabel(acceptorAddress, false, "topology"));
-            acceptorSession.myCapabilitiesAre(node.config.capabilities, node.getPeerManager().locInfo.getLocation());
+            acceptorSession.myCapabilitiesAre(node.getConfig().capabilities, node.getPeerManager().locInfo.getLocation());
 
             if (acceptorCapabilities != null) {
                 // If we've already received the myCapabilitiesAre from the acceptor

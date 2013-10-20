@@ -112,9 +112,9 @@ public class TrUtils {
 		}
 
 		public static void createBidirectionalConnection(final TrNode node1, final TrNode node2) {
-			node1.getPeerManager().addNewPeer(node2.getRemoteNodeAddress(), node2.config.capabilities,
+			node1.getPeerManager().addNewPeer(node2.getRemoteNodeAddress(), node2.getConfig().capabilities,
                     node2.getPeerManager().locInfo.getLocation());
-			node2.getPeerManager().addNewPeer(node1.getRemoteNodeAddress(), node1.config.capabilities,
+			node2.getPeerManager().addNewPeer(node1.getRemoteNodeAddress(), node1.getConfig().capabilities,
                     node1.getPeerManager().locInfo.getLocation());
 		}
 
@@ -145,7 +145,7 @@ public class TrUtils {
 		 */
 		public static BroadcastMessage getBroadcastMessageFrom(TrNode node) {
             ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Some post from a user.", "en", node.mbClasses.identityStore, System.currentTimeMillis());
-            SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.config.currentUserIdentity);
+            SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.getConfig().currentUserIdentity);
             BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
             return broadcastMessage;
 
