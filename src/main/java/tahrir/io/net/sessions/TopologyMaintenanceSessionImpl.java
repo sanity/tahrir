@@ -57,7 +57,7 @@ public class TopologyMaintenanceSessionImpl extends TrSessionImpl implements Top
 		if (!initator) {
 			receivedProbeFrom = sender();
 			hopsToLive--;
-			node.getPeerManager().hasForwardedRecenlty = true;
+			node.getPeerManager().hasForwardedRecently = true;
 		}
 
 		final RemoteNodeAddress closestPeerAddress = node.getPeerManager().getClosestPeer(locationToFind);

@@ -39,7 +39,7 @@ public class TrPeerManager {
 	public final String sessionMgrLabel;
 
 	public final TopologyLocationInfo locInfo;
-	public boolean hasForwardedRecenlty = false;
+	public boolean hasForwardedRecently = false;
 
 	private final TrNode node;
     public Cache<Integer, DateTime> seenUID = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
@@ -64,7 +64,7 @@ public class TrPeerManager {
 			if (config.topologyMaintenance) {
 				TrUtils.executor.scheduleWithFixedDelay(new Runnable() {
 					public void run() {
-						hasForwardedRecenlty = false;
+						hasForwardedRecently = false;
 					}
 				},0, TrConstants.WAIT_FROM_FORWARDING_SEC, TimeUnit.SECONDS);
 			}
@@ -177,7 +177,7 @@ public class TrPeerManager {
 			// } else {
 			// logger.warn("Don't know how to assimilate through already connected peers yet");
 			// }
-		} else if (config.topologyMaintenance) { // && !hasForwardedRecenlty) {
+		} else if (config.topologyMaintenance) { // && !hasForwardedRecently) {
 			// do maintenance on topology for small world network
 			final int randomLocationToFind = Math.abs(TrUtils.rand.nextInt());
 			final TopologyMaintenanceSessionImpl tm = node.sessionMgr.getOrCreateLocalSession(TopologyMaintenanceSessionImpl.class);
@@ -258,7 +258,7 @@ public class TrPeerManager {
 		// allow topology probing more often
 		TrUtils.executor.scheduleWithFixedDelay(new Runnable() {
 			public void run() {
-				hasForwardedRecenlty = false;
+				hasForwardedRecently = false;
 			}
 		},5, 5, TimeUnit.SECONDS);
 	}
