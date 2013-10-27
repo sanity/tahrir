@@ -25,7 +25,7 @@ public class Generic {
         return randomInt(1000);
     }
 
-    public static Integer genericLocation() {
+    public static Integer genericTopologyLocation() {
         return new Random().nextInt();
     }
 

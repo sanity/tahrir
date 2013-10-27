@@ -22,23 +22,20 @@ public class TopologyMaintenanceSessionImplTest {
     private final TrSessionManager sessionManager = mock(TrSessionManager.class);
     private final TrPeerManager peerManager = mock(TrPeerManager.class);
 
-    private RemoteNodeAddress myNodesAddressIs(RemoteNodeAddress myAddress) {
+    private void myNodesAddressIs(RemoteNodeAddress myAddress) {
         when(node.getRemoteNodeAddress()).thenReturn(myAddress);
-        return myAddress;
     }
 
-    private RemoteNodeAddress theClosestPeerAddressIs(RemoteNodeAddress closestPeerAddress) {
+    private void theClosestPeerAddressIs(RemoteNodeAddress closestPeerAddress) {
         when(peerManager.getClosestPeer(anyInt())).thenReturn(closestPeerAddress);
-
-        return closestPeerAddress;
     }
 
-    private TopologyMaintenanceSession sessionManagerReturnsMaintenanceSessionFor(final RemoteNodeAddress closestPeerAddress) {
-        final TrRemoteConnection closestPeerConnection = mock(TrRemoteConnection.class);
-        when(sessionManager.connectionManager.getConnection(eq(closestPeerAddress), anyBoolean(), anyString())).thenReturn(closestPeerConnection);
+    private TopologyMaintenanceSession sessionManagerReturnsMaintenanceSessionFor(final RemoteNodeAddress address) {
+        final TrRemoteConnection connection = mock(TrRemoteConnection.class);
+        when(sessionManager.connectionManager.getConnection(eq(address), anyBoolean(), anyString())).thenReturn(connection);
 
         final TopologyMaintenanceSession maintenanceSession = mock(TopologyMaintenanceSession.class);
-        when(sessionManager.getOrCreateRemoteSession(any(Class.class), eq(closestPeerConnection), anyInt())).thenReturn(maintenanceSession);
+        when(sessionManager.getOrCreateRemoteSession(any(Class.class), eq(connection), anyInt())).thenReturn(maintenanceSession);
 
         return maintenanceSession;
     }
@@ -83,7 +80,7 @@ public class TopologyMaintenanceSessionImplTest {
 
         final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
 
-        final Integer locationToFind = genericLocation();
+        final Integer locationToFind = genericTopologyLocation();
 
         // When
         maintenanceSession.startTopologyMaintenance(locationToFind);
@@ -107,7 +104,7 @@ public class TopologyMaintenanceSessionImplTest {
 
         final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
 
-        final Integer locationToFind = genericLocation();
+        final Integer locationToFind = genericTopologyLocation();
 
         // When
         maintenanceSession.startTopologyMaintenance(locationToFind);
@@ -143,7 +140,7 @@ public class TopologyMaintenanceSessionImplTest {
         final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
 
         // When
-        maintenanceSession.probeForLocation(genericLocation(), TrConstants.MAINTENANCE_HOPS_TO_LIVE,
+        maintenanceSession.probeForLocation(genericTopologyLocation(), TrConstants.MAINTENANCE_HOPS_TO_LIVE,
                 new LinkedList<RemoteNodeAddress>() {{ add(senderAddress); }});
 
         // Then
@@ -180,7 +177,6 @@ public class TopologyMaintenanceSessionImplTest {
 
         final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
 
-        // When
         final LinkedList<RemoteNodeAddress> forwarderAddresses = new LinkedList<RemoteNodeAddress>() {{
             add(senderAddress);
             add(forwarderAddressOne);
@@ -193,12 +189,143 @@ public class TopologyMaintenanceSessionImplTest {
             add(forwarderSessionTwo);
         }};
 
-        maintenanceSession.probeForLocation(genericLocation(), TrConstants.MAINTENANCE_HOPS_TO_LIVE, forwarderAddresses);
+        // When
+        maintenanceSession.probeForLocation(genericTopologyLocation(), TrConstants.MAINTENANCE_HOPS_TO_LIVE, forwarderAddresses);
 
         // Then
         for (final TopologyMaintenanceSession forwarder : forwarderSessions) {
             verify(forwarder).myCapabilitiesAre(nodeConfig.capabilities, topologyLocationInfo.getLocation());
         }
+    }
+
+    @Test
+    public void send_accept_info_should_send_my_capabilities_are_to_the_acceptor_when_our_node_is_in_willConnectTo() {
+        // Given
+        final RemoteNodeAddress myAddress = genericRemoteNodeAddress();
+        myNodesAddressIs(myAddress);
+
+        final RemoteNodeAddress acceptorAddress = genericRemoteNodeAddress();
+        final TopologyMaintenanceSession acceptorSession = sessionManagerReturnsMaintenanceSessionFor(acceptorAddress);
+
+        final TrNodeConfig nodeConfig = new TrNodeConfig();
+        myNodeConfigIs(nodeConfig);
+
+        final TrPeerManager.TopologyLocationInfo topologyLocationInfo = genericTopologyLocationInfo();
+        myTopologyLocationInfoIs(topologyLocationInfo);
+
+        final RemoteNodeAddress closestPeerAddress = genericRemoteNodeAddress();
+        theClosestPeerAddressIs(closestPeerAddress);
+        sessionManagerReturnsMaintenanceSessionFor(closestPeerAddress);
+
+        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
+
+        maintenanceSession.startTopologyMaintenance(genericTopologyLocation()); // we are the initiator
+
+        // When
+        maintenanceSession.sendAcceptInfo(acceptorAddress, new LinkedList<RemoteNodeAddress>() {{
+            add(myAddress);
+        }});
+
+        // Then
+        verify(acceptorSession).myCapabilitiesAre(nodeConfig.capabilities, topologyLocationInfo.getLocation());
+    }
+
+    @Test
+    public void send_accept_info_should_send_accept_info_to_the_prober_when_our_node_is_not_the_initiator() {
+        // Given
+        final RemoteNodeAddress proberAddress = genericRemoteNodeAddress();
+        theSenderLocationIs(proberAddress);
+        TopologyMaintenanceSession proberSession = sessionManagerReturnsMaintenanceSessionFor(proberAddress);
+
+        final RemoteNodeAddress closestPeerAddress = genericRemoteNodeAddress();
+        theClosestPeerAddressIs(closestPeerAddress);
+        sessionManagerReturnsMaintenanceSessionFor(closestPeerAddress);
+
+        final RemoteNodeAddress acceptorAddress = genericRemoteNodeAddress();
+        final LinkedList<RemoteNodeAddress> willConnectTo = new LinkedList<RemoteNodeAddress>();
+
+        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
+
+        maintenanceSession.probeForLocation(genericTopologyLocation(), 0, new LinkedList<RemoteNodeAddress>());
+
+        // When
+        maintenanceSession.sendAcceptInfo(acceptorAddress, willConnectTo);
+
+        // Then
+        verify(proberSession).sendAcceptInfo(acceptorAddress, willConnectTo);
+    }
+
+    @Test
+    public void my_capabilities_are_should_add_the_acceptor_as_a_peer_when_our_node_is_not_the_acceptor() {
+        // Given
+        final RemoteNodeAddress myAddress = genericRemoteNodeAddress();
+        myNodesAddressIs(myAddress);
+
+        final TrNodeConfig nodeConfig = new TrNodeConfig();
+        myNodeConfigIs(nodeConfig);
+
+        final TrPeerManager.TopologyLocationInfo topologyLocationInfo = genericTopologyLocationInfo();
+        myTopologyLocationInfoIs(topologyLocationInfo);
+
+        final RemoteNodeAddress acceptorAddress = genericRemoteNodeAddress();
+        sessionManagerReturnsMaintenanceSessionFor(acceptorAddress);
+
+        final RemoteNodeAddress proberAddress = genericRemoteNodeAddress();
+        theSenderLocationIs(proberAddress);
+        sessionManagerReturnsMaintenanceSessionFor(proberAddress);
+
+        final RemoteNodeAddress closestPeerAddress = genericRemoteNodeAddress();
+        theClosestPeerAddressIs(closestPeerAddress);
+        sessionManagerReturnsMaintenanceSessionFor(closestPeerAddress);
+
+        final TrPeerManager.Capabilities capabilities = new TrNodeConfig().capabilities;
+        final Integer topologyLocation = genericTopologyLocation();
+
+        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
+
+        maintenanceSession.probeForLocation(genericTopologyLocation(), 0, new LinkedList<RemoteNodeAddress>());
+        maintenanceSession.sendAcceptInfo(acceptorAddress, new LinkedList<RemoteNodeAddress>() {{ add(myAddress); }});
+
+        // When
+        maintenanceSession.myCapabilitiesAre(capabilities, topologyLocation);
+
+        // Then
+        verify(peerManager).addByReplacement(acceptorAddress, capabilities, topologyLocation);
+    }
+
+    @Test
+    public void my_capabilities_are_should_add_the_sender_as_a_peer_when_our_node_is_the_acceptor() {
+        // Given
+        final RemoteNodeAddress myAddress = genericRemoteNodeAddress();
+        myNodesAddressIs(myAddress);
+
+        final TrNodeConfig nodeConfig = new TrNodeConfig();
+        myNodeConfigIs(nodeConfig);
+
+        final TrPeerManager.TopologyLocationInfo topologyLocationInfo = genericTopologyLocationInfo();
+        myTopologyLocationInfoIs(topologyLocationInfo);
+
+        final RemoteNodeAddress proberAddress = genericRemoteNodeAddress();
+        theSenderLocationIs(proberAddress);
+        sessionManagerReturnsMaintenanceSessionFor(proberAddress);
+
+        theClosestPeerAddressIs(myAddress);
+        sessionManagerReturnsMaintenanceSessionFor(myAddress);
+
+        myNodeHasNoConnections();
+
+        final TrPeerManager.Capabilities capabilities = new TrNodeConfig().capabilities;
+        final Integer topologyLocation = genericTopologyLocation();
+
+        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
+
+        maintenanceSession.probeForLocation(genericTopologyLocation(), 0, new LinkedList<RemoteNodeAddress>() {{ add(proberAddress); }});
+
+        // When
+        maintenanceSession.myCapabilitiesAre(capabilities, topologyLocation);
+
+        // Then
+        verify(peerManager).addByReplacement(proberAddress, capabilities, topologyLocation);
     }
 
 }
