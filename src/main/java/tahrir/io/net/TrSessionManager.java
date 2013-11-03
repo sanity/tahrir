@@ -40,7 +40,7 @@ public class TrSessionManager {
 		return method.hashCode() ^ Arrays.deepHashCode(method.getGenericParameterTypes());
 	}
 
-	private final Map<Class<? extends TrSession>, Class<? extends TrSessionImpl>> classesByInterface = Maps
+	private final Map<Class<? extends TrSession>, Class<? extends TrSession>> classesByInterface = Maps
 			.newHashMap();
 
 	private final ConcurrentLinkedQueue<Function<PhysicalNetworkLocation, Void>> connectedListeners = new ConcurrentLinkedQueue<Function<PhysicalNetworkLocation, Void>>();
@@ -51,18 +51,18 @@ public class TrSessionManager {
 
 	private final Map<Integer, MethodPair> methodsById = Maps.newHashMap();
 
-	public final Map<Tuple2<String, Integer>, TrSessionImpl> sessions = CacheBuilder.newBuilder()
+	public final Map<Tuple2<String, Integer>, TrSession> sessions = CacheBuilder.newBuilder()
 			.expireAfterWrite(30, TimeUnit.MINUTES)
-			.removalListener(new RemovalListener<Tuple2<String, Integer>, TrSessionImpl>() {
+			.removalListener(new RemovalListener<Tuple2<String, Integer>, TrSession>() {
 
 				@Override
-				public void onRemoval(final RemovalNotification<Tuple2<String, Integer>, TrSessionImpl> sessionInfo) {
+				public void onRemoval(final RemovalNotification<Tuple2<String, Integer>, TrSession> sessionInfo) {
                     if (!sessionInfo.getCause().equals(RemovalCause.REPLACED)) {
 					    sessionInfo.getValue().terminate();
                     }
 				}
 
-			}).<Tuple2<String, Integer>, TrSessionImpl> build().asMap();
+			}).<Tuple2<String, Integer>, TrSession> build().asMap();
 
 	private final TrNode trNode;
 
@@ -96,7 +96,7 @@ public class TrSessionManager {
 
 
 	@SuppressWarnings("unchecked")
-	public <T extends TrSessionImpl> T getOrCreateLocalSession(final Class<T> c, final int sessionId) {
+	public <T extends TrSession> T getOrCreateLocalSession(final Class<T> c, final int sessionId) {
 		try {
 			T session = (T) sessions.get(Tuple2.of(c.getName(), sessionId));
 			if (session == null) {
@@ -123,13 +123,13 @@ public class TrSessionManager {
 		return (T) Proxy.newProxyInstance(c.getClassLoader(), new Class[] { c }, new IH(c, connection, sessionId));
 	}
 
-	public void registerSessionClass(final Class<? extends TrSession> iface, final Class<? extends TrSessionImpl> cls) {
+	public void registerSessionClass(final Class<? extends TrSession> iface, final Class<? extends TrSession> cls) {
 		if (!iface.isInterface())
 			throw new RuntimeException(iface + " is not an interface");
 		if (cls.isInterface())
 			throw new RuntimeException(cls + " is an interface, not a class");
-		if (!TrSessionImpl.class.isAssignableFrom(cls))
-			throw new RuntimeException(cls + " isn't a subclass of TrSessionImpl");
+		if (!TrSession.class.isAssignableFrom(cls))
+			throw new RuntimeException(cls + " isn't a subclass of TrSession");
 		if (!iface.isAssignableFrom(cls))
 			throw new RuntimeException(cls + " is not an implementation of " + iface);
 		try {
@@ -142,9 +142,15 @@ public class TrSessionManager {
 		}
 		classesByInterface.put(iface, cls);
 		for (final Method ifaceMethod : iface.getMethods()) {
-			if (ifaceMethod.getName().equals("registerFailureListener")) {
-				continue;
-			}
+            final Iterable<String> interfaceMethods = Iterables.transform(Arrays.asList(TrSession.class.getMethods()), new Function<Method, String>() {
+                @Override public String apply(final Method input) {
+                    return input.getName();
+                }
+            });
+            if (Iterables.contains(interfaceMethods, ifaceMethod.getName())) {
+                continue;
+            }
+
 			try {
 				final MethodPair methodPair = new MethodPair(ifaceMethod, cls.getMethod(ifaceMethod.getName(),
 						ifaceMethod.getParameterTypes()));
@@ -288,7 +294,7 @@ public class TrSessionManager {
 					final int sessionId = dis.readInt();
 					final int methodId = dis.readInt();
 					final MethodPair methodPair = methodsById.get(methodId);
-					TrSessionImpl session = sessions.get(Tuple2.of(methodPair.cls.getDeclaringClass().getName(),
+					TrSession session = sessions.get(Tuple2.of(methodPair.cls.getDeclaringClass().getName(),
 							sessionId));
 
 
@@ -296,7 +302,7 @@ public class TrSessionManager {
 						// New session, we need to create it
 						final Constructor<?> constructor = methodPair.cls.getDeclaringClass().getConstructor(
 								Integer.class, TrNode.class, TrSessionManager.class);
-						session = (TrSessionImpl) constructor.newInstance(sessionId, trNode, TrSessionManager.this);
+						session = (TrSession) constructor.newInstance(sessionId, trNode, TrSessionManager.this);
 					}
 					// We put regardless of whether it is new or not to
 					// reset cache expiry time
@@ -380,7 +386,7 @@ public class TrSessionManager {
 		TrRemoteConnection remoteConnection;
 	}
 
-	public <T extends TrSessionImpl> T getOrCreateLocalSession(final Class<T> cls) {
+	public <T extends TrSession> T getOrCreateLocalSession(final Class<T> cls) {
 		return this.getOrCreateLocalSession(cls, TrUtils.rand.nextInt());
 	}
 

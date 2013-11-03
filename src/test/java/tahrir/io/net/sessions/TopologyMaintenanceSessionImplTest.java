@@ -19,7 +19,7 @@ public class TopologyMaintenanceSessionImplTest {
     // TODO: jacksingleton - refactor TopologyMaintenanceSessionImpl dependencies to simplify all this setup code
 
     private final TrNode node = mock(TrNode.class);
-    private final TrSessionManager sessionManager = mock(TrSessionManager.class);
+    private final TrSessionImpl session = mock(TrSessionImpl.class);
     private final TrPeerManager peerManager = mock(TrPeerManager.class);
 
     private void myNodesAddressIs(RemoteNodeAddress myAddress) {
@@ -30,18 +30,15 @@ public class TopologyMaintenanceSessionImplTest {
         when(peerManager.getClosestPeer(anyInt())).thenReturn(closestPeerAddress);
     }
 
-    private TopologyMaintenanceSession sessionManagerReturnsMaintenanceSessionFor(final RemoteNodeAddress address) {
-        final TrRemoteConnection connection = mock(TrRemoteConnection.class);
-        when(sessionManager.connectionManager.getConnection(eq(address), anyBoolean(), anyString())).thenReturn(connection);
-
+    private TopologyMaintenanceSession sessionReturnsMaintenanceSessionFor(final RemoteNodeAddress address) {
         final TopologyMaintenanceSession maintenanceSession = mock(TopologyMaintenanceSession.class);
-        when(sessionManager.getOrCreateRemoteSession(any(Class.class), eq(connection), anyInt())).thenReturn(maintenanceSession);
-
+        when(session.remoteSession(any(Class.class), eq(address.physicalLocation))).thenReturn(maintenanceSession);
+        when(session.remoteSession(any(Class.class), eq(address))).thenReturn(maintenanceSession);
         return maintenanceSession;
     }
 
     private void theSenderLocationIs(RemoteNodeAddress senderAddress) {
-        TrSessionImpl.sender.set(senderAddress.physicalLocation);
+        when(session.sender()).thenReturn(senderAddress.physicalLocation);
     }
 
     private void myNodeConfigIs(TrNodeConfig nodeConfig) {
@@ -59,12 +56,6 @@ public class TopologyMaintenanceSessionImplTest {
     @BeforeMethod
     public void setupMocks() {
         when(node.getPeerManager()).thenReturn(peerManager);
-        sessionManager.connectionManager = mock(TrSessionManager.ConnectionManager.class);
-    }
-
-    @AfterMethod
-    public void resetMocks() {
-        reset(node, sessionManager, peerManager, sessionManager.connectionManager);
     }
 
     @Test
@@ -73,12 +64,12 @@ public class TopologyMaintenanceSessionImplTest {
         final RemoteNodeAddress closestPeerAddress = genericRemoteNodeAddress();
         theClosestPeerAddressIs(closestPeerAddress);
 
-        final TopologyMaintenanceSession closestPeerSession = sessionManagerReturnsMaintenanceSessionFor(closestPeerAddress);
+        final TopologyMaintenanceSession closestPeerSession = sessionReturnsMaintenanceSessionFor(closestPeerAddress);
 
         final RemoteNodeAddress myAddress = genericRemoteNodeAddress();
         myNodesAddressIs(myAddress);
 
-        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
+        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, session);
 
         final Integer locationToFind = genericTopologyLocation();
 
@@ -100,9 +91,9 @@ public class TopologyMaintenanceSessionImplTest {
         myNodesAddressIs(myAddress);
         theClosestPeerAddressIs(myAddress);
 
-        final TopologyMaintenanceSession closestPeerSession = sessionManagerReturnsMaintenanceSessionFor(myAddress);
+        final TopologyMaintenanceSession closestPeerSession = sessionReturnsMaintenanceSessionFor(myAddress);
 
-        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
+        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, session);
 
         final Integer locationToFind = genericTopologyLocation();
 
@@ -133,11 +124,11 @@ public class TopologyMaintenanceSessionImplTest {
         myNodeConfigIs(nodeConfig);
 
         final RemoteNodeAddress senderAddress = genericRemoteNodeAddress();
-        final TopologyMaintenanceSession senderSession = sessionManagerReturnsMaintenanceSessionFor(senderAddress);
+        final TopologyMaintenanceSession senderSession = sessionReturnsMaintenanceSessionFor(senderAddress);
 
         theSenderLocationIs(senderAddress);
 
-        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
+        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, session);
 
         // When
         maintenanceSession.probeForLocation(genericTopologyLocation(), TrConstants.MAINTENANCE_HOPS_TO_LIVE,
@@ -165,17 +156,17 @@ public class TopologyMaintenanceSessionImplTest {
         myNodeConfigIs(nodeConfig);
 
         final RemoteNodeAddress senderAddress = genericRemoteNodeAddress();
-        final TopologyMaintenanceSession senderSession = sessionManagerReturnsMaintenanceSessionFor(senderAddress);
+        final TopologyMaintenanceSession senderSession = sessionReturnsMaintenanceSessionFor(senderAddress);
 
         theSenderLocationIs(senderAddress);
 
         final RemoteNodeAddress forwarderAddressOne = genericRemoteNodeAddress();
-        final TopologyMaintenanceSession forwarderSessionOne = sessionManagerReturnsMaintenanceSessionFor(forwarderAddressOne);
+        final TopologyMaintenanceSession forwarderSessionOne = sessionReturnsMaintenanceSessionFor(forwarderAddressOne);
 
         final RemoteNodeAddress forwarderAddressTwo = genericRemoteNodeAddress();
-        final TopologyMaintenanceSession forwarderSessionTwo = sessionManagerReturnsMaintenanceSessionFor(forwarderAddressTwo);
+        final TopologyMaintenanceSession forwarderSessionTwo = sessionReturnsMaintenanceSessionFor(forwarderAddressTwo);
 
-        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
+        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, session);
 
         final LinkedList<RemoteNodeAddress> forwarderAddresses = new LinkedList<RemoteNodeAddress>() {{
             add(senderAddress);
@@ -205,7 +196,7 @@ public class TopologyMaintenanceSessionImplTest {
         myNodesAddressIs(myAddress);
 
         final RemoteNodeAddress acceptorAddress = genericRemoteNodeAddress();
-        final TopologyMaintenanceSession acceptorSession = sessionManagerReturnsMaintenanceSessionFor(acceptorAddress);
+        final TopologyMaintenanceSession acceptorSession = sessionReturnsMaintenanceSessionFor(acceptorAddress);
 
         final TrNodeConfig nodeConfig = new TrNodeConfig();
         myNodeConfigIs(nodeConfig);
@@ -215,9 +206,9 @@ public class TopologyMaintenanceSessionImplTest {
 
         final RemoteNodeAddress closestPeerAddress = genericRemoteNodeAddress();
         theClosestPeerAddressIs(closestPeerAddress);
-        sessionManagerReturnsMaintenanceSessionFor(closestPeerAddress);
+        sessionReturnsMaintenanceSessionFor(closestPeerAddress);
 
-        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
+        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, session);
 
         maintenanceSession.startTopologyMaintenance(genericTopologyLocation()); // we are the initiator
 
@@ -235,16 +226,16 @@ public class TopologyMaintenanceSessionImplTest {
         // Given
         final RemoteNodeAddress proberAddress = genericRemoteNodeAddress();
         theSenderLocationIs(proberAddress);
-        TopologyMaintenanceSession proberSession = sessionManagerReturnsMaintenanceSessionFor(proberAddress);
+        TopologyMaintenanceSession proberSession = sessionReturnsMaintenanceSessionFor(proberAddress);
 
         final RemoteNodeAddress closestPeerAddress = genericRemoteNodeAddress();
         theClosestPeerAddressIs(closestPeerAddress);
-        sessionManagerReturnsMaintenanceSessionFor(closestPeerAddress);
+        sessionReturnsMaintenanceSessionFor(closestPeerAddress);
 
         final RemoteNodeAddress acceptorAddress = genericRemoteNodeAddress();
         final LinkedList<RemoteNodeAddress> willConnectTo = new LinkedList<RemoteNodeAddress>();
 
-        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
+        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, session);
 
         maintenanceSession.probeForLocation(genericTopologyLocation(), 0, new LinkedList<RemoteNodeAddress>());
 
@@ -268,20 +259,20 @@ public class TopologyMaintenanceSessionImplTest {
         myTopologyLocationInfoIs(topologyLocationInfo);
 
         final RemoteNodeAddress acceptorAddress = genericRemoteNodeAddress();
-        sessionManagerReturnsMaintenanceSessionFor(acceptorAddress);
+        sessionReturnsMaintenanceSessionFor(acceptorAddress);
 
         final RemoteNodeAddress proberAddress = genericRemoteNodeAddress();
         theSenderLocationIs(proberAddress);
-        sessionManagerReturnsMaintenanceSessionFor(proberAddress);
+        sessionReturnsMaintenanceSessionFor(proberAddress);
 
         final RemoteNodeAddress closestPeerAddress = genericRemoteNodeAddress();
         theClosestPeerAddressIs(closestPeerAddress);
-        sessionManagerReturnsMaintenanceSessionFor(closestPeerAddress);
+        sessionReturnsMaintenanceSessionFor(closestPeerAddress);
 
         final TrPeerManager.Capabilities capabilities = new TrNodeConfig().capabilities;
         final Integer topologyLocation = genericTopologyLocation();
 
-        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
+        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, session);
 
         maintenanceSession.probeForLocation(genericTopologyLocation(), 0, new LinkedList<RemoteNodeAddress>());
         maintenanceSession.sendAcceptInfo(acceptorAddress, new LinkedList<RemoteNodeAddress>() {{ add(myAddress); }});
@@ -307,17 +298,17 @@ public class TopologyMaintenanceSessionImplTest {
 
         final RemoteNodeAddress proberAddress = genericRemoteNodeAddress();
         theSenderLocationIs(proberAddress);
-        sessionManagerReturnsMaintenanceSessionFor(proberAddress);
+        sessionReturnsMaintenanceSessionFor(proberAddress);
 
         theClosestPeerAddressIs(myAddress);
-        sessionManagerReturnsMaintenanceSessionFor(myAddress);
+        sessionReturnsMaintenanceSessionFor(myAddress);
 
         myNodeHasNoConnections();
 
         final TrPeerManager.Capabilities capabilities = new TrNodeConfig().capabilities;
         final Integer topologyLocation = genericTopologyLocation();
 
-        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, sessionManager);
+        final TopologyMaintenanceSessionImpl maintenanceSession = new TopologyMaintenanceSessionImpl(genericSessionId(), node, session);
 
         maintenanceSession.probeForLocation(genericTopologyLocation(), 0, new LinkedList<RemoteNodeAddress>() {{ add(proberAddress); }});
 
