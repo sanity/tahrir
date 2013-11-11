@@ -33,7 +33,7 @@ public class
         try {
             final TrNode node = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
             if(config.startGui){
-                final TrMainWindow mainWindow = new TrMainWindow(node);
+                final TrMainWindow mainWindow = new TrMainWindow(node, "Default");
                 mainWindow.getContent().revalidate();
             }
             else{

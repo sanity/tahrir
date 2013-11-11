@@ -39,7 +39,7 @@ public class SettingsDisplayPage {
                     //Do nothing..
                 }
                 else{
-                    mainWindow.setCurrentIdentity((String)comboBox.getSelectedItem());
+                    mainWindow.node.setCurrentIdentity((String)comboBox.getSelectedItem());
                 }
             }
         }

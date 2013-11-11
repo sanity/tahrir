@@ -1,5 +1,7 @@
 package tahrir;
 
+import java.awt.*;
+
 public class TrConstants {
 	public static final int PERSISTENCE_CACHE_SIZE = 25;
 
@@ -56,6 +58,8 @@ public class TrConstants {
     public static final String FOLLOWING = "FOLLOWING";
 
     public static final String OWN = "Own";
+
+    public static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
     public static boolean add = true;
 	/**

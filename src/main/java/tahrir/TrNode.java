@@ -141,6 +141,15 @@ public class TrNode {
 		Persistence.loadAndModify(RemoteNodeAddress.class, pubNodeIdFile, mb);
 	}
 
+    public void setCurrentIdentity(String nick){
+        for(UserIdentity identity :this.mbClasses.identityStore.getIdentitiesWithNick(nick)){
+            if(identity.hasPvtKey() && identity.getNick().equals(nick)){
+                this.getConfig().currentUserIdentity = identity;
+            }
+        }
+    }
+
+
     public TrNodeConfig getConfig() {
         return config;
     }

@@ -30,8 +30,9 @@ public class TrMainWindow {
 
 	private static int TAB_NOT_FOUND = -1;
 
-	public TrMainWindow(final TrNode node) {
+	public TrMainWindow(final TrNode node, String currentUsername){
 		this.node = node;
+        node.setCurrentIdentity(currentUsername);
 
 		contentPanel = new JPanel(new MigLayout());
 		tabbedPane = new JTabbedPane();
@@ -68,6 +69,7 @@ public class TrMainWindow {
 		frame.setSize(TrConstants.GUI_WIDTH_PX, TrConstants.GUI_HEIGHT_PX);
 		frame.setResizable(false);
 		frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 	public void createClosableTab(final String tabName, final Component tabContents) {
@@ -76,14 +78,6 @@ public class TrMainWindow {
 		tabbedPane.setSelectedIndex(newTabIndex);
 		tabbedPane.setTabComponentAt(newTabIndex, new ClosableTabComponent(tabName));
 	}
-
-    public void setCurrentIdentity(String nick){
-        for(UserIdentity identity :node.mbClasses.identityStore.getIdentitiesWithNick(nick)){
-            if(identity.hasPvtKey() && identity.getNick().equals(nick)){
-                node.getConfig().currentUserIdentity = identity;
-            }
-        }
-    }
 
 	private void addTabs() {
 		final BroadcastMessageDisplayPage unfilteredPostPage = new BroadcastMessageDisplayPage(

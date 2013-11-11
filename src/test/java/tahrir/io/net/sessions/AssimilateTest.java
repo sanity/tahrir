@@ -130,10 +130,10 @@ public class AssimilateTest {
         final TrNode joinerNode2 = new TrNode(joinerDir2, joinerConfig2);
 
         try{
-            final TrMainWindow mainWindow = new TrMainWindow(joinerNode);
+            final TrMainWindow mainWindow = new TrMainWindow(joinerNode, "Default");
             mainWindow.getContent().revalidate();
 
-            final TrMainWindow mainWindow2 = new TrMainWindow(joinerNode2);
+            final TrMainWindow mainWindow2 = new TrMainWindow(joinerNode2, "Default");
             mainWindow2.getContent().revalidate();
         }
         catch (final Exception e){
