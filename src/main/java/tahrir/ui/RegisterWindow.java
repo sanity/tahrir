@@ -22,6 +22,7 @@ public class RegisterWindow {
     private final JFrame frame;
     private JButton createNewButton;
     private JButton backToLoginButton;
+    private JLabel tahrir_logo;
     private JLabel createNewLabel;
     private JLabel loginLabel;
     private JPanel panel = new JPanel();
@@ -34,8 +35,10 @@ public class RegisterWindow {
         createNewLabel = new JLabel("Create a new ID");
         backToLoginButton = new JButton("Login");
         loginLabel = new JLabel("Login with existing ID");
+        tahrir_logo = new JLabel(new ImageIcon(TrConstants.imageIconPath));
+
         //adjust size and set layout
-        panel.setPreferredSize(new Dimension(300, 300));
+        panel.setPreferredSize(new Dimension(260, 400));
         panel.setLayout (null);
 
         //add components
@@ -44,13 +47,15 @@ public class RegisterWindow {
         panel.add(userIdField);
         panel.add(backToLoginButton);
         panel.add(loginLabel);
+        panel.add(tahrir_logo);
 
         //set component bounds (Using Absolute Positioning (x, y, width, height))
-        createNewButton.setBounds (50, 120, 100, 20);
-        createNewLabel.setBounds (50, 60, 195, 20);
-        userIdField.setBounds (50, 85, 145, 25);
-        backToLoginButton.setBounds(50, 200, 100, 25);
-        loginLabel.setBounds (55, 170, 170, 25);
+        tahrir_logo.setBounds(55, 25, 140, 133);
+        createNewLabel.setBounds (50, 173, 195, 20);
+        userIdField.setBounds (50, 198, 145, 25);
+        createNewButton.setBounds (50, 233, 100, 20);
+        loginLabel.setBounds (55, 283, 170, 25);
+        backToLoginButton.setBounds(50, 313, 100, 25);
 
         //Actions for buttons
         createNewButton.addActionListener(new ActionListener() {
@@ -91,7 +96,7 @@ public class RegisterWindow {
         //int ypos = (int) ((TrConstants.screenSize.getHeight() - 300)/2);
         //int xpos = (int) (TrConstants.screenSize.getWidth() - 300/2);
         //frame.setLocation(xpos, ypos);
-        frame.setSize(300, 350);
+        frame.setSize(260, 400);
         frame.setLocationByPlatform(true);
         frame.setResizable(false);
         frame.setVisible(true);

@@ -23,6 +23,7 @@ public class LoginWindow{
     private JButton createNewButton;
     private JLabel userNameLabel;
     private JLabel createNewLabel;
+    private JLabel tahrir_logo;
     private final JComboBox usernameList;
     private JPanel panel = new JPanel();
 
@@ -44,13 +45,14 @@ public class LoginWindow{
         userNameLabel = new JLabel ("Select your Username");
         createNewLabel = new JLabel("Set up a new ID");
         usernameList = new JComboBox (model);
+        tahrir_logo = new JLabel(new ImageIcon(TrConstants.imageIconPath));
 
         //set components properties
         usernameList.setToolTipText("Choose your Tahrir Identity");
 
 
         //adjust size and set layout
-        panel.setPreferredSize(new Dimension(300, 380));
+        panel.setPreferredSize(new Dimension(400, 580));
         panel.setLayout (null);
 
         //add components
@@ -59,13 +61,15 @@ public class LoginWindow{
         panel.add(usernameList);
         panel.add(userNameLabel);
         panel.add(createNewLabel);
+        panel.add(tahrir_logo);
 
         //set component bounds (Using Absolute Positioning (x, y, width, height))
-        userNameLabel.setBounds(70, 75, 195, 20);
-        usernameList.setBounds(70, 100, 170, 25);
-        loginButton.setBounds(70, 135, 100, 20);
-        createNewLabel.setBounds(70, 195, 195, 20);
-        createNewButton.setBounds(70, 220, 100, 20);
+        tahrir_logo.setBounds(75, 25, 140, 133);
+        userNameLabel.setBounds(70, 185, 195, 20);
+        usernameList.setBounds(70, 210, 170, 25);
+        loginButton.setBounds(70, 245, 100, 20);
+        createNewLabel.setBounds(70, 295, 195, 20);
+        createNewButton.setBounds(70, 325, 100, 20);
 
         //Actions for buttons
         loginButton.addActionListener(new ActionListener() {
