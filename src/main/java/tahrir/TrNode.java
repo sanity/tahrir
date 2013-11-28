@@ -41,7 +41,7 @@ public class TrNode {
 
 	Logger logger = LoggerFactory.getLogger(TrNode.class);
 
-	public final TrNodeConfig config;
+	private final TrNodeConfig config;
 
 	public File privNodeIdFile;
 	public File pubNodeIdFile;
@@ -49,7 +49,7 @@ public class TrNode {
 	public final File rootDirectory;
     public final File identityStoreFile;
 
-	public final TrPeerManager peerManager;
+	private final TrPeerManager peerManager;
 
 	public MicrobloggingClasses mbClasses;
 
@@ -111,7 +111,7 @@ public class TrNode {
 		sessionMgr.registerSessionClass(TopologyMaintenanceSession.class, TopologyMaintenanceSessionImpl.class);
 		sessionMgr.registerSessionClass(AssimilateSession.class, AssimilateSessionImpl.class);
 		// don't want to be able to call broadcast methods on a seed node
-		if (config.peers.runBroadcast) {
+		if (getConfig().peers.runBroadcast) {
 			sessionMgr.registerSessionClass(TransmitMicroblogSession.class, TransmitMicroblogSessionImpl.class);
 		}
 	}
@@ -141,8 +141,21 @@ public class TrNode {
 		Persistence.loadAndModify(RemoteNodeAddress.class, pubNodeIdFile, mb);
 	}
 
+    public void setCurrentIdentity(String nick){
+        for(UserIdentity identity :this.mbClasses.identityStore.getIdentitiesWithNick(nick)){
+            if(identity.hasPvtKey() && identity.getNick().equals(nick)){
+                this.getConfig().currentUserIdentity = identity;
+            }
+        }
+    }
 
-	public static class MicrobloggingClasses {
+
+    public TrNodeConfig getConfig() {
+        return config;
+    }
+
+
+    public static class MicrobloggingClasses {
 		public final BroadcastMessageBroadcaster mbScheduler;
         public final IdentityStore identityStore;
 		public final ShortenedPublicKeyFinder spkFinder;
@@ -151,10 +164,10 @@ public class TrNode {
 		public final BroadcastMessageInbox mbsForViewing;
         public final EventBus eventBus= new EventBus();
 		public MicrobloggingClasses(final TrNode node) {
-            identityStore=new IdentityStore(getOrCreateFile(new File(node.rootDirectory, node.config.contacts)));
+            identityStore=new IdentityStore(getOrCreateFile(new File(node.rootDirectory, node.getConfig().contacts)));
             identityStore.setEventBus(eventBus);
 			spkFinder = new ShortenedPublicKeyFinder(
-					getOrCreateFile(new File(node.rootDirectory, node.config.publicKeyChars)));
+					getOrCreateFile(new File(node.rootDirectory, node.getConfig().publicKeyChars)));
 			mbsForBroadcast = new BroadcastMessageOutbox();
 			mbsForViewing = new BroadcastMessageInbox(identityStore);
 			incomingMbHandler = new IncomingBroadcastMessageHandler(mbsForViewing, mbsForBroadcast, identityStore);
@@ -189,4 +202,8 @@ public class TrNode {
 
 		public RSAPrivateKey privateKey;
 	}
+
+    public TrPeerManager getPeerManager() {
+        return peerManager;
+    }
 }

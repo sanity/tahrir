@@ -22,12 +22,15 @@
 		</pluginRepository>
 	</pluginRepositories>
 	<build>
+
 		<plugins>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
+
 					<source>1.6</source>
 					<target>1.6</target>
 				</configuration>
@@ -55,11 +58,10 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Proguard setup, see http://blog.boxofrats.com/2009/08/07/setting-up-maven-for-scala-and-proguard/ TEMPORARILY DISABLED
 			<plugin>
-				<groupId>com.pyx4me</groupId>
-				<artifactId>proguard-maven-plugin</artifactId>
-				<version>2.0.4</version>
+                <groupId>com.github.wvengen</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+                <version>2.0.6</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -68,26 +70,55 @@
 						</goals>
 					</execution>
 				</executions>
+                <!--<dependencies>-->
+                    <!--<dependency>-->
+                        <!--<groupId>net.sf.proguard</groupId>-->
+                        <!--<artifactId>proguard-base</artifactId>-->
+                        <!--<version>4.10</version>-->
+                        <!--<scope>runtime</scope>-->
+                    <!--</dependency>-->
+                <!--</dependencies>-->
 				<configuration>
 					<options>
 						<option>-allowaccessmodification</option>
-						<option>-keep public class ${project.build.mainClass} { public
-							static void main(java.lang.String[]);}</option>
-						<option>-dontwarn</option>
-						<option>-dontskipnonpubliclibraryclasses</option>
-						<option>-dontskipnonpubliclibraryclassmembers</option>
+                        <option>-microedition</option>
+                        <option>-dontskipnonpubliclibraryclasses</option>
+                        <option>-dontskipnonpubliclibraryclassmembers</option>
+                        <option>-dontnote</option>
+                        <option>-dontwarn</option>
+                        <option>-dontoptimize</option>
+                        <option>-dontobfuscate</option>
+                        <option>-keep public class tahrir.** { public protected *; }</option>
+                        <option>-keep public class org.apache.** { public protected *; }</option>
+                        <option>-keep public class org.kohsuke.args4j.spi** { public protected *; }</option>
+                        <option>-keep public class ch.qos.** { public protected *; }</option>
 					</options>
 					<includeDependency>false</includeDependency>
 					<injar>${project.build.finalName}-jar-with-dependencies.jar</injar>
 					<outjar>${project.build.finalName}-shrunk.jar</outjar>
-					<libs>
-						 WARNING: This is required on OSX, will need to be adjusted for
-							other platforms because these jar files are in a different location
-						<lib>${java.home}/../Classes/classes.jar</lib>
-						<lib>${java.home}/../Classes/jce.jar</lib>
-					</libs>
+                    <libs>
+                        <!-- Java Run Time lib-->
+                        <lib>${java.home}/lib/rt.jar</lib>
+                        <!-- Third party libs -->
+                        <lib>${settings.localRepository}/com/google/code/gson/gson/2.2.2/gson-2.2.2.jar</lib>
+                        <lib>${settings.localRepository}/org/apache/commons/commons-math/2.2/commons-math-2.2.jar</lib>
+                        <lib>${settings.localRepository}/args4j/args4j/2.0.16/args4j-2.0.16.jar</lib>
+                        <lib>${settings.localRepository}/org/testng/testng/5.14/testng-5.14.jar</lib>
+                        <lib>${settings.localRepository}/bouncycastle/bcprov-jdk16/140/bcprov-jdk16-140.jar</lib>
+                        <lib>${settings.localRepository}/com/google/guava/guava/14.0-rc3/guava-14.0-rc3.jar</lib>
+                        <lib>${settings.localRepository}/ch/qos/logback/logback-core/0.9.28/logback-core-0.9.28.jar</lib>
+                        <lib>${settings.localRepository}/com/miglayout/miglayout/3.7.4/miglayout-3.7.4.jar</lib>
+                        <lib>${settings.localRepository}/joda-time/joda-time/1.6.2/joda-time-1.6.2.jar</lib>
+                        <lib>${settings.localRepository}/com/google/inject/guice/3.0/guice-3.0.jar</lib>
+                        <lib>${settings.localRepository}/xom/xom/1.2.5/xom-1.2.5.jar</lib>
+                        <lib>${settings.localRepository}/commons-codec/commons-codec/1.6/commons-codec-1.6.jar</lib>
+                        <lib>${settings.localRepository}/org/apache/commons/commons-lang3/3.1/commons-lang3-3.1.jar</lib>
+                        <lib>${settings.localRepository}/xalan/xalan/2.7.0/xalan-2.7.0.jar</lib>
+                        <lib>${settings.localRepository}/xerces/xercesImpl/2.8.0/xercesImpl-2.8.0.jar</lib>
+                    </libs>
+                    <maxMemory>2g</maxMemory>
 				</configuration>
-			</plugin> -->
+			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
@@ -112,12 +143,6 @@
 			<groupId>args4j</groupId>
 			<artifactId>args4j</artifactId>
 			<version>2.0.16</version>
-		</dependency>
-		<dependency>
-			<groupId>org.testng</groupId>
-			<artifactId>testng</artifactId>
-			<version>5.14</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>bouncycastle</groupId>
@@ -192,5 +217,19 @@
       			<artifactId>vaadin-themes</artifactId>
       			<version>${vaadin.version}</version>
       		</dependency>
+
+        <!-- TEST -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>5.14</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.8.4</version>
+        </dependency>
+        
 	</dependencies>
 </project>

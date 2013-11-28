@@ -29,7 +29,7 @@ public class BroadcastMessageBroadcaster implements Runnable {
     @Override
     public void run() {
         if (!disabled) {
-            Set<PhysicalNetworkLocation> peersThatReceiveMessageBroadcasts = findPeersThatReceiveMessageBroadcasts(node.peerManager.peers);
+            Set<PhysicalNetworkLocation> peersThatReceiveMessageBroadcasts = findPeersThatReceiveMessageBroadcasts(node.getPeerManager().peers);
             final BroadcastMessage broadcastMessageForBroadcast = node.mbClasses.mbsForBroadcast.getMessageForBroadcast();
             for (PhysicalNetworkLocation recepient : peersThatReceiveMessageBroadcasts) {
                 final TransmitMicroblogSessionImpl localMicroblogBroadcastSession = node.sessionMgr.getOrCreateLocalSession(TransmitMicroblogSessionImpl.class);

@@ -10,6 +10,8 @@ import tahrir.io.net.broadcasts.containers.BroadcastMessageInbox;
 import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.tools.TrUtils;
+import tahrir.ui.LoginWindow;
+import tahrir.ui.RegisterWindow;
 import tahrir.ui.TrMainWindow;
 
 import java.security.interfaces.RSAPrivateKey;
@@ -25,10 +27,14 @@ public class GUIMain {
             try {
                 final TrNode testNode = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
 
-                //UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
+                if(testNode.mbClasses.identityStore.labelsOfUser.keySet().isEmpty()){
+                    final RegisterWindow registerWindow = new RegisterWindow(testNode);
+                }
+                else{
+                    final LoginWindow loginWindow = new LoginWindow(testNode);
+                }
 
-                final TrMainWindow mainWindow = new TrMainWindow(testNode);
-                mainWindow.getContent().revalidate();
+                //UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
                 GUIMain.addTestInformationToNode(testNode);
 
             } catch (final Exception e) {

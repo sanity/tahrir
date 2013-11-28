@@ -10,7 +10,8 @@ import tahrir.ui.TrMainWindow;
 import java.io.File;
 import java.io.IOException;
 
-public class TrMain {
+public class
+        TrMain {
 
 	public static Logger logger = LoggerFactory.getLogger(TrMain.class);
 
@@ -32,7 +33,7 @@ public class TrMain {
         try {
             final TrNode node = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
             if(config.startGui){
-                final TrMainWindow mainWindow = new TrMainWindow(node);
+                final TrMainWindow mainWindow = new TrMainWindow(node, "Default");
                 mainWindow.getContent().revalidate();
             }
             else{
@@ -96,7 +97,7 @@ public class TrMain {
 	}
 
     public static class TrMainConfig {
-        public boolean startGui = true;
+        public boolean startGui = false;
 
         public TrNodeConfig node = new TrNodeConfig();
     }

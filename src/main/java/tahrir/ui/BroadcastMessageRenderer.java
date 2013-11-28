@@ -1,7 +1,6 @@
 package tahrir.ui;
 
 import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
-import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
@@ -26,10 +25,7 @@ public class BroadcastMessageRenderer extends AbstractCellEditor implements Tabl
 	@Override
 	public Component getTableCellRendererComponent(final JTable table, final Object value,
 			final boolean isSelected, final boolean hasFocus, final int row, final int column) {
-		final BroadcastMessage broadcastMessage = (BroadcastMessage) value;
-		final BroadcastMessagePostPanel panel = new BroadcastMessagePostPanel(broadcastMessage, mainWindow);
-
-		return panel.getContent();
+        return getComponent(table, (BroadcastMessage) value, row);
 	}
 
 	@Override
@@ -40,8 +36,14 @@ public class BroadcastMessageRenderer extends AbstractCellEditor implements Tabl
 	@Override
 	public Component getTableCellEditorComponent(final JTable table, final Object value,
 			final boolean isSelected, final int row, final int column) {
-		final BroadcastMessage broadcastMessage = (BroadcastMessage) value;
-		final BroadcastMessagePostPanel panel = new BroadcastMessagePostPanel(broadcastMessage, mainWindow);
-		return panel.getContent();
+        return getComponent(table, (BroadcastMessage) value, row);
 	}
+
+    private Component getComponent(JTable table, BroadcastMessage broadcastMessage, int row) {
+        final BroadcastMessagePostPanel panel = new BroadcastMessagePostPanel(broadcastMessage, mainWindow);
+
+        table.setRowHeight(row, panel.getContent().getPreferredSize().height);
+
+        return panel.getContent();
+    }
 }

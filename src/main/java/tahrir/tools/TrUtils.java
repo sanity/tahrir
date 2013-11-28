@@ -1,15 +1,12 @@
 package tahrir.tools;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSortedMultiset;
-import com.google.common.collect.SortedMultiset;
-import com.google.common.collect.TreeMultiset;
 import com.google.common.eventbus.EventBus;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
-import tahrir.TrNodeConfig;
 import tahrir.TrNode;
+import tahrir.TrNodeConfig;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.broadcasts.UserIdentity;
 import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
@@ -19,7 +16,6 @@ import tahrir.tools.GsonSerializers.RSAPublicKeyDeserializer;
 import tahrir.tools.GsonSerializers.RSAPublicKeySerializer;
 
 import java.io.*;
-import java.lang.Object;
 import java.lang.reflect.Type;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -47,6 +43,8 @@ public class TrUtils {
         builder.registerTypeAdapterFactory(new OptionalTypeAdapterFactory());
 		builder.registerTypeAdapter(RSAPublicKey.class, new RSAPublicKeySerializer());
 		builder.registerTypeAdapter(RSAPublicKey.class, new RSAPublicKeyDeserializer());
+        builder.registerTypeAdapter(RSAPrivateKey.class, new GsonSerializers.RSAPrivateKeySerializer());
+        builder.registerTypeAdapter(RSAPrivateKey.class, new GsonSerializers.RSAPrivateKeyDeserializer());
 		gson = builder.create();
 	}
 
@@ -86,8 +84,8 @@ public class TrUtils {
 	 */
 	public static class TestUtils {
 		public static boolean isConnected(final TrNode node1, final TrNode node2) {
-			return node1.peerManager.peers.containsKey(node2.getRemoteNodeAddress().physicalLocation)
-					&& node2.peerManager.peers.containsKey(node1.getRemoteNodeAddress().physicalLocation);
+			return node1.getPeerManager().peers.containsKey(node2.getRemoteNodeAddress().physicalLocation)
+					&& node2.getPeerManager().peers.containsKey(node1.getRemoteNodeAddress().physicalLocation);
 		}
 
 		public static TrNode makeNode(final int port, final boolean maintenance, final boolean assimilate,
@@ -114,10 +112,10 @@ public class TrUtils {
 		}
 
 		public static void createBidirectionalConnection(final TrNode node1, final TrNode node2) {
-			node1.peerManager.addNewPeer(node2.getRemoteNodeAddress(), node2.config.capabilities,
-					node2.peerManager.locInfo.getLocation());
-			node2.peerManager.addNewPeer(node1.getRemoteNodeAddress(), node1.config.capabilities,
-					node1.peerManager.locInfo.getLocation());
+			node1.getPeerManager().addNewPeer(node2.getRemoteNodeAddress(), node2.getConfig().capabilities,
+                    node2.getPeerManager().getLocInfo().getLocation());
+			node2.getPeerManager().addNewPeer(node1.getRemoteNodeAddress(), node1.getConfig().capabilities,
+                    node1.getPeerManager().getLocInfo().getLocation());
 		}
 
 		/**
@@ -147,7 +145,7 @@ public class TrUtils {
 		 */
 		public static BroadcastMessage getBroadcastMessageFrom(TrNode node) {
             ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Some post from a user.", "en", node.mbClasses.identityStore, System.currentTimeMillis());
-            SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.config.currentUserIdentity);
+            SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.getConfig().currentUserIdentity);
             BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
             return broadcastMessage;
 

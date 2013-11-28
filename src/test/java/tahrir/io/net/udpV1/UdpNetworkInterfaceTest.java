@@ -15,6 +15,7 @@ import tahrir.io.net.TrRemoteConnection;
 import tahrir.io.net.udpV1.UdpNetworkInterface.UNIConfig;
 import tahrir.tools.ByteArraySegment;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
+import tahrir.tools.TrUtils;
 import tahrir.tools.Tuple2;
 
 import java.net.InetAddress;
@@ -23,9 +24,6 @@ import java.security.interfaces.RSAPublicKey;
 
 public class UdpNetworkInterfaceTest {
 	private static final Logger logger = LoggerFactory.getLogger(UdpNetworkInterfaceTest.class);
-
-	private int port1 = 3156;
-	private int port2 = 3157;
 
 	private UdpNetworkInterface i1;
 	private UdpNetworkInterface i2;
@@ -43,7 +41,7 @@ public class UdpNetworkInterfaceTest {
 	@BeforeMethod
 	public void setUp() throws Exception {
 		final UNIConfig conf1 = new UNIConfig();
-		conf1.listenPort = port1--;
+		conf1.listenPort = TrUtils.rand.nextInt(10000)+10000;
 		conf1.maxUpstreamBytesPerSecond = 1024;
 
 		final Tuple2<RSAPublicKey, RSAPrivateKey> kp1 = TrCrypto.createRsaKeyPair();
@@ -53,7 +51,7 @@ public class UdpNetworkInterfaceTest {
 		i1 = new UdpNetworkInterface(conf1, kp1);
 
 		final UNIConfig conf2 = new UNIConfig();
-		conf2.listenPort = port2++;
+		conf2.listenPort = conf1.listenPort+1;
 		conf2.maxUpstreamBytesPerSecond = 1024;
 		i2 = new UdpNetworkInterface(conf2, kp2);
 

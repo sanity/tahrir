@@ -7,7 +7,7 @@ import tahrir.TrNode;
 import tahrir.tools.TrUtils;
 
 public class TopologyMaintenanceTest {
-	private static int port = 8649;
+	private static int port = 8112;
 
 	/**
 	 * Nodes initially connected initiator<->forwarder1<->forwader2<->responder
@@ -19,16 +19,16 @@ public class TopologyMaintenanceTest {
 		final TrNode forwarder2 = TrUtils.TestUtils.makeNode(port++, false, false, false, false, 4, 4);
 		final TrNode responder = TrUtils.TestUtils.makeNode(port++, false, false, false, false, 4, 4);
 
-		initiator.peerManager.locInfo.setLocation(0);
-		forwarder1.peerManager.locInfo.setLocation(1);
-		forwarder2.peerManager.locInfo.setLocation(2);
-		responder.peerManager.locInfo.setLocation(3);
+		initiator.getPeerManager().getLocInfo().setLocation(0);
+		forwarder1.getPeerManager().getLocInfo().setLocation(1);
+		forwarder2.getPeerManager().getLocInfo().setLocation(2);
+		responder.getPeerManager().getLocInfo().setLocation(3);
 
 		TrUtils.TestUtils.createBidirectionalConnection(initiator, forwarder1);
 		TrUtils.TestUtils.createBidirectionalConnection(forwarder1, forwarder2);
 		TrUtils.TestUtils.createBidirectionalConnection(forwarder2, responder);
 
-		initiator.peerManager.enableDebugMaintenance();
+		initiator.getPeerManager().enableDebugMaintenance();
 
 		for (int x=0; x<100; x++) {
 			Thread.sleep(200);

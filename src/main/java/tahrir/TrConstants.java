@@ -1,5 +1,7 @@
 package tahrir;
 
+import java.awt.*;
+
 public class TrConstants {
 	public static final int PERSISTENCE_CACHE_SIZE = 25;
 
@@ -49,13 +51,19 @@ public class TrConstants {
 
     public static final int POST_HGAP_PX=50;
 
-	public static final String MAIN_WINDOW_ARTWORK_PATH = "artwork/";
+    public static final String separator = System.getProperty("file.separator");
+
+	public static final String MAIN_WINDOW_ARTWORK_PATH = "artwork"+separator;
 
     public static final String IDENTITY_STORE_TEST_FILE_PATH = System.getProperty("java.io.tmpdir")+System.getProperty("file.separator")+"temp-id-store.json";
 
     public static final String FOLLOWING = "FOLLOWING";
 
     public static final String OWN = "Own";
+
+    public static final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+    public static final String imageIconPath = MAIN_WINDOW_ARTWORK_PATH + "tahrir-logo_small.png";
 
     public static boolean add = true;
 	/**

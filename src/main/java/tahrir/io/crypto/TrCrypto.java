@@ -1,27 +1,7 @@
 package tahrir.io.crypto;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.Signature;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.X509EncodedKeySpec;
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-
+import com.google.common.io.BaseEncoding;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import tahrir.TrConstants;
 import tahrir.io.serialization.TrSerializableException;
 import tahrir.io.serialization.TrSerializer;
@@ -29,7 +9,18 @@ import tahrir.tools.ByteArraySegment;
 import tahrir.tools.ByteArraySegment.ByteArraySegmentBuilder;
 import tahrir.tools.Tuple2;
 
-import com.google.common.io.BaseEncoding;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.security.*;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 /**
  * A simple implementation of the RSA algorithm
@@ -82,7 +73,11 @@ public class TrCrypto {
 		return BaseEncoding.base64().encode(pubKey.getEncoded());
 	}
 
-	public static RSAPublicKey decodeBase64(final String base64String) {
+    public static String toBase64(final RSAPrivateKey privateKey) {
+   		return BaseEncoding.base64().encode(privateKey.getEncoded());
+   	}
+
+	public static RSAPublicKey decodeBase64PublicKey(final String base64String) {
 		final byte[] bytes = BaseEncoding.base64().decode(base64String);
 		try {
 			return (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(bytes));
@@ -90,6 +85,15 @@ public class TrCrypto {
 			throw new RuntimeException(e);
 		}
 	}
+
+    public static RSAPrivateKey decodeBase64PrivateKey(final String base64String) {
+        final byte[] bytes = BaseEncoding.base64().decode(base64String);
+        try {
+            return (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(bytes));
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 	public static TrSignature sign(final Object toSign, final RSAPrivateKey privKey) throws TrSerializableException {
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream(TrConstants.DEFAULT_BAOS_SIZE);

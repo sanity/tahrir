@@ -1,7 +1,6 @@
 package tahrir.ui;
 
 import net.miginfocom.swing.MigLayout;
-import nu.xom.ParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
@@ -31,8 +30,9 @@ public class TrMainWindow {
 
 	private static int TAB_NOT_FOUND = -1;
 
-	public TrMainWindow(final TrNode node) {
+	public TrMainWindow(final TrNode node, String currentUsername){
 		this.node = node;
+        node.setCurrentIdentity(currentUsername);
 
 		contentPanel = new JPanel(new MigLayout());
 		tabbedPane = new JTabbedPane();
@@ -55,7 +55,7 @@ public class TrMainWindow {
                 String message = newPostPane.getText();
                 //TODO: get the language from config or settings page.
                 ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext(message, "en", node.mbClasses.identityStore, System.currentTimeMillis());
-                SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.config.currentUserIdentity);
+                SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.getConfig().currentUserIdentity);
                 final BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
                 node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
                 newPostPane.setText("");
@@ -69,6 +69,7 @@ public class TrMainWindow {
 		frame.setSize(TrConstants.GUI_WIDTH_PX, TrConstants.GUI_HEIGHT_PX);
 		frame.setResizable(false);
 		frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 	public void createClosableTab(final String tabName, final Component tabContents) {
@@ -77,14 +78,6 @@ public class TrMainWindow {
 		tabbedPane.setSelectedIndex(newTabIndex);
 		tabbedPane.setTabComponentAt(newTabIndex, new ClosableTabComponent(tabName));
 	}
-
-    public void setCurrentIdentity(String nick){
-        for(UserIdentity identity :node.mbClasses.identityStore.getIdentitiesWithNick(nick)){
-            if(identity.hasPvtKey() && identity.getNick().equals(nick)){
-                node.config.currentUserIdentity = identity;
-            }
-        }
-    }
 
 	private void addTabs() {
 		final BroadcastMessageDisplayPage unfilteredPostPage = new BroadcastMessageDisplayPage(

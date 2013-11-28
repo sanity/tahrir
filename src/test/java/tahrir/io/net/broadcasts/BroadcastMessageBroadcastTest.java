@@ -16,16 +16,16 @@ public class BroadcastMessageBroadcastTest {
     @Test
     public void simpleTest() throws Exception {
 
-        TrNode sendingNode = TrUtils.TestUtils.makeNode(8766, false, false, false, true, 1, 1);
-        TrNode receivingNode = TrUtils.TestUtils.makeNode(8667, false, false, false, true, 1, 1);
+        TrNode sendingNode = TrUtils.TestUtils.makeNode(8932, false, false, false, true, 1, 1);
+        TrNode receivingNode = TrUtils.TestUtils.makeNode(8933, false, false, false, true, 1, 1);
         TrUtils.TestUtils.createBidirectionalConnection(sendingNode, receivingNode);
-        for (final TrPeerInfo pi : sendingNode.peerManager.peers.values()) {
+        for (final TrPeerInfo pi : sendingNode.getPeerManager().peers.values()) {
             pi.capabilities.receivesMessageBroadcasts = true;
         }
-        sendingNode.config.currentUserIdentity = new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
+        sendingNode.getConfig().currentUserIdentity = new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
         String langCode = "en";
         final ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("Hello world", langCode, sendingNode.mbClasses.identityStore, System.currentTimeMillis());
-        final SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, sendingNode.config.currentUserIdentity);
+        final SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, sendingNode.getConfig().currentUserIdentity);
         final BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
         sendingNode.mbClasses.mbsForBroadcast.insert(broadcastMessage);
 
@@ -54,17 +54,17 @@ public class BroadcastMessageBroadcastTest {
         TrNode sendingNode = TrUtils.TestUtils.makeNode(8769, false, false, false, true, 1, 1);
         TrNode receivingNode = TrUtils.TestUtils.makeNode(8645, false, false, false, true, 1, 1);
         TrUtils.TestUtils.createBidirectionalConnection(sendingNode, receivingNode);
-        for (final TrPeerInfo pi : sendingNode.peerManager.peers.values()) {
+        for (final TrPeerInfo pi : sendingNode.getPeerManager().peers.values()) {
             pi.capabilities.receivesMessageBroadcasts = true;
         }
 
-        sendingNode.config.currentUserIdentity = new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
+        sendingNode.getConfig().currentUserIdentity = new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
         final ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext("You SHOULD have this microblog!", "en", sendingNode.mbClasses.identityStore, System.currentTimeMillis());
-        final SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, sendingNode.config.currentUserIdentity);
+        final SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, sendingNode.getConfig().currentUserIdentity);
         final BroadcastMessage broadcastMessage1 = new BroadcastMessage(signedBroadcastMessage);
 
         final ParsedBroadcastMessage parsedBroadcastMessage1 = ParsedBroadcastMessage.createFromPlaintext("You should NOT have this microblog!", "en", sendingNode.mbClasses.identityStore, System.currentTimeMillis());
-        final SignedBroadcastMessage signedBroadcastMessage1 = new SignedBroadcastMessage(parsedBroadcastMessage1, sendingNode.config.currentUserIdentity);
+        final SignedBroadcastMessage signedBroadcastMessage1 = new SignedBroadcastMessage(parsedBroadcastMessage1, sendingNode.getConfig().currentUserIdentity);
         final BroadcastMessage broadcastMessage2 = new BroadcastMessage(signedBroadcastMessage1);
 
         sendingNode.mbClasses.mbsForBroadcast.insert(broadcastMessage1);

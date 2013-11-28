@@ -1,22 +1,16 @@
 package tahrir.io.net.sessions;
 
-import java.io.File;
-import java.util.SortedSet;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import tahrir.*;
-import tahrir.io.crypto.TrCrypto;
-import tahrir.io.net.*;
-import tahrir.io.net.broadcasts.UserIdentity;
-import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
-import tahrir.io.net.broadcasts.containers.BroadcastMessageInbox;
-import tahrir.tools.*;
+import tahrir.TrNode;
+import tahrir.TrNodeConfig;
+import tahrir.io.net.RemoteNodeAddress;
+import tahrir.io.net.TrPeerManager;
+import tahrir.tools.Persistence;
 import tahrir.tools.TrUtils.TestUtils;
 import tahrir.ui.TrMainWindow;
+
+import java.io.File;
 
 public class AssimilateTest {
 
@@ -69,17 +63,17 @@ public class AssimilateTest {
 
 		for (int x=0; x<50; x++) {
 			Thread.sleep(200);
-			if (joinerNode.peerManager.peers.containsKey(seedNode.getRemoteNodeAddress().physicalLocation)
-					&& seedNode.peerManager.peers.containsKey(joinerNode.getRemoteNodeAddress().physicalLocation)) {
+			if (joinerNode.getPeerManager().peers.containsKey(seedNode.getRemoteNodeAddress().physicalLocation)
+					&& seedNode.getPeerManager().peers.containsKey(joinerNode.getRemoteNodeAddress().physicalLocation)) {
 				break;
 			}
 		}
 		// Verify that they are now connected
-		Assert.assertTrue(joinerNode.peerManager.peers.containsKey(seedNode.getRemoteNodeAddress().physicalLocation), "The joiner peer manager should contain the seed peer");
-		Assert.assertTrue(seedNode.peerManager.peers.containsKey(joinerNode.getRemoteNodeAddress().physicalLocation), "The seed peer manager should contain the joiner peer");
+		Assert.assertTrue(joinerNode.getPeerManager().peers.containsKey(seedNode.getRemoteNodeAddress().physicalLocation), "The joiner peer manager should contain the seed peer");
+		Assert.assertTrue(seedNode.getPeerManager().peers.containsKey(joinerNode.getRemoteNodeAddress().physicalLocation), "The seed peer manager should contain the joiner peer");
 	}
 
-    @Test
+    @Test(enabled = false) // This launches the GUI, it shouldn't.
     public void threePeerTest() throws Exception{
         final TrNodeConfig seedConfig = new TrNodeConfig();
         seedConfig.capabilities.allowsAssimilation = true;
@@ -136,10 +130,10 @@ public class AssimilateTest {
         final TrNode joinerNode2 = new TrNode(joinerDir2, joinerConfig2);
 
         try{
-            final TrMainWindow mainWindow = new TrMainWindow(joinerNode);
+            final TrMainWindow mainWindow = new TrMainWindow(joinerNode, "Default");
             mainWindow.getContent().revalidate();
 
-            final TrMainWindow mainWindow2 = new TrMainWindow(joinerNode2);
+            final TrMainWindow mainWindow2 = new TrMainWindow(joinerNode2, "Default");
             mainWindow2.getContent().revalidate();
         }
         catch (final Exception e){
