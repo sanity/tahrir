@@ -70,14 +70,14 @@
 						</goals>
 					</execution>
 				</executions>
-                <!--<dependencies>-->
-                    <!--<dependency>-->
-                        <!--<groupId>net.sf.proguard</groupId>-->
-                        <!--<artifactId>proguard-base</artifactId>-->
-                        <!--<version>4.10</version>-->
-                        <!--<scope>runtime</scope>-->
-                    <!--</dependency>-->
-                <!--</dependencies>-->
+                <dependencies>
+                    <dependency>
+                        <groupId>net.sf.proguard</groupId>
+                        <artifactId>proguard-base</artifactId>
+                        <version>4.10</version>
+                        <scope>runtime</scope>
+                    </dependency>
+                </dependencies>
 				<configuration>
 					<options>
 						<option>-allowaccessmodification</option>
