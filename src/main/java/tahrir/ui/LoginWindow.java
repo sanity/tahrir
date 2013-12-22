@@ -10,6 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 
 /**
  * User: ravisvi <ravitejasvi@gmail.com>
@@ -42,17 +43,18 @@ public class LoginWindow{
         //construct components
         loginButton = new JButton ("Login");
         createNewButton = new JButton ("Create");
-        userNameLabel = new JLabel ("Select your Username");
-        createNewLabel = new JLabel("Set up a new ID");
+        userNameLabel = new JLabel ("<html>Select a username/ identity to post the message.<html>");
+        createNewLabel = new JLabel("Set up a new Username");
         usernameList = new JComboBox (model);
-        tahrir_logo = new JLabel(new ImageIcon(TrConstants.imageIconPath));
+        URL resource = this.getClass().getResource("tahrir-logo_small.png");
+        tahrir_logo = new JLabel(new ImageIcon(resource));
 
         //set components properties
         usernameList.setToolTipText("Choose your Tahrir Identity");
 
 
         //adjust size and set layout
-        panel.setPreferredSize(new Dimension(400, 580));
+        panel.setPreferredSize(new Dimension(300, 400));
         panel.setLayout (null);
 
         //add components
@@ -64,12 +66,12 @@ public class LoginWindow{
         panel.add(tahrir_logo);
 
         //set component bounds (Using Absolute Positioning (x, y, width, height))
-        tahrir_logo.setBounds(75, 25, 140, 133);
-        userNameLabel.setBounds(70, 185, 195, 20);
-        usernameList.setBounds(70, 210, 170, 25);
-        loginButton.setBounds(70, 245, 100, 20);
-        createNewLabel.setBounds(70, 295, 195, 20);
-        createNewButton.setBounds(70, 325, 100, 20);
+        tahrir_logo.setBounds(80, 25, 140, 133);
+        userNameLabel.setBounds(53, 185, 195, 40);
+        usernameList.setBounds(65, 235, 170, 25);
+        loginButton.setBounds(100, 265, 100, 20);
+        createNewLabel.setBounds(78, 315, 195, 20);
+        createNewButton.setBounds(100, 345, 100, 20);
 
         //Actions for buttons
         loginButton.addActionListener(new ActionListener() {
@@ -80,9 +82,7 @@ public class LoginWindow{
                 }
                 else{
                     frame.dispose();
-                    //node.setCurrentIdentity((String) usernameList.getSelectedItem());
-                    final TrMainWindow mainWindow = new TrMainWindow(node, (String) usernameList.getSelectedItem());
-                    mainWindow.getContent().revalidate();
+                    node.setCurrentIdentity((String) usernameList.getSelectedItem());
                 }
             }
         });
@@ -103,11 +103,11 @@ public class LoginWindow{
        // int ypos = (int) ((TrConstants.screenSize.getHeight() - 400)/2);
        // int xpos = (int) (TrConstants.screenSize.getWidth() - 350/2);
        // frame.setLocation(xpos, ypos);
-        frame.setSize(300, 380);
+        frame.setSize(300, 400);
         frame.setLocationByPlatform(true);
         frame.setResizable(false);
         frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 
     }

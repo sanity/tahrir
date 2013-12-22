@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 
 /**
  * User: ravisvi <ravitejasvi@gmail.com>
@@ -25,23 +26,31 @@ public class RegisterWindow {
     private JLabel tahrir_logo;
     private JLabel createNewLabel;
     private JLabel loginLabel;
+    private final JLabel helpText;
     private JPanel panel = new JPanel();
     private JTextField userIdField = new JTextField(10);
 
     public RegisterWindow(final TrNode node){
 
         //construct components
-        createNewButton = new JButton ("Create New ID");
-        createNewLabel = new JLabel("Create a new ID");
+        createNewButton = new JButton ("Create");
+        createNewLabel = new JLabel("Create a new username");
         backToLoginButton = new JButton("Login");
-        loginLabel = new JLabel("Login with existing ID");
-        tahrir_logo = new JLabel(new ImageIcon(TrConstants.imageIconPath));
+        loginLabel = new JLabel("Login with existing username");
+        helpText = new JLabel("<html>To post a message in Tahrir," +
+                " you must have at least one identity/ username." +
+                " This can be your real name," +
+                " or an anonymous nickname of your own choosing. <br/></html>");
+        URL resource = this.getClass().getResource("tahrir-logo_small.png");
+        //System.out.println(resource);
+        tahrir_logo = new JLabel(new ImageIcon(resource));
 
         //adjust size and set layout
-        panel.setPreferredSize(new Dimension(260, 400));
+        panel.setPreferredSize(new Dimension(280, 500));
         panel.setLayout (null);
 
         //add components
+        panel.add(helpText);
         panel.add(createNewButton);
         panel.add(createNewLabel);
         panel.add(userIdField);
@@ -50,12 +59,13 @@ public class RegisterWindow {
         panel.add(tahrir_logo);
 
         //set component bounds (Using Absolute Positioning (x, y, width, height))
-        tahrir_logo.setBounds(55, 25, 140, 133);
-        createNewLabel.setBounds (50, 173, 195, 20);
-        userIdField.setBounds (50, 198, 145, 25);
-        createNewButton.setBounds (50, 233, 100, 20);
-        loginLabel.setBounds (55, 283, 170, 25);
-        backToLoginButton.setBounds(50, 313, 100, 25);
+        tahrir_logo.setBounds(70, 25, 140, 133);
+        helpText.setBounds(45, 188, 190, 100);
+        createNewLabel.setBounds (68, 303, 180, 20);
+        userIdField.setBounds (68, 333, 145, 25);
+        createNewButton.setBounds (90, 368, 100, 20);
+        loginLabel.setBounds (43, 398, 195, 25);
+        backToLoginButton.setBounds(90, 428, 100, 25);
 
         //Actions for buttons
         createNewButton.addActionListener(new ActionListener() {
@@ -66,8 +76,7 @@ public class RegisterWindow {
                     UserIdentity identity = new UserIdentity(userIdField.getText(), node.getRemoteNodeAddress().publicKey, Optional.of(node.getPrivateNodeId().privateKey));
                     node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN,identity);
                     frame.dispose();
-                    final TrMainWindow mainWindow = new TrMainWindow(node, userIdField.getText());
-                    mainWindow.getContent().revalidate();
+
                 }
                 else{
                     //TODO: Prompt either username not entered or username can't be default
@@ -96,11 +105,11 @@ public class RegisterWindow {
         //int ypos = (int) ((TrConstants.screenSize.getHeight() - 300)/2);
         //int xpos = (int) (TrConstants.screenSize.getWidth() - 300/2);
         //frame.setLocation(xpos, ypos);
-        frame.setSize(260, 400);
+        frame.setSize(280, 500);
         frame.setLocationByPlatform(true);
         frame.setResizable(false);
         frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
     }
 
