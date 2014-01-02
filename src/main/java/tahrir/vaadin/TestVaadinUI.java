@@ -11,7 +11,9 @@ import com.vaadin.ui.Label;
 public class TestVaadinUI extends UI {
 
     final Button postButton = new Button("Post");
-    
+    final Button exitTahrirButton = new Button("Exit Program");
+
+
     @Override
     protected void init(VaadinRequest request) {
         VerticalLayout view = new VerticalLayout();
@@ -73,6 +75,14 @@ public class TestVaadinUI extends UI {
         VerticalLayout tagsUserIsFollowingTab = new VerticalLayout();
         tagsUserIsFollowingTab.addComponent(new Label("This tab filters for hashtags (#) that the user follows"));
         tabsheet.addTab(tagsUserIsFollowingTab, "Tags I Follow");
+
+
+        exitTahrirButton.addClickListener(new Button.ClickListener() {
+            public void buttonClick(Button.ClickEvent event) {
+                System.exit(0);
+            }
+        });
+        view.addComponent(exitTahrirButton);
 
 
 
