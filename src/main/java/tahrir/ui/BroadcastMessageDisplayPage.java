@@ -64,7 +64,7 @@ public class BroadcastMessageDisplayPage {
 		return content;
 	}
 
-	@SuppressWarnings("serial")
+    @SuppressWarnings("serial")
 	private class MicroblogTableModel extends AbstractTableModel {
 		private final ArrayList<BroadcastMessage> broadcastMessages;
         // TODO: Use a separate Set so that we can efficiently check whether

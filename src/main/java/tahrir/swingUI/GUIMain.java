@@ -47,18 +47,21 @@ public class GUIMain {
 
         public static void addTestInformationToNode(final TrNode node) {
 
-            UserIdentity user1=new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
-            UserIdentity user2=new UserIdentity("user2", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
+            UserIdentity user1 = new UserIdentity("user1", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
+            UserIdentity user2 = new UserIdentity("user2", TrCrypto.createRsaKeyPair().a, Optional.of(TrCrypto.createRsaKeyPair().b));
             UserIdentity user3 = new UserIdentity("User3", node.getRemoteNodeAddress().publicKey, Optional.of(node.getPrivateNodeId().privateKey));
             UserIdentity user4 = new UserIdentity("User4", node.getRemoteNodeAddress().publicKey, Optional.of(node.getPrivateNodeId().privateKey));
             UserIdentity user5 = new UserIdentity("User5", node.getRemoteNodeAddress().publicKey, Optional.of(node.getPrivateNodeId().privateKey));
             UserIdentity user6 = new UserIdentity("User6", node.getRemoteNodeAddress().publicKey, Optional.of(node.getPrivateNodeId().privateKey));
+            UserIdentity user7 = new UserIdentity("Guest", TrCrypto.createRsaKeyPair().a, Optional.<RSAPrivateKey>absent());
             node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.FOLLOWING, user1);
             node.mbClasses.identityStore.addIdentity(user2);
+            node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.FOLLOWING, user7);
             node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user3);
             node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user4);
             node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user5);
             node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN, user6);
+
 
             BroadcastMessage fromRand = TrUtils.TestUtils.getBroadcastMessage(node);
             BroadcastMessage fromUser1 = TrUtils.TestUtils.getBroadcastMessageFrom(node, user1);
