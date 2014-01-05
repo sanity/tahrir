@@ -69,8 +69,9 @@ public class BroadcastMessageDisplayPage {
 
     public MicroblogTableModel getTableModel(){return tableModel;}
 
-	@SuppressWarnings("serial")
+    @SuppressWarnings("serial")
 	public class MicroblogTableModel extends AbstractTableModel {
+
 		private final ArrayList<BroadcastMessage> broadcastMessages;
         // TODO: Use a separate Set so that we can efficiently check whether
         // broadcastMessages are being added more than once

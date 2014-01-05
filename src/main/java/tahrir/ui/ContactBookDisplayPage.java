@@ -3,6 +3,7 @@ package tahrir.ui;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import tahrir.io.net.broadcasts.UserIdentity;
+import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -16,16 +17,11 @@ import java.util.*;
 public class ContactBookDisplayPage {
     private final JComponent content;
     private final ContactBookTableModel tableModel;
-    EventBus eventBus;
+    private final EventBus eventBus;
 
     public ContactBookDisplayPage(final TrMainWindow mainWindow) {
-        eventBus = mainWindow.node.mbClasses.eventBus;
+        eventBus = mainWindow.getNode().mbClasses.eventBus;
         tableModel = new ContactBookTableModel();
-        for (UserIdentity userIdentity: mainWindow.node.mbClasses.identityStore.labelsOfUser.keySet()){
-            {
-                tableModel.addNewIdentity(userIdentity);
-            }
-        }
 
         final JTable table = new JTable(tableModel);
         table.setFillsViewportHeight(true);
@@ -39,8 +35,13 @@ public class ContactBookDisplayPage {
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setViewportView(table);
         content = scrollPane;
-
         eventBus.register(this);
+
+        Set<UserIdentity> existingIdentites = mainWindow.getNode().mbClasses.identityStore.labelsOfUser.keySet();
+        for (UserIdentity userIdentity: existingIdentites){
+                tableModel.addNewIdentity(userIdentity);
+        }
+
 
     }
 
@@ -60,6 +61,7 @@ public class ContactBookDisplayPage {
         return content;
     }
 
+    @SuppressWarnings("serial")
     private class ContactBookTableModel extends AbstractTableModel{
         private final ArrayList<UserIdentity> users;
 
