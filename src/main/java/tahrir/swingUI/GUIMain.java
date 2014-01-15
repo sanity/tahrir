@@ -20,27 +20,32 @@ import java.util.SortedSet;
  */
 public class GUIMain {
 
-        public static void main(final String[] args) {
+        public static void main(final String[] args) {/*
             try {
                 final TrNode testNode = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
 
                 final TrMainWindow mainWindow = new TrMainWindow(testNode, "Default");
                 mainWindow.getContentPanel().revalidate();
 
-                /*if(testNode.mbClasses.identityStore.labelsOfUser.keySet().isEmpty()){
-                    final RegisterWindow registerWindow = new RegisterWindow(testNode);
-                }
-                else{
-                    final LoginWindow loginWindow = new LoginWindow(testNode);
-                }
-                */
-                //UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
-                GUIMain.addTestInformationToNode(testNode);
+                if(testNode.mbClasses.identityStore.labelsOfUser.keySet().isEmpty()){
 
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
+                    if(testNode.mbClasses.identityStore.labelsOfUser.keySet().isEmpty()){
+
+                        final RegisterWindow registerWindow = new RegisterWindow(testNode);
+                    }
+                    else{
+                        final LoginWindow loginWindow = new LoginWindow(testNode);
+                    }
+
+                    //UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
+                    GUIMain.addTestInformationToNode(testNode);
+
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                }
+            }*/
         }
+
 
         public static void addTestInformationToNode(final TrNode node) {
 
