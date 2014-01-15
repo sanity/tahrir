@@ -27,16 +27,13 @@ public class GUIMain {
             try {
                 final TrNode testNode = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
 
-                final TrMainWindow mainWindow = new TrMainWindow(testNode, "Default");
-                mainWindow.getContent().revalidate();
-
-                /*if(testNode.mbClasses.identityStore.labelsOfUser.keySet().isEmpty()){
+                if(testNode.mbClasses.identityStore.labelsOfUser.keySet().isEmpty()){
                     final RegisterWindow registerWindow = new RegisterWindow(testNode);
                 }
                 else{
                     final LoginWindow loginWindow = new LoginWindow(testNode);
                 }
-                */
+
                 //UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
                 GUIMain.addTestInformationToNode(testNode);
 
