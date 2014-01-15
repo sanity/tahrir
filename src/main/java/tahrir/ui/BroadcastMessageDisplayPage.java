@@ -15,7 +15,6 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.SortedSet;
 
@@ -63,9 +62,6 @@ public class BroadcastMessageDisplayPage {
                 tableModel.addNewMicroblog(event.broadcastMessage);
             }
         }
-        if(event.type.equals(BroadcastMessageModifiedEvent.ModificationType.BOOSTED)){
-            tableModel.fireTableDataChanged();
-        }
     }
 
 	public JComponent getContent() {
@@ -110,7 +106,6 @@ public class BroadcastMessageDisplayPage {
 
 		public void addNewMicroblog(final BroadcastMessage bm) {
             broadcastMessages.add(0, bm);
-            Collections.sort(broadcastMessages, new BroadcastMessagesComparator());
             // This is what updates the GUI with new broadcastMessages.
             this.fireTableRowsInserted(0, tableModel.getRowCount());
 		}
