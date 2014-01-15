@@ -41,9 +41,6 @@ public class TrMain {
                 mainWindow.getContent().revalidate();
             }
             else{
-                //final TestVaadinUI vaadinUI= new TestVaadinUI();
-
-
                 System.out.println("will now make vaadin server");
                 final Server httpServer = new Server(18080);
                 final ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
