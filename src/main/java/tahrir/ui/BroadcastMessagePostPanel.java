@@ -1,5 +1,6 @@
 package tahrir.ui;
 
+import com.google.common.eventbus.EventBus;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +26,11 @@ public class BroadcastMessagePostPanel {
 	private static final Logger logger = LoggerFactory.getLogger(BroadcastMessagePostPanel.class);
 	private final JPanel content;
 	private final TrMainWindow mainWindow;
+    private final EventBus eventBus;
 
 	public BroadcastMessagePostPanel(final BroadcastMessage bm, final TrMainWindow mainWindow) {
 		this.mainWindow = mainWindow;
+        this.eventBus = mainWindow.node.mbClasses.eventBus;
 		content = new JPanel(new MigLayout());
         content.setBackground(Color.WHITE);
 
@@ -87,9 +90,18 @@ public class BroadcastMessagePostPanel {
         });
         setVotingButtonConfigs(reBroadcastButton, "Re-broadcast this");
         content.add(reBroadcastButton, "split 2, span, align right");
-        reBroadcast action=new reBroadcast(node, bm);
-        reBroadcastButton.addActionListener(action);
+        reBroadcastButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                bm.resetPriority();
+                eventBus.post(new BroadcastMessageModifiedEvent(bm, BroadcastMessageModifiedEvent.ModificationType.BOOSTED));
+            }
+        });
+        //reBroadcast action=new reBroadcast(node, bm);
+        //reBroadcastButton.addActionListener(action);
     }
+
+    //TODO: private void addFollowButton
 
 	private void setVotingButtonConfigs(final JButton button, final String tooltip) {
 		button.setToolTipText(tooltip);
@@ -125,7 +137,7 @@ public class BroadcastMessagePostPanel {
 
     /*  Auth: Ravi Tejasvi
     *   ReBroadcast button copies the message and then broadcasts the same with high priority.
-    */
+
     private final class reBroadcast implements ActionListener
     {
         private final TrNode node;
@@ -141,5 +153,5 @@ public class BroadcastMessagePostPanel {
         }
 
 
-    }
+    }*/
 }

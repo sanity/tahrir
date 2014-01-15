@@ -10,7 +10,7 @@ import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 public class BroadcastMessageModifiedEvent {
     public BroadcastMessage broadcastMessage;
     public enum ModificationType{
-        RECEIVED, REMOVE;
+        RECEIVED, REMOVE, BOOSTED;
     }
     ModificationType type;
     public BroadcastMessageModifiedEvent(BroadcastMessage broadcastMessage, ModificationType type){
