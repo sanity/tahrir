@@ -5,17 +5,24 @@ import com.vaadin.event.FieldEvents;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.VaadinRequest;
+import tahrir.TrNode;
+import tahrir.vaadin.TahrirVaadinRequest;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Label;
+
 
 public class TestVaadinUI extends UI {
 
     final Button postButton = new Button("Post");
     final Button exitTahrirButton = new Button("Exit Program");
 
+    private TrNode node;
 
     @Override
     protected void init(VaadinRequest request) {
+
+        node=((TahrirVaadinRequest)request).getNode();
+
         VerticalLayout view = new VerticalLayout();
         setContent(view);
 

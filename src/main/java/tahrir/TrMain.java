@@ -1,6 +1,8 @@
 package tahrir;
 
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.server.VaadinServletRequest;
+import com.vaadin.server.VaadinServletService;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -10,8 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.tools.TrUtils;
 import tahrir.ui.TrMainWindow;
+import tahrir.vaadin.TahrirVaadinRequest;
 import tahrir.vaadin.TestVaadinUI;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.soap.Node;
 import java.io.File;
 import java.io.IOException;
 
@@ -45,9 +50,19 @@ public class TrMain {
                 final Server httpServer = new Server(18080);
                 final ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
                 handler.setContextPath("/");
-                final VaadinServlet vaadinServlet = new VaadinServlet();
+
+                final VaadinServlet vaadinServlet = new VaadinServlet(){
+
+                    protected TahrirVaadinRequest createVaadinRequest(
+                            HttpServletRequest request) {
+                        return new TahrirVaadinRequest(request, getService(), node);
+                    }
+
+
+                };
                 final ServletHolder vaadinServletHolder = new ServletHolder(vaadinServlet);
                 vaadinServletHolder.setInitParameter("UI", "tahrir.vaadin.TestVaadinUI");
+
                 handler.addServlet(vaadinServletHolder, "/*");
                 httpServer.setHandler(handler);
                 httpServer.start();
