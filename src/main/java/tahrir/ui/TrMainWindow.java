@@ -52,13 +52,23 @@ public class TrMainWindow {
         newPostButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String message = newPostPane.getText();
-                //TODO: get the language from config or settings page.
-                ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext(message, "en", node.mbClasses.identityStore, System.currentTimeMillis());
-                SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.getConfig().currentUserIdentity);
-                final BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
-                node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
-                newPostPane.setText("");
+                if(node.getConfig().currentUserIdentity.getNick().equals("Default")){
+                    if(node.mbClasses.identityStore.labelsOfUser.keySet().isEmpty()){
+                        final RegisterWindow registerWindow = new RegisterWindow(node);
+                    }
+                    else{
+                        final LoginWindow loginWindow = new LoginWindow(node);
+                    }
+                }
+                else{
+                    String message = newPostPane.getText();
+                    //TODO: get the language from config or settings page.
+                    ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext(message, "en", node.mbClasses.identityStore, System.currentTimeMillis());
+                    SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.getConfig().currentUserIdentity);
+                    final BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
+                    node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
+                    newPostPane.setText("");
+                }
             }
         });
 		contentPanel.add(newPostButton, "align center");
