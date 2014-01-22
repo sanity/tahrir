@@ -1,8 +1,6 @@
 package tahrir;
 
 import com.vaadin.server.VaadinServlet;
-import com.vaadin.server.VaadinServletRequest;
-import com.vaadin.server.VaadinServletService;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -13,10 +11,8 @@ import org.slf4j.LoggerFactory;
 import tahrir.tools.TrUtils;
 import tahrir.ui.TrMainWindow;
 import tahrir.vaadin.TahrirVaadinRequest;
-import tahrir.vaadin.TestVaadinUI;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.soap.Node;
 import java.io.File;
 import java.io.IOException;
 
@@ -24,9 +20,6 @@ public class TrMain {
 
 	public static Logger logger = LoggerFactory.getLogger(TrMain.class);
 
-	/**
-	 * @param args
-	 */
 	public static void main(final String[] args) {
 		final CommandLineOptions options = readCommandLineOpts(args);
 		final File rootDirectory = new File(options.dir);

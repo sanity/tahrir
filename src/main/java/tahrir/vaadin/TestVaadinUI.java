@@ -6,9 +6,15 @@ import com.vaadin.event.ShortcutAction;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.VaadinRequest;
 import tahrir.TrNode;
-import tahrir.vaadin.TahrirVaadinRequest;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Label;
+import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.io.net.broadcasts.broadcastMessages.SignedBroadcastMessage;
+import tahrir.io.net.broadcasts.filters.Unfiltered;
+import tahrir.ui.BroadcastMessageDisplayPage;
+import tahrir.ui.LoginWindow;
+import tahrir.ui.RegisterWindow;
 
 
 public class TestVaadinUI extends UI {
@@ -36,6 +42,10 @@ public class TestVaadinUI extends UI {
         allTab.addComponent(new Label("This is the 'firehose' tab"));
         tabsheet.addTab(allTab, "All");
 
+        final BroadcastMessageDisplayPage unfilteredPostPage = new BroadcastMessageDisplayPage(new Unfiltered(), this);
+
+
+
         final TextField postField = new TextField();
         allTab.addComponent(postField);
 
@@ -46,6 +56,24 @@ public class TestVaadinUI extends UI {
 
                 String messageToPost = postField.getValue();
                 allTab.addComponent(new Label(messageToPost));
+
+
+                if(node.getConfig().currentUserIdentity.getNick().equals("Default")){
+                    if(node.mbClasses.identityStore.labelsOfUser.keySet().isEmpty()){
+                        final RegisterWindow registerWindow = new RegisterWindow(node);
+                    }
+                    else{
+                        final LoginWindow loginWindow = new LoginWindow(node);
+                    }
+                }
+                else{
+                    String message = postField.getValue();
+                    //TODO: get the language from config or settings page.
+                    ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext(message, "en", node.mbClasses.identityStore, System.currentTimeMillis());
+                    SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.getConfig().currentUserIdentity);
+                    final BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
+                    node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
+                }
             }
         });
 
