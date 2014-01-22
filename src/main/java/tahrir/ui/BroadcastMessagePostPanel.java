@@ -27,13 +27,13 @@ public class BroadcastMessagePostPanel {
 	private static final Logger logger = LoggerFactory.getLogger(BroadcastMessagePostPanel.class);
 	private final JPanel content;
 	private final TrUI mainWindow;
-    private final EventBus eventBus;
+    private EventBus eventBus;
 
 	public BroadcastMessagePostPanel(final BroadcastMessage bm, final TrUI mainWindow) {
 		this.mainWindow = mainWindow;
+        eventBus = mainWindow.getNode().mbClasses.eventBus;
 
-        this.eventBus = mainWindow.getNode().mbClasses.eventBus;
-
+        eventBus = mainWindow.getNode().mbClasses.eventBus;
 		content = new JPanel(new MigLayout());
         content.setBackground(Color.WHITE);
 
@@ -93,9 +93,18 @@ public class BroadcastMessagePostPanel {
         });
         setVotingButtonConfigs(reBroadcastButton, "Re-broadcast this");
         content.add(reBroadcastButton, "split 2, span, align right");
-        reBroadcast action=new reBroadcast(node, bm);
-        reBroadcastButton.addActionListener(action);
+        reBroadcastButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                bm.resetPriority();
+                eventBus.post(new BroadcastMessageModifiedEvent(bm, BroadcastMessageModifiedEvent.ModificationType.BOOSTED));
+            }
+        });
+        //reBroadcast action=new reBroadcast(node, bm);
+        //reBroadcastButton.addActionListener(action);
     }
+
+    //TODO: private void addFollowButton
 
 	private void setVotingButtonConfigs(final JButton button, final String tooltip) {
 		button.setToolTipText(tooltip);
@@ -131,7 +140,7 @@ public class BroadcastMessagePostPanel {
 
     /*  Auth: Ravi Tejasvi
     *   ReBroadcast button copies the message and then broadcasts the same with high priority.
-    */
+
     private final class reBroadcast implements ActionListener
     {
         private final TrNode node;
@@ -147,5 +156,5 @@ public class BroadcastMessagePostPanel {
         }
 
 
-    }
+    }*/
 }
