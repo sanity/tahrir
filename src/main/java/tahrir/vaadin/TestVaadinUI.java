@@ -24,6 +24,8 @@ public class TestVaadinUI extends UI {
 
     private TrNode node;
 
+
+
     @Override
     protected void init(VaadinRequest request) {
 
@@ -42,7 +44,7 @@ public class TestVaadinUI extends UI {
         allTab.addComponent(new Label("This is the 'firehose' tab"));
         tabsheet.addTab(allTab, "All");
 
-        final BroadcastMessageDisplayPage unfilteredPostPage = new BroadcastMessageDisplayPage(new Unfiltered(), this);
+        //final BroadcastMessageDisplayPage unfilteredPostPage = new BroadcastMessageDisplayPage(new Unfiltered(), this);
 
 
 
@@ -125,6 +127,12 @@ public class TestVaadinUI extends UI {
 
     @Override
     public void markAsDirty() {
+    }
+
+
+    public TrNode getNode(){
+
+        return node;
     }
 /*
     class SubmitFormOnEnterKeyHandler extends TextField implements Action.Handler {
