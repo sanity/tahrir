@@ -8,13 +8,9 @@ import tahrir.io.crypto.TrCrypto;
 import tahrir.io.net.broadcasts.UserIdentity;
 import tahrir.io.net.broadcasts.containers.BroadcastMessageInbox;
 import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
-import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.tools.TrUtils;
-import tahrir.ui.LoginWindow;
-import tahrir.ui.RegisterWindow;
 import tahrir.ui.TrMainWindow;
 
-import java.security.interfaces.RSAPrivateKey;
 import java.util.SortedSet;
 
 /**
@@ -28,7 +24,7 @@ public class GUIMain {
                 final TrNode testNode = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
 
                 final TrMainWindow mainWindow = new TrMainWindow(testNode, "Default");
-                mainWindow.getContent().revalidate();
+                mainWindow.getContentPanel().revalidate();
 
                 /*if(testNode.mbClasses.identityStore.labelsOfUser.keySet().isEmpty()){
                     final RegisterWindow registerWindow = new RegisterWindow(testNode);

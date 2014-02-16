@@ -4,7 +4,9 @@ import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
+import tahrir.TrMain;
 import tahrir.TrNode;
+import tahrir.TrUI;
 import tahrir.io.net.broadcasts.UserIdentity;
 import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.io.net.broadcasts.broadcastMessages.SignedBroadcastMessage;
@@ -19,16 +21,17 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class TrMainWindow {
+public class TrMainWindow implements TrUI{
 	public static Logger logger = LoggerFactory.getLogger(TrMainWindow.class.getName());
 
-	public TrNode node;
+	private TrNode node;
 
 	private final JFrame frame;
 	private final JPanel contentPanel;
 	private final JTabbedPane tabbedPane;
 
 	private static int TAB_NOT_FOUND = -1;
+
 
 	public TrMainWindow(final TrNode node, String currentUsername){
 		this.node = node;
@@ -109,16 +112,16 @@ public class TrMainWindow {
         tabbedPane.addTab("Settings", settingsDisplayPage.getContent());
 		/*
 		TODO: Decide icon or text
-		tabbedPane.addTab(null, createTabIcon("unfiltered.png"), unfilteredPostPage.getContent(), "All posts");
-		tabbedPane.addTab(null, createTabIcon("following.png"), followingPostPage.getContent(), "Following posts");
+		tabbedPane.addTab(null, createTabIcon("unfiltered.png"), unfilteredPostPage.getContentPanel(), "All posts");
+		tabbedPane.addTab(null, createTabIcon("following.png"), followingPostPage.getContentPanel(), "Following posts");
 		tabbedPane.addTab(null, createTabIcon("mentions.png"), mentions, "Mentions");
-		tabbedPane.addTab(null, createTabIcon("my-posts.png"), myPostsPage.getContent(), "My posts");
+		tabbedPane.addTab(null, createTabIcon("my-posts.png"), myPostsPage.getContentPanel(), "My posts");
 		tabbedPane.addTab(null, createTabIcon("contact-book.png"), contactBook, "Contact book");
 		tabbedPane.addTab(null, createTabIcon("settings.png"), settings, "Settings");
 		*/
 	}
 
-	public JPanel getContent() {
+	public JPanel getContentPanel() {
 		return contentPanel;
 	}
 
@@ -127,7 +130,12 @@ public class TrMainWindow {
 		return icon;
 	}
 
-	private class ClosableTabComponent extends JPanel {
+    @Override
+    public TrNode getNode() {
+        return node;
+    }
+
+    private class ClosableTabComponent extends JPanel {
 		public ClosableTabComponent(final String tabName) {
 			super(new MigLayout());
 

@@ -36,7 +36,7 @@ public class TrMain {
             final TrNode node = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
             if(config.startGui){ //this is the vaadin branch, so this will be false
                 final TrMainWindow mainWindow = new TrMainWindow(node, "Default");
-                mainWindow.getContent().revalidate();
+                mainWindow.getContentPanel().revalidate();
             }
             else{
                 System.out.println("will now make vaadin server");
@@ -50,7 +50,6 @@ public class TrMain {
                             HttpServletRequest request) {
                         return new TahrirVaadinRequest(request, getService(), node);
                     }
-
 
                 };
                 final ServletHolder vaadinServletHolder = new ServletHolder(vaadinServlet);

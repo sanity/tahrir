@@ -2,6 +2,7 @@ package tahrir.ui;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import tahrir.TrUI;
 import tahrir.io.net.broadcasts.UserIdentity;
 import tahrir.io.net.broadcasts.filters.AuthorFilter;
 
@@ -18,9 +19,9 @@ import java.util.Set;
 @SuppressWarnings("serial")
 public class AuthorDisplayPageButton extends TabCreateButton {
     private final Optional<UserIdentity> authorIdentity;
-	private final TrMainWindow mainWindow;
+	private final TrUI mainWindow;
 
-	public AuthorDisplayPageButton(final TrMainWindow mainWindow, UserIdentity identity) {
+	public AuthorDisplayPageButton(final TrUI mainWindow, UserIdentity identity) {
 		super(mainWindow, identity.getNick());
 		this.mainWindow = mainWindow;
         this.authorIdentity = Optional.of(identity);
@@ -34,7 +35,7 @@ public class AuthorDisplayPageButton extends TabCreateButton {
         final Set<UserIdentity> authors = Sets.newHashSet();
         if(authorIdentity.isPresent())
         authors.add(authorIdentity.get());
-		final BroadcastMessageDisplayPage mbDisplayPage = new BroadcastMessageDisplayPage(new AuthorFilter(mainWindow.node.mbClasses.identityStore), mainWindow);
+		final BroadcastMessageDisplayPage mbDisplayPage = new BroadcastMessageDisplayPage(new AuthorFilter(mainWindow.getNode().mbClasses.identityStore), mainWindow);
 		setContents(mbDisplayPage.getContent());
 		super.actionPerformed(arg0);
 	}

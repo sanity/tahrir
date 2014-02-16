@@ -6,6 +6,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tahrir.TrUI;
 import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.vaadin.TestVaadinUI;
@@ -22,9 +23,10 @@ public class BroadcastMessageDisplayPage {
     private final EventBus eventBus;
     private final Predicate<BroadcastMessage> filter;
     private static final Logger logger = LoggerFactory.getLogger(BroadcastMessageDisplayPage.class.getName());
-    public BroadcastMessageDisplayPage(final Predicate<BroadcastMessage> filter, final TrMainWindow mainWindow) {
+
+    public BroadcastMessageDisplayPage(final Predicate<BroadcastMessage> filter, final TrUI mainWindow) {
         this.filter = filter;
-        eventBus = mainWindow.node.mbClasses.eventBus;
+        eventBus = mainWindow.getNode().mbClasses.eventBus;
 		tableModel = new MicroblogTableModel();
 
 		final JTable table = new JTable(tableModel);
@@ -43,7 +45,7 @@ public class BroadcastMessageDisplayPage {
         logger.debug("EventBus registered");
         eventBus.register(this);
 
-        final SortedSet<BroadcastMessage> existingMicroblogs = mainWindow.node.mbClasses.mbsForViewing.getMicroblogSet();
+        final SortedSet<BroadcastMessage> existingMicroblogs = mainWindow.getNode().mbClasses.mbsForViewing.getMicroblogSet();
 
         for (BroadcastMessage broadcastMessage : existingMicroblogs) {
             if (filter.apply(broadcastMessage)) {

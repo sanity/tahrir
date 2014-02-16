@@ -1,5 +1,7 @@
 package tahrir.ui;
 
+import tahrir.TrUI;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,7 +12,7 @@ import java.awt.event.ActionListener;
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 public class TabCreateButton extends JButton implements ActionListener {
-	private final TrMainWindow mainWindow;
+	private final TrUI mainWindow;
 	private final String tabName;
 	private JComponent tabContents;
 
@@ -18,7 +20,7 @@ public class TabCreateButton extends JButton implements ActionListener {
 		this(null , null, mainWindow, tabName, tabContents);
 	}
 
-	public TabCreateButton(final String textOnButton, final Icon icon, final TrMainWindow mainWindow,
+	public TabCreateButton(final String textOnButton, final Icon icon, final TrUI mainWindow,
 			final String tabName, final JComponent tabContents) {
 		super(textOnButton, icon);
 		this.mainWindow = mainWindow;
@@ -26,7 +28,7 @@ public class TabCreateButton extends JButton implements ActionListener {
 		this.tabName = tabName;
 	}
 
-	public TabCreateButton(final TrMainWindow mainWindow, final String tabName) {
+	public TabCreateButton(final TrUI mainWindow, final String tabName) {
 		this(tabName, null, mainWindow, tabName, null);
 	}
 
