@@ -4,8 +4,10 @@ package tahrir.vaadin;
 import com.vaadin.event.FieldEvents;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.event.ShortcutListener;
-import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.*;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import tahrir.TrNode;
 import com.vaadin.ui.*;
@@ -21,6 +23,9 @@ import tahrir.ui.RegisterWindow;
 import tahrir.ui.TrMainWindow;
 
 import java.awt.*;
+import java.io.IOException;
+import java.util.*;
+import java.util.List;
 
 
 public class TestVaadinUI extends UI implements TrUI{
@@ -51,9 +56,14 @@ public class TestVaadinUI extends UI implements TrUI{
         allTab.addComponent(new Label("This is the 'firehose' tab"));
         tabsheet.addTab(allTab, "All");
 
-        //final BroadcastMessageDisplayPage unfilteredPostPage = new BroadcastMessageDisplayPage(new Unfiltered(), this);
+        final BroadcastMessageDisplayPage unfilteredPostPage = new BroadcastMessageDisplayPage(new Unfiltered(), this);
 
+        Label messegesToDisplay= new Label(unfilteredPostPage.getTableModel().getBroadcastMessages().toString());//wow this is terrible
+        //If it was python it would give me an array list pretty printed as a string,
+        // but since it's java, so that' doesn't happen, so this doens't actually work, just a placeholder.
+        //also, it does not dynamically update, it will only update when you refresh.
 
+        allTab.addComponent(messegesToDisplay);
 
         final TextField postField = new TextField();
         allTab.addComponent(postField);
@@ -64,7 +74,7 @@ public class TestVaadinUI extends UI implements TrUI{
             public void buttonClick(Button.ClickEvent event) {
 
                 String messageToPost = postField.getValue();
-                allTab.addComponent(new Label(messageToPost));
+                //allTab.addComponent(new Label(messageToPost));
 
 
                 if(node.getConfig().currentUserIdentity.getNick().equals("Default")){

@@ -29,7 +29,7 @@ public class BroadcastMessageDisplayPage {
         eventBus = mainWindow.getNode().mbClasses.eventBus;
 		tableModel = new MicroblogTableModel();
 
-		final JTable table = new JTable(tableModel);
+		JTable table = new JTable(tableModel);
 		final BroadcastMessageRenderer renderer = new BroadcastMessageRenderer(mainWindow);
 		// will allow it to fill entire scroll pane
 		table.setFillsViewportHeight(true);
@@ -53,36 +53,6 @@ public class BroadcastMessageDisplayPage {
             }
         }
     }
-/*
-    public BroadcastMessageDisplayPage(final Predicate<BroadcastMessage> filter, final TestVaadinUI vaadinUI) { //vaadin version
-        this.filter = filter;
-        eventBus = vaadinUI.getNode().mbClasses.eventBus;
-        tableModel = new MicroblogTableModel();
-
-        final JTable table = new JTable(tableModel);
-        final BroadcastMessageRenderer renderer = new BroadcastMessageRenderer(vaadinUI);
-        // will allow it to fill entire scroll pane
-        table.setFillsViewportHeight(true);
-        table.setGridColor(new Color(244,242,242));
-        table.setDefaultRenderer(ParsedBroadcastMessage.class, renderer);
-        table.setDefaultEditor(ParsedBroadcastMessage.class, renderer);
-
-        final JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setViewportView(table);
-        content = scrollPane;
-        logger.debug("EventBus registered");
-        eventBus.register(this);
-
-        final SortedSet<BroadcastMessage> existingMicroblogs = vaadinUI.getNode().mbClasses.mbsForViewing.getMicroblogSet();
-
-        for (BroadcastMessage broadcastMessage : existingMicroblogs) {
-            if (filter.apply(broadcastMessage)) {
-                tableModel.addNewMicroblog(broadcastMessage);
-            }
-        }
-    }*/
 
     @Subscribe
     public void modifyMicroblogsDisplay(BroadcastMessageModifiedEvent event){
@@ -97,8 +67,10 @@ public class BroadcastMessageDisplayPage {
 		return content;
 	}
 
+    public MicroblogTableModel getTableModel(){return tableModel;}
+
 	@SuppressWarnings("serial")
-	private class MicroblogTableModel extends AbstractTableModel {
+	public class MicroblogTableModel extends AbstractTableModel {
 		private final ArrayList<BroadcastMessage> broadcastMessages;
         // TODO: Use a separate Set so that we can efficiently check whether
         // broadcastMessages are being added more than once
@@ -150,5 +122,10 @@ public class BroadcastMessageDisplayPage {
 			// this allows clicking of buttons etc. in the table
 			return true;
 		}
+
+        public ArrayList<BroadcastMessage> getBroadcastMessages(){
+
+            return broadcastMessages;
+        }
 	}
 }
