@@ -1,5 +1,6 @@
 package tahrir.ui;
 
+import tahrir.TrUI;
 import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 
 import javax.swing.*;
@@ -16,9 +17,9 @@ import java.awt.*;
  * @author Kieran Donegan <kdonegan.92@gmail.com>
  */
 public class BroadcastMessageRenderer extends AbstractCellEditor implements TableCellRenderer, TableCellEditor {
-	private final TrMainWindow mainWindow;
+	private final TrUI mainWindow;
 
-	public BroadcastMessageRenderer(final TrMainWindow mainWindow) {
+	public BroadcastMessageRenderer(final TrUI mainWindow) {
 		this.mainWindow = mainWindow;
 	}
 

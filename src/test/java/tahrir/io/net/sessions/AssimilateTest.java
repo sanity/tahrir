@@ -131,10 +131,10 @@ public class AssimilateTest {
 
         try{
             final TrMainWindow mainWindow = new TrMainWindow(joinerNode, "Default");
-            mainWindow.getContent().revalidate();
+            mainWindow.getContentPanel().revalidate();
 
             final TrMainWindow mainWindow2 = new TrMainWindow(joinerNode2, "Default");
-            mainWindow2.getContent().revalidate();
+            mainWindow2.getContentPanel().revalidate();
         }
         catch (final Exception e){
             e.printStackTrace();

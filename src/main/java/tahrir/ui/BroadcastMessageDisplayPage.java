@@ -6,8 +6,10 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tahrir.TrUI;
 import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.vaadin.TestVaadinUI;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -23,12 +25,13 @@ public class BroadcastMessageDisplayPage {
     private final EventBus eventBus;
     private final Predicate<BroadcastMessage> filter;
     private static final Logger logger = LoggerFactory.getLogger(BroadcastMessageDisplayPage.class.getName());
-    public BroadcastMessageDisplayPage(final Predicate<BroadcastMessage> filter, final TrMainWindow mainWindow) {
+
+    public BroadcastMessageDisplayPage(final Predicate<BroadcastMessage> filter, final TrUI mainWindow) {
         this.filter = filter;
-        eventBus = mainWindow.node.mbClasses.eventBus;
+        eventBus = mainWindow.getNode().mbClasses.eventBus;
 		tableModel = new MicroblogTableModel();
 
-		final JTable table = new JTable(tableModel);
+		JTable table = new JTable(tableModel);
 		final BroadcastMessageRenderer renderer = new BroadcastMessageRenderer(mainWindow);
 		// will allow it to fill entire scroll pane
 		table.setFillsViewportHeight(true);
@@ -44,7 +47,7 @@ public class BroadcastMessageDisplayPage {
         logger.debug("EventBus registered");
         eventBus.register(this);
 
-        final SortedSet<BroadcastMessage> existingMicroblogs = mainWindow.node.mbClasses.mbsForViewing.getMicroblogSet();
+        final SortedSet<BroadcastMessage> existingMicroblogs = mainWindow.getNode().mbClasses.mbsForViewing.getMicroblogSet();
 
         for (BroadcastMessage broadcastMessage : existingMicroblogs) {
             if (filter.apply(broadcastMessage)) {
@@ -77,9 +80,12 @@ public class BroadcastMessageDisplayPage {
 
     }
 
-    @SuppressWarnings("serial")
-	private class MicroblogTableModel extends AbstractTableModel {
-		private final ArrayList<BroadcastMessage> broadcastMessages;
+	@SuppressWarnings("serial")
+	public class MicroblogTableModel extends AbstractTableModel {
+
+        public MicroblogTableModel getTableModel(){return tableModel;}
+
+        private final ArrayList<BroadcastMessage> broadcastMessages;
         // TODO: Use a separate Set so that we can efficiently check whether
         // broadcastMessages are being added more than once
 
@@ -131,5 +137,10 @@ public class BroadcastMessageDisplayPage {
 			// this allows clicking of buttons etc. in the table
 			return true;
 		}
+
+        public ArrayList<BroadcastMessage> getBroadcastMessages(){
+
+            return broadcastMessages;
+        }
 	}
 }

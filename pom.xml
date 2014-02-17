@@ -5,10 +5,9 @@
 	<artifactId>tahrir</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<properties>
-		<project.build.mainClass>tahrir.TrMain</project.build.mainClass>
-		<!-- I need to explicitly specify encoding to avoid non-standard, like 
-			was GBK or GB18030. Because I live in China. -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <vaadin.version>7.0.0</vaadin.version>
+
 	</properties>
 	<pluginRepositories>
 		<pluginRepository>
@@ -123,6 +122,11 @@
 		</plugins>
 	</build>
 	<dependencies>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlet</artifactId>
+            <version>9.1.0.M0</version>
+        </dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
@@ -192,6 +196,27 @@
 			<artifactId>commons-lang3</artifactId>
 			<version>3.1</version>
 		</dependency>
+        <dependency>
+      			<groupId>com.vaadin</groupId>
+      			<artifactId>vaadin-server</artifactId>
+      			<version>${vaadin.version}</version>
+      		</dependency>
+      		<dependency>
+      			<groupId>com.vaadin</groupId>
+      			<artifactId>vaadin-client-compiled</artifactId>
+      			<version>${vaadin.version}</version>
+      		</dependency>
+      		<dependency>
+      			<groupId>com.vaadin</groupId>
+      			<artifactId>vaadin-client</artifactId>
+      			<version>${vaadin.version}</version>
+      			<scope>provided</scope>
+      		</dependency>
+      		<dependency>
+      			<groupId>com.vaadin</groupId>
+      			<artifactId>vaadin-themes</artifactId>
+      			<version>${vaadin.version}</version>
+      		</dependency>
 
         <!-- TEST -->
         <dependency>
@@ -205,5 +230,6 @@
             <artifactId>mockito-all</artifactId>
             <version>1.8.4</version>
         </dependency>
+        
 	</dependencies>
 </project>

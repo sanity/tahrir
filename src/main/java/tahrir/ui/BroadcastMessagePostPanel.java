@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.TrNode;
+import tahrir.TrUI;
 import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 
 import javax.swing.*;
@@ -25,12 +26,15 @@ import java.util.Date;
 public class BroadcastMessagePostPanel {
 	private static final Logger logger = LoggerFactory.getLogger(BroadcastMessagePostPanel.class);
 	private final JPanel content;
-	private final TrMainWindow mainWindow;
+
     private final EventBus eventBus;
 
-	public BroadcastMessagePostPanel(final BroadcastMessage bm, final TrMainWindow mainWindow) {
+	private final TrUI mainWindow;
+
+
+	public BroadcastMessagePostPanel(final BroadcastMessage bm, final TrUI mainWindow) {
 		this.mainWindow = mainWindow;
-        this.eventBus = mainWindow.node.mbClasses.eventBus;
+        this.eventBus = mainWindow.getNode().mbClasses.eventBus;
 		content = new JPanel(new MigLayout());
         content.setBackground(Color.WHITE);
 
@@ -39,7 +43,7 @@ public class BroadcastMessagePostPanel {
         addAuthorButton(bm, mainWindow);
 		addPostTime(bm);
 		addTextPane(bm, mainWindow);
-		addReBroadcastButtons(mainWindow.node, bm);
+		addReBroadcastButtons(mainWindow.getNode(), bm);
 	}
 
 	public JComponent getContent() {
@@ -53,7 +57,7 @@ public class BroadcastMessagePostPanel {
         content.add(postTime, "gap push, wrap");
 	}
 
-	private void addAuthorButton(final BroadcastMessage bm, final TrMainWindow mainWindow) {
+	private void addAuthorButton(final BroadcastMessage bm, final TrUI mainWindow) {
 		final AuthorDisplayPageButton authorNick = new AuthorDisplayPageButton(mainWindow,
 				bm.signedBroadcastMessage.getAuthor());
 		authorNick.setFont(new Font("bold", Font.BOLD, authorNick.getFont().getSize() + 2));
@@ -69,7 +73,7 @@ public class BroadcastMessagePostPanel {
         return messageTextPane;
 
     }
-	private void addTextPane(final BroadcastMessage bm, TrMainWindow mainWindow) {
+	private void addTextPane(final BroadcastMessage bm, TrUI mainWindow) {
         final JTextPane messageTextPane = new JTextPane();
         setTextPane(messageTextPane);
         messageTextPane.setText(bm.signedBroadcastMessage.parsedBroadcastMessage.getPlainTextBroadcastMessage());

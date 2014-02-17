@@ -1,23 +1,25 @@
 package tahrir;
 
+import com.vaadin.server.VaadinServlet;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.tools.TrUtils;
 import tahrir.ui.TrMainWindow;
+import tahrir.vaadin.TahrirVaadinRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 
-public class
-        TrMain {
+public class TrMain {
 
 	public static Logger logger = LoggerFactory.getLogger(TrMain.class);
 
-	/**
-	 * @param args
-	 */
 	public static void main(final String[] args) {
 		final CommandLineOptions options = readCommandLineOpts(args);
 		final File rootDirectory = new File(options.dir);
@@ -32,18 +34,40 @@ public class
 
         try {
             final TrNode node = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
-            if(config.startGui){
+            if(config.startGui){ //this is the vaadin branch, so this will be false
                 final TrMainWindow mainWindow = new TrMainWindow(node, "Default");
-                mainWindow.getContent().revalidate();
+                mainWindow.getContentPanel().revalidate();
             }
             else{
+                System.out.println("will now make vaadin server");
+                final Server httpServer = new Server(18080);
+                final ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+                handler.setContextPath("/");
+
+                final VaadinServlet vaadinServlet = new VaadinServlet(){
+
+                    protected TahrirVaadinRequest createVaadinRequest(
+                            HttpServletRequest request) {
+                        return new TahrirVaadinRequest(request, getService(), node);
+                    }
+
+                };
+                final ServletHolder vaadinServletHolder = new ServletHolder(vaadinServlet);
+                vaadinServletHolder.setInitParameter("UI", "tahrir.vaadin.TestVaadinUI");
+
+                handler.addServlet(vaadinServletHolder, "/*");
+                httpServer.setHandler(handler);
+                httpServer.start();
+                httpServer.join();
+
+                System.out.println("done making vaadin server");
 
             }
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
 
-
+        System.out.println("main method complete");
 
     }
 
