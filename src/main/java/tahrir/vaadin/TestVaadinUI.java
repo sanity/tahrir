@@ -74,7 +74,9 @@ public class TestVaadinUI extends UI implements TrUI{
 
         ArrayList<BroadcastMessage> broadcastMessageArrayList= unfilteredPostPage.getTableModel().getBroadcastMessages();
         for(int i=0;i<broadcastMessageArrayList.size();i++){
-           messegesToDisplay.addItem(new Object[]{broadcastMessageArrayList.get(i).toString()},i+1);
+
+            String mes=broadcastMessageArrayList.get(i).signedBroadcastMessage.parsedBroadcastMessage.getPlainTextBroadcastMessage();
+            messegesToDisplay.addItem(new Object[]{mes},i+1);
         }
 
         Panel alltabMessagesPanel=new Panel(messegesToDisplay);
@@ -110,7 +112,7 @@ public class TestVaadinUI extends UI implements TrUI{
                     node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
 
 
-                    messegesToDisplay.refreshRowCache();
+                    messegesToDisplay.refreshRowCache();//this doesn't seem to do anything, i guess this method doesn't do what i thought it would
                 }
             }
         });
