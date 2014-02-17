@@ -82,7 +82,7 @@ public class LoginWindow{
                     frame.dispose();
                     //node.setCurrentIdentity((String) usernameList.getSelectedItem());
                     final TrMainWindow mainWindow = new TrMainWindow(node, (String) usernameList.getSelectedItem());
-                    mainWindow.getContent().revalidate();
+                    mainWindow.getContentPanel().revalidate();
                 }
             }
         });

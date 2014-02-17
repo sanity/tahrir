@@ -67,7 +67,7 @@ public class RegisterWindow {
                     node.mbClasses.identityStore.addIdentityWithLabel(TrConstants.OWN,identity);
                     frame.dispose();
                     final TrMainWindow mainWindow = new TrMainWindow(node, userIdField.getText());
-                    mainWindow.getContent().revalidate();
+                    mainWindow.getContentPanel().revalidate();
                 }
                 else{
                     //TODO: Prompt either username not entered or username can't be default
