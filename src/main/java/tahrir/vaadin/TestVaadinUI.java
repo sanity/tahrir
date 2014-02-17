@@ -35,8 +35,11 @@ public class TestVaadinUI extends UI implements TrUI{
 
     public TrNode node;
 
+    Table messegesToDisplay;
 
     TabSheet tabsheet;
+
+    int refresh_counter=1;
 
     @Override
     protected void init(VaadinRequest request) {
@@ -53,17 +56,30 @@ public class TestVaadinUI extends UI implements TrUI{
         view.addComponent(tabsheet);
 
         final VerticalLayout allTab = new VerticalLayout();
-        allTab.addComponent(new Label("This is the 'firehose' tab"));
+        allTab.addComponent(new Label("This is the 'firehose' tab, refresh time number: "+ refresh_counter));
+        refresh_counter++;
         tabsheet.addTab(allTab, "All");
 
         final BroadcastMessageDisplayPage unfilteredPostPage = new BroadcastMessageDisplayPage(new Unfiltered(), this);
 
-        Label messegesToDisplay= new Label(unfilteredPostPage.getTableModel().getBroadcastMessages().toString());//wow this is terrible
+        //Label messegesToDisplay= new Label(unfilteredPostPage.getTableModel().getBroadcastMessages().toString());//wow this is terrible
         //If it was python it would give me an array list pretty printed as a string,
-        // but since it's java, so that' doesn't happen, so this doens't actually work, just a placeholder.
+        // but since it's java, so that doesn't happen, instead just a bunch of pointers get printed out.  this is just a placeholder.
         //also, it does not dynamically update, it will only update when you refresh.
 
-        allTab.addComponent(messegesToDisplay);
+
+        messegesToDisplay =new Table("Messages");
+
+        messegesToDisplay.addContainerProperty("message", String.class,  null);
+
+        ArrayList<BroadcastMessage> broadcastMessageArrayList= unfilteredPostPage.getTableModel().getBroadcastMessages();
+        for(int i=0;i<broadcastMessageArrayList.size();i++){
+           messegesToDisplay.addItem(new Object[]{broadcastMessageArrayList.get(i).toString()},i+1);
+        }
+
+        Panel alltabMessagesPanel=new Panel(messegesToDisplay);
+
+        allTab.addComponent(alltabMessagesPanel);
 
         final TextField postField = new TextField();
         allTab.addComponent(postField);
@@ -92,6 +108,9 @@ public class TestVaadinUI extends UI implements TrUI{
                     SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.getConfig().currentUserIdentity);
                     final BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
                     node.mbClasses.incomingMbHandler.handleInsertion(broadcastMessage);
+
+
+                    messegesToDisplay.refreshRowCache();
                 }
             }
         });
