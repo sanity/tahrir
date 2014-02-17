@@ -79,9 +79,7 @@ public class TestVaadinUI extends UI implements TrUI{
 
         postButton.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
-
-                String messageToPost = postField.getValue();
-                //allTab.addComponent(new Label(messageToPost));
+                //everything in this method is copy pasted from ravi's code
 
 
                 if(node.getConfig().currentUserIdentity.getNick().equals("Default")){
