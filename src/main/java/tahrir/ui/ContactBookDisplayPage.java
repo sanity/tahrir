@@ -20,7 +20,7 @@ public class ContactBookDisplayPage {
     private final EventBus eventBus;
 
     public ContactBookDisplayPage(final TrMainWindow mainWindow) {
-        eventBus = mainWindow.node.mbClasses.eventBus;
+        eventBus = mainWindow.getNode().mbClasses.eventBus;
         tableModel = new ContactBookTableModel();
 
         final JTable table = new JTable(tableModel);
@@ -37,7 +37,7 @@ public class ContactBookDisplayPage {
         content = scrollPane;
         eventBus.register(this);
 
-        Set<UserIdentity> existingIdentites = mainWindow.node.mbClasses.identityStore.labelsOfUser.keySet();
+        Set<UserIdentity> existingIdentites = mainWindow.getNode().mbClasses.identityStore.labelsOfUser.keySet();
         for (UserIdentity userIdentity: existingIdentites){
                 tableModel.addNewIdentity(userIdentity);
         }

@@ -19,13 +19,13 @@ public class SettingsDisplayPage {
     DefaultComboBoxModel model = new DefaultComboBoxModel();
 
     public SettingsDisplayPage(final TrMainWindow mainWindow) {
-        eventBus = mainWindow.node.mbClasses.identityStore.eventBus;
+        eventBus = mainWindow.getNode().mbClasses.identityStore.eventBus;
         final JPanel panel = new JPanel();
         panel.setLayout(null);
 
         JLabel profile = new JLabel("Choose a profile");
 
-        for (UserIdentity userIdentity: mainWindow.node.mbClasses.identityStore.labelsOfUser.keySet()){
+        for (UserIdentity userIdentity: mainWindow.getNode().mbClasses.identityStore.labelsOfUser.keySet()){
             if(userIdentity.hasPvtKey()){
                 model.addElement(userIdentity.getNick());
             }
@@ -41,7 +41,7 @@ public class SettingsDisplayPage {
                     //Do nothing..
                 }
                 else{
-                    mainWindow.node.setCurrentIdentity((String)comboBox.getSelectedItem());
+                    mainWindow.getNode().setCurrentIdentity((String)comboBox.getSelectedItem());
                 }
             }
         }
@@ -53,7 +53,7 @@ public class SettingsDisplayPage {
         createButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                final RegisterWindow registerWindow = new RegisterWindow(mainWindow.node);
+                final RegisterWindow registerWindow = new RegisterWindow(mainWindow.getNode());
             }
         }
         );
