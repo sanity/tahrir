@@ -72,6 +72,10 @@ public class BroadcastMessageDisplayPage {
 		return content;
 	}
 
+    public MicroblogTableModel getTableModel() {
+        return tableModel;
+    }
+
     private class BroadcastMessagesComparator implements Comparator<BroadcastMessage> {
         @Override
         public int compare(BroadcastMessage bm1, BroadcastMessage bm2) {
@@ -82,8 +86,6 @@ public class BroadcastMessageDisplayPage {
 
 	@SuppressWarnings("serial")
 	public class MicroblogTableModel extends AbstractTableModel {
-
-        public MicroblogTableModel getTableModel(){return tableModel;}
 
         private final ArrayList<BroadcastMessage> broadcastMessages;
         // TODO: Use a separate Set so that we can efficiently check whether
