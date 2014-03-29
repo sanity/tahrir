@@ -55,6 +55,7 @@ public class TestVaadinUI extends UI implements TrUI{
         final VerticalLayout allTab = new VerticalLayout();
         tabsheet.addTab(allTab, "All");
 
+        //this is the message listener, of sorts
         final BroadcastMessageDisplayPage unfilteredPostPage = new BroadcastMessageDisplayPage(new Unfiltered(), this);
 
         messegesToDisplay =new Table("Messages");
@@ -69,14 +70,14 @@ public class TestVaadinUI extends UI implements TrUI{
         }
 
         Panel alltabMessagesPanel=new Panel(messegesToDisplay);
-
         allTab.addComponent(alltabMessagesPanel);
+
+
 
         final TextField postField = new TextField();
         allTab.addComponent(postField);
-
         postField.setImmediate(true);
-
+        //this takes care of sending a message.  I have not implemented anything about creating a new ID
         postButton.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
                 //everything in this method is copy pasted from ravi's code
