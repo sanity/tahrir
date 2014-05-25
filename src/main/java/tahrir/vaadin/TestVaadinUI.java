@@ -9,10 +9,10 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
-import tahrir.TrNode;
+import tahrir.*;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Label;
-import tahrir.TrUI;
+import tahrir.io.net.broadcasts.UserIdentity;
 import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.io.net.broadcasts.broadcastMessages.SignedBroadcastMessage;
@@ -28,7 +28,7 @@ import java.util.*;
 import java.util.List;
 
 
-public class TestVaadinUI extends UI implements TrUI{
+public class TestVaadinUI extends UI implements InterfaceToTrModel{
 
     final Button postButton = new Button("Post");
     final Button exitTahrirButton = new Button("Exit Program");
@@ -39,7 +39,73 @@ public class TestVaadinUI extends UI implements TrUI{
 
     TabSheet tabsheet;
 
+
     @Override
+    protected void init(VaadinRequest vaadinRequest) {
+
+        node=((TahrirVaadinRequest)vaadinRequest).getNode();
+
+
+        VerticalLayout view = new VerticalLayout();
+        setContent(view);
+
+        view.addComponent(new Label("Hello Vaadin!"));
+
+        tabsheet = new TabSheet();
+        view.addComponent(tabsheet);
+
+        final VerticalLayout allTab = new VerticalLayout();
+        tabsheet.addTab(allTab, "All");
+
+        //this is the message listener, of sorts
+        final BroadcastMessageDisplayPage unfilteredPostPage = new BroadcastMessageDisplayPage(new Unfiltered(), this);
+
+        messegesToDisplay =new Table("Messages");
+
+        messegesToDisplay.addContainerProperty("message", String.class,  null);
+
+        ArrayList<BroadcastMessage> broadcastMessageArrayList= unfilteredPostPage.getTableModel().getBroadcastMessages();
+        for(int i=0;i<broadcastMessageArrayList.size();i++){
+
+            String mes=broadcastMessageArrayList.get(i).signedBroadcastMessage.parsedBroadcastMessage.getPlainTextBroadcastMessage();
+            messegesToDisplay.addItem(new Object[]{mes},i+1);
+        }
+
+        Panel alltabMessagesPanel=new Panel(messegesToDisplay);
+        allTab.addComponent(alltabMessagesPanel);
+
+    }
+
+    public void createClosableTab(final String tabName, final java.awt.Component tabContents) {
+
+        final VerticalLayout newtab = new VerticalLayout();
+
+        tabsheet.addTab(newtab, tabName);
+    }
+
+
+    public TrNode getNode() {
+        return node;
+    }
+
+    @Override
+    public void broadcastMessage(BroadcastMessage message, BroadcastMessageSentListener broadcastMessageListener) {
+
+    }
+
+    @Override
+    public UserIdentity createUserIdentity(String preferredNickname) {
+        return null;
+    }
+
+    @Override
+    public void addMessageReceivedListener(MessageReceivedListener messageReceivedListener) {
+
+    }
+
+}
+
+/*    @Override
     protected void init(VaadinRequest request) {
 
         node=((TahrirVaadinRequest)request).getNode();
@@ -93,7 +159,6 @@ public class TestVaadinUI extends UI implements TrUI{
                 }
                 else{
                     String message = postField.getValue();
-                    //TODO: get the language from config or settings page.
                     ParsedBroadcastMessage parsedBroadcastMessage = ParsedBroadcastMessage.createFromPlaintext(message, "en", node.mbClasses.identityStore, System.currentTimeMillis());
                     SignedBroadcastMessage signedBroadcastMessage = new SignedBroadcastMessage(parsedBroadcastMessage, node.getConfig().currentUserIdentity);
                     final BroadcastMessage broadcastMessage = new BroadcastMessage(signedBroadcastMessage);
@@ -124,14 +189,14 @@ public class TestVaadinUI extends UI implements TrUI{
 
 
 
-        /*
+        *//*
         VerticalLayout peopleUserIsFollowingTab = new VerticalLayout();
         peopleUserIsFollowingTab.addComponent(new Label("This tab filters for posts by all the people (@) that the user follows"));
         tabsheet.addTab(peopleUserIsFollowingTab, "People I Follow");
 
         VerticalLayout tagsUserIsFollowingTab = new VerticalLayout();
         tagsUserIsFollowingTab.addComponent(new Label("This tab filters for hashtags (#) that the user follows"));
-        tabsheet.addTab(tagsUserIsFollowingTab, "Tags I Follow");*/
+        tabsheet.addTab(tagsUserIsFollowingTab, "Tags I Follow");*//*
 
 
         exitTahrirButton.addClickListener(new Button.ClickListener() {
@@ -143,45 +208,4 @@ public class TestVaadinUI extends UI implements TrUI{
 
 
 
-    }
-
-    public void createClosableTab(final String tabName, final java.awt.Component tabContents) {
-
-        final VerticalLayout newtab = new VerticalLayout();
-
-        tabsheet.addTab(newtab, tabName);
-    }
-
-    @Override
-    public void markAsDirty() {
-    }
-
-    @Override
-    public TrNode getNode() {
-        return node;
-    }
-
-/*
-    class SubmitFormOnEnterKeyHandler extends TextField implements Action.Handler {
-        
-        public SubmitFormOnEnterKeyHandler(){
-
-            getApplication().getMainWindow.addActionHandler(this);
-
-        }
-
-        private final Action enterKeyShortcutAction = new ShortcutAction(null, ShortcutAction.KeyCode.ENTER, null);
-
-        public Action[] getActions(Object target, Object sender) {
-            return new Action[]{enterKeyShortcutAction};
-        }
-
-        public void handleAction(Action action, Object sender, Object target) {
-            if (action == enterKeyShortcutAction) {
-                
-                
-                postButton.click();
-            }
-        }
     }*/
-}

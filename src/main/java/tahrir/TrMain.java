@@ -46,11 +46,9 @@ public class TrMain {
 
                 final VaadinServlet vaadinServlet = new VaadinServlet(){
 
-                    protected TahrirVaadinRequest createVaadinRequest(
-                            HttpServletRequest request) {
+                    protected TahrirVaadinRequest createVaadinRequest(HttpServletRequest request) {
                         return new TahrirVaadinRequest(request, getService(), node);
                     }
-
                 };
                 final ServletHolder vaadinServletHolder = new ServletHolder(vaadinServlet);
                 vaadinServletHolder.setInitParameter("UI", "tahrir.vaadin.TestVaadinUI");
