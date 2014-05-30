@@ -26,8 +26,7 @@ public class TrMainWindow implements TrUI{
 
 	private TrNode node;
 
-	private final JFrame frame;
-	private final JPanel contentPanel;
+    private final JPanel contentPanel;
 	private final JTabbedPane tabbedPane;
 
 	private static int TAB_NOT_FOUND = -1;
@@ -76,13 +75,15 @@ public class TrMainWindow implements TrUI{
         });
 		contentPanel.add(newPostButton, "align center");
 
-		frame = new JFrame();
+        JFrame frame = new JFrame();
 		frame.setTitle("Tahrir");
 		frame.getContentPane().add(contentPanel, BorderLayout.CENTER);
 		frame.setSize(TrConstants.GUI_WIDTH_PX, TrConstants.GUI_HEIGHT_PX);
 		frame.setResizable(false);
 		frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        contentPanel.revalidate();
 	}
 
 	public void createClosableTab(final String tabName, final Component tabContents) {
@@ -123,7 +124,7 @@ public class TrMainWindow implements TrUI{
 
 	public JPanel getContentPanel() {
 		return contentPanel;
-	}
+	}//this method should be deleted, but it would break some tests, which in turn should be changed
 
 	private Icon createTabIcon(final String name) {
 		final ImageIcon icon = new ImageIcon(TrConstants.MAIN_WINDOW_ARTWORK_PATH + name);

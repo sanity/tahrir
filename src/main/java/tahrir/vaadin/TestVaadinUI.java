@@ -41,7 +41,7 @@ public class TestVaadinUI extends UI implements InterfaceToTrModel{
 
 
     @Override
-    protected void init(VaadinRequest vaadinRequest) {
+    protected void init(VaadinRequest vaadinRequest) {/*comment out for now while we do MVC refactor for java swing first
 
         node=((TahrirVaadinRequest)vaadinRequest).getNode();
 
@@ -72,7 +72,7 @@ public class TestVaadinUI extends UI implements InterfaceToTrModel{
         }
 
         Panel alltabMessagesPanel=new Panel(messegesToDisplay);
-        allTab.addComponent(alltabMessagesPanel);
+        allTab.addComponent(alltabMessagesPanel);*/
 
     }
 

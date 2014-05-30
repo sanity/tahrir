@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.tools.TrUtils;
 import tahrir.ui.TrMainWindow;
+import tahrir.ui.TrMainWindowMVC;
 import tahrir.vaadin.TahrirVaadinRequest;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,11 +35,13 @@ public class TrMain {
 
         try {
             final TrNode node = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
-            if(config.startGui){ //this is the vaadin branch, so this will be false
-                final TrMainWindow mainWindow = new TrMainWindow(node, "Default");
-                mainWindow.getContentPanel().revalidate();
+            if(config.startGui){ //this is MVC refactor branch, so this should be true
+                //final TrMainWindow mainWindow = new TrMainWindow(node, "Default");
+
+                final TrMainWindowMVC mainWindowMVC = new TrMainWindowMVC(node);
+
             }
-            else{
+            /*else{ //this is MVC refactor branch, let's figure out how to do it for swing first
                 System.out.println("will now make vaadin server");
                 final Server httpServer = new Server(18080);
                 final ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -60,7 +63,7 @@ public class TrMain {
 
                 System.out.println("done making vaadin server");
 
-            }
+            }*/
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
