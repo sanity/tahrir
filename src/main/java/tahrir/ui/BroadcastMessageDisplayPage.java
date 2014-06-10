@@ -72,15 +72,16 @@ public class BroadcastMessageDisplayPage {
 		return content;
 	}
 
+    public MicroblogTableModel getTableModel(){return tableModel;}
+
+
+
     private class BroadcastMessagesComparator implements Comparator<BroadcastMessage> {
         @Override
         public int compare(BroadcastMessage bm1, BroadcastMessage bm2) {
             return Integer.toString(bm1.priority).compareTo(Integer.toString(bm2.priority));
         }
-
     }
-
-    public MicroblogTableModel getTableModel(){return tableModel;}
 
 
     @SuppressWarnings("serial")

@@ -163,6 +163,9 @@ public class TrNode {
 		public final BroadcastMessageOutbox mbsForBroadcast;
 		public final BroadcastMessageInbox mbsForViewing;
         public final EventBus eventBus= new EventBus();
+
+
+
 		public MicrobloggingClasses(final TrNode node) {
             identityStore=new IdentityStore(getOrCreateFile(new File(node.rootDirectory, node.getConfig().contacts)));
             identityStore.setEventBus(eventBus);
