@@ -8,7 +8,19 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vaadin.version>7.0.0</vaadin.version>
 
+        <restlet-version>2.2.1</restlet-version>
+
 	</properties>
+
+    <repositories>
+        <repository>
+            <id>maven-restlet</id>
+            <name>Restlet repository</name>
+            <url>http://maven.restlet.com</url>
+        </repository>
+    </repositories>
+
+
 	<pluginRepositories>
 		<pluginRepository>
 			<id>codehaus-snapshots</id>
@@ -230,12 +242,28 @@
             <artifactId>mockito-all</artifactId>
             <version>1.8.4</version>
         </dependency>
+
         <dependency>
-            <groupId>com.sparkjava</groupId>
-            <artifactId>spark-core</artifactId>
-            <version>1.1.1</version>
+            <groupId>org.restlet.jse</groupId>
+            <artifactId>org.restlet</artifactId>
+            <version>${restlet-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.restlet.jse</groupId>
+            <artifactId>org.restlet.ext.jackson</artifactId>
+            <version>${restlet-version}</version>
         </dependency>
 
-        
-	</dependencies>
+        <dependency>
+            <groupId>org.restlet.jse</groupId>
+            <artifactId>org.restlet.ext.json</artifactId>
+            <version>${restlet-version}</version>
+        </dependency>
+
+        </dependencies>
+
+
+
+
+
 </project>
