@@ -52,7 +52,7 @@ public class AssimilateSessionImpl extends TrSessionImpl implements AssimilateSe
         requestNewConnectionTime = System.currentTimeMillis();
         requestNewConnectionFuture = TrUtils.executor.schedule(new AssimilationFailureChecker(), RELAY_ASSIMILATION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         locallyInitiated = true;
-        pubNodeSession = this.remoteSession(AssimilateSession.class, this.connection(assimilateVia.remoteNodeAddress, true));
+        pubNodeSession = remoteSession(AssimilateSession.class, connection(assimilateVia.remoteNodeAddress, true));
         pubNodeSession.registerFailureListener(onFailure);
         pubNodeSession.requestNewConnection(node.getRemoteNodeAddress().publicKey);
     }
