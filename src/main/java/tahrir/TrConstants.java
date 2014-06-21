@@ -61,8 +61,6 @@ public class TrConstants {
 
     public static final String OWN = "Own";
 
-    public static final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
     public static final String imageIconPath = MAIN_WINDOW_ARTWORK_PATH + "tahrir-logo_small.png";
 
     public static boolean add = true;
