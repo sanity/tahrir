@@ -1,3 +1,4 @@
+
 package tahrir.vaadin;
 
 import com.vaadin.server.VaadinRequest;
@@ -20,7 +21,31 @@ public class TahrirVaadinRequest extends VaadinServletRequest{
 
     public TahrirVaadinRequest(HttpServletRequest request, VaadinServletService vaadinService, TrNode n) {
         super(request, vaadinService);
-        node=n;
+        node = n;
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
