@@ -2,10 +2,9 @@ package tahrir.ui;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import tahrir.io.net.broadcasts.UserIdentity;
+import tahrir.network.broadcasts.UserIdentity;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 

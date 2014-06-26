@@ -1,7 +1,6 @@
 package tahrir.ui;
 
-import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
-import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
 
 /**
  * User: ravisvi <ravitejasvi@gmail.com>

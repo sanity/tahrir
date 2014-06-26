@@ -3,11 +3,10 @@ package tahrir.ui;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import tahrir.TrUI;
-import tahrir.io.net.broadcasts.UserIdentity;
-import tahrir.io.net.broadcasts.filters.AuthorFilter;
+import tahrir.network.broadcasts.UserIdentity;
+import tahrir.network.broadcasts.filters.AuthorFilter;
 
 import java.awt.event.ActionEvent;
-import java.security.interfaces.RSAPublicKey;
 import java.util.Set;
 
 /**

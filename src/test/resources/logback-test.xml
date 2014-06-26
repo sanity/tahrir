@@ -8,7 +8,7 @@
         </encoder>
     </appender>
 
-    <logger name="tahrir.io.net.sessions.AssimilateSessionImpl" level="DEBUG" />
+    <logger name="tahrir.network.sessions.AssimilateSessionImpl" level="DEBUG" />
 
     <!-- turn OFF all logging (children can override) -->
     <root level="INFO">

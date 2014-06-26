@@ -7,8 +7,8 @@ import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrUI;
-import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
-import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
+import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
+import tahrir.network.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;

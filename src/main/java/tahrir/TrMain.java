@@ -4,7 +4,7 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tahrir.tools.TrUtils;
+import tahrir.util.tools.TrUtils;
 import tahrir.ui.TrMainWindow;
 
 import java.io.File;

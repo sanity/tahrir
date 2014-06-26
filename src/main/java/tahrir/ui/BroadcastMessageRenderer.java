@@ -1,7 +1,7 @@
 package tahrir.ui;
 
 import tahrir.TrUI;
-import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
+import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;

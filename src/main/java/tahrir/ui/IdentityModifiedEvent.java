@@ -1,7 +1,7 @@
 package tahrir.ui;
 
 
-import tahrir.io.net.broadcasts.UserIdentity;
+import tahrir.network.broadcasts.UserIdentity;
 
 /**
  * Author   : Ravisvi <ravitejasvi@gmail.com>

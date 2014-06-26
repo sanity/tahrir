@@ -2,9 +2,8 @@ package tahrir.ui;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tahrir.TrConstants;
 import tahrir.TrNode;
-import tahrir.io.net.broadcasts.UserIdentity;
+import tahrir.network.broadcasts.UserIdentity;
 
 import javax.swing.*;
 import java.awt.*;

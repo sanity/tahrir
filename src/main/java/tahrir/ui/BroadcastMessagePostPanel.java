@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.TrUI;
-import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
+import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
 
 import javax.swing.*;
 import java.awt.*;

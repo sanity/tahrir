@@ -1,11 +1,11 @@
 package tahrir;
 
 import com.google.common.base.Optional;
-import tahrir.io.crypto.TrCrypto;
-import tahrir.io.net.*;
-import tahrir.io.net.TrPeerManager.Capabilities;
-import tahrir.io.net.broadcasts.UserIdentity;
-import tahrir.io.net.udpV1.UdpNetworkInterface.UNIConfig;
+import tahrir.network.TrPeerManager;
+import tahrir.util.crypto.TrCrypto;
+import tahrir.network.TrPeerManager.Capabilities;
+import tahrir.network.broadcasts.UserIdentity;
+import tahrir.transport.messaging.udpV1.UdpNetworkInterface.UNIConfig;
 
 public class TrNodeConfig {
 	public String privateNodeId = "myprivnodeid.dat";
