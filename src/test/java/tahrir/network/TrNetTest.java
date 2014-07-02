@@ -1,4 +1,4 @@
-package tahrir.io.network;
+package tahrir.network;
 
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -9,7 +9,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import tahrir.TrNodeConfig;
 import tahrir.TrNode;
-import tahrir.network.*;
+import tahrir.transport.rpc.*;
 import tahrir.util.crypto.TrCrypto;
 import tahrir.network.sessions.Priority;
 import tahrir.transport.messaging.udpV1.UdpNetworkInterface;

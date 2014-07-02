@@ -5,7 +5,7 @@ import com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
-import tahrir.network.broadcasts.IdentityStore;
+import tahrir.identites.IdentityStore;
 import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.network.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.ui.BroadcastMessageModifiedEvent;

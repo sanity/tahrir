@@ -1,4 +1,4 @@
-package tahrir.network;
+package tahrir.transport.rpc;
 
 import com.google.common.base.Function;
 import com.google.common.cache.Cache;
@@ -11,7 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.TrNode;
-import tahrir.network.TrPeerManager.TrPeerInfo.Assimilation;
+import tahrir.network.PhysicalNetworkLocation;
+import tahrir.network.RemoteNodeAddress;
+import tahrir.transport.rpc.TrPeerManager.TrPeerInfo.Assimilation;
 import tahrir.network.sessions.AssimilateSessionImpl;
 import tahrir.network.sessions.TopologyMaintenanceSessionImpl;
 import tahrir.util.tools.Persistence;

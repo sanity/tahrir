@@ -8,7 +8,7 @@ import com.google.gson.JsonParseException;
 import tahrir.TrNode;
 import tahrir.TrNodeConfig;
 import tahrir.util.crypto.TrCrypto;
-import tahrir.network.broadcasts.UserIdentity;
+import tahrir.identites.UserIdentity;
 import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.network.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.network.broadcasts.broadcastMessages.SignedBroadcastMessage;

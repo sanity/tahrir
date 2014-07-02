@@ -1,10 +1,10 @@
 package tahrir;
 
 import com.google.common.base.Optional;
-import tahrir.network.TrPeerManager;
+import tahrir.transport.rpc.TrPeerManager;
 import tahrir.util.crypto.TrCrypto;
-import tahrir.network.TrPeerManager.Capabilities;
-import tahrir.network.broadcasts.UserIdentity;
+import tahrir.transport.rpc.TrPeerManager.Capabilities;
+import tahrir.identites.UserIdentity;
 import tahrir.transport.messaging.udpV1.UdpNetworkInterface.UNIConfig;
 
 public class TrNodeConfig {

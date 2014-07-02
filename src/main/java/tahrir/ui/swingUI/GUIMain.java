@@ -5,7 +5,7 @@ import com.google.common.collect.Sets;
 import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.util.crypto.TrCrypto;
-import tahrir.network.broadcasts.UserIdentity;
+import tahrir.identites.UserIdentity;
 import tahrir.network.broadcasts.containers.BroadcastMessageInbox;
 import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.util.tools.TrUtils;

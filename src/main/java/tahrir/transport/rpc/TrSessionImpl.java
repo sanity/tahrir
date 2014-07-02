@@ -1,4 +1,4 @@
-package tahrir.network;
+package tahrir.transport.rpc;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -6,7 +6,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.slf4j.*;
 
 import tahrir.TrNode;
-import tahrir.network.TrPeerManager.TrPeerInfo;
+import tahrir.network.PhysicalNetworkLocation;
+import tahrir.network.RemoteNodeAddress;
+import tahrir.transport.rpc.TrPeerManager.TrPeerInfo;
 
 public abstract class TrSessionImpl implements TrSession {
 	protected Logger logger;

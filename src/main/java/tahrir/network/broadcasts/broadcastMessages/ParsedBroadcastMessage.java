@@ -3,8 +3,8 @@ package tahrir.network.broadcasts.broadcastMessages;
 import com.google.common.base.Optional;
 import nu.xom.*;
 import tahrir.TrConstants;
-import tahrir.network.broadcasts.IdentityStore;
-import tahrir.network.broadcasts.UserIdentity;
+import tahrir.identites.IdentityStore;
+import tahrir.identites.UserIdentity;
 
 /**
  * BroadcastMessage in xml format.

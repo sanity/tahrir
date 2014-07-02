@@ -10,7 +10,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import tahrir.util.crypto.TrCrypto;
 import tahrir.network.RemoteNodeAddress;
-import tahrir.network.TrPeerManager.TrPeerInfo;
+import tahrir.transport.rpc.TrPeerManager.TrPeerInfo;
 import tahrir.transport.messaging.udpV1.UdpNetworkLocation;
 
 import java.io.*;

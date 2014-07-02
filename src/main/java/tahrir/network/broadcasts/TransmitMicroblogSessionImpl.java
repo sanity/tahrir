@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrNode;
 import tahrir.network.PhysicalNetworkLocation;
-import tahrir.network.TrSessionImpl;
-import tahrir.network.TrSessionManager;
+import tahrir.transport.rpc.TrSessionImpl;
+import tahrir.transport.rpc.TrSessionManager;
 import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
 
 import java.util.concurrent.CountDownLatch;

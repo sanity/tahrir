@@ -2,7 +2,7 @@ package tahrir.network.broadcasts.broadcastMessages;
 
 import tahrir.util.crypto.TrCrypto;
 import tahrir.util.crypto.TrSignature;
-import tahrir.network.broadcasts.UserIdentity;
+import tahrir.identites.UserIdentity;
 
 /**
  * User: ravisvi <ravitejasvi@gmail.com>

@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrNode;
 import tahrir.network.PhysicalNetworkLocation;
-import tahrir.network.TrPeerManager;
+import tahrir.transport.rpc.TrPeerManager;
 import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
 
 import java.util.Map;

@@ -1,7 +1,7 @@
 package tahrir.network.broadcasts;
 
 import tahrir.TrConstants;
-import tahrir.network.TrSession;
+import tahrir.transport.rpc.TrSession;
 import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.network.sessions.Priority;
 

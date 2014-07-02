@@ -2,7 +2,7 @@ package tahrir.ui;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import tahrir.network.broadcasts.UserIdentity;
+import tahrir.identites.UserIdentity;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;

@@ -4,9 +4,9 @@ import java.security.interfaces.RSAPublicKey;
 
 import tahrir.network.PhysicalNetworkLocation;
 import tahrir.network.RemoteNodeAddress;
-import tahrir.network.TrNetworkInterface;
-import tahrir.network.TrPeerManager.Capabilities;
-import tahrir.network.TrSession;
+import tahrir.transport.rpc.TrNetworkInterface;
+import tahrir.transport.rpc.TrPeerManager.Capabilities;
+import tahrir.transport.rpc.TrSession;
 
 /*
  * This is the assimilation procedure, we have a requestor, who needs a new connection, zero or more

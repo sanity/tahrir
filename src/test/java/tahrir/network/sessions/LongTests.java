@@ -5,8 +5,8 @@ import java.util.List;
 
 import tahrir.*;
 import tahrir.network.RemoteNodeAddress;
-import tahrir.network.TrPeerManager;
-import tahrir.network.TrPeerManager.TrPeerInfo;
+import tahrir.transport.rpc.TrPeerManager;
+import tahrir.transport.rpc.TrPeerManager.TrPeerInfo;
 import tahrir.util.tools.*;
 
 import com.google.common.collect.Lists;

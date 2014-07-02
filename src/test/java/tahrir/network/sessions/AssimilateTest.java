@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 import tahrir.TrNode;
 import tahrir.TrNodeConfig;
 import tahrir.network.RemoteNodeAddress;
-import tahrir.network.TrPeerManager;
+import tahrir.transport.rpc.TrPeerManager;
 import tahrir.util.tools.Persistence;
 import tahrir.util.tools.TrUtils.TestUtils;
 import tahrir.ui.TrMainWindow;

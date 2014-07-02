@@ -3,8 +3,8 @@ package tahrir.network.broadcasts.filters;
 import com.google.common.base.Predicate;
 import nu.xom.Document;
 import tahrir.TrConstants;
-import tahrir.network.broadcasts.IdentityStore;
-import tahrir.network.broadcasts.UserIdentity;
+import tahrir.identites.IdentityStore;
+import tahrir.identites.UserIdentity;
 import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
 
 /**

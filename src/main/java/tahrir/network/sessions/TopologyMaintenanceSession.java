@@ -4,8 +4,8 @@ import java.util.LinkedList;
 
 import tahrir.TrConstants;
 import tahrir.network.RemoteNodeAddress;
-import tahrir.network.TrPeerManager.Capabilities;
-import tahrir.network.TrSession;
+import tahrir.transport.rpc.TrPeerManager.Capabilities;
+import tahrir.transport.rpc.TrSession;
 
 public interface TopologyMaintenanceSession extends TrSession {
 	@Priority(TrConstants.TOPOLOGY_MAINTENANCE_PRIORITY)

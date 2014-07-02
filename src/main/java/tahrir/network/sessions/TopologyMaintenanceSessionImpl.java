@@ -7,9 +7,9 @@ import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.network.PhysicalNetworkLocation;
 import tahrir.network.RemoteNodeAddress;
-import tahrir.network.TrPeerManager.Capabilities;
-import tahrir.network.TrSessionImpl;
-import tahrir.network.TrSessionManager;
+import tahrir.transport.rpc.TrPeerManager.Capabilities;
+import tahrir.transport.rpc.TrSessionImpl;
+import tahrir.transport.rpc.TrSessionManager;
 import tahrir.util.tools.TrUtils;
 
 import java.util.LinkedList;

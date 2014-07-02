@@ -1,4 +1,4 @@
-package tahrir.network;
+package tahrir.transport.rpc;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -13,8 +13,10 @@ import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrNode;
-import tahrir.network.TrNetworkInterface.TrMessageListener;
-import tahrir.network.TrNetworkInterface.TrSentReceivedListener;
+import tahrir.network.PhysicalNetworkLocation;
+import tahrir.network.RemoteNodeAddress;
+import tahrir.transport.rpc.TrNetworkInterface.TrMessageListener;
+import tahrir.transport.rpc.TrNetworkInterface.TrSentReceivedListener;
 import tahrir.network.sessions.Priority;
 import tahrir.transport.messaging.udpV1.UdpNetworkLocation;
 import tahrir.transport.messaging.serialization.TrSerializer;

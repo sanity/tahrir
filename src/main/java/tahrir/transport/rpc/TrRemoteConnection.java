@@ -1,12 +1,13 @@
-package tahrir.network;
+package tahrir.transport.rpc;
 
 import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
 
 import com.google.common.base.Function;
 
-import tahrir.network.TrNetworkInterface.TrMessageListener;
-import tahrir.network.TrNetworkInterface.TrSentReceivedListener;
+import tahrir.network.PhysicalNetworkLocation;
+import tahrir.transport.rpc.TrNetworkInterface.TrMessageListener;
+import tahrir.transport.rpc.TrNetworkInterface.TrSentReceivedListener;
 import tahrir.util.tools.ByteArraySegment;
 
 public abstract class TrRemoteConnection {

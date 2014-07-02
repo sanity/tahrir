@@ -3,7 +3,7 @@ package tahrir.ui;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import tahrir.TrUI;
-import tahrir.network.broadcasts.UserIdentity;
+import tahrir.identites.UserIdentity;
 import tahrir.network.broadcasts.filters.AuthorFilter;
 
 import java.awt.event.ActionEvent;

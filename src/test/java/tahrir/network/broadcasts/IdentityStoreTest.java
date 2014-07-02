@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tahrir.TrConstants;
+import tahrir.identites.IdentityStore;
+import tahrir.identites.UserIdentity;
 import tahrir.util.crypto.TrCrypto;
 
 import java.io.File;

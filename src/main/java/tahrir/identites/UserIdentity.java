@@ -1,4 +1,4 @@
-package tahrir.network.broadcasts;
+package tahrir.identites;
 
 import com.google.common.base.Optional;
 
