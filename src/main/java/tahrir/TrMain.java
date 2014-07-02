@@ -1,6 +1,5 @@
 package tahrir;
 
-import com.vaadin.server.VaadinServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -10,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.tools.TrUtils;
 import tahrir.ui.TrMainWindow;
-import tahrir.vaadin.TahrirVaadinRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -34,35 +32,9 @@ public class TrMain {
 
         try {
             final TrNode node = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
-            if(config.startGui){ //this is the vaadin branch, so this will be false
-                final TrMainWindow mainWindow = new TrMainWindow(node, "Default");
-                mainWindow.getContentPanel().revalidate();
-            }
-            else{
-                System.out.println("will now make vaadin server");
-                final Server httpServer = new Server(18080);
-                final ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-                handler.setContextPath("/");
+            final TrMainWindow mainWindow = new TrMainWindow(node, "Default");
+            mainWindow.getContentPanel().revalidate();
 
-                final VaadinServlet vaadinServlet = new VaadinServlet(){
-
-                    protected TahrirVaadinRequest createVaadinRequest(
-                            HttpServletRequest request) {
-                        return new TahrirVaadinRequest(request, getService(), node);
-                    }
-
-                };
-                final ServletHolder vaadinServletHolder = new ServletHolder(vaadinServlet);
-                vaadinServletHolder.setInitParameter("UI", "tahrir.vaadin.TestVaadinUI");
-
-                handler.addServlet(vaadinServletHolder, "/*");
-                httpServer.setHandler(handler);
-                httpServer.start();
-                httpServer.join();
-
-                System.out.println("done making vaadin server");
-
-            }
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
