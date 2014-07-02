@@ -1,8 +1,11 @@
 package tahrir.api;
 
-import org.restlet.Application;
-import org.restlet.Component;
+import org.restlet.*;
+import org.restlet.data.MediaType;
 import org.restlet.data.Protocol;
+
+/*created by Oliver Lee */
+
 
 public class RESTAPIMain {
 
@@ -12,13 +15,26 @@ public class RESTAPIMain {
         Component component = new Component();
         component.getServers().add(Protocol.HTTP, 18080);
 
-        TahrirRestlet restlet = new TahrirRestlet();
-
+        TahrirRestlet restlet = new TahrirRestlet(component.getDefaultHost());
         component.getDefaultHost().attach("", restlet);
+
+        /*component.getDefaultHost().attach("/branch1", new Restlet() {
+            @Override
+            public void handle(Request request, Response response){
+
+                response.setEntity("<!DOCTYPE html>\n" +
+                        "<html>\n" +
+                        "<body>\n" +
+                        "\n" +
+                        "<p>This is branch1</p>\n" +
+                        "\n" +
+                        "</body>\n" +
+                        "</html>", MediaType.TEXT_HTML);
+            }
+        });*/
+
+
         component.start();
 
     }
-
-
-
 }
