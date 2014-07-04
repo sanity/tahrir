@@ -1,7 +1,12 @@
 package tahrir.api;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.restlet.*;
 import org.restlet.data.MediaType;
+import org.restlet.ext.json.JsonRepresentation;
+import org.restlet.representation.Representation;
+import org.restlet.resource.Get;
 import org.restlet.routing.VirtualHost;
 
 
@@ -10,11 +15,12 @@ import org.restlet.routing.VirtualHost;
 public class TahrirRestlet extends org.restlet.Component{
 
 
-    public TahrirRestlet(VirtualHost host){
+    public TahrirRestlet(VirtualHost host) {
 
         host.attach("/branch1", new Restlet() {
             @Override
-            public void handle(Request request, Response response){
+            public void handle(Request request, Response response) {
+
 
                 response.setEntity("<!DOCTYPE html>\n" +
                         "<html>\n" +
@@ -27,7 +33,30 @@ public class TahrirRestlet extends org.restlet.Component{
             }
         });
 
+        host.attach("/branch2", new Restlet() {
+            @Get("json")
+            public Representation greet(){
+                String message="Hello tejas";
+
+                JSONObject jo=new JSONObject();
+                try {
+                    jo.put("message",message);
+
+                }
+                catch(JSONException e)
+                {
+
+                }
+
+                Representation rp=new JsonRepresentation(jo);
+
+                return rp;
+            }
+        });
+
+
     }
+
 
     @Override
     public void handle(Request request, Response response) {
