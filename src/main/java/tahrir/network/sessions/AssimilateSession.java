@@ -2,7 +2,7 @@ package tahrir.network.sessions;
 
 import java.security.interfaces.RSAPublicKey;
 
-import tahrir.network.PhysicalNetworkLocation;
+import tahrir.transport.messaging.udpV1.PhysicalNetworkLocation;
 import tahrir.network.RemoteNodeAddress;
 import tahrir.transport.rpc.TrNetworkInterface;
 import tahrir.transport.rpc.TrPeerManager.Capabilities;

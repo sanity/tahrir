@@ -10,6 +10,7 @@ import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.network.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 import tahrir.ui.BroadcastMessageModifiedEvent;
 
+import javax.inject.Inject;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.SortedSet;
@@ -26,6 +27,7 @@ public class BroadcastMessageInbox {
 	private static final BroadcastMessageTimeComparator comparator =new BroadcastMessageTimeComparator();
 
 	private final IdentityStore identityStore;
+
     private final EventBus eventBus;
 
 	public BroadcastMessageInbox(final IdentityStore identityStore) {

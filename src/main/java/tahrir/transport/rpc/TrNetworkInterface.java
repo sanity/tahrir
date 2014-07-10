@@ -4,7 +4,7 @@ import java.security.interfaces.RSAPublicKey;
 
 import com.google.common.base.Function;
 
-import tahrir.network.PhysicalNetworkLocation;
+import tahrir.transport.messaging.udpV1.PhysicalNetworkLocation;
 import tahrir.util.tools.ByteArraySegment;
 
 public abstract class TrNetworkInterface {

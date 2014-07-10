@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrNode;
-import tahrir.network.PhysicalNetworkLocation;
+import tahrir.transport.messaging.udpV1.PhysicalNetworkLocation;
 import tahrir.transport.rpc.TrPeerManager;
 import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
 

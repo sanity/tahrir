@@ -7,7 +7,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import tahrir.util.crypto.TrCrypto;
-import tahrir.network.PhysicalNetworkLocation;
 import tahrir.transport.rpc.TrNetworkInterface;
 import tahrir.transport.rpc.TrNetworkInterface.TrMessageListener;
 import tahrir.transport.rpc.TrNetworkInterface.TrSentReceivedListener;

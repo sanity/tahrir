@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
-import tahrir.network.PhysicalNetworkLocation;
 import tahrir.transport.rpc.TrNetworkInterface;
 import tahrir.transport.rpc.TrRemoteConnection;
 import tahrir.util.tools.ByteArraySegment;

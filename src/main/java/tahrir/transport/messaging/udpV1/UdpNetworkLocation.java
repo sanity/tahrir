@@ -2,8 +2,6 @@ package tahrir.transport.messaging.udpV1;
 
 import java.net.InetAddress;
 
-import tahrir.network.PhysicalNetworkLocation;
-
 public class UdpNetworkLocation implements PhysicalNetworkLocation {
 	public final InetAddress inetAddress;
 	public final int port;

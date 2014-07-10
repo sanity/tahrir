@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import tahrir.TrConstants;
 import tahrir.util.crypto.TrCrypto;
 import tahrir.util.crypto.TrSymKey;
-import tahrir.network.PhysicalNetworkLocation;
 import tahrir.transport.rpc.TrNetworkInterface;
 import tahrir.transport.rpc.TrNetworkInterface.TrMessageListener;
 import tahrir.transport.rpc.TrNetworkInterface.TrSentListener;

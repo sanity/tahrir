@@ -9,6 +9,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import tahrir.TrNodeConfig;
 import tahrir.TrNode;
+import tahrir.transport.messaging.udpV1.PhysicalNetworkLocation;
 import tahrir.transport.rpc.*;
 import tahrir.util.crypto.TrCrypto;
 import tahrir.network.sessions.Priority;

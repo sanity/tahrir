@@ -4,6 +4,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import tahrir.identites.UserIdentity;
 
+import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;

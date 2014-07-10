@@ -10,6 +10,7 @@ import tahrir.TrUI;
 import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.network.broadcasts.broadcastMessages.ParsedBroadcastMessage;
 
+import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;

@@ -2,6 +2,8 @@ package tahrir.ui.swingUI;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import dagger.ObjectGraph;
+import tahrir.TahrirModule;
 import tahrir.TrConstants;
 import tahrir.TrNode;
 import tahrir.util.crypto.TrCrypto;
@@ -18,9 +20,9 @@ import java.util.SortedSet;
  * User: ravisvi <ravitejasvi@gmail.com>
  * Date: 20/07/13
  */
-public class GUIMain {
-
-        public static void main(final String[] args) {
+public class GUIMain implements Runnable{
+        @Override
+        public void run(){
             try {
                 final TrNode testNode = TrUtils.TestUtils.makeNode(9003, false, false, false, true, 0, 0);
 
@@ -40,6 +42,11 @@ public class GUIMain {
             } catch (final Exception e) {
                 e.printStackTrace();
             }
+        }
+        public static void main(final String[] args) {
+            ObjectGraph objectGraph = ObjectGraph.create(new TahrirModule());
+            GUIMain guiMain = objectGraph.get(GUIMain.class);
+            guiMain.run();
         }
 
         public static void addTestInformationToNode(final TrNode node) {

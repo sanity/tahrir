@@ -3,7 +3,7 @@ package tahrir.transport.messaging.serialization;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import nu.xom.Document;
-import tahrir.network.PhysicalNetworkLocation;
+import tahrir.transport.messaging.udpV1.PhysicalNetworkLocation;
 import tahrir.transport.messaging.serialization.serializers.*;
 import tahrir.util.tools.ByteArraySegment;
 

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import tahrir.identites.IdentityStore;
 import tahrir.identites.UserIdentity;
 import tahrir.network.*;
+import tahrir.transport.messaging.udpV1.PhysicalNetworkLocation;
 import tahrir.transport.rpc.TrNetworkInterface;
 import tahrir.transport.rpc.TrPeerManager;
 import tahrir.transport.rpc.TrSessionManager;

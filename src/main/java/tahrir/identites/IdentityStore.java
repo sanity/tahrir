@@ -11,6 +11,7 @@ import tahrir.TrConstants;
 import tahrir.util.tools.TrUtils;
 import tahrir.ui.IdentityModifiedEvent;
 
+import javax.inject.Inject;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.security.interfaces.RSAPublicKey;
@@ -30,6 +31,7 @@ public class IdentityStore {
 
     private TreeMap<String, Set<UserIdentity>> usersWithNickname = Maps.newTreeMap();
 
+    @Inject
     public EventBus eventBus;
 
 

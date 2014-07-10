@@ -9,6 +9,7 @@ import tahrir.TrNode;
 import tahrir.TrUI;
 import tahrir.network.broadcasts.broadcastMessages.BroadcastMessage;
 
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -26,7 +27,6 @@ import java.util.Date;
 public class BroadcastMessagePostPanel {
 	private static final Logger logger = LoggerFactory.getLogger(BroadcastMessagePostPanel.class);
 	private final JPanel content;
-
     private final EventBus eventBus;
 
 	private final TrUI mainWindow;

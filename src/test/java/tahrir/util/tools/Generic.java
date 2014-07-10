@@ -1,7 +1,7 @@
 package tahrir.util.tools;
 
 import tahrir.util.crypto.TrCrypto;
-import tahrir.network.PhysicalNetworkLocation;
+import tahrir.transport.messaging.udpV1.PhysicalNetworkLocation;
 import tahrir.network.RemoteNodeAddress;
 import tahrir.transport.rpc.TrPeerManager;
 import tahrir.transport.messaging.udpV1.UdpNetworkLocation;

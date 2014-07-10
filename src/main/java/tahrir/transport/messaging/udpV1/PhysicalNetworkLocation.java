@@ -1,4 +1,4 @@
-package tahrir.network;
+package tahrir.transport.messaging.udpV1;
 
 public interface PhysicalNetworkLocation {
 	@Override

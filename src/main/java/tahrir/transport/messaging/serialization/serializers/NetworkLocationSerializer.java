@@ -4,7 +4,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.net.InetAddress;
 
-import tahrir.network.PhysicalNetworkLocation;
+import tahrir.transport.messaging.udpV1.PhysicalNetworkLocation;
 import tahrir.transport.messaging.udpV1.UdpNetworkLocation;
 import tahrir.transport.messaging.serialization.*;
 

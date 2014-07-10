@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.slf4j.*;
 
 import tahrir.TrNode;
-import tahrir.network.PhysicalNetworkLocation;
+import tahrir.transport.messaging.udpV1.PhysicalNetworkLocation;
 import tahrir.network.RemoteNodeAddress;
 import tahrir.transport.rpc.TrPeerManager.TrPeerInfo;
 

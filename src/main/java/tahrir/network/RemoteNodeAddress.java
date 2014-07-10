@@ -1,5 +1,7 @@
 package tahrir.network;
 
+import tahrir.transport.messaging.udpV1.PhysicalNetworkLocation;
+
 import java.security.interfaces.RSAPublicKey;
 
 
