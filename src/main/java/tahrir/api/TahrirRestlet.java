@@ -56,7 +56,6 @@ public class TahrirRestlet extends org.restlet.Component{
             }
         });
 
-<<<<<<< HEAD
         host.attach("/branch2", new Restlet() {
             @Override
               public void handle(Request request, Response response) {
@@ -72,27 +71,6 @@ public class TahrirRestlet extends org.restlet.Component{
                     "</html>", MediaType.TEXT_HTML);
         }
         });
-=======
-        /*host.attach("/branch2", new Restlet() {
-            @Get("json")
-            public Representation greet(){
-                String message="Hello tejas";
-
-                JSONObject jo=new JSONObject();
-                try {
-                    jo.put("message",message);
->>>>>>> origin/Tahrir-api-72723708
-
-
-
-
-<<<<<<< HEAD
-=======
-                return rp;
-            }
-        });*/
->>>>>>> origin/Tahrir-api-72723708
-
 
     }
 
