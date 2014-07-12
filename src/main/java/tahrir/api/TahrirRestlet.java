@@ -58,10 +58,8 @@ public class TahrirRestlet extends org.restlet.Component{
 
         host.attach("/branch2", new Restlet() {
             @Override
-              public void handle(Request request, Response response) {
-
-
-            response.setEntity("<!DOCTYPE html>\n" +
+            public void handle(Request request, Response response) {
+                response.setEntity("<!DOCTYPE html>\n" +
                     "<html>\n" +
                     "<body>\n" +
                     "\n" +
@@ -69,7 +67,7 @@ public class TahrirRestlet extends org.restlet.Component{
                     "\n" +
                     "</body>\n" +
                     "</html>", MediaType.TEXT_HTML);
-        }
+            }
         });
 
     }
