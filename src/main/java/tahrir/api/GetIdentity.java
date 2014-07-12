@@ -22,8 +22,8 @@ public class GetIdentity extends ServerResource {
         JSONObject key=new JSONObject();
         try
         {
-            key.put("Public_Key",publickey);
-            key.put("Private_key",privatekey);
+            key.put("public_Key",publickey);
+            key.put("private_key",privatekey);
 
         }
         catch(JSONException e)
