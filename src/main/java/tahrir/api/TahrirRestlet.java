@@ -22,18 +22,41 @@ public class TahrirRestlet extends org.restlet.Component{
             public void handle(Request request, Response response) {
 
 
-                response.setEntity("<!DOCTYPE html>\n" +
-                        "<html>\n" +
-                        "<body>\n" +
-                        "\n" +
-                        "<p>This is branch1</p>\n" +
-                        "\n" +
-                        "</body>\n" +
-                        "</html>", MediaType.TEXT_HTML);
+                if(request.getMethod().getName().equals("GET")){
+
+                    response.setEntity("<!DOCTYPE html>\n" +
+                            "<html>\n" +
+                            "<body>\n" +
+                            "\n" +
+                            "<p>This is branch1</p>\n" +
+                            "\n" +
+                            "</body>\n" +
+                            "</html>", MediaType.TEXT_HTML);
+                }
+                else if(request.getMethod().getName().equals("POST")){
+
+                    JSONObject j=new JSONObject();
+
+                    try {
+                        j.append("key", "val");
+                    }
+                    catch (org.json.JSONException e){
+                        System.err.println("something wrong with json");
+                    }
+
+                    response.setEntity(j.toString(), MediaType.APPLICATION_JSON);
+                }
+                else{
+
+                    System.err.println("method not recognized");
+                }
+
+
+
             }
         });
 
-        host.attach("/branch2", new Restlet() {
+        /*host.attach("/branch2", new Restlet() {
             @Get("json")
             public Representation greet(){
                 String message="Hello tejas";
@@ -52,7 +75,7 @@ public class TahrirRestlet extends org.restlet.Component{
 
                 return rp;
             }
-        });
+        });*/
 
 
     }
