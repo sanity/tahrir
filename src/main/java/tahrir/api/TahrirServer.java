@@ -3,22 +3,36 @@ package tahrir.api;
 /**
  * Created by Tejas Dharamsi on 6/25/2014.
  */
+
+import org.restlet.Application;
 import org.restlet.Component;
-import org.restlet.Server;
+import org.restlet.Context;
+import org.restlet.Restlet;
 import org.restlet.data.Protocol;
+import org.restlet.routing.Router;
 
-public class TahrirServer {
-    public static void main(String[] args) throws Exception{
 
-        Server server = new Server(Protocol.HTTP,8080,TahrirServerResource.class);
-        server.start();
+public class TahrirServer extends Application {
 
-        Component c1 = new Component();
-       c1.getServers().add(Protocol.HTTP, 8080);
+    public static void main(String args[])throws Exception
+    {
+        Component component = new Component();
+        component.getServers().add(Protocol.HTTP, 8080);
 
-        GetMessage restlet = new GetMessage();
+        TahrirServer restlet = new TahrirServer();
+        component.getDefaultHost().attach("", restlet);
+        component.start();
 
-        c1.getDefaultHost().attach("/fetch_message", restlet);
-        c1.start();
     }
+    @Override
+    public Restlet createInboundRoot() {
+
+
+        Router router = new Router();
+        router.attach("/message", GetMessage.class);
+        router.attach("/identity",GetIdentity.class);
+        return router;
+    }
+
+
 }

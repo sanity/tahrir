@@ -34,25 +34,24 @@ public class TahrirRestlet extends org.restlet.Component{
         });
 
         host.attach("/branch2", new Restlet() {
-            @Get("json")
-            public Representation greet(){
-                String message="Hello tejas";
+            @Override
+              public void handle(Request request, Response response) {
 
-                JSONObject jo=new JSONObject();
-                try {
-                    jo.put("message",message);
 
-                }
-                catch(JSONException e)
-                {
-
-                }
-
-                Representation rp=new JsonRepresentation(jo);
-
-                return rp;
-            }
+            response.setEntity("<!DOCTYPE html>\n" +
+                    "<html>\n" +
+                    "<body>\n" +
+                    "\n" +
+                    "<p>This is branch1</p>\n" +
+                    "\n" +
+                    "</body>\n" +
+                    "</html>", MediaType.TEXT_HTML);
+        }
         });
+
+
+
+
 
 
     }

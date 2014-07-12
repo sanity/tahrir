@@ -22,12 +22,12 @@ public class TahrirServerResource extends ServerResource {
         JSONObject jo=new JSONObject();
         try {
             jo.put("message", "True");
+            jo.getJSONObject(message);
         }
         catch(JSONException e)
         {
 
         }
-
         Representation rp=new JsonRepresentation(jo);
         return rp;//"Hello Tejas!!! Wassup";
     }
