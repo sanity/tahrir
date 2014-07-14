@@ -3,6 +3,7 @@ package tahrir.api;
 import org.restlet.*;
 import org.restlet.data.MediaType;
 import org.restlet.data.Protocol;
+import org.restlet.routing.Router;
 
 /*created by Oliver Lee */
 
@@ -37,4 +38,15 @@ public class RESTAPIMain {
         component.start();
 
     }
+
+/*
+    @Override
+    public Restlet createInboundRoot() {
+
+
+        Router router = new Router();
+        router.attach("/message", GetMessage.class);
+        router.attach("/identity",GetIdentity.class);
+        return router;
+    }*/
 }

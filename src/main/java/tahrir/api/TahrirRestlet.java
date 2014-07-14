@@ -63,7 +63,7 @@ public class TahrirRestlet extends org.restlet.Component{
                     "<html>\n" +
                     "<body>\n" +
                     "\n" +
-                    "<p>This is branch1</p>\n" +
+                    "<p>This is branch2</p>\n" +
                     "\n" +
                     "</body>\n" +
                     "</html>", MediaType.TEXT_HTML);
