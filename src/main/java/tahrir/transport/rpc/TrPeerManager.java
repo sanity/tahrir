@@ -3,6 +3,7 @@ package tahrir.transport.rpc;
 import com.google.common.base.Function;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.BetaDistributionImpl;
@@ -21,6 +22,7 @@ import tahrir.util.tools.Persistence.Modified;
 import tahrir.util.tools.TrUtils;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,7 +50,8 @@ public class TrPeerManager {
     public Cache<Integer, DateTime> seenUID = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
 
     @Inject TrSessionManager sessionManager;
-    @Inject File publicNodeIdsDir;
+    @Inject @Named("publicNodeIdsDir") File publicNodeIdsDir;
+    @Inject @Named("publicNodeIdFile") File publicNodeIdFile;
 
     @Inject
 	public TrPeerManager(final Config config) {
@@ -112,7 +115,7 @@ public class TrPeerManager {
         if (peers.isEmpty()) {
 
             // We need to use a public peer
-            final ArrayList<File> publicNodeIdFiles = publicNodeIdsDir.listFiles();
+            final ArrayList<File> publicNodeIdFiles = Lists.newArrayList(publicNodeIdsDir.listFiles());
             for (int attempts = 0; attempts < 10; attempts++) {
                 final File pubPeerFile = publicNodeIdFiles.get(TrUtils.rand.nextInt(publicNodeIdFiles.size()));
                 final TrPeerInfo pnii = Persistence.loadReadOnly(TrPeerInfo.class, pubPeerFile);
@@ -176,7 +179,7 @@ public class TrPeerManager {
 		// TODO: We might want to spawn multiple assimilation requests (say, up to 3)
 		// in the event that we are well below minPeers to speed this up
 		if (config.assimilate && peers.size() < config.minPeers) {
-			final AssimilateSessionImpl as = node.sessionMgr.getOrCreateLocalSession(AssimilateSessionImpl.class);
+			final AssimilateSessionImpl as = sessionManager.getOrCreateLocalSession(AssimilateSessionImpl.class);
 			final TrPeerInfo ap = getPeerForAssimilation(Collections.EMPTY_SET);
 
 			as.startAssimilation(TrUtils.noopRunnable, ap);
@@ -187,7 +190,7 @@ public class TrPeerManager {
 		} else if (config.topologyMaintenance) { // && !hasForwardedRecently) {
 			// do maintenance on topology for small world network
 			final int randomLocationToFind = Math.abs(TrUtils.rand.nextInt());
-			final TopologyMaintenanceSessionImpl tm = node.sessionMgr.getOrCreateLocalSession(TopologyMaintenanceSessionImpl.class);
+			final TopologyMaintenanceSessionImpl tm = sessionManager.getOrCreateLocalSession(TopologyMaintenanceSessionImpl.class);
 			tm.startTopologyMaintenance(randomLocationToFind);
 		}
 	}
@@ -202,7 +205,7 @@ public class TrPeerManager {
 				// If we've tried it three times, and it failed more than half
 				// the time, let's get rid of it
 				if (a.successRate.total > 3 && a.successRate.get() < 0.5) {
-					node.sessionMgr.connectionManager.noLongerNeeded(addr, sessionMgrLabel);
+					sessionManager.connectionManager.noLongerNeeded(addr, sessionMgrLabel);
 				}
 				return null;
 			}
@@ -223,7 +226,9 @@ public class TrPeerManager {
 
 	public RemoteNodeAddress getClosestPeer(final int locationToFind) {
 		// closest peer is initially calling node
-		RemoteNodeAddress closestPeer = node.getRemoteNodeAddress();
+        RemoteNodeAddress closestPeer = Persistence.loadReadOnly(RemoteNodeAddress.class, publicNodeIdFile);
+
+
 		final int callingNodeTopologyLoc = getLocInfo().location;
 		int closestDistance = getLinearDistanceWithRollover(callingNodeTopologyLoc, locationToFind);
 
@@ -307,7 +312,8 @@ public class TrPeerManager {
 	 * @param updateFunction
 	 */
 	public void updatePeerInfo(final PhysicalNetworkLocation addr, final Function<TrPeerInfo, Void> updateFunction) {
-		final File pubNodeFile = node.getFileForPublicNode(addr);
+
+        final File pubNodeFile = getFileForPublicNode(addr);
 		if (pubNodeFile.exists()) {
 			Persistence.loadAndModify(TrPeerInfo.class, pubNodeFile, new Persistence.ModifyBlock<TrPeerInfo>() {
 
@@ -324,6 +330,11 @@ public class TrPeerManager {
 			}
 		}
 	}
+
+    public File getFileForPublicNode(final PhysicalNetworkLocation addr) {
+        final int hc = Math.abs(addr.hashCode());
+        return new File(publicNodeIdsDir, "pn-" + hc + ".dat");
+    }
 
     public TopologyLocationInfo getLocInfo() {
         return locInfo;

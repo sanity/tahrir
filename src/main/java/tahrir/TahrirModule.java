@@ -2,8 +2,11 @@ package tahrir;
 
 import dagger.Module;
 import dagger.Provides;
+import tahrir.network.RemoteNodeAddress;
+import tahrir.transport.messaging.udpV1.PhysicalNetworkLocation;
 import tahrir.transport.rpc.TrPeerManager;
 import tahrir.ui.swingUI.GUIMain;
+import tahrir.util.tools.Persistence;
 
 import javax.inject.Named;
 import java.io.File;
@@ -25,6 +28,8 @@ import static tahrir.util.tools.TrUtils.TestUtils.createTempDirectory;
 
 public class TahrirModule {
 
+    private File rootDirectory = null;
+
 
     @Provides
     TrNodeConfig provideNodeCongfig(){
@@ -42,44 +47,52 @@ public class TahrirModule {
     }
     */
 
+    //TODO: This may give a problem is provideRootDir isn't called before other functions. Should it be lazy?
+
     @Provides @Named("rootDirectory")
     File provideRootDir() throws IOException {
-        final File temp;
+        if(this.rootDirectory!=null){
+            return this.rootDirectory;
+        }
+        else{
 
-        temp = File.createTempFile("temp", Long.toString(System.nanoTime()));
+            this.rootDirectory = File.createTempFile("temp", Long.toString(System.nanoTime()));
 
-        if (!(temp.delete()))
-            throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
+            if (!(this.rootDirectory.delete()))
+                throw new IOException("Could not delete temp file: " + this.rootDirectory.getAbsolutePath());
 
-        if (!(temp.mkdir()))
-            throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
+            if (!(this.rootDirectory.mkdir()))
+                throw new IOException("Could not create temp directory: " + this.rootDirectory.getAbsolutePath());
 
-        return (temp);
+            return (this.rootDirectory);
+        }
+
     }
 
 
     @Provides @Named("publicNodeIdsDir")
-    File providePublicNodeIdsDir(){
-        File directory = null;
-        try {
-            directory = createTempDirectory();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return new File(directory, "publicPeers");
+    File providePublicNodeIdsDir() throws IOException {
+        this.rootDirectory = provideRootDir();
+        //Is this uneccessary? I'm trying to avoid getting null if root directory wasn't set.
+
+        return new File(this.rootDirectory, "publicPeers");
     }
 
     @Provides @Named("privateNodeIdFile")
-    File providePrivateNodeIdFile(String directory){
-        return new File(directory, "myprivnodeid.dat");
+    File providePrivateNodeIdFile() throws IOException {
+        this.rootDirectory = provideRootDir();
+        return new File(this.rootDirectory, "myprivnodeid.dat");
     }
     @Provides @Named("publicNodeIdFile")
-    File providePublicNodeIdFile(String directory){
-        return new File(directory, "mypubnodeid.dat");
+    File providePublicNodeIdFile() throws IOException {
+        this.rootDirectory = provideRootDir();
+        return new File(this.rootDirectory, "mypubnodeid.dat");
     }
 
     @Provides @Named("identityStoreFile")
-    File provideIdentityStoreFile(String rootDirectory){
+    File provideIdentityStoreFile() throws IOException {
+        this.rootDirectory = provideRootDir();
         return new File(rootDirectory+System.getProperty("file.separator")+"id-store.json");
     }
+
 }
