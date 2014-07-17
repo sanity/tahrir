@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import tahrir.TrUI;
 import tahrir.io.net.broadcasts.broadcastMessages.BroadcastMessage;
 import tahrir.io.net.broadcasts.broadcastMessages.ParsedBroadcastMessage;
-import tahrir.vaadin.TestVaadinUI;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
