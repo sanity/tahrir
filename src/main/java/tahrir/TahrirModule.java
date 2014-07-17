@@ -22,12 +22,11 @@ import static tahrir.util.tools.TrUtils.TestUtils.createTempDirectory;
 
 
 @Module(
-        injects = {GUIMain.class},
+        injects = {GUIMain.class, TrPeerManager.class},
         complete = true
 )
 
 public class TahrirModule {
-
     private File rootDirectory = null;
 
 
@@ -50,20 +49,24 @@ public class TahrirModule {
     //TODO: This may give a problem is provideRootDir isn't called before other functions. Should it be lazy?
 
     @Provides @Named("rootDirectory")
-    File provideRootDir() throws IOException {
+    File provideRootDir(){
         if(this.rootDirectory!=null){
             return this.rootDirectory;
         }
         else{
 
-            this.rootDirectory = File.createTempFile("temp", Long.toString(System.nanoTime()));
+            try {
+                this.rootDirectory = File.createTempFile("temp", Long.toString(System.nanoTime()));
+
 
             if (!(this.rootDirectory.delete()))
                 throw new IOException("Could not delete temp file: " + this.rootDirectory.getAbsolutePath());
 
             if (!(this.rootDirectory.mkdir()))
                 throw new IOException("Could not create temp directory: " + this.rootDirectory.getAbsolutePath());
-
+            } catch (IOException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
             return (this.rootDirectory);
         }
 
@@ -71,7 +74,7 @@ public class TahrirModule {
 
 
     @Provides @Named("publicNodeIdsDir")
-    File providePublicNodeIdsDir() throws IOException {
+    File providePublicNodeIdsDir(){
         this.rootDirectory = provideRootDir();
         //Is this uneccessary? I'm trying to avoid getting null if root directory wasn't set.
 
@@ -79,18 +82,18 @@ public class TahrirModule {
     }
 
     @Provides @Named("privateNodeIdFile")
-    File providePrivateNodeIdFile() throws IOException {
+    File providePrivateNodeIdFile(){
         this.rootDirectory = provideRootDir();
         return new File(this.rootDirectory, "myprivnodeid.dat");
     }
     @Provides @Named("publicNodeIdFile")
-    File providePublicNodeIdFile() throws IOException {
+    File providePublicNodeIdFile(){
         this.rootDirectory = provideRootDir();
         return new File(this.rootDirectory, "mypubnodeid.dat");
     }
 
     @Provides @Named("identityStoreFile")
-    File provideIdentityStoreFile() throws IOException {
+    File provideIdentityStoreFile(){
         this.rootDirectory = provideRootDir();
         return new File(rootDirectory+System.getProperty("file.separator")+"id-store.json");
     }

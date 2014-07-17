@@ -159,7 +159,7 @@ public class TrUtils {
             return broadcastMessage;
 
         }
-        @Inject
+
 		public static File createTempDirectory() throws IOException {
 			final File temp;
 
