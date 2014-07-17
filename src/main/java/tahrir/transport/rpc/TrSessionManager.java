@@ -66,7 +66,7 @@ public class TrSessionManager {
 
 			}).<Tuple2<String, Integer>, TrSessionImpl> build().asMap();
 
-	private final TrNode trNode;
+	//private final TrNode trNode;
 
 	private final Map<Class<? extends PhysicalNetworkLocation>, TrNetworkInterface> interfacesByAddressType;
 
@@ -80,7 +80,7 @@ public class TrSessionManager {
 		for (final TrNetworkInterface iface : interfaces) {
 			interfacesByAddressType.put(iface.getAddressClass(), iface);
 		}
-		this.trNode = trNode;
+		//this.trNode = trNode;
 		if (allowUnilateral) {
 			for (final TrNetworkInterface netIface : interfacesByAddressType.values()) {
 				netIface.allowUnsolicitedInbound(new TrNetMessageListener());
@@ -103,7 +103,7 @@ public class TrSessionManager {
 			T session = (T) sessions.get(Tuple2.of(c.getName(), sessionId));
 			if (session == null) {
 				final Constructor<?> constructor = c.getConstructor(Integer.class, TrNode.class, TrSessionManager.class);
-				session = (T) constructor.newInstance(sessionId, trNode, this);
+				session = (T) constructor.newInstance(sessionId, this);
 			}
 			// We put regardless of whether it is new or not to reset cache
 			// expiry time
@@ -298,7 +298,7 @@ public class TrSessionManager {
 						// New session, we need to create it
 						final Constructor<?> constructor = methodPair.cls.getDeclaringClass().getConstructor(
 								Integer.class, TrNode.class, TrSessionManager.class);
-						session = (TrSessionImpl) constructor.newInstance(sessionId, trNode, TrSessionManager.this);
+						session = (TrSessionImpl) constructor.newInstance(sessionId, TrSessionManager.this);
 					}
 					// We put regardless of whether it is new or not to
 					// reset cache expiry time

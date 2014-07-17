@@ -14,17 +14,17 @@ public abstract class TrSessionImpl implements TrSession {
 	protected Logger logger;
 	public static final ThreadLocal<PhysicalNetworkLocation> sender = new ThreadLocal<PhysicalNetworkLocation>();
 	protected final int sessionId;
-	protected final TrNode node;
+	//protected final TrNode node;
 	protected final TrSessionManager sessionMgr;
 	private final ConcurrentLinkedQueue<Runnable> terminatedCallbacks = new ConcurrentLinkedQueue<Runnable>();
 	private final Set<PhysicalNetworkLocation> toUnregister = Collections.synchronizedSet(new HashSet<PhysicalNetworkLocation>());
 	private final String userLabel;
 
-	public TrSessionImpl(final Integer sessionId, final TrNode node, final TrSessionManager sessionMgr) {
+	public TrSessionImpl(final Integer sessionId, final TrSessionManager sessionMgr) {
 		userLabel = this.getClass().getName() + "(" + sessionId + ")";
 		logger = LoggerFactory.getLogger(userLabel);
 		this.sessionId = sessionId;
-		this.node = node;
+		//this.node = node;
 		this.sessionMgr = sessionMgr;
 	}
 
