@@ -34,6 +34,11 @@ public class TahrirModule {
     TrNodeConfig provideNodeCongfig(){
         return new TrNodeConfig();
     }
+
+    @Provides
+    TrPeerManager.Config provideConfig(){
+        return new TrPeerManager.Config();
+    }
     /*
     @Provides   //for rootDirectory file.
     File provideFile(String filename){

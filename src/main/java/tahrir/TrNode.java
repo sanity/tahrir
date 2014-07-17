@@ -98,7 +98,7 @@ public class TrNode {
 		final Tuple2<RSAPublicKey, RSAPrivateKey> keyPair = Tuple2.of(getRemoteNodeAddress().publicKey,
 				getPrivateNodeId().privateKey);
 		final TrNetworkInterface uni = new UdpNetworkInterface(config.udp, keyPair);
-		sessionMgr = new TrSessionManager(this, uni, config.capabilities.allowsUnsolicitiedInbound);
+		sessionMgr = new TrSessionManager(uni, config.capabilities.allowsUnsolicitiedInbound);
 
 		logger.info("Set up peer manager");
 		peerManager = new TrPeerManager(config.peers);
