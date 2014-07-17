@@ -25,6 +25,7 @@ import tahrir.util.tools.ByteArraySegment.ByteArraySegmentBuilder;
 import tahrir.util.tools.TrUtils;
 import tahrir.util.tools.Tuple2;
 
+import javax.inject.Inject;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -70,12 +71,12 @@ public class TrSessionManager {
 
 	private final Map<Class<? extends PhysicalNetworkLocation>, TrNetworkInterface> interfacesByAddressType;
 
-	public TrSessionManager(final TrNode trNode, final TrNetworkInterface i, final boolean allowUnilateral) {
-		this(trNode, Collections.singleton(i), allowUnilateral);
+    @Inject
+	public TrSessionManager(final TrNetworkInterface i, final boolean allowUnilateral) {
+		this(Collections.singleton(i), allowUnilateral);
 	}
 
-	public TrSessionManager(final TrNode trNode, final Iterable<TrNetworkInterface> interfaces,
-			final boolean allowUnilateral) {
+	public TrSessionManager(final Iterable<TrNetworkInterface> interfaces, final boolean allowUnilateral) {
 		interfacesByAddressType = Maps.newHashMap();
 		for (final TrNetworkInterface iface : interfaces) {
 			interfacesByAddressType.put(iface.getAddressClass(), iface);

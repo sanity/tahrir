@@ -54,8 +54,8 @@ public class TrPeerManager {
     @Inject @Named("publicNodeIdFile") File publicNodeIdFile;
 
     @Inject
-	public TrPeerManager(final Config config) {
-		this.config = config;
+	public TrPeerManager() {
+		this.config = new Config();
 		//this.node = node;
 		sessionMgrLabel = "TrPeerManager(" + TrUtils.rand.nextInt() + ")";
 		locInfo = new TopologyLocationInfo(this);
