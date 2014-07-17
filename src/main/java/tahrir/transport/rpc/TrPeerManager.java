@@ -20,6 +20,7 @@ import tahrir.util.tools.Persistence;
 import tahrir.util.tools.Persistence.Modified;
 import tahrir.util.tools.TrUtils;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,12 +44,16 @@ public class TrPeerManager {
 	private final TopologyLocationInfo locInfo;
 	public boolean hasForwardedRecently = false;
 
-	private final TrNode node;
+	//private final TrNode node;
     public Cache<Integer, DateTime> seenUID = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
 
-	public TrPeerManager(final Config config, final TrNode node) {
+    @Inject TrSessionManager sessionManager;
+    @Inject File publicNodeIdsDir;
+
+    @Inject
+	public TrPeerManager(final Config config) {
 		this.config = config;
-		this.node = node;
+		//this.node = node;
 		sessionMgrLabel = "TrPeerManager(" + TrUtils.rand.nextInt() + ")";
 		locInfo = new TopologyLocationInfo(this);
 		if (config.runMaintainance ) {
@@ -82,7 +87,7 @@ public class TrPeerManager {
 		tpi.capabilities = capabilities;
 		tpi.topologyLocation = topologyLocation;
 		peers.put(pubNodeAddress.physicalLocation, tpi);
-		node.sessionMgr.connectionManager.getConnection(pubNodeAddress, false, sessionMgrLabel, new Runnable() {
+		sessionManager.connectionManager.getConnection(pubNodeAddress, false, sessionMgrLabel, new Runnable() {
 
 			public void run() {
 				peers.remove(pubNodeAddress.physicalLocation);
@@ -97,7 +102,7 @@ public class TrPeerManager {
 		} else {
 			// add it by replacement removing LRU peer
 			final PhysicalNetworkLocation toRemove = getLeastRecentlyUsedPeer();
-			node.sessionMgr.connectionManager.noLongerNeeded(toRemove, "topology");
+			sessionManager.connectionManager.noLongerNeeded(toRemove, "topology");
 			peers.remove(toRemove);
 			addNewPeer(pubNodeAddress, capabilities, topologyLocation);
 		}
@@ -107,7 +112,7 @@ public class TrPeerManager {
         if (peers.isEmpty()) {
 
             // We need to use a public peer
-            final ArrayList<File> publicNodeIdFiles = node.getPublicNodeIdFiles();
+            final ArrayList<File> publicNodeIdFiles = publicNodeIdsDir.listFiles();
             for (int attempts = 0; attempts < 10; attempts++) {
                 final File pubPeerFile = publicNodeIdFiles.get(TrUtils.rand.nextInt(publicNodeIdFiles.size()));
                 final TrPeerInfo pnii = Persistence.loadReadOnly(TrPeerInfo.class, pubPeerFile);

@@ -15,6 +15,7 @@ import tahrir.network.broadcasts.broadcastMessages.SignedBroadcastMessage;
 import tahrir.util.tools.GsonSerializers.RSAPublicKeyDeserializer;
 import tahrir.util.tools.GsonSerializers.RSAPublicKeySerializer;
 
+import javax.inject.Inject;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.security.interfaces.RSAPrivateKey;
@@ -158,7 +159,7 @@ public class TrUtils {
             return broadcastMessage;
 
         }
-
+        @Inject
 		public static File createTempDirectory() throws IOException {
 			final File temp;
 

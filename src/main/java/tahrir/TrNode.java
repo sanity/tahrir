@@ -101,7 +101,7 @@ public class TrNode {
 		sessionMgr = new TrSessionManager(this, uni, config.capabilities.allowsUnsolicitiedInbound);
 
 		logger.info("Set up peer manager");
-		peerManager = new TrPeerManager(config.peers, this);
+		peerManager = new TrPeerManager(config.peers);
 
 		registerSessions();
 
