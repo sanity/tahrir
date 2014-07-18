@@ -9,6 +9,7 @@ import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.routing.VirtualHost;
 import tahrir.io.crypto.TrCrypto;
+import tahrir.tools.GsonSerializers;
 import tahrir.tools.Tuple2;
 
 import java.security.interfaces.RSAPrivateKey;
@@ -139,8 +140,13 @@ public class TahrirRestlet extends org.restlet.Component{
                     Tuple2<RSAPublicKey, RSAPrivateKey> keyPair= TrCrypto.createRsaKeyPair();
                     JSONObject jsonResponseWithKeyPair=new JSONObject();
                     try {
-                        jsonResponseWithKeyPair.append("public_key", keyPair.a);
-                        jsonResponseWithKeyPair.append("private_key", keyPair.b);
+
+                        GsonSerializers.RSAPublicKeySerializer publicKeySerializer=new GsonSerializers.RSAPublicKeySerializer();
+                        jsonResponseWithKeyPair.append("public_key", publicKeySerializer.serialize(keyPair.a, null, null));
+
+                        GsonSerializers.RSAPrivateKeySerializer privateKeySerializer=new GsonSerializers.RSAPrivateKeySerializer();
+                        jsonResponseWithKeyPair.append("private_key", privateKeySerializer.serialize(keyPair.b, null, null));
+
                     } catch (JSONException e) {
                         System.err.println("something wrong with putting keypair in json");
                         e.printStackTrace();
