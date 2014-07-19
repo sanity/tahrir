@@ -1,19 +1,8 @@
 package tahrir.api;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.restlet.*;
 import org.restlet.data.MediaType;
-import org.restlet.ext.json.JsonRepresentation;
-import org.restlet.representation.Representation;
-import org.restlet.resource.Get;
 import org.restlet.routing.VirtualHost;
-import tahrir.io.crypto.TrCrypto;
-import tahrir.tools.GsonSerializers;
-import tahrir.tools.Tuple2;
-
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 
 
 /*created by Oliver Lee */
@@ -125,7 +114,7 @@ public class TahrirRestlet extends org.restlet.Component{
         });
 
 
-        host.attach("/identity", new IdentityRestlet(host));
+        host.attach("/identity", new IdentityRestlet());
 
     }
 
