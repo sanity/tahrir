@@ -24,9 +24,6 @@ public class IdentityRestlet extends org.restlet.Component{
          */
         super.handle(request, response);
 
-
-
-
         if(request.getMethod().getName().equals("GET")){
 
             Tuple2<RSAPublicKey, RSAPrivateKey> keyPair= TrCrypto.createRsaKeyPair();

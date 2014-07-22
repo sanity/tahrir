@@ -63,6 +63,9 @@ public class TahrirRestlet extends org.restlet.Component{
         host.attach("/messages", new Restlet() {
             @Override
             public void handle(Request request, Response response) {
+
+                super.handle(request, response);
+
                 if(request.getMethod().getName().equals("GET")) {
 
                     response.setEntity("<!DOCTYPE html>\n" +
@@ -95,6 +98,8 @@ public class TahrirRestlet extends org.restlet.Component{
         host.attach("/messages/boost", new Restlet() {
             @Override
             public void handle(Request request, Response response) {
+                super.handle(request, response);
+
                 if(request.getMethod().getName().equals("GET")) {
 
                     response.setEntity("<!DOCTYPE html>\n" +
