@@ -7,6 +7,7 @@ import org.restlet.Response;
 import org.restlet.data.MediaType;
 import tahrir.io.crypto.TrCrypto;
 import tahrir.tools.GsonSerializers;
+import tahrir.tools.TrUtils;
 import tahrir.tools.Tuple2;
 
 import java.security.interfaces.RSAPrivateKey;
@@ -24,27 +25,25 @@ public class IdentityRestlet extends org.restlet.Component{
         super.handle(request, response);
 
 
+
+
         if(request.getMethod().getName().equals("GET")){
 
             Tuple2<RSAPublicKey, RSAPrivateKey> keyPair= TrCrypto.createRsaKeyPair();
-            JSONObject jsonResponseWithKeyPair=new JSONObject();
-            try {
 
-                GsonSerializers.RSAPublicKeySerializer publicKeySerializer=new GsonSerializers.RSAPublicKeySerializer();
-                jsonResponseWithKeyPair.append("public_key", publicKeySerializer.serialize(keyPair.a, null, null));
 
-                GsonSerializers.RSAPrivateKeySerializer privateKeySerializer=new GsonSerializers.RSAPrivateKeySerializer();
-                jsonResponseWithKeyPair.append("private_key", privateKeySerializer.serialize(keyPair.b, null, null));
+            IdentityResponse identityResponse=new IdentityResponse();
 
-            } catch (JSONException e) {
-                System.err.println("something wrong with putting keypair in json");
-                e.printStackTrace();
-            }
+            identityResponse.publicKey=keyPair.a;
+            identityResponse.privateKey=keyPair.b;
+
+            String resp= TrUtils.gson.toJson(identityResponse);
+
 
             /*TODO: right now, the private and public key are sent to the GUI in an unencrypted json object.  is this ok?
                 i know it's all on the local machine but still seems a bit insecure
              */
-            response.setEntity(jsonResponseWithKeyPair.toString(), MediaType.APPLICATION_JSON);
+            response.setEntity(resp, MediaType.APPLICATION_JSON);
 
         }
         else{
@@ -54,7 +53,14 @@ public class IdentityRestlet extends org.restlet.Component{
 
 
 
+    public static class IdentityResponse{
 
+        public RSAPublicKey publicKey;
+
+
+        public RSAPrivateKey privateKey;
+
+    }
 
 
 
