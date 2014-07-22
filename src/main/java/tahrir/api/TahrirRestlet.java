@@ -7,7 +7,7 @@ import org.restlet.routing.VirtualHost;
 
 /*created by Oliver Lee */
 
-public class TahrirRestlet extends org.restlet.Component{
+public class TahrirRestlet extends org.restlet.Component {
 
 
     public TahrirRestlet(VirtualHost host) {
@@ -60,7 +60,7 @@ public class TahrirRestlet extends org.restlet.Component{
         });*/
 
 
-        host.attach("/messages", new Restlet() {
+/*        host.attach("/messages", new Restlet() {
             @Override
             public void handle(Request request, Response response) {
                 if(request.getMethod().getName().equals("GET")) {
@@ -127,7 +127,7 @@ public class TahrirRestlet extends org.restlet.Component{
                     "Subclasses overriding this method should make sure that they call
                      super.handle(request, response) before adding their own logic."
                  */
-        super.handle(request, response);
+      /*  super.handle(request, response);
 
 
         response.setEntity("<!DOCTYPE html>\n" +
@@ -138,5 +138,6 @@ public class TahrirRestlet extends org.restlet.Component{
             "\n" +
             "</body>\n" +
             "</html>", MediaType.TEXT_HTML);
+    } */
     }
 }

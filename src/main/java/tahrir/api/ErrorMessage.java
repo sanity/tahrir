@@ -14,7 +14,7 @@ public class ErrorMessage {
             jsonobj.put("error", "An error occured");
             return jsonobj;
         } catch (Exception e) {
-            return null;
+            throw new RuntimeException();
         }
     }
 }
