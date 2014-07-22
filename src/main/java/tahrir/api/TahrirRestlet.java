@@ -68,14 +68,9 @@ public class TahrirRestlet extends org.restlet.Component{
 
                 if(request.getMethod().getName().equals("GET")) {
 
-                    response.setEntity("<!DOCTYPE html>\n" +
-                            "<html>\n" +
-                            "<body>\n" +
-                            "\n" +
-                            "<p>you are GETing /messages</p>\n" +
-                            "\n" +
-                            "</body>\n" +
-                            "</html>", MediaType.TEXT_HTML);
+                    GetMessagesRestlet getMessagesRestlet=new GetMessagesRestlet();
+                    getMessagesRestlet.handle(request, response);
+
                 }
                 else if(request.getMethod().getName().equals("POST")){
 
