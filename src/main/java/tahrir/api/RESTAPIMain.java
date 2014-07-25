@@ -10,9 +10,9 @@ import java.util.Hashtable;
 /*created by Oliver Lee */
 
 
-public class RESTAPIMain extends Application {
+public class RESTAPIMain {
 
-    private Hashtable messages;
+
     public static void main(String[]args) throws Exception {
 
         Component component = new Component();
@@ -24,11 +24,8 @@ public class RESTAPIMain extends Application {
           component.start();
 
     }
-    public RESTAPIMain() {
-        super();
-        this.messages = new Hashtable();
-    }
 
+/*
     @Override
     public Restlet createInboundRoot() {
 
@@ -40,26 +37,6 @@ public class RESTAPIMain extends Application {
         return router;
     }
 
-
-    public Message getMessage(String id)
-    {
-        return (Message)this.messages.get(id);
-    }
-
-
-    public void saveMessage(Message m) {
-        this.messages.put(m.getId(), m);
-    }
-
-
-    public void deleteMessage(String id)
-    {
-        this.messages.remove(id);
-    }
-
-
-    public Collection getMessage() {
-        return this.messages.values();
-    }
+*/
 
 }

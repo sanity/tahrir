@@ -2,6 +2,7 @@ package tahrir.api;
 
 import org.restlet.*;
 import org.restlet.data.MediaType;
+import org.restlet.data.Status;
 import org.restlet.routing.VirtualHost;
 
 
@@ -60,7 +61,7 @@ public class TahrirRestlet extends org.restlet.Component {
         });*/
 
 
-/*        host.attach("/messages", new Restlet() {
+        host.attach("/messages", new Restlet() {
             @Override
             public void handle(Request request, Response response) {
                 if(request.getMethod().getName().equals("GET")) {
@@ -87,6 +88,7 @@ public class TahrirRestlet extends org.restlet.Component {
 
                 }
                 else{
+                    response.setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
                     System.err.println("method not recognized, /messages only uses GET and POST");
                 }
             }
@@ -127,7 +129,7 @@ public class TahrirRestlet extends org.restlet.Component {
                     "Subclasses overriding this method should make sure that they call
                      super.handle(request, response) before adding their own logic."
                  */
-      /*  super.handle(request, response);
+        super.handle(request, response);
 
 
         response.setEntity("<!DOCTYPE html>\n" +
@@ -138,6 +140,9 @@ public class TahrirRestlet extends org.restlet.Component {
             "\n" +
             "</body>\n" +
             "</html>", MediaType.TEXT_HTML);
-    } */
     }
+
 }
+
+
+
