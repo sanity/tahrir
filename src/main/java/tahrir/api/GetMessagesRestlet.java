@@ -3,6 +3,7 @@ package tahrir.api;
 
 import org.restlet.Request;
 import org.restlet.Response;
+import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import tahrir.tools.TrUtils;
 
@@ -10,14 +11,21 @@ import java.util.ArrayList;
 
 public class GetMessagesRestlet extends org.restlet.Component{
 
-
-
-
     @Override
     public void handle(Request request, Response response) {
 
+	    //read the query paramters
+        Form queryParams = request.getResourceRef().getQueryAsForm();
+	    System.out.println("author: "+ queryParams.getValues("author"));
+	    System.out.println("contains: "+ queryParams.getValues("contains"));
+	    System.out.println("regex: "+ queryParams.getValues("regex"));
+	    System.out.println("after_date: "+ queryParams.getValues("after_date"));
+	    System.out.println("before_date: "+ queryParams.getValues("before_date"));
+	    System.out.println("id_greater_than: "+ queryParams.getValues("id_greater_than"));
+
         //as of july 2014 when this code is written, business logic does not exist yet,
-        // however when it does, it will somehow populate this array list
+        // however when it does, it will take in the query parameters and then populate this array list,
+	    // or something along these lines
         ArrayList<GetMessagesResponse.GetMessagesResponseMessage> messagesList=
                 new ArrayList<GetMessagesResponse.GetMessagesResponseMessage>();
 
@@ -26,7 +34,6 @@ public class GetMessagesRestlet extends org.restlet.Component{
                 "pubkeyjdfjldflkdskj", "sanity",1234,"hashoerijdfjgpsdfogsdf","hello"));
         messagesList.add(new GetMessagesResponse.GetMessagesResponseMessage(
                 "pubkeyaadfsdjndasjfhasdlf", "insanity",4321,"hashqrewrwerwewesdafaf","hello again"));
-
 
         //serialize into json
         GetMessagesResponse getMessagesResponse=new GetMessagesResponse();
@@ -47,10 +54,7 @@ public class GetMessagesRestlet extends org.restlet.Component{
 
     }
 
-
-
     private static class GetMessagesResponse{
-
         /*
         {
             "messages":[
@@ -73,7 +77,6 @@ public class GetMessagesRestlet extends org.restlet.Component{
 
         public ArrayList<GetMessagesResponseMessage> messageses=new ArrayList<GetMessagesResponseMessage>();
 
-
         private static class GetMessagesResponseMessage{
 
             public GetMessagesResponseMessage(String author_pubkey, String author_nick, int message_id,
@@ -92,7 +95,5 @@ public class GetMessagesRestlet extends org.restlet.Component{
             public String message_hash;
             public String content;
         }
-
-
     }
 }

@@ -1,8 +1,15 @@
 package tahrir.api;
 
+import com.sun.javafx.geom.transform.Identity;
 import org.restlet.*;
 import org.restlet.data.MediaType;
 import org.restlet.routing.VirtualHost;
+import tahrir.io.crypto.TrCrypto;
+import tahrir.tools.TrUtils;
+import tahrir.tools.Tuple2;
+
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 
 
 /*created by Oliver Lee */
@@ -74,14 +81,8 @@ public class TahrirRestlet extends org.restlet.Component{
                 }
                 else if(request.getMethod().getName().equals("POST")){
 
-                    response.setEntity("<!DOCTYPE html>\n" +
-                            "<html>\n" +
-                            "<body>\n" +
-                            "\n" +
-                            "<p>you are POSTing /messages</p>\n" +
-                            "\n" +
-                            "</body>\n" +
-                            "</html>", MediaType.TEXT_HTML);
+	                PostMessagesRestlet postMessagesRestlet=new PostMessagesRestlet();
+	                postMessagesRestlet.handle(request, response);
 
                 }
                 else{
@@ -96,16 +97,8 @@ public class TahrirRestlet extends org.restlet.Component{
                 super.handle(request, response);
 
                 if(request.getMethod().getName().equals("GET")) {
-
-                    response.setEntity("<!DOCTYPE html>\n" +
-                            "<html>\n" +
-                            "<body>\n" +
-                            "\n" +
-                            "<p>you are GETing /messages/boost</p>\n" +
-                            "\n" +
-                            "</body>\n" +
-                            "</html>", MediaType.TEXT_HTML);
-
+	                BoostMessagesRestlet boostMessagesRestlet=new BoostMessagesRestlet();
+	                boostMessagesRestlet.handle(request, response);
                 }
                 else{
                     System.err.println("method not recognized, /boost only uses GET");
@@ -113,8 +106,29 @@ public class TahrirRestlet extends org.restlet.Component{
             }
         });
 
+        host.attach("/identity", new Restlet() {
+	        @Override
+	        public void handle(Request request, Response response) {
+		        /*if you go to the source code of Restlet.java, in the comment above the handle(request, response) method,
+                    it says:
+                    "Subclasses overriding this method should make sure that they call
+                    super.handle(request, response) before adding their own logic."
+                */
+		        super.handle(request, response);
 
-        host.attach("/identity", new IdentityRestlet());
+
+		        if(request.getMethod().getName().equals("GET")){
+
+			        IdentityRestlet identityRestlet=new IdentityRestlet();
+			        identityRestlet.handle(request,response);
+
+		        }
+		        else{
+			        System.err.println("method not recognized, /identity only uses GET");
+		        }
+	        }
+        });
+
 
     }
 
