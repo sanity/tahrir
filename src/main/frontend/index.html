@@ -11,20 +11,14 @@
     <script src="js/bootstrap.min.js"></script>
 
     <!--Angular Starts from here-->
-    <script>
-      var App = angular.module('App', []);
-      App.controller('MessageCtrl', function ($scope){
-        $scope.messages = ['hey, This is Tahrir'];
-
-        $scope.addMessage = function() {
-          $scope.messages.push($scope.enteredMessage);
-          $scope.enteredMessage = '';
-        };
-      });
+    <script src="js/tahrir.js">
+      
     </script>
   </head>
 
+
   <body ng-controller="MessageCtrl">
+
     <div class="container-fluid">
   <div class="row-fluid">
     <div class="span2">
@@ -68,9 +62,13 @@
   </div>
 </div>
 
-    <ul>
+
+<ul>
       <li ng-repeat="message in messages">{{message}}</li>
-    </ul>
+</ul>
+
+
+    
 
 
     <form ng-submit="addMessage()" class="navbar-form pull-left">
