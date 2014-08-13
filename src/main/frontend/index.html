@@ -10,6 +10,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
 
+
     <!--Angular Starts from here-->
     <script src="js/tahrir.js">
       
@@ -37,7 +38,7 @@
           <input type="text" style="width:100px" ng-maxlength="10">
           <br>
           <br>
-          <button type="submit" class="btn">Generate Key Pair</button>
+          <button type="submit" class="btn btn-primary">Generate Key Pair</button>
 
 
 
@@ -51,7 +52,7 @@
 <br>
 <br>
 
-    <div class="span10">
+    <div class="span10"> 
     <div class="navbar">
   <div class="navbar-inner">
     <a class="brand" href="#">Tahrir</a>
@@ -63,9 +64,9 @@
 </div>
 
 
-<ul>
-      <li ng-repeat="message in messages">{{message}}</li>
-</ul>
+<div>
+      <div class="alert" style="width:450px" ng-repeat="message in messages">{{message}}</div>
+</div>
 
 
     
@@ -74,9 +75,10 @@
     <form ng-submit="addMessage()" class="navbar-form pull-left">
     
       <input type="text" style="width: 500px"class="span6" ng-model="enteredMessage" ng-maxlength="140">
-      <button type="submit" class="btn">Post Message</button>
+      <button type="submit" class="btn btn-info">Post Message</button>
       
     </form>
+  </div>
     </div>
   </div>
 </div>
