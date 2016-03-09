@@ -8,3 +8,7 @@ logback*.xml
 *.iws
 *.ipr
 .idea
+out/
+src/main/java/META-INF/
+src/main/resources/tahrir/artwork/tahrir-logo_small.png
+ubuntu@seed1.tahrirproject.org

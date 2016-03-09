@@ -63,6 +63,10 @@ public class TrConstants {
 
     public static final String imageIconPath = MAIN_WINDOW_ARTWORK_PATH + "tahrir-logo_small.png";
 
+	public static final String LOGIN_MESSAGE = "Log in";
+
+	public static final String APP_NAME = "Tahrir";
+
     public static boolean add = true;
 	/**
 	 * Records constants to do with the microblog XML format.
