@@ -6,9 +6,20 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vaadin.version>7.0.0</vaadin.version>
+
+        <restlet-version>2.2.1</restlet-version>
 
 	</properties>
+
+    <repositories>
+        <repository>
+            <id>maven-restlet</id>
+            <name>Public online Restlet repository</name>
+            <url>http://maven.restlet.com</url>
+        </repository>
+    </repositories>
+
+
 	<pluginRepositories>
 		<pluginRepository>
 			<id>codehaus-snapshots</id>
@@ -196,27 +207,24 @@
 			<artifactId>commons-lang3</artifactId>
 			<version>3.1</version>
 		</dependency>
+
+
         <dependency>
-      			<groupId>com.vaadin</groupId>
-      			<artifactId>vaadin-server</artifactId>
-      			<version>${vaadin.version}</version>
-      		</dependency>
-      		<dependency>
-      			<groupId>com.vaadin</groupId>
-      			<artifactId>vaadin-client-compiled</artifactId>
-      			<version>${vaadin.version}</version>
-      		</dependency>
-      		<dependency>
-      			<groupId>com.vaadin</groupId>
-      			<artifactId>vaadin-client</artifactId>
-      			<version>${vaadin.version}</version>
-      			<scope>provided</scope>
-      		</dependency>
-      		<dependency>
-      			<groupId>com.vaadin</groupId>
-      			<artifactId>vaadin-themes</artifactId>
-      			<version>${vaadin.version}</version>
-      		</dependency>
+            <groupId>org.restlet.jse</groupId>
+            <artifactId>org.restlet</artifactId>
+            <version>2.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.restlet.jse</groupId>
+            <artifactId>org.restlet.ext.jackson</artifactId>
+            <version>2.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.restlet.jse</groupId>
+            <artifactId>org.restlet.ext.json</artifactId>
+            <version>2.2.1</version>
+        </dependency>
+
 
         <!-- TEST -->
         <dependency>
@@ -230,6 +238,17 @@
             <artifactId>mockito-all</artifactId>
             <version>1.8.4</version>
         </dependency>
-        
-	</dependencies>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-core</artifactId>
+            <version>1.9</version>
+        </dependency>
+
+
+    </dependencies>
+
+
+
+
+
 </project>
