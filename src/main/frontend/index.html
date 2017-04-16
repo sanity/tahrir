@@ -1,0 +1,86 @@
+
+<!--@Author Tejas-->
+
+<html ng-app="App">
+
+  <head>
+    <meta charset="utf-8">
+    <title>Tahrir</title>
+     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
+
+    <!--Angular Starts from here-->
+    <script src="js/tahrir.js">
+      
+    </script>
+  </head>
+
+
+  <body ng-controller="MessageCtrl">
+
+    <div class="container-fluid">
+  <div class="row-fluid">
+    <div class="span2">
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <div class="well sidebar-nav">
+        <ul class="nav nav-list">
+          
+
+          <li class="nav-header">User Nick</li>
+          
+          <input type="text" style="width:100px" ng-maxlength="10">
+          <br>
+          <br>
+          <button type="submit" class="btn btn-primary">Generate Key Pair</button>
+
+
+
+
+      <!--Sidebar content-->
+    </div>
+    </div>
+
+
+
+<br>
+<br>
+
+    <div class="span10"> 
+    <div class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" href="#">Tahrir</a>
+    <ul class="nav">
+      <li class="active"><a href="#">Timeline</a></li>
+      <li><a href="#">Mentions</a></li>  
+    </ul>
+  </div>
+</div>
+
+
+<div>
+      <div class="alert" style="width:450px" ng-repeat="message in messages">{{message}}</div>
+</div>
+
+
+    
+
+
+    <form ng-submit="addMessage()" class="navbar-form pull-left">
+    
+      <input type="text" style="width: 500px"class="span6" ng-model="enteredMessage" ng-maxlength="140">
+      <button type="submit" class="btn btn-info">Post Message</button>
+      
+    </form>
+  </div>
+    </div>
+  </div>
+</div>
+  </body>
+</html>
