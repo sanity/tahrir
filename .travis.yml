@@ -5,3 +5,7 @@ notifications:
     - ian.clarke@gmail.com
     - ravitejasvi@gmail.com
     - tahrir-development@googlegroups.com
+
+cache:
+  directories:
+  - $HOME/.m2
