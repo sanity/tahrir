@@ -17,6 +17,7 @@ import tahrir.tools.GsonSerializers.RSAPublicKeySerializer;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Random;
@@ -162,13 +163,7 @@ public class TrUtils {
 		public static File createTempDirectory() throws IOException {
 			final File temp;
 
-			temp = File.createTempFile("temp", Long.toString(System.nanoTime()));
-
-			if (!(temp.delete()))
-				throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
-
-			if (!(temp.mkdir()))
-				throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
+			temp = Files.createTempDirectory("temp" + Long.toString(System.nanoTime())).toFile();
 
 			return (temp);
 		}
